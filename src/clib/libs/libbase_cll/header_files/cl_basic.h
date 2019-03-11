@@ -163,6 +163,16 @@
   bc_array_s_clear(&buffer);\
 }/*}}}*/
 
+#define DEBUG_PRINT_LINES(TYPE,VALUE) \
+{/*{{{*/\
+  CONT_INIT(bc_array_s,buffer);\
+  TYPE ## _to_string_separator(VALUE,&buffer,1,"\n");\
+  bc_array_s_push(&buffer,'\0');\
+  fputs(buffer.data,stderr);\
+  fputc('\n',stderr);\
+  bc_array_s_clear(&buffer);\
+}/*}}}*/
+
 // - debug message macros -
 /*{{{*/
 #define DEBUG_MESSAGE(LEVEL,MSG) fprintf(stderr,"DLvl. " #LEVEL ": "); MSG

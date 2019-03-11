@@ -145,6 +145,7 @@ inlines string_list_s
 
 void test_bc_array();
 void test_atomic();
+void test_static();
 void test_string();
 void test_basic_type_array();
 void test_static_type_array();

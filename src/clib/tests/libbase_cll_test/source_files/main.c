@@ -11,6 +11,7 @@ const char *test_names[] =
 {/*{{{*/
   "bc_array",
   "atomic",
+  "static",
   "string",
   "basic_type_array",
   "static_type_array",
@@ -30,6 +31,7 @@ test_function_t test_functions[] =
 {/*{{{*/
   test_bc_array,
   test_atomic,
+  test_static,
   test_string,
   test_basic_type_array,
   test_static_type_array,
@@ -193,6 +195,33 @@ void test_atomic()
 #endif
 }/*}}}*/
 
+void test_static()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT(bc_array_s,buffer);
+
+#define STATIC_S_TO_BUFFER(NAME) \
+{/*{{{*/\
+  buffer.used = 0;\
+  static_s_to_string(NAME,&buffer);\
+  bc_array_s_push(&buffer,'\0');\
+}/*}}}*/
+
+  // - static_s_to_string -
+  static_s static_0 = {1,2,3};
+  STATIC_S_TO_BUFFER(&static_0);
+  cassert(strcmp(buffer.data,"{first:1,second:2,third:3}") == 0);
+
+  // - static_s_to_string_separator -
+  buffer.used = 0;
+  static_s_to_string_separator(&static_0,&buffer,4," -- ");
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"first:1 -- second:2 -- third:3") == 0);
+
+  bc_array_s_clear(&buffer);
+#endif
+}/*}}}*/
+
 void test_string()
 {/*{{{*/
 
@@ -327,13 +356,6 @@ void test_static_type_array()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
   CONT_INIT(bc_array_s,buffer);
-
-#define STATIC_S_TO_BUFFER(NAME) \
-{/*{{{*/\
-  buffer.used = 0;\
-  static_s_to_string(NAME,&buffer);\
-  bc_array_s_push(&buffer,'\0');\
-}/*}}}*/
 
 #define STATIC_ARRAY_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -512,6 +534,12 @@ void test_dynamic_type_array()
   cassert(array_0.used == 3 && array_0.size == 3 &&
     strcmp(buffer.data,"[Hello world!,Hello world!,Hello world!]") == 0);
 
+  // - string_array_s_to_string_separator -
+  buffer.used = 0;
+  string_array_s_to_string_separator(&array_0,&buffer,4," -- ");
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"Hello world! -- Hello world! -- Hello world!") == 0);
+
   // - string_array_s_push_blank -
   unsigned idx = 0;
   do {
@@ -627,6 +655,12 @@ void test_dynamic_type_queue()
   DYNAMIC_QUEUE_S_TO_BUFFER(&queue_0);
   cassert(strcmp(buffer.data,"[One,Two,Three,Four]") == 0);
 
+  // - string_queue_s_to_string_separator -
+  buffer.used = 0;
+  string_queue_s_to_string_separator(&queue_0,&buffer,4," -- ");
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"One -- Two -- Three -- Four") == 0);
+
   string_queue_s_clear(&queue_0);
   bc_array_s_clear(&buffer);
 #endif
@@ -722,6 +756,12 @@ void test_dynamic_type_list()
   DYNAMIC_LIST_S_TO_BUFFER(&list_0);
   cassert(strcmp(buffer.data,"[One,Two,Three,Four]") == 0);
 
+  // - string_list_s_to_string_separator -
+  buffer.used = 0;
+  string_list_s_to_string_separator(&list_0,&buffer,4," -- ");
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"One -- Two -- Three -- Four") == 0);
+
   string_list_s_clear(&list_0);
   bc_array_s_clear(&buffer);
 #endif
@@ -816,6 +856,12 @@ void test_dynamic_type_tree()
   } while(++idx < sizeof(data)/sizeof(data[0]));
   DYNAMIC_TREE_S_TO_BUFFER(&tree_0);
   cassert(strcmp(buffer.data,"[One,Two,Four,Three]") == 0);
+
+  // - string_tree_s_to_string_separator -
+  buffer.used = 0;
+  string_tree_s_to_string_separator(&tree_0,&buffer,4," -- ");
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"One -- Two -- Four -- Three") == 0);
 
   string_tree_s_clear(&tree_0);
   bc_array_s_clear(&buffer);
