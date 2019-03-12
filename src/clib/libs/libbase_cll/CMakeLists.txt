@@ -6,7 +6,9 @@ set(CONF_COMP_DEFS)
 
 if(OS_LINUX)
   set(CONF_LINK_LIBS
-    m)
+    m
+    -fsanitize=address
+    -fsanitize=undefined)
 elseif(OS_WINDOWS)
   set(CONF_LINK_LIBS)
 endif()

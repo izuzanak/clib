@@ -5,6 +5,11 @@ include "cl_struct.h"
 
 // === methods of generated structures =========================================
 
+// -- json_nice_s --
+@begin
+methods json_nice_s
+@end
+
 // -- lalr_stack_element_s --
 @begin
 methods lalr_stack_element_s

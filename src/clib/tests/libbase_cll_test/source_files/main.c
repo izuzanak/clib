@@ -218,6 +218,27 @@ void test_static()
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,"first:1 -- second:2 -- third:3") == 0);
 
+  // - static_s_to_json -
+  buffer.used = 0;
+  static_s_to_json(&static_0,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"{\"first\":1,\"second\":2,\"third\":3}") == 0);
+
+  // - static_s_to_json_nice -
+  CONT_INIT(json_nice_s,json_nice);
+  json_nice_s_create(&json_nice,"--","==");
+
+  buffer.used = 0;
+  static_s_to_json_nice(&static_0,&json_nice,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,
+"{\n"
+"==--\"first\": 1,\n"
+"==--\"second\": 2,\n"
+"==--\"third\": 3\n"
+"==}") == 0);
+
+  json_nice_s_clear(&json_nice);
   bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
@@ -441,6 +462,39 @@ void test_static_type_array()
   cassert(static_array_s_compare(&array_0,&array_1) &&
     strcmp(buffer.data,"[{first:0,second:0,third:0},{first:1,second:1,third:1},{first:2,second:2,third:2}]") == 0);
 
+  // - static_array_s_to_json -
+  buffer.used = 0;
+  static_array_s_to_json(&array_0,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"[{\"first\":0,\"second\":0,\"third\":0},{\"first\":1,\"second\":1,\"third\":1},{\"first\":2,\"second\":2,\"third\":2}]") == 0);
+
+  // - static_array_s_to_json_nice -
+  CONT_INIT(json_nice_s,json_nice);
+  json_nice_s_create(&json_nice,"--","==");
+
+  buffer.used = 0;
+  static_array_s_to_json_nice(&array_0,&json_nice,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,
+"[\n"
+"==--{\n"
+"==----\"first\": 0,\n"
+"==----\"second\": 0,\n"
+"==----\"third\": 0\n"
+"==--},\n"
+"==--{\n"
+"==----\"first\": 1,\n"
+"==----\"second\": 1,\n"
+"==----\"third\": 1\n"
+"==--},\n"
+"==--{\n"
+"==----\"first\": 2,\n"
+"==----\"second\": 2,\n"
+"==----\"third\": 2\n"
+"==--}\n"
+"==]") == 0);
+
+  json_nice_s_clear(&json_nice);
   static_array_s_clear(&array_1);
   static_array_s_clear(&array_0);
   bc_array_s_clear(&buffer);
@@ -622,6 +676,39 @@ void test_static_type_queue()
   STATIC_QUEUE_S_TO_BUFFER(&queue_0);
   cassert(strcmp(buffer.data,"[{first:0,second:0,third:0},{first:1,second:1,third:1},{first:2,second:2,third:2}]") == 0);
 
+  // - static_queue_s_to_json -
+  buffer.used = 0;
+  static_queue_s_to_json(&queue_0,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"[{\"first\":0,\"second\":0,\"third\":0},{\"first\":1,\"second\":1,\"third\":1},{\"first\":2,\"second\":2,\"third\":2}]") == 0);
+
+  // - static_queue_s_to_json_nice -
+  CONT_INIT(json_nice_s,json_nice);
+  json_nice_s_create(&json_nice,"--","==");
+
+  buffer.used = 0;
+  static_queue_s_to_json_nice(&queue_0,&json_nice,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,
+"[\n"
+"==--{\n"
+"==----\"first\": 0,\n"
+"==----\"second\": 0,\n"
+"==----\"third\": 0\n"
+"==--},\n"
+"==--{\n"
+"==----\"first\": 1,\n"
+"==----\"second\": 1,\n"
+"==----\"third\": 1\n"
+"==--},\n"
+"==--{\n"
+"==----\"first\": 2,\n"
+"==----\"second\": 2,\n"
+"==----\"third\": 2\n"
+"==--}\n"
+"==]") == 0);
+
+  json_nice_s_clear(&json_nice);
   static_queue_s_clear(&queue_0);
   bc_array_s_clear(&buffer);
 #endif
@@ -722,6 +809,39 @@ void test_static_type_list()
   STATIC_LIST_S_TO_BUFFER(&list_0);
   cassert(strcmp(buffer.data,"[{first:0,second:0,third:0},{first:1,second:1,third:1},{first:2,second:2,third:2}]") == 0);
 
+  // - static_list_s_to_json -
+  buffer.used = 0;
+  static_list_s_to_json(&list_0,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"[{\"first\":0,\"second\":0,\"third\":0},{\"first\":1,\"second\":1,\"third\":1},{\"first\":2,\"second\":2,\"third\":2}]") == 0);
+
+  // - static_list_s_to_json_nice -
+  CONT_INIT(json_nice_s,json_nice);
+  json_nice_s_create(&json_nice,"--","==");
+
+  buffer.used = 0;
+  static_list_s_to_json_nice(&list_0,&json_nice,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,
+"[\n"
+"==--{\n"
+"==----\"first\": 0,\n"
+"==----\"second\": 0,\n"
+"==----\"third\": 0\n"
+"==--},\n"
+"==--{\n"
+"==----\"first\": 1,\n"
+"==----\"second\": 1,\n"
+"==----\"third\": 1\n"
+"==--},\n"
+"==--{\n"
+"==----\"first\": 2,\n"
+"==----\"second\": 2,\n"
+"==----\"third\": 2\n"
+"==--}\n"
+"==]") == 0);
+
+  json_nice_s_clear(&json_nice);
   static_list_s_clear(&list_0);
   bc_array_s_clear(&buffer);
 #endif
@@ -823,6 +943,39 @@ void test_static_type_tree()
   STATIC_TREE_S_TO_BUFFER(&tree_0);
   cassert(strcmp(buffer.data,"[{first:0,second:0,third:0},{first:1,second:1,third:1},{first:2,second:2,third:2}]") == 0);
 
+  // - static_tree_s_to_json -
+  buffer.used = 0;
+  static_tree_s_to_json(&tree_0,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"[{\"first\":0,\"second\":0,\"third\":0},{\"first\":1,\"second\":1,\"third\":1},{\"first\":2,\"second\":2,\"third\":2}]") == 0);
+
+  // - static_tree_s_to_json_nice -
+  CONT_INIT(json_nice_s,json_nice);
+  json_nice_s_create(&json_nice,"--","==");
+
+  buffer.used = 0;
+  static_tree_s_to_json_nice(&tree_0,&json_nice,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,
+"[\n"
+"==--{\n"
+"==----\"first\": 0,\n"
+"==----\"second\": 0,\n"
+"==----\"third\": 0\n"
+"==--},\n"
+"==--{\n"
+"==----\"first\": 1,\n"
+"==----\"second\": 1,\n"
+"==----\"third\": 1\n"
+"==--},\n"
+"==--{\n"
+"==----\"first\": 2,\n"
+"==----\"second\": 2,\n"
+"==----\"third\": 2\n"
+"==--}\n"
+"==]") == 0);
+
+  json_nice_s_clear(&json_nice);
   static_tree_s_clear(&tree_0);
   bc_array_s_clear(&buffer);
 #endif

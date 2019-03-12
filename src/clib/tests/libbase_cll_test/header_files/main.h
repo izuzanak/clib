@@ -17,6 +17,7 @@ ui:first
 ui:second
 ui:third
 >
+options ( to_json to_json_nice )
 static_s;
 @end
 
@@ -42,22 +43,30 @@ rb_tree<ui> ui_tree_s;
 
 // -- static_array_s --
 @begin
-array<static_s> static_array_s;
+array<static_s>
+options ( to_json to_json_nice )
+static_array_s;
 @end
 
 // -- static_queue_s --
 @begin
-queue<static_s> static_queue_s;
+queue<static_s>
+options ( to_json to_json_nice )
+static_queue_s;
 @end
 
 // -- static_list_s --
 @begin
-list<static_s> static_list_s;
+list<static_s>
+options ( to_json to_json_nice )
+static_list_s;
 @end
 
 // -- static_tree_s --
 @begin
-rb_tree<static_s> static_tree_s;
+rb_tree<static_s>
+options ( to_json to_json_nice )
+static_tree_s;
 @end
 
 // -- string_queue_s --

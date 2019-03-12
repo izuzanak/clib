@@ -111,6 +111,24 @@ BASIC_TYPE_TO_STRING_DEFINE(bd);
 BASIC_TYPE_TO_STRING_DEFINE(pointer);
 #endif
 
+// === definition of to_json methods for basic data types ======================
+
+#define   si_to_json   si_to_string
+#define  usi_to_json  usi_to_string
+#define   bi_to_json   bi_to_string
+#define   ui_to_json   ui_to_string
+#define  lli_to_json  lli_to_string
+#define ulli_to_json ulli_to_string
+#define   bd_to_json   bd_to_string
+
+#define   si_to_json_nice(VALUE,NICE,TARGET)   si_to_json(VALUE,TARGET)
+#define  usi_to_json_nice(VALUE,NICE,TARGET)  usi_to_json(VALUE,TARGET)
+#define   bi_to_json_nice(VALUE,NICE,TARGET)   bi_to_json(VALUE,TARGET)
+#define   ui_to_json_nice(VALUE,NICE,TARGET)   ui_to_json(VALUE,TARGET)
+#define  lli_to_json_nice(VALUE,NICE,TARGET)  lli_to_json(VALUE,TARGET)
+#define ulli_to_json_nice(VALUE,NICE,TARGET) ulli_to_json(VALUE,TARGET)
+#define   bd_to_json_nice(VALUE,NICE,TARGET)   bd_to_json(VALUE,TARGET)
+
 // === inline methods of generated structures ==================================
 
 // -- bc_array_s --
