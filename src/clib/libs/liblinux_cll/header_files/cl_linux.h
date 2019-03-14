@@ -159,7 +159,8 @@ WUR liblinux_cll_EXPORT int signal_s_simple_handler(signal_callback_t a_handler)
 // === definition of generated structures ======================================
 
 typedef struct epoll_s epoll_s;
-typedef void (*epoll_fd_callback_t)(void *a_object,unsigned a_index,int a_fd,epoll_s *a_epoll);
+typedef struct epoll_event epoll_event_s;
+typedef void (*epoll_fd_callback_t)(void *a_object,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll);
 typedef void (*epoll_time_callback_t)(void *a_object,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
 
 // -- epoll_callback_s --
@@ -220,8 +221,10 @@ epoll_s;
 
 static inline int epoll_s_create(epoll_s *this,int a_flags);
 WUR static inline int epoll_s_fd(epoll_s *this,epoll_fd_s *a_epoll_fd,unsigned a_evts);
-WUR liblinux_cll_EXPORT int epoll_s_fd_callback(epoll_s *this,
+WUR static inline int epoll_s_fd_callback(epoll_s *this,
     epoll_fd_s *a_epoll_fd,unsigned a_evts,epoll_fd_callback_t a_callback,void *a_object,unsigned a_index);
+WUR liblinux_cll_EXPORT int epoll_s_fd_update(epoll_s *this,
+    epoll_fd_s *a_epoll_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback);
 static inline void epoll_s_timer_stamp(epoll_s *this,
     ulli a_time,epoll_time_callback_t a_callback,void *a_object,unsigned a_index,epoll_timer_s *a_epoll_timer);
 WUR static inline int epoll_s_timer_delay(epoll_s *this,
@@ -252,6 +255,8 @@ static inline int epoll_fd_s_compare(const epoll_fd_s *this,const epoll_fd_s *a_
 #if OPTION_TO_STRING == ENABLED
 static inline void epoll_fd_s_to_string(const epoll_fd_s *this,bc_array_s *a_trg);
 #endif
+
+WUR static inline int epoll_fd_s_modify_events(epoll_fd_s *this,unsigned a_evts);
 
 // === definition of structure epoll_timer_s ===================================
 
@@ -565,7 +570,15 @@ static inline int epoll_s_create(epoll_s *this,int a_flags)
 
 static inline int epoll_s_fd(epoll_s *this,epoll_fd_s *a_epoll_fd,unsigned a_evts)
 {/*{{{*/
-  return epoll_s_fd_callback(this,a_epoll_fd,a_evts,NULL,NULL,0);
+  epoll_callback_s callback = {NULL,NULL,0};
+  return epoll_s_fd_update(this,a_epoll_fd,a_evts,1,&callback);
+}/*}}}*/
+
+static inline int epoll_s_fd_callback(epoll_s *this,
+    epoll_fd_s *a_epoll_fd,unsigned a_evts,epoll_fd_callback_t a_callback,void *a_object,unsigned a_index)
+{/*{{{*/
+  epoll_callback_s callback = {a_callback,a_object,a_index};
+  return epoll_s_fd_update(this,a_epoll_fd,a_evts,1,&callback);
 }/*}}}*/
 
 static inline void epoll_s_timer_stamp(epoll_s *this,
@@ -665,6 +678,14 @@ static inline void epoll_fd_s_to_string(const epoll_fd_s *this,bc_array_s *a_trg
   bc_array_s_append_format(a_trg,"}");
 }/*}}}*/
 #endif
+
+static inline int epoll_fd_s_modify_events(epoll_fd_s *this,unsigned a_evts)
+{/*{{{*/
+  debug_assert(this->epoll != NULL);
+
+  epoll_callback_s callback = {NULL,NULL,0};
+  return epoll_s_fd_update(this->epoll,this,a_evts,0,&callback);
+}/*}}}*/
 
 // === inline methods of structure epoll_timer_s ===============================
 

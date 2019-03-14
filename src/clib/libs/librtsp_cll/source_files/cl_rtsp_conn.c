@@ -325,12 +325,12 @@ int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,e
   return 0;
 }/*}}}*/
 
-int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,int a_fd,epoll_s *a_epoll)
+int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_index;
   (void)a_epoll;
 
-  if (a_fd != this->epoll_fd.fd)
+  if (a_epoll_event->data.fd != this->epoll_fd.fd)
   {
     throw_error(RTSP_CONN_INVALID_FD);
   }

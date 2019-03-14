@@ -446,8 +446,8 @@ methods epoll_time_events_s
 methods epoll_s
 @end
 
-int epoll_s_fd_callback(epoll_s *this,
-    epoll_fd_s *a_epoll_fd,unsigned a_evts,epoll_fd_callback_t a_callback,void *a_object,unsigned a_index)
+int epoll_s_fd_update(epoll_s *this,
+    epoll_fd_s *a_epoll_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
 {/*{{{*/
   epoll_fd_events_s *fd_events = &this->fd_events;
 
@@ -460,7 +460,12 @@ int epoll_s_fd_callback(epoll_s *this,
   }
 
   epoll_fd_event_s *fd_event = fd_events->data + a_epoll_fd->fd;
-  epoll_callback_s_set(&fd_event->callback,a_callback,a_object,a_index);
+
+  // - update callback if requested -
+  if (a_update_cb)
+  {
+    fd_event->callback = *a_callback;
+  }
 
   unsigned evts = fd_event->evts;
 
@@ -576,7 +581,7 @@ int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout)
       if (callback->function != NULL)
       {
         // - call event callback -
-        ((epoll_fd_callback_t)callback->function)(callback->object,callback->index,fd,this);
+        ((epoll_fd_callback_t)callback->function)(callback->object,callback->index,e_ptr,this);
       }
 
     } while(++e_ptr < e_ptr_end);

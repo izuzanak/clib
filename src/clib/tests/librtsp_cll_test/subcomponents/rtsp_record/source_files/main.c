@@ -120,7 +120,7 @@ void rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,un
   }
 }/*}}}*/
 
-void rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,int a_fd,epoll_s *a_epoll)
+void rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"rtsp_recorder_s_client_fd_event: %u\n",a_index));
 
@@ -128,7 +128,7 @@ void rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,int 
   rtsp_record_s *record = this->records.data + a_index;
   rtsp_client_s *client = &this->client_list.data[record->client_idx].object;
 
-  if (rtsp_client_s_fd_event(client,a_index,a_fd,a_epoll))
+  if (rtsp_client_s_fd_event(client,a_index,a_epoll_event,a_epoll))
   {
     rtsp_client_s_clear(client);
     rtsp_client_list_s_remove(&this->client_list,a_index);

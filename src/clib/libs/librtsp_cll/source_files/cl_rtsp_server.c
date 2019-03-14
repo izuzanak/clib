@@ -47,11 +47,11 @@ int rtsp_server_s_create(rtsp_server_s *this,
   return 0;
 }/*}}}*/
 
-int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,int a_fd,epoll_s *a_epoll)
+int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_index;
 
-  if (a_fd != this->epoll_fd.fd)
+  if (a_epoll_event->data.fd != this->epoll_fd.fd)
   {
     throw_error(RTSP_SERVER_INVALID_FD);
   }
@@ -108,12 +108,12 @@ void rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,unsigned
   }
 }/*}}}*/
 
-void rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,int a_fd,epoll_s *a_epoll)
+void rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   rtsp_server_s *this = (rtsp_server_s *)a_rtsp_server;
   rtsp_conn_s *conn = &this->conn_list.data[a_index].object;
 
-  if (rtsp_conn_s_fd_event(conn,0,a_fd,a_epoll))
+  if (rtsp_conn_s_fd_event(conn,0,a_epoll_event,a_epoll))
   {
     // - call conn_drop_callback -
     ((rtsp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);

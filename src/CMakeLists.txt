@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 2.8)
 
 find_package(PkgConfig)
 
@@ -104,7 +104,8 @@ endfunction()
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(OS_LINUX TRUE)
   set(OS_WINDOWS FALSE)
-  add_definitions(-g -fsanitize=address -fsanitize=undefined -Wall -Wfatal-errors -DLINUX)
+  add_definitions(-g -Wall -Wfatal-errors -DLINUX)
+  #add_definitions(-g -fsanitize=address -fsanitize=undefined -Wall -Wfatal-errors -DLINUX)
   #add_definitions(-O3 -DNDEBUG -Wall -Wfatal-errors -DLINUX)
 else()
   set(OS_LINUX FALSE)

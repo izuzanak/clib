@@ -30,17 +30,17 @@ int client_recv_packet(void *a_client_list,unsigned a_index,const bc_array_s *a_
   (void)a_src;
 
   // - packet received indication -
-  //fputc('.',stderr);
+  fputc('.',stderr);
 
   return 0;
 }/*}}}*/
 
-void client_fd_event(void *a_client_list,unsigned a_index,int a_fd,epoll_s *a_epoll)
+void client_fd_event(void *a_client_list,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   rtsp_client_list_s *client_list = (rtsp_client_list_s *)a_client_list;
   rtsp_client_s *client = &client_list->data[a_index].object;
 
-  if (rtsp_client_s_fd_event(client,a_index,a_fd,a_epoll))
+  if (rtsp_client_s_fd_event(client,a_index,a_epoll_event,a_epoll))
   {
     rtsp_client_s_clear(client);
     rtsp_client_list_s_remove(client_list,a_index);
@@ -58,17 +58,17 @@ int main(int argc,char **argv)
   //const unsigned short port = 554;
   //const char *media = "udpstream_ch1";
 
-  //const char *server_ip = "10.2.35.6";
-  //const unsigned short port = 554;
-  //const char *media = "udpstream_ch1";
+  const char *server_ip = "10.2.35.6";
+  const unsigned short port = 554;
+  const char *media = "udpstream_ch1";
 
   //const char *server_ip = "10.2.1.18";
   //const unsigned short port = 554;
   //const char *media = "11";
 
-  const char *server_ip = "127.0.0.1";
-  const unsigned short port = 8000;
-  const char *media = "10.2.1.18";
+  //const char *server_ip = "127.0.0.1";
+  //const unsigned short port = 8000;
+  //const char *media = "10.2.1.18";
 
   //const char *server_ip = "10.2.1.10";
   //const unsigned short port = 8080;

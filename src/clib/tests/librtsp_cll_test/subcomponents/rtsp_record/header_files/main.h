@@ -58,7 +58,7 @@ WUR int rtsp_recorder_s_create(rtsp_recorder_s *this,const char *a_base_dir,unsi
   const char **a_server_ips,const usi *a_server_ports,const char **a_media,const char **a_file_names);
 void rtsp_recorder_s_run(rtsp_recorder_s *this);
 void rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
-void rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,int a_fd,epoll_s *a_epoll);
+void rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR int rtsp_recorder_s_recv_sdp(void *a_rtsp_recorder,unsigned a_index,const bc_array_s *a_src);
 WUR int rtsp_recorder_s_recv_packet(void *a_rtsp_recorder,unsigned a_index,const bc_array_s *a_src);
 

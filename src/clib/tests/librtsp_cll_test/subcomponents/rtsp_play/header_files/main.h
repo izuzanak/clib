@@ -51,7 +51,7 @@ rtsp_player_s;
 
 WUR int rtsp_player_s_create(rtsp_player_s *this,const char *a_base_dir,const char *a_ip,usi a_port);
 void rtsp_player_s_run(rtsp_player_s *this);
-void rtsp_player_s_server_fd_event(void *a_rtsp_player,unsigned a_index,int a_fd,epoll_s *a_epoll);
+void rtsp_player_s_server_fd_event(void *a_rtsp_player,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 void rtsp_player_s_conn_new(void *a_rtsp_player,unsigned a_index);
 void rtsp_player_s_conn_drop(void *a_rtsp_player,unsigned a_index);
 WUR int rtsp_player_s_conn_get_sdp(void *a_rtsp_player,unsigned a_index,const char *a_url,bc_array_s *a_trg);

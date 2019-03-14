@@ -126,7 +126,7 @@ WUR int rtsp_client_s_send_cmd(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_resp(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_sdp(rtsp_client_s *this);
-WUR librtsp_cll_EXPORT int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,int a_fd,epoll_s *a_epoll);
+WUR librtsp_cll_EXPORT int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // -- rtsp_setup_s --
 @begin
@@ -185,7 +185,7 @@ WUR int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll);
 WUR int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll);
 WUR int rtsp_conn_s_send_packet(rtsp_conn_s *this);
 WUR librtsp_cll_EXPORT int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
-WUR librtsp_cll_EXPORT int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,int a_fd,epoll_s *a_epoll);
+WUR librtsp_cll_EXPORT int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // -- rtsp_conn_list_s --
 @begin
@@ -229,9 +229,9 @@ WUR librtsp_cll_EXPORT int rtsp_server_s_create(rtsp_server_s *this,
   rtsp_conn_check_media_callback_t a_conn_check_media_callback,
   rtsp_conn_get_packet_callback_t a_conn_get_packet_callback,
   void *a_cb_object);
-WUR librtsp_cll_EXPORT int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,int a_fd,epoll_s *a_epoll);
+WUR librtsp_cll_EXPORT int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 librtsp_cll_EXPORT void rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
-librtsp_cll_EXPORT void rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,int a_fd,epoll_s *a_epoll);
+librtsp_cll_EXPORT void rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // === inline methods of generated structures ==================================
 

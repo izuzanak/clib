@@ -138,9 +138,12 @@ inlines bc_array_s
 
 static inline void bc_array_s_append(bc_array_s *this,unsigned a_count,const char *a_data)
 {/*{{{*/
-  unsigned old_used = this->used;
-  bc_array_s_push_blanks(this,a_count);
-  memcpy(this->data + old_used,a_data,a_count);
+  if (a_count != 0)
+  {
+    unsigned old_used = this->used;
+    bc_array_s_push_blanks(this,a_count);
+    memcpy(this->data + old_used,a_data,a_count);
+  }
 }/*}}}*/
 
 static inline void bc_array_s_append_ptr(bc_array_s *this,const char *a_data)
