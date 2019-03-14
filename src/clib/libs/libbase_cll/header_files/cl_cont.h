@@ -95,7 +95,6 @@ static inline void check_free(pointer a_location);
 
 // === definition of to_string methods for basic data types ====================
 
-#if OPTION_TO_STRING == ENABLED
 #define BASIC_TYPE_TO_STRING_DEFINE(TYPE) \
 static inline void TYPE ## _to_string(const TYPE *this,bc_array_s *a_trg);
 
@@ -109,7 +108,6 @@ BASIC_TYPE_TO_STRING_DEFINE(lli);
 BASIC_TYPE_TO_STRING_DEFINE(ulli);
 BASIC_TYPE_TO_STRING_DEFINE(bd);
 BASIC_TYPE_TO_STRING_DEFINE(pointer);
-#endif
 
 // === definition of to_json methods for basic data types ======================
 
@@ -290,7 +288,6 @@ static inline void check_free(pointer a_location)
 
 // === inline basic data types to_string methods ===============================
 
-#if OPTION_TO_STRING == ENABLED
 #define BASIC_TYPE_TO_STRING_INLINE(TYPE,FORMAT) \
 static inline void TYPE ## _to_string(const TYPE *this,bc_array_s *a_trg)\
 {/*{{{*/\
@@ -318,7 +315,6 @@ BASIC_TYPE_TO_STRING_INLINE(lli,"%" HOST_LL_FORMAT "d");
 BASIC_TYPE_TO_STRING_INLINE(ulli,"%" HOST_LL_FORMAT "u");
 BASIC_TYPE_TO_STRING_INLINE(bd,"%f");
 BASIC_TYPE_TO_STRING_INLINE(pointer,"%p");
-#endif
 
 #endif
 

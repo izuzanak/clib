@@ -53,12 +53,10 @@ void test_json_parse()
 "  }\n"
 "}";
 
-  CONT_INIT(string_s,source);
-  string_s_set_ptr(&source,data);
-
   // - json_parse -
   var_s object = NULL;
-  cassert(json_parse(&source,&object) == 0);
+  bc_array_s data_buffer = {strlen(data),strlen(data),(char *)data};
+  cassert(json_parse(&data_buffer,&object) == 0);
   loc_s_to_string(object,&buffer);
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,"[null:<blank>,array:[0,1,2,3,4,5,6,7,8,9],float:123.400000,object:[first:0,third:2,second:1],string:Hello world!,integer:123]") == 0);
@@ -73,12 +71,11 @@ void test_json_parse()
   cassert(json_create_nice(object,&tab,&indent,&buffer) == 0);
   bc_array_s_push(&buffer,'\0');
 
-  cassert(strcmp(buffer.data,source.data) == 0);
+  cassert(strcmp(buffer.data,data) == 0);
 
   string_s_clear(&tab);
   string_s_clear(&indent);
   var_s_clear(&object);
-  string_s_clear(&source);
   bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
@@ -116,18 +113,15 @@ void test_json_parse_comments()
 "  }\n"
 "}";
 
-  CONT_INIT(string_s,source);
-  string_s_set_ptr(&source,data);
-
   // - json_parse -
   var_s object = NULL;
-  cassert(json_parse(&source,&object) == 0);
+  bc_array_s data_buffer = {strlen(data),strlen(data),(char *)data};
+  cassert(json_parse(&data_buffer,&object) == 0);
   loc_s_to_string(object,&buffer);
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,"[null:<blank>,array:[0,1,2,3,4,5,6,7,8,9],float:123.400000,object:[first:0,third:2,second:1],string:Hello world!,integer:123]") == 0);
 
   var_s_clear(&object);
-  string_s_clear(&source);
   bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/

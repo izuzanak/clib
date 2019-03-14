@@ -153,6 +153,7 @@
 #endif
 
 // - to_string debug macros -
+#if OPTION_TO_STRING == ENABLED
 #define DEBUG_PRINT(TYPE,VALUE) \
 {/*{{{*/\
   CONT_INIT(bc_array_s,buffer);\
@@ -162,7 +163,9 @@
   fputc('\n',stderr);\
   bc_array_s_clear(&buffer);\
 }/*}}}*/
+#endif
 
+#if OPTION_TO_STRING == ENABLED
 #define DEBUG_PRINT_LINES(TYPE,VALUE) \
 {/*{{{*/\
   CONT_INIT(bc_array_s,buffer);\
@@ -172,6 +175,7 @@
   fputc('\n',stderr);\
   bc_array_s_clear(&buffer);\
 }/*}}}*/
+#endif
 
 // - debug message macros -
 /*{{{*/

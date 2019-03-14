@@ -9,7 +9,7 @@ include "cl_channel.h"
 
 // - error codes -
 #define ERROR_CHANNEL_COMM_SERVER_CREATE_ERROR 1
-#define ERROR_CHANNEL_COMM_EPOLL_ERROR 2
+#define ERROR_CHANNEL_COMM_SERVER_EPOLL_ERROR 2
 #define ERROR_CHANNEL_COMM_CONN_SCHEDULE_MESSAGE_ERROR 3
 
 // === definition of generated structures ======================================

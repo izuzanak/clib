@@ -112,7 +112,7 @@ void pa_json_val_string(json_parser_s *this)
 
 void pa_json_val_integer(json_parser_s *this)
 {/*{{{*/
-  string_s *source_string = &this->source_string;
+  const bc_array_s *source = (const bc_array_s *)this->source;
   lli_tree_s *const_integers = &this->const_integers;
   var_array_s *integer_vars = &this->integer_vars;
   var_array_s *values = &this->values;
@@ -121,14 +121,9 @@ void pa_json_val_integer(json_parser_s *this)
   // *****
 
   lalr_stack_element_s *lse = lalr_stack_s_last(lalr_stack);
-  unsigned int_num_end = lse->terminal_end - lse->terminal_start;
-  char *int_num_data = source_string->data + lse->terminal_start;
 
-  // - retrieve number from string -
-  char tmp_char = int_num_data[int_num_end];
-  int_num_data[int_num_end] = '\0';
-  long long int const_int = strtoll(int_num_data,NULL,10);
-  int_num_data[int_num_end] = tmp_char;
+  // - retrieve number from source -
+  long long int const_int = strtoll(source->data + lse->terminal_start,NULL,10);
 
   // - get constant position in array -
   unsigned cd_idx = lli_tree_s_unique_insert(const_integers,const_int);
@@ -153,7 +148,7 @@ void pa_json_val_integer(json_parser_s *this)
 
 void pa_json_val_float(json_parser_s *this)
 {/*{{{*/
-  string_s *source_string = &this->source_string;
+  const bc_array_s *source = (const bc_array_s *)this->source;
   bd_tree_s *const_floats = &this->const_floats;
   var_array_s *float_vars = &this->float_vars;
   var_array_s *values = &this->values;
@@ -162,14 +157,9 @@ void pa_json_val_float(json_parser_s *this)
   // *****
 
   lalr_stack_element_s *lse = lalr_stack_s_last(lalr_stack);
-  unsigned float_num_end = lse->terminal_end - lse->terminal_start;
-  char *float_num_data = source_string->data + lse->terminal_start;
 
-  // - retrieve number from string -
-  char tmp_char = float_num_data[float_num_end];
-  float_num_data[float_num_end] = '\0';
-  double const_float = strtod(float_num_data,NULL);
-  float_num_data[float_num_end] = tmp_char;
+  // - retrieve number from source -
+  double const_float = strtod(source->data + lse->terminal_start,NULL);
 
   // - get constant position in array -
   unsigned cd_idx = bd_tree_s_unique_insert(const_floats,const_float);
@@ -256,7 +246,7 @@ void pa_json_val_null(json_parser_s *this)
 
 void pa_json_string(json_parser_s *this)
 {/*{{{*/
-  string_s *source_string = &this->source_string;
+  const bc_array_s *source = (const bc_array_s *)this->source;
   string_tree_s *const_strings = &this->const_strings;
   var_array_s *string_vars = &this->string_vars;
   ui_array_s *string_idxs = &this->string_idxs;
@@ -266,8 +256,8 @@ void pa_json_string(json_parser_s *this)
 
   lalr_stack_element_s *lse = lalr_stack_s_last(lalr_stack);
 
-  char *ptr = source_string->data + lse->terminal_start + 1;
-  char *ptr_end = source_string->data + lse->terminal_end - 1;
+  char *ptr = source->data + lse->terminal_start + 1;
+  char *ptr_end = source->data + lse->terminal_end - 1;
 
   bc_array_s char_buffer;
   bc_array_s_init_size(&char_buffer,(ptr_end - ptr) + 1);

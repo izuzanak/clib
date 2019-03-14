@@ -12,7 +12,8 @@ include "cl_channel.h"
 #define ERROR_CHANNEL_CLIENT_WRITE_ERROR 2
 
 #define ERROR_CHANNEL_COMM_CONN_CREATE_ERROR 1
-#define ERROR_CHANNEL_COMM_EPOLL_ERROR 2
+#define ERROR_CHANNEL_COMM_CONN_EPOLL_ERROR 2
+#define ERROR_CHANNEL_COMM_EPOLL_ERROR 3
 
 // === definition of generated structures ======================================
 

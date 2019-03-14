@@ -27,7 +27,7 @@ int channel_comm_s_create(channel_comm_s *this,const char *a_ip,unsigned short a
 
   if(epoll_s_fd_callback(&this->epoll,&this->server.epoll_fd,EPOLLIN | EPOLLPRI,channel_comm_s_fd_event,this,0))
   {
-    throw_error(CHANNEL_COMM_EPOLL_ERROR);
+    throw_error(CHANNEL_COMM_SERVER_EPOLL_ERROR);
   }
 
   return 0;
@@ -43,7 +43,7 @@ int channel_comm_s_run(channel_comm_s *this)
     {
       if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
       {
-        throw_error(CHANNEL_COMM_EPOLL_ERROR);
+        throw_error(CHANNEL_COMM_SERVER_EPOLL_ERROR);
       }
     }
   }

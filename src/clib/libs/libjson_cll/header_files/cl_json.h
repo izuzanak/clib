@@ -59,7 +59,7 @@ rb_tree<bd> bd_tree_s;
 @begin
 struct
 <
-string_s:source_string
+pointer:source
 ui:input_idx
 ui:old_input_idx
 
@@ -87,7 +87,7 @@ json_parser_s;
 @end
 
 unsigned json_parser_s_recognize_terminal(json_parser_s *this);
-WUR libjson_cll_EXPORT int json_parser_s_parse(json_parser_s *this,string_s *a_src,var_s *a_trg);
+WUR libjson_cll_EXPORT int json_parser_s_parse(json_parser_s *this,const bc_array_s *a_src,var_s *a_trg);
 
 // -- json_create_stack_element_s --
 @begin
@@ -111,7 +111,7 @@ void json_create_append_string(const string_s *a_src,bc_array_s *a_trg);
 WUR libjson_cll_EXPORT int json_create(var_s a_obj,bc_array_s *a_trg);
 WUR libjson_cll_EXPORT int json_create_nice(var_s a_obj,const string_s
     *a_tabulator,const string_s *a_indent,bc_array_s *a_trg);
-WUR static inline int json_parse(string_s *a_src,var_s *a_trg);
+WUR static inline int json_parse(const bc_array_s *a_src,var_s *a_trg);
 
 // === inline methods of generated structures ==================================
 
@@ -156,7 +156,7 @@ inlines json_create_stack_s
 
 // === inline global functions =================================================
 
-static inline int json_parse(string_s *a_src,var_s *a_trg)
+static inline int json_parse(const bc_array_s *a_src,var_s *a_trg)
 {/*{{{*/
   CONT_INIT(json_parser_s,json_parser);
   int res = json_parser_s_parse(&json_parser,a_src,a_trg);

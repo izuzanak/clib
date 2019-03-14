@@ -64,12 +64,12 @@ methods json_parser_s
 
 unsigned json_parser_s_recognize_terminal(json_parser_s *this)
 {/*{{{*/
-  unsigned source_string_length = this->source_string.size - 1;
+  const bc_array_s *source = (const bc_array_s *)this->source;
 
 #define JSON_GET_NEXT_CHAR() \
   {\
-    if (this->input_idx < source_string_length) {\
-      in_char = (unsigned char)this->source_string.data[this->input_idx];\
+    if (this->input_idx < source->used) {\
+      in_char = (unsigned char)source->data[this->input_idx];\
     }\
     else {\
       in_char = '\0';\
@@ -628,9 +628,9 @@ state_43_label:
 
 }/*}}}*/
 
-int json_parser_s_parse(json_parser_s *this,string_s *a_src,var_s *a_trg)
+int json_parser_s_parse(json_parser_s *this,const bc_array_s *a_src,var_s *a_trg)
 {/*{{{*/
-  string_s_swap(&this->source_string,a_src);
+  this->source = (pointer)a_src;
 
   this->input_idx = 0;
   this->old_input_idx = 0;
@@ -639,9 +639,6 @@ int json_parser_s_parse(json_parser_s *this,string_s *a_src,var_s *a_trg)
   lalr_stack_s_push_state(&this->lalr_stack,0);
 
   unsigned ret_term = c_idx_not_exist;
-
-#define JSON_PARSE_SOURCE_RETURN() \
-  string_s_swap(&this->source_string,a_src);
 
   do
   {
@@ -655,8 +652,6 @@ int json_parser_s_parse(json_parser_s *this,string_s *a_src,var_s *a_trg)
       // - PARSE ERROR unrecognized terminal -
       if (ret_term == c_idx_not_exist)
       {
-        JSON_PARSE_SOURCE_RETURN();
-
         throw_error(JSON_PARSE_UNRECOGNIZED_TERMINAL);
       }
 
@@ -673,8 +668,6 @@ int json_parser_s_parse(json_parser_s *this,string_s *a_src,var_s *a_trg)
     // - PARSE ERROR wrong syntax -
     if (parse_action == c_idx_not_exist)
     {
-      JSON_PARSE_SOURCE_RETURN();
-
       throw_error(JSON_PARSE_INVALID_SYNTAX);
     }
 
@@ -711,8 +704,6 @@ int json_parser_s_parse(json_parser_s *this,string_s *a_src,var_s *a_trg)
     }
   }
   while(1);
-
-  JSON_PARSE_SOURCE_RETURN();
 
   // - retrieve parsed object -
   var_s_copy(a_trg,var_array_s_pop(&this->objects));
