@@ -43,17 +43,29 @@ int channel_comm_s_create(channel_comm_s *this,
       string_s_set_ptr(&client->server_ip,a_server_ips[create_idx]);
       client->server_port = a_server_ports[create_idx];
 
+      client->message.type = 0;
+      client->message.sequence = 0;
+
       if (channel_conn_s_create_client(&client->connection,
             client->server_ip.data,client->server_port,client_idx,channel_comm_s_message,this))
       {
-        throw_error(CHANNEL_COMM_CREATE_CONN_ERROR);
+        throw_error(CHANNEL_COMM_CONN_CREATE_ERROR);
       }
 
+      // - register epoll fd events -
       if (epoll_s_fd_callback(&this->epoll,&client->connection.epoll_fd,EPOLLIN | EPOLLPRI,channel_comm_s_client_fd_event,this,client_idx))
       {
         channel_client_list_s_remove(&this->client_list,client_idx);
 
-        throw_error(CHANNEL_COMM_CREATE_CONN_ERROR);
+        throw_error(CHANNEL_COMM_EPOLL_ERROR);
+      }
+
+      // - register epoll timer -
+      if (epoll_s_timer_period_now(&this->epoll,500000000ULL,channel_comm_s_client_time_event,this,client_idx,&client->epoll_timer))
+      {
+        channel_client_list_s_remove(&this->client_list,client_idx);
+
+        throw_error(CHANNEL_COMM_EPOLL_ERROR);
       }
 
     } while(++create_idx < a_count);
@@ -62,17 +74,33 @@ int channel_comm_s_create(channel_comm_s *this,
   return 0;
 }/*}}}*/
 
-void channel_comm_s_run(channel_comm_s *this)
+int channel_comm_s_run(channel_comm_s *this)
 {/*{{{*/
-  while(!g_terminate)
+  while(!g_terminate && this->client_list.first_idx != c_idx_not_exist)
   {
     // - wait on events -
     int err;
     if ((err = epoll_s_wait(&this->epoll,32,-1)))
     {
-      cassert(err == ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED);
+      if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
+      {
+        throw_error(CHANNEL_COMM_EPOLL_ERROR);
+      }
     }
   }
+
+  return 0;
+}/*}}}*/
+
+void channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
+{/*{{{*/
+  channel_comm_s *this = (channel_comm_s *)a_channel_comm;
+  channel_client_s *client = &this->client_list.data[a_index].object;
+
+  this->buffer.used = 0;
+  channel_message_s_to_json(&client->message,&this->buffer);
+  ++client->message.sequence;
+  cassert(channel_conn_s_schedule_message(&client->connection,&this->buffer) == 0);
 }/*}}}*/
 
 void channel_comm_s_client_fd_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
@@ -89,9 +117,9 @@ void channel_comm_s_client_fd_event(void *a_channel_comm,unsigned a_index,epoll_
 
 int channel_comm_s_message(void *a_channel_comm,unsigned a_index,const bc_array_s *a_message)
 {/*{{{*/
-  debug_message_1(fprintf(stderr,"channel_comm_s_message: %u - %.*s\n",a_index,a_message->used,a_message->data));
+  (void)a_channel_comm;
 
-  // FIXME TODO continue ...
+  debug_message_5(fprintf(stderr,"conn_message: %u - %.*s\n",a_index,a_message->used,a_message->data));
 
   return 0;
 }/*}}}*/
@@ -121,10 +149,70 @@ int main(int argc,char **argv)
   {/*{{{*/
     "127.0.0.1",
     "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
+    "127.0.0.1",
   };/*}}}*/
 
   const usi server_ports[] =
   {/*{{{*/
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
+    8001,
     8001,
     8001,
   };/*}}}*/
@@ -132,8 +220,8 @@ int main(int argc,char **argv)
 
   CONT_INIT(channel_comm_s,comm);
 
-  cassert(channel_comm_s_create(&comm,2,server_ips,server_ports) == 0);
-  channel_comm_s_run(&comm);
+  cassert(channel_comm_s_create(&comm,10,server_ips,server_ports) == 0);
+  cassert(channel_comm_s_run(&comm) == 0);
   channel_comm_s_clear(&comm);
 
   memcheck_release_assert();

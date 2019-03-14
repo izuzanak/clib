@@ -147,7 +147,7 @@ int channel_conn_s_send_msg(channel_conn_s *this)
   }
   else
   {
-    // - modify fd epoll events, only input -
+    // - modify fd epoll events: only input -
     if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLPRI))
     {
       throw_error(CHANNEL_CONN_EPOLL_ERROR);
@@ -188,10 +188,19 @@ int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s 
 
 int channel_conn_s_schedule_message(channel_conn_s *this,bc_array_s *a_message)
 {/*{{{*/
+
+  // - format message length and insert it to output queue -
+  this->buffer.used = 0;
+  bc_array_s_append_format(&this->buffer,"0x%8.8x;",a_message->used);
+
+  bc_array_queue_s_insert_blank(&this->out_msg_queue);
+  bc_array_s_swap(bc_array_queue_s_last(&this->out_msg_queue),&this->buffer);
+
+  // - insert message to output queue -
   bc_array_queue_s_insert_blank(&this->out_msg_queue);
   bc_array_s_swap(bc_array_queue_s_last(&this->out_msg_queue),a_message);
 
-    // - modify fd epoll events, input and output -
+    // - modify fd epoll events: input and output -
   if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI))
   {
     throw_error(CHANNEL_CONN_EPOLL_ERROR);
@@ -211,7 +220,7 @@ methods channel_server_s
 @end
 
 int channel_server_s_create(channel_server_s *this,
-  const string_s *a_ip,unsigned short a_port,
+  const char *a_ip,unsigned short a_port,
   channel_conn_new_callback_t a_conn_new_callback,
   channel_conn_drop_callback_t a_conn_drop_callback,
   channel_conn_message_callback_t a_conn_message_callback,
@@ -221,7 +230,7 @@ int channel_server_s_create(channel_server_s *this,
 
   channel_server_s_clear(this);
 
-  string_s_copy(&this->ip,a_ip);
+  string_s_set_ptr(&this->ip,a_ip);
   this->port = a_port;
 
   this->conn_new_callback = a_conn_new_callback;

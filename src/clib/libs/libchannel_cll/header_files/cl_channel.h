@@ -58,6 +58,8 @@ ui:in_msg_length
 
 bc_array_queue_s:out_msg_queue
 ui:out_msg_offset
+
+bc_array_s:buffer
 >
 channel_conn_s;
 @end
@@ -98,7 +100,7 @@ channel_server_s;
 @end
 
 WUR libchannel_cll_EXPORT int channel_server_s_create(channel_server_s *this,
-    const string_s *a_ip,unsigned short a_port,
+    const char *a_ip,unsigned short a_port,
     channel_conn_new_callback_t a_conn_new_callback,
     channel_conn_drop_callback_t a_conn_drop_callback,
     channel_conn_message_callback_t a_conn_message_callback,

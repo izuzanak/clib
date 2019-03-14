@@ -231,6 +231,8 @@ WUR static inline int epoll_s_timer_delay(epoll_s *this,
     ulli a_delay,epoll_time_callback_t a_callback,void *a_object,unsigned a_index,epoll_timer_s *a_epoll_timer);
 WUR static inline int epoll_s_timer_period(epoll_s *this,
     ulli a_period,epoll_time_callback_t a_callback,void *a_object,unsigned a_index,epoll_timer_s *a_epoll_timer);
+WUR static inline int epoll_s_timer_period_now(epoll_s *this,
+    ulli a_period,epoll_time_callback_t a_callback,void *a_object,unsigned a_index,epoll_timer_s *a_epoll_timer);
 static inline void epoll_s_timer_remove(epoll_s *this,epoll_timer_s *a_epoll_timer);
 WUR liblinux_cll_EXPORT int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout);
 
@@ -615,6 +617,22 @@ static inline int epoll_s_timer_period(epoll_s *this,
   }
 
   epoll_time_map_s time_map = {time_now + a_period,a_period,{a_callback,a_object,a_index}};
+  a_epoll_timer->timer = epoll_time_events_s_insert(&this->time_events,&time_map);
+  a_epoll_timer->epoll = this;
+
+  return 0;
+}/*}}}*/
+
+static inline int epoll_s_timer_period_now(epoll_s *this,
+    ulli a_period,epoll_time_callback_t a_callback,void *a_object,unsigned a_index,epoll_timer_s *a_epoll_timer)
+{/*{{{*/
+  ulli time_now;
+  if (clock_s_gettime(CLOCK_MONOTONIC,&time_now))
+  {
+    throw_error(EPOLL_GET_TIME_ERROR);
+  }
+
+  epoll_time_map_s time_map = {time_now,a_period,{a_callback,a_object,a_index}};
   a_epoll_timer->timer = epoll_time_events_s_insert(&this->time_events,&time_map);
   a_epoll_timer->epoll = this;
 

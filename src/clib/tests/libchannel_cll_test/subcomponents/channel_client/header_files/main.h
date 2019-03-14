@@ -11,7 +11,8 @@ include "cl_channel.h"
 #define ERROR_CHANNEL_CLIENT_CONNECT_ERROR 1
 #define ERROR_CHANNEL_CLIENT_WRITE_ERROR 2
 
-#define ERROR_CHANNEL_COMM_CREATE_CONN_ERROR 1
+#define ERROR_CHANNEL_COMM_CONN_CREATE_ERROR 1
+#define ERROR_CHANNEL_COMM_EPOLL_ERROR 2
 
 // === definition of generated structures ======================================
 
@@ -34,9 +35,8 @@ string_s:server_ip
 usi:server_port
 
 channel_conn_s:connection
-
-bc_array_s:buffer
-bc_array_s:out_msg
+channel_message_s:message
+epoll_timer_s:epoll_timer
 >
 channel_client_s;
 @end
@@ -51,6 +51,7 @@ list<channel_client_s> channel_client_list_s;
 struct
 <
 channel_client_list_s:client_list
+bc_array_s:buffer
 epoll_s:epoll
 >
 channel_comm_s;
@@ -58,7 +59,8 @@ channel_comm_s;
 
 WUR int channel_comm_s_create(channel_comm_s *this,
   unsigned a_count,const char **a_server_ips,const usi *a_server_ports);
-void channel_comm_s_run(channel_comm_s *this);
+WUR int channel_comm_s_run(channel_comm_s *this);
+void channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
 void channel_comm_s_client_fd_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR int channel_comm_s_message(void *a_channel_comm,unsigned a_index,const bc_array_s *a_message);
 
