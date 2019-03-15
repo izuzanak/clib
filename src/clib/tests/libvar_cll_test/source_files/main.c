@@ -274,11 +274,39 @@ void test_var_array()
   ARRAY_TO_STRING(array_3);
   cassert(strcmp(buffer.data,"[4,3,2,1,0,-1,-2,-3,-4,-5]") == 0);
 
+  // - loc_s_array_to_json -
+  buffer.used = 0;
+  loc_s_array_to_json(array_3,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"[4,3,2,1,0,-1,-2,-3,-4,-5]") == 0);
+
+  // - loc_s_array_to_json_nice -
+  CONT_INIT(json_nice_s,json_nice);
+  json_nice_s_create(&json_nice,"--","==");
+
+  buffer.used = 0;
+  loc_s_array_to_json_nice(array_3,&json_nice,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,
+"[\n"
+"==--4,\n"
+"==--3,\n"
+"==--2,\n"
+"==--1,\n"
+"==--0,\n"
+"==---1,\n"
+"==---2,\n"
+"==---3,\n"
+"==---4,\n"
+"==---5\n"
+"==]") == 0);
+
   // - loc_s_array_order -
   cassert(
     loc_s_array_order(array_2,array_3) < 0 &&
     loc_s_array_order(array_3,array_2) > 0);
 
+  json_nice_s_clear(&json_nice);
   var_s_clear(&array_3);
   var_s_clear(&array_2);
   var_s_clear(&array_1);
@@ -357,6 +385,34 @@ void test_var_dict()
   DICT_TO_STRING(dict_0);
   cassert(strcmp(buffer.data,"[0:A,1:B,2:C,3:D,4:E,10:0,11:0,12:0,13:0,14:0]") == 0);
 
+//  // - loc_s_dict_to_json -
+//  buffer.used = 0;
+//  loc_s_dict_to_json(dict_0,&buffer);
+//  bc_array_s_push(&buffer,'\0');
+//  cassert(strcmp(buffer.data,"{0:\"A\",1:\"B\",2:\"C\",3:\"D\",4:\"E\",10:0,11:0,12:0,13:0,14:0}") == 0);
+//
+//  // - loc_s_dict_to_json_nice -
+//  CONT_INIT(json_nice_s,json_nice);
+//  json_nice_s_create(&json_nice,"--","==");
+//
+//  buffer.used = 0;
+//  loc_s_dict_to_json_nice(dict_0,&json_nice,&buffer);
+//  bc_array_s_push(&buffer,'\0');
+//  cassert(strcmp(buffer.data,
+//"{\n"
+//"==--0: \"A\",\n"
+//"==--1: \"B\",\n"
+//"==--2: \"C\",\n"
+//"==--3: \"D\",\n"
+//"==--4: \"E\",\n"
+//"==--10: 0,\n"
+//"==--11: 0,\n"
+//"==--12: 0,\n"
+//"==--13: 0,\n"
+//"==--14: 0\n"
+//"==}") == 0);
+//
+//  json_nice_s_clear(&json_nice);
   var_s_clear(&dict_0);
   bc_array_s_clear(&buffer);
 #endif
@@ -379,10 +435,12 @@ void test_register_type()
     loc_s_person_clear,
     loc_s_person_order,
 #if OPTION_TO_STRING == ENABLED
-    loc_s_person_to_string
+    loc_s_person_to_string,
 #else
-    NULL
+    NULL,
 #endif
+    loc_s_person_to_json,
+    loc_s_person_to_json_nice
     );
 
   VAR(person,loc_s_person("Frank","Sobotka",45));
@@ -395,6 +453,44 @@ void test_register_type()
   VAR_ARRAY_S_TO_STRING(&array_0);
   cassert(strcmp(buffer.data,"[{name:Frank,surname:Sobotka,age:45},{name:Frank,surname:Sobotka,age:45},{name:Frank,surname:Sobotka,age:45},{name:Frank,surname:Sobotka,age:45}]") == 0);
 
+  // - var_array_s_to_json -
+  buffer.used = 0;
+  var_array_s_to_json(&array_0,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"[{\"name\":\"Frank\",\"surname\":\"Sobotka\",\"age\":45},{\"name\":\"Frank\",\"surname\":\"Sobotka\",\"age\":45},{\"name\":\"Frank\",\"surname\":\"Sobotka\",\"age\":45},{\"name\":\"Frank\",\"surname\":\"Sobotka\",\"age\":45}]") == 0);
+
+  // - var_array_s_to_json_nice -
+  CONT_INIT(json_nice_s,json_nice);
+  json_nice_s_create(&json_nice,"--","==");
+
+  buffer.used = 0;
+  var_array_s_to_json_nice(&array_0,&json_nice,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,
+"[\n"
+"==--{\n"
+"==----\"name\": \"Frank\",\n"
+"==----\"surname\": \"Sobotka\",\n"
+"==----\"age\": 45\n"
+"==--},\n"
+"==--{\n"
+"==----\"name\": \"Frank\",\n"
+"==----\"surname\": \"Sobotka\",\n"
+"==----\"age\": 45\n"
+"==--},\n"
+"==--{\n"
+"==----\"name\": \"Frank\",\n"
+"==----\"surname\": \"Sobotka\",\n"
+"==----\"age\": 45\n"
+"==--},\n"
+"==--{\n"
+"==----\"name\": \"Frank\",\n"
+"==----\"surname\": \"Sobotka\",\n"
+"==----\"age\": 45\n"
+"==--}\n"
+"==]") == 0);
+
+  json_nice_s_clear(&json_nice);
   var_array_s_clear(&array_0);
   var_s_clear(&person);
   bc_array_s_clear(&buffer);

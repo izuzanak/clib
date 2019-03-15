@@ -30,6 +30,7 @@ define crc16_s basic
 #if OPTION_TO_STRING == ENABLED
 static inline void crc16_s_to_string(const crc16_s *this,bc_array_s *a_trg);
 #endif
+static inline void crc16_s_to_json(const crc16_s *this,bc_array_s *a_trg);
 libcrc_cll_EXPORT void crc16_s_update(crc16_s *this,unsigned a_size,const void *a_data);
 static inline int crc16_s_valid(const crc16_s *this,crc16_s a_init,unsigned a_size,const void *a_data);
 
@@ -41,6 +42,11 @@ static inline void crc16_s_to_string(const crc16_s *this,bc_array_s *a_trg)
   bc_array_s_append_format(a_trg,"crc16_s{0x%4.4hx}",*this);
 }/*}}}*/
 #endif
+
+static inline void crc16_s_to_json(const crc16_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  usi_to_json(this,a_trg);
+}/*}}}*/
 
 static inline int crc16_s_valid(const crc16_s *this,crc16_s a_init,unsigned a_size,const void *a_data)
 {/*{{{*/

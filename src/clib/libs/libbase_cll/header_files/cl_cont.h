@@ -33,7 +33,9 @@ bc_array_s;
 
 // -- ui_array_s --
 @begin
-array<ui> ui_array_s;
+array<ui>
+options ( to_json )
+ui_array_s;
 @end
 
 #if OPTION_MEMCHECK == ENABLED

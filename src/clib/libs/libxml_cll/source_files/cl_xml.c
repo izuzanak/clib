@@ -613,10 +613,12 @@ void libxml_init()
     loc_s_xml_node_clear,
     loc_s_xml_node_order,
 #if OPTION_TO_STRING == ENABLED
-    loc_s_xml_node_to_string
+    loc_s_xml_node_to_string,
 #else
-    NULL
+    NULL,
 #endif
+    loc_s_xml_node_to_json,
+    loc_s_xml_node_to_json_nice
     );
 
 }/*}}}*/

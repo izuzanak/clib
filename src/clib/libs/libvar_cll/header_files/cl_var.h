@@ -60,6 +60,8 @@ static inline int loc_s_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED
 static inline void loc_s_to_string(var_s this,bc_array_s *a_trg);
 #endif
+static inline void loc_s_to_json(var_s this,bc_array_s *a_trg);
+static inline void loc_s_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 
 // === definition of structure loc_s function maps =============================
 
@@ -77,14 +79,22 @@ typedef void (*loc_s___to_string_t)(var_s this,bc_array_s *a_trg);
 libvar_cll_EXPORT extern loc_s___to_string_t g_loc_s___to_string[LOC_S_MAX_TYPES];
 #endif
 
+typedef void (*loc_s___to_json_t)(var_s this,bc_array_s *a_trg);
+libvar_cll_EXPORT extern loc_s___to_json_t g_loc_s___to_json[LOC_S_MAX_TYPES];
+
+typedef void (*loc_s___to_json_nice_t)(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
+libvar_cll_EXPORT extern loc_s___to_json_nice_t g_loc_s___to_json_nice[LOC_S_MAX_TYPES];
+
 libvar_cll_EXPORT unsigned loc_s_register_type(
   loc_s___clear_t a_clear,
   loc_s___order_t a_order,
 #if OPTION_TO_STRING == ENABLED
-  loc_s___to_string_t a_to_string
+  loc_s___to_string_t a_to_string,
 #else
-  void *a_to_string
+  void *a_to_string,
 #endif
+  loc_s___to_json_t a_to_json,
+  loc_s___to_json_nice_t a_to_json_nice
   );
 
 // === definition of var_s =====================================================
@@ -103,12 +113,16 @@ static inline int var_s_compare(const var_s *this,const var_s *a_second);
 #if OPTION_TO_STRING == ENABLED
 static inline void var_s_to_string(const var_s *this,bc_array_s *a_trg);
 #endif
+static inline void var_s_to_json(const var_s *this,bc_array_s *a_trg);
+static inline void var_s_to_json_nice(const var_s *this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 
 // === definition of generated structures ======================================
 
 // -- var_array_s --
 @begin
-array<var_s> var_array_s;
+array<var_s>
+options ( to_json to_json_nice )
+var_array_s;
 @end
 
 static inline void var_array_s_push_loc(var_array_s *this,var_s a_value);
@@ -139,6 +153,9 @@ static inline void var_map_s_to_string(const var_map_s *this,bc_array_s *a_trg);
 safe_rb_tree<var_map_s> var_map_tree_s;
 @end
 
+void var_map_tree_s_to_json(const var_map_tree_s *this,bc_array_s *a_trg);
+void var_map_tree_s_to_json_nice(const var_map_tree_s *this,json_nice_s *a_json_nice,bc_array_s *a_trg);
+
 // === definition of loc_s types ===============================================
 
 // - type BLANK -
@@ -148,6 +165,8 @@ static inline int loc_s_blank_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED
 static inline void loc_s_blank_to_string(var_s this,bc_array_s *a_trg);
 #endif
+static inline void loc_s_blank_to_json(var_s this,bc_array_s *a_trg);
+static inline void loc_s_blank_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 
 // - type INTEGER -
 static inline var_s loc_s_int(long long int a_value);
@@ -156,6 +175,8 @@ static inline int loc_s_int_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED
 static inline void loc_s_int_to_string(var_s this,bc_array_s *a_trg);
 #endif
+static inline void loc_s_int_to_json(var_s this,bc_array_s *a_trg);
+static inline void loc_s_int_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 static inline long long int loc_s_int_value(var_s this);
 
 // - type FLOAT -
@@ -165,6 +186,8 @@ static inline int loc_s_float_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED
 static inline void loc_s_float_to_string(var_s this,bc_array_s *a_trg);
 #endif
+static inline void loc_s_float_to_json(var_s this,bc_array_s *a_trg);
+static inline void loc_s_float_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 static inline double loc_s_float_value(var_s this);
 
 // - type STRING -
@@ -177,6 +200,8 @@ static inline int loc_s_string_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED
 static inline void loc_s_string_to_string(var_s this,bc_array_s *a_trg);
 #endif
+static inline void loc_s_string_to_json(var_s this,bc_array_s *a_trg);
+static inline void loc_s_string_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 static inline const string_s *loc_s_string_value(var_s this);
 
 // - type ARRAY -
@@ -187,6 +212,8 @@ libvar_cll_EXPORT int loc_s_array___order(const var_array_s *a_first,const var_a
 #if OPTION_TO_STRING == ENABLED
 static inline void loc_s_array_to_string(var_s this,bc_array_s *a_trg);
 #endif
+static inline void loc_s_array_to_json(var_s this,bc_array_s *a_trg);
+static inline void loc_s_array_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 static inline var_array_s *loc_s_array_value(var_s this);
 static inline unsigned loc_s_array_length(var_s this);
 static inline void loc_s_array_push(var_s this,var_s a_value);
@@ -201,6 +228,8 @@ libvar_cll_EXPORT int loc_s_dict___order(const var_map_tree_s *a_first,const var
 #if OPTION_TO_STRING == ENABLED
 static inline void loc_s_dict_to_string(var_s this,bc_array_s *a_trg);
 #endif
+static inline void loc_s_dict_to_json(var_s this,bc_array_s *a_trg);
+static inline void loc_s_dict_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 static inline var_map_tree_s *loc_s_dict_value(var_s this);
 static inline unsigned loc_s_dict_length(var_s this);
 static inline int loc_s_dict_has_key(var_s this,var_s a_key);
@@ -244,6 +273,16 @@ void loc_s_to_string(var_s this,bc_array_s *a_trg)
   g_loc_s___to_string[this->v_type](this,a_trg);
 }/*}}}*/
 #endif
+
+static inline void loc_s_to_json(var_s this,bc_array_s *a_trg)
+{/*{{{*/
+  g_loc_s___to_json[this->v_type](this,a_trg);
+}/*}}}*/
+
+static inline void loc_s_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg)
+{/*{{{*/
+  g_loc_s___to_json_nice[this->v_type](this,a_json_nice,a_trg);
+}/*}}}*/
 
 // === inline methods of var_s =================================================
 
@@ -312,6 +351,30 @@ static inline void var_s_to_string(const var_s *this,bc_array_s *a_trg)
   }
 }/*}}}*/
 #endif
+
+static inline void var_s_to_json(const var_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  if (*this != NULL)
+  {
+    loc_s_to_json(*this,a_trg);
+  }
+  else
+  {
+    bc_array_s_append_ptr(a_trg,"null");
+  }
+}/*}}}*/
+
+static inline void var_s_to_json_nice(const var_s *this,json_nice_s *a_json_nice,bc_array_s *a_trg)
+{/*{{{*/
+  if (*this != NULL)
+  {
+    loc_s_to_json_nice(*this,a_json_nice,a_trg);
+  }
+  else
+  {
+    bc_array_s_append_ptr(a_trg,"null");
+  }
+}/*}}}*/
 
 #define VAR(NAME,VALUE) \
   CONT_INIT(var_s,NAME);\
@@ -416,6 +479,20 @@ static inline void loc_s_blank_to_string(var_s this,bc_array_s *a_trg)
 }/*}}}*/
 #endif
 
+static inline void loc_s_blank_to_json(var_s this,bc_array_s *a_trg)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_blank);
+
+  bc_array_s_append_ptr(a_trg,"null");
+}/*}}}*/
+
+static inline void loc_s_blank_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg)
+{/*{{{*/
+  (void)a_json_nice;
+
+  loc_s_blank_to_json(this,a_trg);
+}/*}}}*/
+
 // - type INTEGER -
 static inline var_s loc_s_int(long long int a_value)
 {/*{{{*/
@@ -450,6 +527,20 @@ static inline void loc_s_int_to_string(var_s this,bc_array_s *a_trg)
   lli_to_string(&this->v_data.lli,a_trg);
 }/*}}}*/
 #endif
+
+static inline void loc_s_int_to_json(var_s this,bc_array_s *a_trg)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_integer);
+
+  lli_to_json(&this->v_data.lli,a_trg);
+}/*}}}*/
+
+static inline void loc_s_int_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg)
+{/*{{{*/
+  (void)a_json_nice;
+
+  loc_s_int_to_json(this,a_trg);
+}/*}}}*/
 
 static inline long long int loc_s_int_value(var_s this)
 {/*{{{*/
@@ -492,6 +583,20 @@ static inline void loc_s_float_to_string(var_s this,bc_array_s *a_trg)
   bd_to_string(&this->v_data.bd,a_trg);
 }/*}}}*/
 #endif
+
+static inline void loc_s_float_to_json(var_s this,bc_array_s *a_trg)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_float);
+
+  bd_to_json(&this->v_data.bd,a_trg);
+}/*}}}*/
+
+static inline void loc_s_float_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg)
+{/*{{{*/
+  (void)a_json_nice;
+
+  loc_s_float_to_json(this,a_trg);
+}/*}}}*/
 
 static inline double loc_s_float_value(var_s this)
 {/*{{{*/
@@ -567,9 +672,26 @@ static inline void loc_s_string_to_string(var_s this,bc_array_s *a_trg)
   debug_assert(this->v_type == c_bi_type_string);
 
   string_s *string = (string_s *)this->v_data.ptr;
+
   string_s_to_string(string,a_trg);
 }/*}}}*/
 #endif
+
+static inline void loc_s_string_to_json(var_s this,bc_array_s *a_trg)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_string);
+
+  string_s *string = (string_s *)this->v_data.ptr;
+
+  string_s_to_json(string,a_trg);
+}/*}}}*/
+
+static inline void loc_s_string_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg)
+{/*{{{*/
+  (void)a_json_nice;
+
+  loc_s_string_to_json(this,a_trg);
+}/*}}}*/
 
 static inline const string_s *loc_s_string_value(var_s this)
 {/*{{{*/
@@ -625,6 +747,24 @@ static inline void loc_s_array_to_string(var_s this,bc_array_s *a_trg)
   var_array_s_to_string(array,a_trg);
 }/*}}}*/
 #endif
+
+static inline void loc_s_array_to_json(var_s this,bc_array_s *a_trg)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_array);
+
+  var_array_s *array = (var_array_s *)this->v_data.ptr;
+
+  var_array_s_to_json(array,a_trg);
+}/*}}}*/
+
+static inline void loc_s_array_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_array);
+
+  var_array_s *array = (var_array_s *)this->v_data.ptr;
+
+  var_array_s_to_json_nice(array,a_json_nice,a_trg);
+}/*}}}*/
 
 static inline var_array_s *loc_s_array_value(var_s this)
 {/*{{{*/
@@ -716,6 +856,24 @@ static inline void loc_s_dict_to_string(var_s this,bc_array_s *a_trg)
   var_map_tree_s_to_string(tree,a_trg);
 }/*}}}*/
 #endif
+
+static inline void loc_s_dict_to_json(var_s this,bc_array_s *a_trg)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_dict);
+
+  var_map_tree_s *tree = (var_map_tree_s *)this->v_data.ptr;
+
+  var_map_tree_s_to_json(tree,a_trg);
+}/*}}}*/
+
+static inline void loc_s_dict_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_dict);
+
+  var_map_tree_s *tree = (var_map_tree_s *)this->v_data.ptr;
+
+  var_map_tree_s_to_json_nice(tree,a_json_nice,a_trg);
+}/*}}}*/
 
 static inline var_map_tree_s *loc_s_dict_value(var_s this)
 {/*{{{*/

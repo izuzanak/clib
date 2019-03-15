@@ -39,14 +39,36 @@ loc_s___to_string_t g_loc_s___to_string[LOC_S_MAX_TYPES] =
 };/*}}}*/
 #endif
 
+loc_s___to_json_t g_loc_s___to_json[LOC_S_MAX_TYPES] =
+{/*{{{*/
+  loc_s_blank_to_json,
+  loc_s_int_to_json,
+  loc_s_float_to_json,
+  loc_s_string_to_json,
+  loc_s_array_to_json,
+  loc_s_dict_to_json,
+};/*}}}*/
+
+loc_s___to_json_nice_t g_loc_s___to_json_nice[LOC_S_MAX_TYPES] =
+{/*{{{*/
+  loc_s_blank_to_json_nice,
+  loc_s_int_to_json_nice,
+  loc_s_float_to_json_nice,
+  loc_s_string_to_json_nice,
+  loc_s_array_to_json_nice,
+  loc_s_dict_to_json_nice,
+};/*}}}*/
+
 unsigned loc_s_register_type(
   loc_s___clear_t a_clear,
   loc_s___order_t a_order,
 #if OPTION_TO_STRING == ENABLED
-  loc_s___to_string_t a_to_string
+  loc_s___to_string_t a_to_string,
 #else
-  void *a_to_string
+  void *a_to_string,
 #endif
+  loc_s___to_json_t a_to_json,
+  loc_s___to_json_nice_t a_to_json_nice
   )
 {/*{{{*/
   cassert(g_loc_s_type_cnt < LOC_S_MAX_TYPES);
@@ -56,6 +78,8 @@ unsigned loc_s_register_type(
 #if OPTION_TO_STRING == ENABLED
   g_loc_s___to_string[g_loc_s_type_cnt] = a_to_string;
 #endif
+  g_loc_s___to_json[g_loc_s_type_cnt] = a_to_json;
+  g_loc_s___to_json_nice[g_loc_s_type_cnt] = a_to_json_nice;
 
   return g_loc_s_type_cnt++;
 }/*}}}*/
@@ -81,6 +105,80 @@ methods var_map_s
 @begin
 methods var_map_tree_s
 @end
+
+void var_map_tree_s_to_json(const var_map_tree_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  if (this->root_idx != c_idx_not_exist)
+  {
+    bc_array_s_push(a_trg,'{');
+
+    unsigned stack[RB_TREE_STACK_SIZE(var_map_tree_s,this)];
+    unsigned *stack_ptr = stack;
+
+    unsigned idx = var_map_tree_s_get_stack_min_value_idx(this,this->root_idx,&stack_ptr);
+    do {
+      var_map_s *var_map = &(this->data + idx)->object;
+      debug_assert(var_map->key->v_type == c_bi_type_string);
+
+      var_s_to_json(&var_map->key,a_trg);
+      bc_array_s_push(a_trg,':');
+      var_s_to_json(&var_map->value,a_trg);
+
+      idx = var_map_tree_s_get_stack_next_idx(this,idx,&stack_ptr,stack);
+      if (idx == c_idx_not_exist)
+      {
+        break;
+      }
+
+      bc_array_s_push(a_trg,',');
+    } while(1);
+
+    bc_array_s_push(a_trg,'}');
+  }
+  else
+  {
+    bc_array_s_append(a_trg,2,"{}");
+  }
+}/*}}}*/
+
+void var_map_tree_s_to_json_nice(const var_map_tree_s *this,json_nice_s *a_json_nice,bc_array_s *a_trg)
+{/*{{{*/
+  if (this->root_idx != c_idx_not_exist)
+  {
+    bc_array_s_push(a_trg,'{');
+    json_nice_s_push_indent(a_json_nice,a_trg);
+
+    unsigned stack[RB_TREE_STACK_SIZE(var_map_tree_s,this)];
+    unsigned *stack_ptr = stack;
+
+    unsigned idx = var_map_tree_s_get_stack_min_value_idx(this,this->root_idx,&stack_ptr);
+    do {
+      var_map_s *var_map = &(this->data + idx)->object;
+      debug_assert(var_map->key->v_type == c_bi_type_string);
+
+      var_s_to_json_nice(&var_map->key,a_json_nice,a_trg);
+      bc_array_s_push(a_trg,':');
+      bc_array_s_push(a_trg,' ');
+      var_s_to_json_nice(&var_map->value,a_json_nice,a_trg);
+
+      idx = var_map_tree_s_get_stack_next_idx(this,idx,&stack_ptr,stack);
+      if (idx == c_idx_not_exist)
+      {
+        break;
+      }
+
+      bc_array_s_push(a_trg,',');
+      json_nice_s_indent(a_json_nice,a_trg);
+    } while(1);
+
+    json_nice_s_pop_indent(a_json_nice,a_trg);
+    bc_array_s_push(a_trg,'}');
+  }
+  else
+  {
+    bc_array_s_append(a_trg,2,"{}");
+  }
+}/*}}}*/
 
 // === methods of loc_s types ==================================================
 //

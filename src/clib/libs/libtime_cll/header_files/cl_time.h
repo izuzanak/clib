@@ -70,6 +70,7 @@ define time_s basic
 #if OPTION_TO_STRING == ENABLED
 static inline void time_s_to_string(const time_s *this,bc_array_s *a_trg);
 #endif
+static inline void time_s_to_json(const time_s *this,bc_array_s *a_trg);
 static inline void time_s_now(time_s *this);
 WUR libtime_cll_EXPORT int time_s_from_string(time_s *this,unsigned a_length,const char *a_data);
 WUR static inline int time_s_from_string_ptr(time_s *this,const char *a_data);
@@ -109,6 +110,7 @@ static inline int datetime_s_is_leap_year(unsigned a_year)
 #if OPTION_TO_STRING == ENABLED
 static inline void time_s_to_string(const time_s *this,bc_array_s *a_trg)
 {/*{{{*/
+
   // - convert time to datetime structure -
   datetime_s datetime;
   datetime_s_from_nanosec(&datetime,*this);
@@ -117,6 +119,11 @@ static inline void time_s_to_string(const time_s *this,bc_array_s *a_trg)
     ,datetime.year,datetime.month,datetime.day,datetime.hour,datetime.min,datetime.sec);
 }/*}}}*/
 #endif
+
+static inline void time_s_to_json(const time_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  ulli_to_json(this,a_trg);
+}/*}}}*/
 
 static inline void time_s_now(time_s *this)
 {/*{{{*/
