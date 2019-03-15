@@ -245,6 +245,8 @@ void test_static()
 
 void test_string()
 {/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT(bc_array_s,buffer);
 
   // - string_s_init -
   string_s string_0;
@@ -271,12 +273,21 @@ void test_string()
   cassert(string_0.size == strlen(data_0) + 1 && strcmp(string_0.data,data_0) == 0);
   cassert(string_s_compare(&string_0,&string_1));
 
+  // - string_s_to_json -
+  string_s_set_ptr(&string_0,"Hello\nthere\nworld!\n");
+  buffer.used = 0;
+  string_s_to_json(&string_0,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"\"Hello\\nthere\\nworld!\\n\"") == 0);
+
   // - string_s_clear -
   string_s_clear(&string_1);
   cassert(!string_s_compare(&string_0,&string_1));
 
   string_s_clear(&string_1);
   string_s_clear(&string_0);
+  bc_array_s_clear(&buffer);
+#endif
 }/*}}}*/
 
 void test_basic_type_array()

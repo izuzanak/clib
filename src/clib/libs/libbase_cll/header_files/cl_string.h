@@ -44,6 +44,9 @@ static inline int string_s_compare(const string_s *this,const string_s *a_second
 #if OPTION_TO_STRING == ENABLED
 static inline void string_s_to_string(const string_s *this,bc_array_s *a_trg);
 #endif
+libbase_cll_EXPORT void string_s_to_json(const string_s *this,bc_array_s *a_trg);
+static inline void string_s_to_json_nice(const string_s *this,void *a_json_nice,bc_array_s *a_trg);
+
 libbase_cll_EXPORT unsigned string_s_get_idx(string_s *this,unsigned a_idx,unsigned a_length,const char *a_data);
 
 // === definition of generated structures ======================================
@@ -145,6 +148,13 @@ static inline void string_s_copy(string_s *this,const string_s *a_src)
   this->size = a_src->size;
 }/*}}}*/
 
+static inline int string_s_compare(const string_s *this,const string_s *a_second)
+{/*{{{*/
+  if (this->size != a_second->size) { return 0; }
+  if (this->data == &c_string_terminating_char) { return 1; }
+  return (memcmp(this->data,a_second->data,(this->size - 1)*sizeof(char)) == 0);
+}/*}}}*/
+
 #if OPTION_TO_STRING == ENABLED
 static inline void string_s_to_string(const string_s *this,bc_array_s *a_trg)
 {/*{{{*/
@@ -152,11 +162,11 @@ static inline void string_s_to_string(const string_s *this,bc_array_s *a_trg)
 }/*}}}*/
 #endif
 
-static inline int string_s_compare(const string_s *this,const string_s *a_second)
+static inline void string_s_to_json_nice(const string_s *this,void *a_json_nice,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->size != a_second->size) { return 0; }
-  if (this->data == &c_string_terminating_char) { return 1; }
-  return (memcmp(this->data,a_second->data,(this->size - 1)*sizeof(char)) == 0);
+  (void)a_json_nice;
+
+  string_s_to_json(this,a_trg);
 }/*}}}*/
 
 // === inline methods of generated structures ==================================

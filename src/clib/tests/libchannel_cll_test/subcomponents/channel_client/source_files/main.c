@@ -183,7 +183,7 @@ int main(int argc,char **argv)
 
   const usi server_ports[] =
   {/*{{{*/
-    8002,
+    8001,
     8001,
     8001,
     8001,
@@ -219,7 +219,7 @@ int main(int argc,char **argv)
 
   CONT_INIT(channel_comm_s,comm);
 
-  cassert(channel_comm_s_create(&comm,1,server_ips,server_ports) == 0);
+  cassert(channel_comm_s_create(&comm,10,server_ips,server_ports) == 0);
   cassert(channel_comm_s_run(&comm) == 0);
   channel_comm_s_clear(&comm);
 

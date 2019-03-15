@@ -723,52 +723,6 @@ methods json_create_stack_s
 
 // === global functions ========================================================
 
-void json_create_append_string(const string_s *a_src,bc_array_s *a_trg)
-{/*{{{*/
-  if (a_src->size > 1)
-  {
-    char *ptr = a_src->data;
-    char *ptr_end = ptr + a_src->size - 1;
-    do {
-
-      switch (*ptr)
-      {
-        case '\b':
-          bc_array_s_push(a_trg,'\\');
-          bc_array_s_push(a_trg,'b');
-          break;
-        case '\f':
-          bc_array_s_push(a_trg,'\\');
-          bc_array_s_push(a_trg,'f');
-          break;
-        case '\n':
-          bc_array_s_push(a_trg,'\\');
-          bc_array_s_push(a_trg,'n');
-          break;
-        case '\r':
-          bc_array_s_push(a_trg,'\\');
-          bc_array_s_push(a_trg,'r');
-          break;
-        case '\t':
-          bc_array_s_push(a_trg,'\\');
-          bc_array_s_push(a_trg,'t');
-          break;
-        case '\\':
-          bc_array_s_push(a_trg,'\\');
-          bc_array_s_push(a_trg,'\\');
-          break;
-        case '"':
-          bc_array_s_push(a_trg,'\\');
-          bc_array_s_push(a_trg,'"');
-          break;
-        default:
-          bc_array_s_push(a_trg,*ptr);
-      }
-
-    } while(++ptr < ptr_end);
-  }
-}/*}}}*/
-
 int json_create(var_s a_obj,bc_array_s *a_trg)
 {/*{{{*/
   debug_assert(a_obj != NULL);
@@ -826,12 +780,7 @@ int json_create(var_s a_obj,bc_array_s *a_trg)
 
     case c_bi_type_string:
       {/*{{{*/
-        const string_s *string = loc_s_string_value(var);
-
-        bc_array_s_push(a_trg,'"');
-        json_create_append_string(string,a_trg);
-        bc_array_s_push(a_trg,'"');
-
+        string_s_to_json(loc_s_string_value(var),a_trg);
         json_create_stack_s_pop(&create_stack);
       }/*}}}*/
       break;
@@ -903,11 +852,7 @@ int json_create(var_s a_obj,bc_array_s *a_trg)
             }
 
             // - retrieve key string -
-            const string_s *string = loc_s_string_value(key_var);
-
-            bc_array_s_push(a_trg,'"');
-            json_create_append_string(string,a_trg);
-            bc_array_s_push(a_trg,'"');
+            string_s_to_json(loc_s_string_value(key_var),a_trg);
             bc_array_s_push(a_trg,':');
 
             // - insert value object to create stack -
@@ -1035,12 +980,7 @@ int json_create_nice(var_s a_obj,const string_s *a_tabulator,
 
     case c_bi_type_string:
       {/*{{{*/
-        const string_s *string = loc_s_string_value(var);
-
-        bc_array_s_push(a_trg,'"');
-        json_create_append_string(string,a_trg);
-        bc_array_s_push(a_trg,'"');
-
+        string_s_to_json(loc_s_string_value(var),a_trg);
         json_create_stack_s_pop(&create_stack);
       }/*}}}*/
       break;
@@ -1152,11 +1092,7 @@ int json_create_nice(var_s a_obj,const string_s *a_tabulator,
             }
 
             // - retrieve key string -
-            const string_s *string = loc_s_string_value(key_var);
-
-            bc_array_s_push(a_trg,'"');
-            json_create_append_string(string,a_trg);
-            bc_array_s_push(a_trg,'"');
+            string_s_to_json(loc_s_string_value(key_var),a_trg);
             bc_array_s_push(a_trg,':');
             bc_array_s_push(a_trg,' ');
 

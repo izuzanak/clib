@@ -36,6 +36,56 @@ void string_s_set_format(string_s *this,const char *a_format,...)
   }
 }/*}}}*/
 
+void string_s_to_json(const string_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_push(a_trg,'"');
+
+  if (this->size > 1)
+  {
+    char *ptr = this->data;
+    char *ptr_end = ptr + this->size - 1;
+    do {
+
+      switch (*ptr)
+      {
+        case '\b':
+          bc_array_s_push(a_trg,'\\');
+          bc_array_s_push(a_trg,'b');
+          break;
+        case '\f':
+          bc_array_s_push(a_trg,'\\');
+          bc_array_s_push(a_trg,'f');
+          break;
+        case '\n':
+          bc_array_s_push(a_trg,'\\');
+          bc_array_s_push(a_trg,'n');
+          break;
+        case '\r':
+          bc_array_s_push(a_trg,'\\');
+          bc_array_s_push(a_trg,'r');
+          break;
+        case '\t':
+          bc_array_s_push(a_trg,'\\');
+          bc_array_s_push(a_trg,'t');
+          break;
+        case '\\':
+          bc_array_s_push(a_trg,'\\');
+          bc_array_s_push(a_trg,'\\');
+          break;
+        case '"':
+          bc_array_s_push(a_trg,'\\');
+          bc_array_s_push(a_trg,'"');
+          break;
+        default:
+          bc_array_s_push(a_trg,*ptr);
+      }
+
+    } while(++ptr < ptr_end);
+  }
+
+  bc_array_s_push(a_trg,'"');
+}/*}}}*/
+
 unsigned string_s_get_idx(string_s *this,unsigned a_idx,unsigned a_length,const char *a_data)
 {/*{{{*/
   if (a_idx >= (this->size - 1) || a_length == 0 || a_length >= (this->size - a_idx))

@@ -107,7 +107,6 @@ array<json_create_stack_element_s> json_create_stack_s;
 
 // === definition of global functions ==========================================
 
-void json_create_append_string(const string_s *a_src,bc_array_s *a_trg);
 WUR libjson_cll_EXPORT int json_create(var_s a_obj,bc_array_s *a_trg);
 WUR libjson_cll_EXPORT int json_create_nice(var_s a_obj,const string_s
     *a_tabulator,const string_s *a_indent,bc_array_s *a_trg);
