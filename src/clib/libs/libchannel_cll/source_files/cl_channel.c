@@ -81,10 +81,17 @@ int channel_conn_s_recv_msg(channel_conn_s *this)
       debug_message_6(fprintf(stderr,"message length: %.*s\n",11,msg->data + msg_offset));
 
       // - retrieve length of message -
+      char *ptr = msg->data + msg_offset;
       char *end_ptr;
-      this->in_msg_length = strtol(msg->data + msg_offset,&end_ptr,16);
 
-      msg_offset = (end_ptr - msg->data) + 1;
+      this->in_msg_length = strtol(ptr,&end_ptr,16);
+
+      if (end_ptr - ptr != 10)
+      {
+        throw_error(CHANNEL_CONN_READ_ERROR);
+      }
+
+      msg_offset += 11;
     }
     else
     {
@@ -121,7 +128,7 @@ int channel_conn_s_send_msg(channel_conn_s *this)
   {
     bc_array_s *message = bc_array_queue_s_first(&this->out_msg_queue);
     size_t write_cnt = message->used - this->out_msg_offset;
-    
+
     // - limit maximal write size -
     if (write_cnt > 4096)
     {
