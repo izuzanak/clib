@@ -213,7 +213,7 @@ int channel_conn_s_schedule_message(channel_conn_s *this,bc_array_s *a_message)
   bc_array_queue_s_insert_blank(&this->out_msg_queue);
   bc_array_s_swap(bc_array_queue_s_last(&this->out_msg_queue),a_message);
 
-    // - modify fd epoll events: input and output -
+  // - modify fd epoll events: input and output -
   if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI))
   {
     throw_error(CHANNEL_CONN_EPOLL_ERROR);

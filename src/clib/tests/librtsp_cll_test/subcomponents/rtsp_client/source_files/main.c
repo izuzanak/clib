@@ -58,9 +58,17 @@ int main(int argc,char **argv)
   //const unsigned short port = 554;
   //const char *media = "udpstream_ch1";
 
-  const char *server_ip = "10.2.35.6";
-  const unsigned short port = 554;
-  const char *media = "udpstream_ch1";
+  //const char *server_ip = "10.2.35.6";
+  //const unsigned short port = 554;
+  //const char *media = "udpstream_ch1";
+
+  //const char *server_ip = "192.168.3.3";
+  //const unsigned short port = 8080;
+  //const char *media = "video/h264";
+
+  const char *server_ip = "127.0.0.1";
+  const unsigned short port = 8080;
+  const char *media = "video";
 
   //const char *server_ip = "10.2.1.18";
   //const unsigned short port = 554;
@@ -85,7 +93,7 @@ int main(int argc,char **argv)
 
   CONT_INIT(rtsp_client_list_s,client_list);
 
-  unsigned client_cnt = 32;
+  unsigned client_cnt = 1;
   unsigned idx = 0;
   do {
     unsigned client_idx = rtsp_client_list_s_append_blank(&client_list);
