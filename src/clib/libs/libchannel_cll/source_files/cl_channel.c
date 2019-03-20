@@ -146,7 +146,13 @@ int channel_conn_s_send_msg(channel_conn_s *this)
     // - whole message was send -
     if ((this->out_msg_offset += cnt) >= message->used)
     {
-      bc_array_queue_s_next(&this->out_msg_queue);
+      message = bc_array_queue_s_next(&this->out_msg_queue);
+
+      // - release too big buffers -
+      if (message->size > 65536)
+      {
+        bc_array_s_clear(message);
+      }
 
       // - reset out message offset -
       this->out_msg_offset = 0;
