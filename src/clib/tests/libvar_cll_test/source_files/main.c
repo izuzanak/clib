@@ -274,6 +274,7 @@ void test_var_array()
   ARRAY_TO_STRING(array_3);
   cassert(strcmp(buffer.data,"[4,3,2,1,0,-1,-2,-3,-4,-5]") == 0);
 
+#if OPTION_TO_JSON == ENABLED
   // - loc_s_array_to_json -
   buffer.used = 0;
   loc_s_array_to_json(array_3,&buffer);
@@ -301,12 +302,14 @@ void test_var_array()
 "==---5\n"
 "==]") == 0);
 
+  json_nice_s_clear(&json_nice);
+#endif
+
   // - loc_s_array_order -
   cassert(
     loc_s_array_order(array_2,array_3) < 0 &&
     loc_s_array_order(array_3,array_2) > 0);
 
-  json_nice_s_clear(&json_nice);
   var_s_clear(&array_3);
   var_s_clear(&array_2);
   var_s_clear(&array_1);
@@ -385,6 +388,7 @@ void test_var_dict()
   DICT_TO_STRING(dict_0);
   cassert(strcmp(buffer.data,"[0:A,1:B,2:C,3:D,4:E,10:0,11:0,12:0,13:0,14:0]") == 0);
 
+#if OPTION_TO_JSON == ENABLED
 //  // - loc_s_dict_to_json -
 //  buffer.used = 0;
 //  loc_s_dict_to_json(dict_0,&buffer);
@@ -413,6 +417,8 @@ void test_var_dict()
 //"==}") == 0);
 //
 //  json_nice_s_clear(&json_nice);
+#endif
+
   var_s_clear(&dict_0);
   bc_array_s_clear(&buffer);
 #endif
@@ -439,8 +445,13 @@ void test_register_type()
 #else
     NULL,
 #endif
+#if OPTION_TO_JSON == ENABLED
     loc_s_person_to_json,
     loc_s_person_to_json_nice
+#else
+    NULL,
+    NULL
+#endif
     );
 
   VAR(person,loc_s_person("Frank","Sobotka",45));
@@ -453,6 +464,7 @@ void test_register_type()
   VAR_ARRAY_S_TO_STRING(&array_0);
   cassert(strcmp(buffer.data,"[{name:Frank,surname:Sobotka,age:45},{name:Frank,surname:Sobotka,age:45},{name:Frank,surname:Sobotka,age:45},{name:Frank,surname:Sobotka,age:45}]") == 0);
 
+#if OPTION_TO_JSON == ENABLED
   // - var_array_s_to_json -
   buffer.used = 0;
   var_array_s_to_json(&array_0,&buffer);
@@ -491,6 +503,8 @@ void test_register_type()
 "==]") == 0);
 
   json_nice_s_clear(&json_nice);
+#endif
+
   var_array_s_clear(&array_0);
   var_s_clear(&person);
   bc_array_s_clear(&buffer);

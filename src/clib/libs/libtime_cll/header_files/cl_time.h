@@ -70,7 +70,9 @@ define time_s basic
 #if OPTION_TO_STRING == ENABLED
 static inline void time_s_to_string(const time_s *this,bc_array_s *a_trg);
 #endif
+#if OPTION_TO_JSON == ENABLED
 static inline void time_s_to_json(const time_s *this,bc_array_s *a_trg);
+#endif
 static inline void time_s_now(time_s *this);
 WUR libtime_cll_EXPORT int time_s_from_string(time_s *this,unsigned a_length,const char *a_data);
 WUR static inline int time_s_from_string_ptr(time_s *this,const char *a_data);
@@ -120,10 +122,12 @@ static inline void time_s_to_string(const time_s *this,bc_array_s *a_trg)
 }/*}}}*/
 #endif
 
+#if OPTION_TO_JSON == ENABLED
 static inline void time_s_to_json(const time_s *this,bc_array_s *a_trg)
 {/*{{{*/
   ulli_to_json(this,a_trg);
 }/*}}}*/
+#endif
 
 static inline void time_s_now(time_s *this)
 {/*{{{*/

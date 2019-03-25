@@ -39,6 +39,7 @@ loc_s___to_string_t g_loc_s___to_string[LOC_S_MAX_TYPES] =
 };/*}}}*/
 #endif
 
+#if OPTION_TO_JSON == ENABLED
 loc_s___to_json_t g_loc_s___to_json[LOC_S_MAX_TYPES] =
 {/*{{{*/
   loc_s_blank_to_json,
@@ -58,6 +59,7 @@ loc_s___to_json_nice_t g_loc_s___to_json_nice[LOC_S_MAX_TYPES] =
   loc_s_array_to_json_nice,
   loc_s_dict_to_json_nice,
 };/*}}}*/
+#endif
 
 unsigned loc_s_register_type(
   loc_s___clear_t a_clear,
@@ -67,8 +69,13 @@ unsigned loc_s_register_type(
 #else
   void *a_to_string,
 #endif
+#if OPTION_TO_JSON == ENABLED
   loc_s___to_json_t a_to_json,
   loc_s___to_json_nice_t a_to_json_nice
+#else
+  void *a_to_json,
+  void *a_to_json_nice
+#endif
   )
 {/*{{{*/
   cassert(g_loc_s_type_cnt < LOC_S_MAX_TYPES);
@@ -78,8 +85,10 @@ unsigned loc_s_register_type(
 #if OPTION_TO_STRING == ENABLED
   g_loc_s___to_string[g_loc_s_type_cnt] = a_to_string;
 #endif
+#if OPTION_TO_JSON == ENABLED
   g_loc_s___to_json[g_loc_s_type_cnt] = a_to_json;
   g_loc_s___to_json_nice[g_loc_s_type_cnt] = a_to_json_nice;
+#endif
 
   return g_loc_s_type_cnt++;
 }/*}}}*/
@@ -106,6 +115,7 @@ methods var_map_s
 methods var_map_tree_s
 @end
 
+#if OPTION_TO_JSON == ENABLED
 void var_map_tree_s_to_json(const var_map_tree_s *this,bc_array_s *a_trg)
 {/*{{{*/
   if (this->root_idx != c_idx_not_exist)
@@ -179,6 +189,7 @@ void var_map_tree_s_to_json_nice(const var_map_tree_s *this,json_nice_s *a_json_
     bc_array_s_append(a_trg,2,"{}");
   }
 }/*}}}*/
+#endif
 
 // === methods of loc_s types ==================================================
 //

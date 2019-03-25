@@ -98,7 +98,12 @@ void channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,unsi
   channel_client_s *client = &this->client_list.data[a_index].object;
 
   this->buffer.used = 0;
+#if OPTION_TO_JSON == ENABLED
   channel_message_s_to_json(&client->message,&this->buffer);
+#else
+  bc_array_s_append_format(&this->buffer,"[type:%u,sequence:%u]",
+    client->message.type,client->message.sequence);
+#endif
   ++client->message.sequence;
   cassert(channel_conn_s_schedule_message(&client->connection,&this->buffer) == 0);
 }/*}}}*/

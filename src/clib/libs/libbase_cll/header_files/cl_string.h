@@ -45,7 +45,9 @@ static inline int string_s_compare(const string_s *this,const string_s *a_second
 static inline void string_s_to_string(const string_s *this,bc_array_s *a_trg);
 #endif
 libbase_cll_EXPORT void string_s_to_json(const string_s *this,bc_array_s *a_trg);
+#if OPTION_TO_JSON == ENABLED
 static inline void string_s_to_json_nice(const string_s *this,void *a_json_nice,bc_array_s *a_trg);
+#endif
 
 libbase_cll_EXPORT unsigned string_s_get_idx(string_s *this,unsigned a_idx,unsigned a_length,const char *a_data);
 
@@ -162,12 +164,14 @@ static inline void string_s_to_string(const string_s *this,bc_array_s *a_trg)
 }/*}}}*/
 #endif
 
+#if OPTION_TO_JSON == ENABLED
 static inline void string_s_to_json_nice(const string_s *this,void *a_json_nice,bc_array_s *a_trg)
 {/*{{{*/
   (void)a_json_nice;
 
   string_s_to_json(this,a_trg);
 }/*}}}*/
+#endif
 
 // === inline methods of generated structures ==================================
 

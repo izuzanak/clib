@@ -65,8 +65,10 @@ static inline int loc_s_xml_node_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED
 static inline void loc_s_xml_node_to_string(var_s this,bc_array_s *a_trg);
 #endif
+#if OPTION_TO_JSON == ENABLED
 static inline void loc_s_xml_node_to_json(var_s this,bc_array_s *a_trg);
 static inline void loc_s_xml_node_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
+#endif
 static inline xml_node_s *loc_s_xml_node_value(var_s this);
 
 static inline void xml_node_s___update_conts_array(var_s *a_array,var_s a_value);
@@ -178,6 +180,7 @@ static inline void loc_s_xml_node_to_string(var_s this,bc_array_s *a_trg)
 }/*}}}*/
 #endif
 
+#if OPTION_TO_JSON == ENABLED
 static inline void loc_s_xml_node_to_json(var_s this,bc_array_s *a_trg)
 {/*{{{*/
   cassert(0);
@@ -187,6 +190,7 @@ static inline void loc_s_xml_node_to_json_nice(var_s this,json_nice_s *a_json_ni
 {/*{{{*/
   cassert(0);
 }/*}}}*/
+#endif
 
 static inline xml_node_s *loc_s_xml_node_value(var_s this)
 {/*{{{*/

@@ -617,8 +617,13 @@ void libxml_init()
 #else
     NULL,
 #endif
+#if OPTION_TO_JSON == ENABLED
     loc_s_xml_node_to_json,
     loc_s_xml_node_to_json_nice
+#else
+    NULL,
+    NULL
+#endif
     );
 
 }/*}}}*/

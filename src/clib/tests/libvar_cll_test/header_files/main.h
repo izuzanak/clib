@@ -27,8 +27,10 @@ static inline int loc_s_person_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED
 static inline void loc_s_person_to_string(var_s this,bc_array_s *a_trg);
 #endif
+#if OPTION_TO_JSON == ENABLED
 static inline void loc_s_person_to_json(var_s this,bc_array_s *a_trg);
 static inline void loc_s_person_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
+#endif
 
 // === inline methods of generated structures ==================================
 
@@ -88,6 +90,7 @@ static inline void loc_s_person_to_string(var_s this,bc_array_s *a_trg)
 }/*}}}*/
 #endif
 
+#if OPTION_TO_JSON == ENABLED
 static inline void loc_s_person_to_json(var_s this,bc_array_s *a_trg)
 {/*{{{*/
   debug_assert(this->v_type == g_type_person);
@@ -103,6 +106,7 @@ static inline void loc_s_person_to_json_nice(var_s this,json_nice_s *a_json_nice
   person_s *person = (person_s *)this->v_data.ptr;
   person_s_to_json_nice(person,a_json_nice,a_trg);
 }/*}}}*/
+#endif
 
 // === test execution functions ================================================
 
