@@ -581,7 +581,15 @@ int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout)
       if (callback->function != NULL)
       {
         // - call event callback -
-        ((epoll_fd_callback_t)callback->function)(callback->object,callback->index,e_ptr,this);
+        if (((epoll_fd_callback_t)callback->function)(callback->object,callback->index,e_ptr,this))
+        {
+          if (events != stack_events)
+          {
+            cfree(events);
+          }
+
+          throw_error(EPOLL_FD_CALLBACK_ERROR);
+        }
       }
 
     } while(++e_ptr < e_ptr_end);
@@ -618,7 +626,10 @@ int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout)
       if (callback->function != NULL)
       {
         // - call event callback -
-        ((epoll_time_callback_t)callback->function)(callback->object,callback->index,time_idx,this);
+        if (((epoll_time_callback_t)callback->function)(callback->object,callback->index,time_idx,this))
+        {
+          throw_error(EPOLL_TIMER_CALLBACK_ERROR);
+        }
       }
 
       epoll_time_events_s_remove(time_events,time_idx);

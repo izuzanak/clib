@@ -62,6 +62,8 @@ include "cl_time.h"
 #define ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED 5
 #define ERROR_EPOLL_WAIT_ERROR 6
 #define ERROR_EPOLL_GET_TIME_ERROR 7
+#define ERROR_EPOLL_FD_CALLBACK_ERROR 8
+#define ERROR_EPOLL_TIMER_CALLBACK_ERROR 9
 
 // === constants and definitions ===============================================
 
@@ -162,8 +164,8 @@ WUR liblinux_cll_EXPORT int signal_s_simple_handler(signal_callback_t a_handler)
 
 typedef struct epoll_s epoll_s;
 typedef struct epoll_event epoll_event_s;
-typedef void (*epoll_fd_callback_t)(void *a_object,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll);
-typedef void (*epoll_time_callback_t)(void *a_object,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
+typedef int (*epoll_fd_callback_t)(void *a_object,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll);
+typedef int (*epoll_time_callback_t)(void *a_object,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
 
 // -- epoll_callback_s --
 @begin

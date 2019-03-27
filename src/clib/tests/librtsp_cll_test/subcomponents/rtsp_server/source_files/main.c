@@ -72,11 +72,16 @@ int conn_get_packet(void *a_rtsp_server,unsigned a_index,bc_array_s *a_trg)
   return 1;
 }/*}}}*/
 
-void server_fd_event(void *a_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int server_fd_event(void *a_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   rtsp_server_s *server = (rtsp_server_s *)a_server;
 
-  cassert(rtsp_server_s_fd_event(server,a_index,a_epoll_event,a_epoll) == 0);
+  if (rtsp_server_s_fd_event(server,a_index,a_epoll_event,a_epoll))
+  {
+    throw_error(RTSP_TEST_SERVER_FD_EVENT_ERROR);
+  }
+
+  return 0;
 }/*}}}*/
 
 int main(int argc,char **argv)

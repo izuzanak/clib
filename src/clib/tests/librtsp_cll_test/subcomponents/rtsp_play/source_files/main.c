@@ -63,11 +63,16 @@ void rtsp_player_s_run(rtsp_player_s *this)
   } while(g_terminate == 0);
 }/*}}}*/
 
-void rtsp_player_s_server_fd_event(void *a_rtsp_player,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_player_s_server_fd_event(void *a_rtsp_player,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   rtsp_player_s *this = (rtsp_player_s *)a_rtsp_player;
 
-  cassert(rtsp_server_s_fd_event(&this->server,a_index,a_epoll_event,a_epoll) == 0);
+  if (rtsp_server_s_fd_event(&this->server,a_index,a_epoll_event,a_epoll))
+  {
+    throw_error(PLAYER_SERVER_FD_EVENT_ERROR);
+  }
+
+  return 0;
 }/*}}}*/
 
 void rtsp_player_s_conn_new(void *a_rtsp_player,unsigned a_index)

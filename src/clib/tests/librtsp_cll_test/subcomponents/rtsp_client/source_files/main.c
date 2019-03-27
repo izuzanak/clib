@@ -35,7 +35,7 @@ int client_recv_packet(void *a_client_list,unsigned a_index,const bc_array_s *a_
   return 0;
 }/*}}}*/
 
-void client_fd_event(void *a_client_list,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int client_fd_event(void *a_client_list,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   rtsp_client_list_s *client_list = (rtsp_client_list_s *)a_client_list;
   rtsp_client_s *client = &client_list->data[a_index].object;
@@ -45,6 +45,8 @@ void client_fd_event(void *a_client_list,unsigned a_index,epoll_event_s *a_epoll
     rtsp_client_s_clear(client);
     rtsp_client_list_s_remove(client_list,a_index);
   }
+
+  return 0;
 }/*}}}*/
 
 int main(int argc,char **argv)

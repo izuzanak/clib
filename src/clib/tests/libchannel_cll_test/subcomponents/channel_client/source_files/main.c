@@ -92,7 +92,7 @@ int channel_comm_s_run(channel_comm_s *this)
   return 0;
 }/*}}}*/
 
-void channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
+int channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_timer;
   (void)a_epoll;
@@ -108,10 +108,15 @@ void channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,unsi
     client->message.type,client->message.sequence);
 #endif
   ++client->message.sequence;
-  cassert(channel_conn_s_schedule_message(&client->connection,&this->buffer) == 0);
+  if (channel_conn_s_schedule_message(&client->connection,&this->buffer))
+  {
+    throw_error(CHANNEL_COMM_CONN_SCHEDULE_MESSAGE_ERROR);
+  }
+
+  return 0;
 }/*}}}*/
 
-void channel_comm_s_client_fd_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int channel_comm_s_client_fd_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   channel_comm_s *this = (channel_comm_s *)a_channel_comm;
   channel_client_s *client = &this->client_list.data[a_index].object;
@@ -121,6 +126,8 @@ void channel_comm_s_client_fd_event(void *a_channel_comm,unsigned a_index,epoll_
     channel_client_s_clear(client);
     channel_client_list_s_remove(&this->client_list,a_index);
   }
+
+  return 0;
 }/*}}}*/
 
 int channel_comm_s_message(void *a_channel_comm,unsigned a_index,const bc_array_s *a_message)

@@ -93,7 +93,7 @@ int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a
   return 0;
 }/*}}}*/
 
-void rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
+int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
 {/*{{{*/
   rtsp_server_s *this = (rtsp_server_s *)a_rtsp_server;
   rtsp_conn_s *conn = &this->conn_list.data[a_index].object;
@@ -106,9 +106,11 @@ void rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,unsigned
     rtsp_conn_s_clear(conn);
     rtsp_conn_list_s_remove(&this->conn_list,a_index);
   }
+
+  return 0;
 }/*}}}*/
 
-void rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   rtsp_server_s *this = (rtsp_server_s *)a_rtsp_server;
   rtsp_conn_s *conn = &this->conn_list.data[a_index].object;
@@ -121,5 +123,7 @@ void rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_even
     rtsp_conn_s_clear(conn);
     rtsp_conn_list_s_remove(&this->conn_list,a_index);
   }
+
+  return 0;
 }/*}}}*/
 

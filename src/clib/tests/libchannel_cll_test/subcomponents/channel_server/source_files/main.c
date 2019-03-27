@@ -84,11 +84,16 @@ int channel_comm_s_conn_message(void *a_channel_comm,unsigned a_index,const bc_a
   return 0;
 }/*}}}*/
 
-void channel_comm_s_fd_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int channel_comm_s_fd_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   channel_comm_s *this = (channel_comm_s *)a_channel_comm;
 
-  cassert(channel_server_s_fd_event(&this->server,a_index,a_epoll_event,a_epoll) == 0);
+  if (channel_server_s_fd_event(&this->server,a_index,a_epoll_event,a_epoll))
+  {
+    throw_error(CHANNEL_COMM_CONN_SERVER_FD_EVENT_ERROR);
+  }
+
+  return 0;
 }/*}}}*/
 
 // === global functions ========================================================

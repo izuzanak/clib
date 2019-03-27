@@ -106,7 +106,7 @@ WUR libchannel_cll_EXPORT int channel_server_s_create(channel_server_s *this,
     channel_conn_message_callback_t a_conn_message_callback,
     void *a_cb_object);
 WUR libchannel_cll_EXPORT int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-libchannel_cll_EXPORT void channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libchannel_cll_EXPORT int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // === inline methods of generated structures ==================================
 

@@ -56,7 +56,10 @@ int rtsp_recorder_s_create(rtsp_recorder_s *this,const char *a_base_dir,unsigned
       }
 
       // - schedule reconnect timer-
-      cassert(epoll_s_timer_delay(&this->epoll,0,rtsp_recorder_s_record_time_event,this,record_idx,&record->epoll_timer) == 0);
+      if (epoll_s_timer_delay(&this->epoll,0,rtsp_recorder_s_record_time_event,this,record_idx,&record->epoll_timer))
+      {
+        throw_error(RECORDER_EPOLL_ERROR);
+      }
 
     } while(++record_idx < a_count);
   }
@@ -77,7 +80,7 @@ void rtsp_recorder_s_run(rtsp_recorder_s *this)
   } while(g_terminate == 0);
 }/*}}}*/
 
-void rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
+int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_timer;
   (void)a_epoll;
@@ -104,23 +107,34 @@ void rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,un
       rtsp_client_list_s_remove(&this->client_list,client_idx);
 
       // - schedule next reconnect try timer -
-      cassert(epoll_s_timer_delay(&this->epoll,5000000000ULL,rtsp_recorder_s_record_time_event,this,a_index,&record->epoll_timer) == 0);
+      if (epoll_s_timer_delay(&this->epoll,5000000000ULL,rtsp_recorder_s_record_time_event,this,a_index,&record->epoll_timer))
+      {
+        throw_error(RECORDER_EPOLL_ERROR);
+      }
 
-      return;
+      return 0;
     }
 
     // - register client fd -
-    cassert(epoll_s_fd_callback(&this->epoll,&client->epoll_fd,EPOLLIN | EPOLLPRI,rtsp_recorder_s_client_fd_event,this,a_index) == 0);
+    if (epoll_s_fd_callback(&this->epoll,&client->epoll_fd,EPOLLIN | EPOLLPRI,rtsp_recorder_s_client_fd_event,this,a_index))
+    {
+      throw_error(RECORDER_EPOLL_ERROR);
+    }
 
     // - set record client index -
     record->client_idx = client_idx;
 
     // - update last packet time -
-    cassert(clock_s_gettime(CLOCK_MONOTONIC,&record->last_pkt_time) == 0);
+    if (clock_s_gettime(CLOCK_MONOTONIC,&record->last_pkt_time))
+    {
+      throw_error(RECORDER_GET_TIME_ERROR);
+    }
   }
+
+  return 0;
 }/*}}}*/
 
-void rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"rtsp_recorder_s_client_fd_event: %u\n",a_index));
 
@@ -136,8 +150,13 @@ void rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epol
     record->client_idx = c_idx_not_exist;
 
     // - schedule reconnect timer-
-    cassert(epoll_s_timer_delay(&this->epoll,0,rtsp_recorder_s_record_time_event,this,a_index,&record->epoll_timer) == 0);
+    if (epoll_s_timer_delay(&this->epoll,0,rtsp_recorder_s_record_time_event,this,a_index,&record->epoll_timer))
+    {
+      throw_error(RECORDER_EPOLL_ERROR);
+    }
   }
+
+  return 0;
 }/*}}}*/
 
 int rtsp_recorder_s_recv_sdp(void *a_rtsp_recorder,unsigned a_index,const bc_array_s *a_src)

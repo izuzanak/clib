@@ -229,8 +229,8 @@ WUR librtsp_cll_EXPORT int rtsp_server_s_create(rtsp_server_s *this,
   rtsp_conn_get_packet_callback_t a_conn_get_packet_callback,
   void *a_cb_object);
 WUR librtsp_cll_EXPORT int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-librtsp_cll_EXPORT void rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
-librtsp_cll_EXPORT void rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR librtsp_cll_EXPORT int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
+WUR librtsp_cll_EXPORT int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // === inline methods of generated structures ==================================
 

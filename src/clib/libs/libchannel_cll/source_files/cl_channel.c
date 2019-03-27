@@ -299,7 +299,7 @@ int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_even
   return 0;
 }/*}}}*/
 
-void channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   channel_server_s *this = (channel_server_s *)a_channel_server;
   channel_conn_s *conn = &this->conn_list.data[a_index].object;
@@ -312,5 +312,7 @@ void channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epol
     channel_conn_s_clear(conn);
     channel_conn_list_s_remove(&this->conn_list,a_index);
   }
+
+  return 0;
 }/*}}}*/
 
