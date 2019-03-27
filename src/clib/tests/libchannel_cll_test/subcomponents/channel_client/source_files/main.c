@@ -61,7 +61,7 @@ int channel_comm_s_create(channel_comm_s *this,
       }
 
       // - register epoll timer -
-      if (epoll_s_timer_period_now(&this->epoll,500000000ULL,channel_comm_s_client_time_event,this,client_idx,&client->epoll_timer))
+      if (epoll_s_timer_period_now(&this->epoll,100000000ULL,channel_comm_s_client_time_event,this,client_idx,&client->epoll_timer))
       {
         channel_client_list_s_remove(&this->client_list,client_idx);
 
@@ -94,6 +94,9 @@ int channel_comm_s_run(channel_comm_s *this)
 
 void channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
 {/*{{{*/
+  (void)a_timer;
+  (void)a_epoll;
+
   channel_comm_s *this = (channel_comm_s *)a_channel_comm;
   channel_client_s *client = &this->client_list.data[a_index].object;
 

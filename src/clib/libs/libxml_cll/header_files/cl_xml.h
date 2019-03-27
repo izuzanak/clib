@@ -183,11 +183,18 @@ static inline void loc_s_xml_node_to_string(var_s this,bc_array_s *a_trg)
 #if OPTION_TO_JSON == ENABLED
 static inline void loc_s_xml_node_to_json(var_s this,bc_array_s *a_trg)
 {/*{{{*/
+  (void)this;
+  (void)a_trg;
+
   cassert(0);
 }/*}}}*/
 
 static inline void loc_s_xml_node_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg)
 {/*{{{*/
+  (void)this;
+  (void)a_json_nice;
+  (void)a_trg;
+
   cassert(0);
 }/*}}}*/
 #endif

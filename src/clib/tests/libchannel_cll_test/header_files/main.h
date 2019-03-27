@@ -13,7 +13,7 @@ include "cl_channel.h"
 
 // === test execution functions ================================================
 
-void test_dummy();
+void test_channel();
 
 // === program entry function ==================================================
 
