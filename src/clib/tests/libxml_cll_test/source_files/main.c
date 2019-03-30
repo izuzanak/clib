@@ -138,7 +138,7 @@ int main(int argc,char **argv)
   (void)argc;
   (void)argv;
 
-  EXECUTE_TESTS(libxml_init(),libxml_clear());
+  EXECUTE_TESTS(libxml_cll_init(),libxml_cll_clear());
 
   return 0;
 }/*}}}*/

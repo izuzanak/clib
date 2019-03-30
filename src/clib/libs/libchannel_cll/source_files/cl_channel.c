@@ -5,15 +5,17 @@ include "cl_channel.h"
 
 // === methods of generated structures =========================================
 
-// -- bc_array_queue_s --
+// -- var_queue_s --
 @begin
-methods bc_array_queue_s
+methods var_queue_s
 @end
 
 // -- channel_conn_s --
 @begin
 methods channel_conn_s
 @end
+
+unsigned g_type_channel_message = c_idx_not_exist;
 
 void channel_conn_s_create(channel_conn_s *this,unsigned a_index,epoll_fd_s *a_epoll_fd,
     channel_conn_message_callback_t a_conn_message_callback,
@@ -126,7 +128,7 @@ int channel_conn_s_send_msg(channel_conn_s *this)
 {/*{{{*/
   if (this->out_msg_queue.used != 0)
   {
-    bc_array_s *message = bc_array_queue_s_first(&this->out_msg_queue);
+    bc_array_s *message = loc_s_channel_message_value(*var_queue_s_first(&this->out_msg_queue));
     size_t write_cnt = message->used - this->out_msg_offset;
 
     // - limit maximal write size -
@@ -146,13 +148,14 @@ int channel_conn_s_send_msg(channel_conn_s *this)
     // - whole message was send -
     if ((this->out_msg_offset += cnt) >= message->used)
     {
-      message = bc_array_queue_s_next(&this->out_msg_queue);
-
       // - release too big buffers -
       if (message->size > 65536)
       {
         bc_array_s_clear(message);
       }
+
+      // - remove message from queue -
+      var_queue_s_next(&this->out_msg_queue);
 
       // - reset out message offset -
       this->out_msg_offset = 0;
@@ -201,17 +204,11 @@ int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s 
 
 int channel_conn_s_schedule_message(channel_conn_s *this,bc_array_s *a_message)
 {/*{{{*/
+  var_s message_length = loc_s_channel_message_buffer_length(a_message);
+  var_s message_data = loc_s_channel_message_buffer_swap(a_message);
 
-  // - format message length and insert it to output queue -
-  this->buffer.used = 0;
-  bc_array_s_append_format(&this->buffer,"0x%8.8x;",a_message->used);
-
-  bc_array_queue_s_insert_blank(&this->out_msg_queue);
-  bc_array_s_swap(bc_array_queue_s_last(&this->out_msg_queue),&this->buffer);
-
-  // - insert message to output queue -
-  bc_array_queue_s_insert_blank(&this->out_msg_queue);
-  bc_array_s_swap(bc_array_queue_s_last(&this->out_msg_queue),a_message);
+  var_queue_s_insert(&this->out_msg_queue,&message_length);
+  var_queue_s_insert(&this->out_msg_queue,&message_data);
 
   // - modify fd epoll events: input and output -
   if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI))
@@ -294,7 +291,10 @@ int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_even
       conn_idx,&epoll_fd,this->conn_message_callback,this->cb_object);
 
   // - call conn_new_callback -
-  ((channel_conn_new_callback_t)this->conn_new_callback)(this->cb_object,conn_idx);
+  if (((channel_conn_new_callback_t)this->conn_new_callback)(this->cb_object,conn_idx))
+  {
+    throw_error(CHANNEL_CONN_CALLBACK_ERROR);
+  }
 
   return 0;
 }/*}}}*/
@@ -307,12 +307,45 @@ int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll
   if (channel_conn_s_fd_event(conn,0,a_epoll_event,a_epoll))
   {
     // - call conn_drop_callback -
-    ((channel_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);
+    if (((channel_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index))
+    {
+      channel_conn_s_clear(conn);
+      channel_conn_list_s_remove(&this->conn_list,a_index);
+
+      throw_error(CHANNEL_CONN_CALLBACK_ERROR);
+    }
 
     channel_conn_s_clear(conn);
     channel_conn_list_s_remove(&this->conn_list,a_index);
   }
 
   return 0;
+}/*}}}*/
+
+void libchannel_cll_init()
+{/*{{{*/
+
+  // - loc_s_register_type -
+  g_type_channel_message = loc_s_register_type(
+    loc_s_channel_message_clear,
+    loc_s_channel_message_order,
+#if OPTION_TO_STRING == ENABLED
+    loc_s_channel_message_to_string,
+#else
+    NULL,
+#endif
+#if OPTION_TO_JSON == ENABLED
+    loc_s_channel_message_to_json,
+    loc_s_channel_message_to_json_nice
+#else
+    NULL,
+    NULL
+#endif
+    );
+
+}/*}}}*/
+
+void libchannel_cll_clear()
+{/*{{{*/
 }/*}}}*/
 

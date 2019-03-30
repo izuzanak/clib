@@ -28,8 +28,8 @@ channel_comm_s;
 
 WUR int channel_comm_s_create(channel_comm_s *this,const char *a_ip,unsigned short a_port);
 WUR int channel_comm_s_run(channel_comm_s *this);
-void channel_comm_s_conn_new(void *a_channel_comm,unsigned a_index);
-void channel_comm_s_conn_drop(void *a_channel_comm,unsigned a_index);
+WUR int channel_comm_s_conn_new(void *a_channel_comm,unsigned a_index);
+WUR int channel_comm_s_conn_drop(void *a_channel_comm,unsigned a_index);
 WUR int channel_comm_s_conn_message(void *a_channel_comm,unsigned a_index,const bc_array_s *a_message);
 WUR int channel_comm_s_fd_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 

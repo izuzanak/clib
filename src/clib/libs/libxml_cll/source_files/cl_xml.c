@@ -604,7 +604,7 @@ void xml_create_nice(var_s a_node,const string_s *a_tabulator,
   bc_array_s_clear(&indent_buffer);
 }/*}}}*/
 
-void libxml_init()
+void libxml_cll_init()
 {/*{{{*/
   xmlInitParser();
 
@@ -628,7 +628,7 @@ void libxml_init()
 
 }/*}}}*/
 
-void libxml_clear()
+void libxml_cll_clear()
 {/*{{{*/
   xmlCleanupParser();
 }/*}}}*/

@@ -4,6 +4,7 @@
 
 @begin
 include "cl_linux.h"
+include "cl_var.h"
 @end
 
 // - function export definitions -
@@ -32,15 +33,32 @@ include "cl_linux.h"
 #define ERROR_CHANNEL_CONN_EPOLL_ERROR 8
 
 typedef struct channel_server_s channel_server_s;
-typedef void (*channel_conn_new_callback_t)(void *a_object,unsigned a_index);
-typedef void (*channel_conn_drop_callback_t)(void *a_object,unsigned a_index);
+typedef int (*channel_conn_new_callback_t)(void *a_object,unsigned a_index);
+typedef int (*channel_conn_drop_callback_t)(void *a_object,unsigned a_index);
 typedef int (*channel_conn_message_callback_t)(void *a_object,unsigned a_index,const bc_array_s *a_message);
+
+// === definition of var type channel_message  =================================
+
+extern unsigned g_type_channel_message;
+
+static inline var_s loc_s_channel_message_buffer_length(bc_array_s *a_src);
+static inline var_s loc_s_channel_message_buffer_swap(bc_array_s *a_src);
+static inline void loc_s_channel_message_clear(var_s this);
+static inline int loc_s_channel_message_order(var_s a_first,var_s a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void loc_s_channel_message_to_string(var_s this,bc_array_s *a_trg);
+#endif
+#if OPTION_TO_JSON == ENABLED
+static inline void loc_s_channel_message_to_json(var_s this,bc_array_s *a_trg);
+static inline void loc_s_channel_message_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
+#endif
+static inline bc_array_s *loc_s_channel_message_value(var_s this);
 
 // === definition of generated structures ======================================
 
-// -- bc_array_queue_s --
+// -- var_queue_s --
 @begin
-queue<bc_array_s> bc_array_queue_s;
+queue<var_s> var_queue_s;
 @end
 
 // -- channel_conn_s --
@@ -56,7 +74,7 @@ pointer:cb_object
 bc_array_s:in_msg
 ui:in_msg_length
 
-bc_array_queue_s:out_msg_queue
+var_queue_s:out_msg_queue
 ui:out_msg_offset
 
 bc_array_s:buffer
@@ -108,11 +126,102 @@ WUR libchannel_cll_EXPORT int channel_server_s_create(channel_server_s *this,
 WUR libchannel_cll_EXPORT int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR libchannel_cll_EXPORT int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
+// === definition of global functions ==========================================
+
+void libchannel_cll_init();
+void libchannel_cll_clear();
+
+// === inline methods of var type channel_message  =============================
+
+static inline var_s loc_s_channel_message_buffer_length(bc_array_s *a_src)
+{/*{{{*/
+  bc_array_s *buffer = (bc_array_s *)cmalloc(sizeof(bc_array_s));
+  bc_array_s_init(buffer);
+  bc_array_s_append_format(buffer,"0x%8.8x;",a_src->used);
+
+  var_s var = loc_s___new();
+  var->v_type = g_type_channel_message;
+  atomic_s_set(&var->v_ref_cnt,0);
+  var->v_data.ptr = buffer;
+
+  return var;
+}/*}}}*/
+
+static inline var_s loc_s_channel_message_buffer_swap(bc_array_s *a_src)
+{/*{{{*/
+  bc_array_s *buffer = (bc_array_s *)cmalloc(sizeof(bc_array_s));
+  bc_array_s_init(buffer);
+  bc_array_s_swap(buffer,a_src);
+
+  var_s var = loc_s___new();
+  var->v_type = g_type_channel_message;
+  atomic_s_set(&var->v_ref_cnt,0);
+  var->v_data.ptr = buffer;
+
+  return var;
+}/*}}}*/
+
+static inline void loc_s_channel_message_clear(var_s this)
+{/*{{{*/
+  debug_assert(this->v_type == g_type_channel_message);
+
+  bc_array_s *buffer = (bc_array_s *)this->v_data.ptr;
+  bc_array_s_clear(buffer);
+  cfree(buffer);
+}/*}}}*/
+
+static inline int loc_s_channel_message_order(var_s a_first,var_s a_second)
+{/*{{{*/
+  debug_assert(a_first->v_type == g_type_channel_message &&
+               a_second->v_type == g_type_channel_message);
+
+  bc_array_s *first = (bc_array_s *)a_first->v_data.ptr;
+  bc_array_s *second = (bc_array_s *)a_second->v_data.ptr;
+
+  if (first->used < second->used) { return -1; }
+  if (first->used > second->used) { return 1; }
+
+  return memcmp(first->data,second->data,first->used - 1);
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void loc_s_channel_message_to_string(var_s this,bc_array_s *a_trg)
+{/*{{{*/
+  (void)this;
+
+  bc_array_s_append_ptr(a_trg,"{}");
+}/*}}}*/
+#endif
+
+#if OPTION_TO_JSON == ENABLED
+static inline void loc_s_channel_message_to_json(var_s this,bc_array_s *a_trg)
+{/*{{{*/
+  (void)this;
+
+  bc_array_s_append_ptr(a_trg,"{}");
+}/*}}}*/
+
+static inline void loc_s_channel_message_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg)
+{/*{{{*/
+  (void)this;
+  (void)a_json_nice;
+
+  bc_array_s_append_ptr(a_trg,"{}");
+}/*}}}*/
+#endif
+
+static inline bc_array_s *loc_s_channel_message_value(var_s this)
+{/*{{{*/
+  debug_assert(this->v_type == g_type_channel_message);
+
+  return (bc_array_s *)this->v_data.ptr;
+}/*}}}*/
+
 // === inline methods of generated structures ==================================
 
-// -- bc_array_queue_s --
+// -- var_queue_s --
 @begin
-inlines bc_array_queue_s
+inlines var_queue_s
 @end
 
 // -- channel_conn_s --

@@ -51,18 +51,22 @@ int channel_comm_s_run(channel_comm_s *this)
   return 0;
 }/*}}}*/
 
-void channel_comm_s_conn_new(void *a_channel_comm,unsigned a_index)
+int channel_comm_s_conn_new(void *a_channel_comm,unsigned a_index)
 {/*{{{*/
   (void)a_channel_comm;
 
   debug_message_5(fprintf(stderr,"channel_comm_s_conn_new: %u\n",a_index));
+
+  return 0;
 }/*}}}*/
 
-void channel_comm_s_conn_drop(void *a_channel_comm,unsigned a_index)
+int channel_comm_s_conn_drop(void *a_channel_comm,unsigned a_index)
 {/*{{{*/
   (void)a_channel_comm;
 
   debug_message_5(fprintf(stderr,"channel_comm_s_conn_drop: %u\n",a_index));
+
+  return 0;
 }/*}}}*/
 
 int channel_comm_s_conn_message(void *a_channel_comm,unsigned a_index,const bc_array_s *a_message)
@@ -114,6 +118,7 @@ int main(int argc,char **argv)
   (void)argv;
 
   memcheck_init();
+  libchannel_cll_init();
 
   cassert(signal_s_simple_handler(signal_handler) == 0);
 
@@ -125,6 +130,7 @@ int main(int argc,char **argv)
   cassert(channel_comm_s_run(&comm) == 0);
   channel_comm_s_clear(&comm);
 
+  libchannel_cll_clear();
   memcheck_release_assert();
 
   return 0;

@@ -4,7 +4,7 @@
 
 @begin
 include "cl_test.h"
-include "cl_channel.h"
+include "cl_linux.h"
 @end
 
 // === definition of generated structures ======================================

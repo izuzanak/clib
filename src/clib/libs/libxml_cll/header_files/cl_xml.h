@@ -114,8 +114,8 @@ libxml_cll_EXPORT void xml_create(var_s a_node,bc_array_s *a_trg);
 libxml_cll_EXPORT void xml_create_nice(var_s a_node,
     const string_s *a_tabulator,const string_s *a_indent,bc_array_s *a_trg);
 
-void libxml_init();
-void libxml_clear();
+void libxml_cll_init();
+void libxml_cll_clear();
 
 // === inline methods of generated structures ==================================
 

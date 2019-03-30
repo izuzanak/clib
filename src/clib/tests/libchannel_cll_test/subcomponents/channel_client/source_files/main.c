@@ -157,6 +157,7 @@ int main(int argc,char **argv)
   (void)argv;
 
   memcheck_init();
+  libchannel_cll_init();
 
   cassert(signal_s_simple_handler(signal_handler) == 0);
 
@@ -238,6 +239,7 @@ int main(int argc,char **argv)
   cassert(channel_comm_s_run(&comm) == 0);
   channel_comm_s_clear(&comm);
 
+  libchannel_cll_clear();
   memcheck_release_assert();
 
   return 0;
