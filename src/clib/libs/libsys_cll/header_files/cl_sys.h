@@ -241,10 +241,10 @@ static inline int file_s_open(file_s *this,const char *a_pathname,const char *a_
 
 static inline int file_s_write_close(file_s *this,const void *a_src,size_t a_size)
 {/*{{{*/
-  int ret = stream_s_write(this,a_src,a_size);
-  if (ret != 0)
+  int res = stream_s_write(this,a_src,a_size);
+  if (res != 0)
   {
-    return ret;
+    return res;
   }
 
   file_s_clear(this);
@@ -254,10 +254,10 @@ static inline int file_s_write_close(file_s *this,const void *a_src,size_t a_siz
 
 static inline int file_s_read_close(file_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  int ret = stream_s_read(this,a_trg);
-  if (ret != 0)
+  int res = stream_s_read(this,a_trg);
+  if (res != 0)
   {
-    return ret;
+    return res;
   }
 
   file_s_clear(this);
@@ -355,10 +355,10 @@ static inline int pipe_s_popen(pipe_s *this,const char *a_command,const char *a_
 
 static inline int pipe_s_write_close(pipe_s *this,const void *a_src,size_t a_size)
 {/*{{{*/
-  int ret = stream_s_write(this,a_src,a_size);
-  if (ret != 0)
+  int res = stream_s_write(this,a_src,a_size);
+  if (res != 0)
   {
-    return ret;
+    return res;
   }
 
   pipe_s_clear(this);
@@ -368,10 +368,10 @@ static inline int pipe_s_write_close(pipe_s *this,const void *a_src,size_t a_siz
 
 static inline int pipe_s_read_close(pipe_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  int ret = stream_s_read(this,a_trg);
-  if (ret != 0)
+  int res = stream_s_read(this,a_trg);
+  if (res != 0)
   {
-    return ret;
+    return res;
   }
 
   pipe_s_clear(this);
