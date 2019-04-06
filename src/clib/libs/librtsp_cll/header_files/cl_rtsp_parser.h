@@ -28,9 +28,10 @@ ui:session_length
 ui:timeout
 bi:ping
 bi:unicast
+bi:tcp
 pointer:url_rtsp
-ui:interleaved_begin
-ui:interleaved_end
+ui:inter_port_begin
+ui:inter_port_end
 
 lalr_stack_s:lalr_stack
 >
@@ -53,7 +54,8 @@ void pa_rtsp_header_cseq(rtsp_parser_s *this);
 void pa_rtsp_header_ct_base(rtsp_parser_s *this);
 void pa_rtsp_header_ct_type(rtsp_parser_s *this);
 void pa_rtsp_header_ct_length(rtsp_parser_s *this);
-void pa_rtsp_header_transport(rtsp_parser_s *this);
+void pa_rtsp_header_transport_tcp(rtsp_parser_s *this);
+void pa_rtsp_header_transport_udp(rtsp_parser_s *this);
 void pa_rtsp_header_range(rtsp_parser_s *this);
 void pa_rtsp_header_ping(rtsp_parser_s *this);
 void pa_rtsp_header_ignore(rtsp_parser_s *this);
@@ -70,7 +72,7 @@ void pa_rtsp_header_session(rtsp_parser_s *this);
 void pa_rtsp_key_timeout(rtsp_parser_s *this);
 void pa_rtsp_key_npt(rtsp_parser_s *this);
 void pa_rtsp_key_unicast(rtsp_parser_s *this);
-void pa_rtsp_key_interleaved(rtsp_parser_s *this);
+void pa_rtsp_key_inter_port(rtsp_parser_s *this);
 
 // === inline methods of generated structures ==================================
 

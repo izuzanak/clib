@@ -78,7 +78,7 @@ int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a
         }
 
         if (rtsp_conn_s_create(&this->conn_list.data[conn_idx].object,
-            this,conn_idx,&epoll_fd))
+            this,conn_idx,&epoll_fd,&address))
         {
           rtsp_conn_list_s_remove(&this->conn_list,conn_idx);
 

@@ -27,13 +27,14 @@ methods rtsp_conn_s
 @end
 
 int rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
-    unsigned a_index,epoll_fd_s *a_epoll_fd)
+    unsigned a_index,epoll_fd_s *a_epoll_fd,socket_address_s *a_client_addr)
 {/*{{{*/
   debug_message_3(fprintf(stderr,"rtsp_conn_s_create\n"));
 
   rtsp_conn_s_clear(this);
 
   this->server = a_server;
+  this->client_addr = *a_client_addr;
   this->index = a_index;
   epoll_fd_s_swap(&this->epoll_fd,a_epoll_fd);
 
@@ -192,8 +193,9 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
         rtsp_setups_s_push_blank(&this->rtsp_setups);
         rtsp_setup_s *setup = rtsp_setups_s_last(&this->rtsp_setups);
         string_s_set_ptr(&setup->media_url,this->parser.url_rtsp);
-        setup->interleaved_begin = this->parser.interleaved_begin;
-        setup->interleaved_end = this->parser.interleaved_end;
+        setup->tcp = this->parser.tcp;
+        setup->inter_port_begin = this->parser.inter_port_begin;
+        setup->inter_port_end = this->parser.inter_port_end;
 
         // - generate session number if needed -
         if (this->session == 0)
@@ -209,14 +211,58 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
 "CSeq: %u\r\n"
 "Date: ",this->parser.cseq);
         rtsp_conn_s_append_time(&this->out_msg);
-        bc_array_s_append_format(&this->out_msg,
+
+        if (this->parser.tcp)
+        {
+          bc_array_s_append_format(&this->out_msg,
 "\r\n"
 "Transport: RTP/AVP/TCP;unicast;interleaved=%u-%u\r\n"
 "Session: %" HOST_LL_FORMAT "u;timeout=60\r\n"
 "\r\n",
-this->parser.interleaved_begin,
-this->parser.interleaved_end,
+this->parser.inter_port_begin,
+this->parser.inter_port_end,
 this->session);
+        }
+        else
+        {
+          string_s *ip = &((rtsp_server_s *)this->server)->ip;
+
+          socket_address_s data_in_addr;
+          socket_address_s ctrl_in_addr;
+
+          if (socket_address_s_create(&data_in_addr,ip->data,0) ||
+              socket_s_create(&setup->udp_data,AF_INET,SOCK_DGRAM) ||
+              socket_s_create(&setup->udp_ctrl,AF_INET,SOCK_DGRAM) ||
+              socket_s_bind(&setup->udp_data,&data_in_addr) ||
+              socket_s_bind(&setup->udp_ctrl,&data_in_addr) ||
+              socket_s_address(&setup->udp_data,&data_in_addr) ||
+              socket_s_address(&setup->udp_ctrl,&ctrl_in_addr))
+          {
+            throw_error(RTSP_CONN_UDP_SETUP_ERROR);
+          }
+
+          usi udp_data_in_port = socket_address_s_port(&data_in_addr);
+          usi udp_ctrl_in_port = socket_address_s_port(&ctrl_in_addr);
+
+          // - setup udp data address -
+          setup->udp_data_addr = this->client_addr;
+          setup->udp_data_addr.sin_port = htons(this->parser.inter_port_begin);
+
+          // - setup udp control address -
+          setup->udp_ctrl_addr = this->client_addr;
+          setup->udp_ctrl_addr.sin_port = htons(this->parser.inter_port_end);
+
+          bc_array_s_append_format(&this->out_msg,
+"\r\n"
+"Transport: RTP/AVP;unicast;client_port=%u-%u;server_port=%hu-%hu\r\n"
+"Session: %" HOST_LL_FORMAT "u;timeout=60\r\n"
+"\r\n",
+this->parser.inter_port_begin,
+this->parser.inter_port_end,
+udp_data_in_port,
+udp_ctrl_in_port,
+this->session);
+        }
 
         if (rtsp_conn_s_send_resp(this,&this->out_msg))
         {
@@ -305,10 +351,10 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
       throw_error(RTSP_CONN_CALLBACK_ERROR);
     }
 
-    uc pkt_channel = RTP_PKT_GET_CHANNEL(this->packet.data);
+    this->pkt_channel = RTP_PKT_GET_CHANNEL(this->packet.data);
 
     // - adjust packet sequence -
-    switch (pkt_channel)
+    switch (this->pkt_channel)
     {
     case 0:
       RTP_PKT_SET_SEQUENCE(this->packet.data,this->packet_seq_0++);
@@ -339,9 +385,32 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
 
 int rtsp_conn_s_send_packet(rtsp_conn_s *this)
 {/*{{{*/
-  debug_message_6(fprintf(stderr,"rtsp_conn_s_send_packet\n"););
+  debug_message_7(fprintf(stderr,"rtsp_conn_s_send_packet\n"););
 
-  return fd_s_write(&this->epoll_fd.fd,this->packet.data + sizeof(rtsp_pkt_delay_t),this->packet.used - sizeof(rtsp_pkt_delay_t));
+  rtsp_setup_s *setup;
+
+  switch (this->pkt_channel)
+  {
+  case 0:
+    setup = this->rtsp_setups.data + 0;
+    break;
+  case 2:
+    setup = this->rtsp_setups.data + 1;
+    break;
+  default:
+    return 0;
+  }
+
+  if (setup->tcp)
+  {
+    return fd_s_write(&this->epoll_fd.fd,
+        this->packet.data + sizeof(rtsp_pkt_delay_t),this->packet.used - sizeof(rtsp_pkt_delay_t));
+  }
+  else
+  {
+    return socket_s_sendto(&setup->udp_data,&setup->udp_data_addr,
+        this->packet.data + sizeof(rtsp_pkt_delay_t) + 4,this->packet.used - (sizeof(rtsp_pkt_delay_t) + 4));
+  }
 }/*}}}*/
 
 int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)

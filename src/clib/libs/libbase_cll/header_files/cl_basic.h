@@ -87,7 +87,7 @@
 #define OPTION_DEBUG_ASSERT ENABLED
 #define OPTION_BRUTAL_ASSERT ENABLED
 #define OPTION_MEMCHECK ENABLED
-#define OPTION_DEBUG_LEVEL 5
+#define OPTION_DEBUG_LEVEL 6
 #define OPTION_TO_STRING ENABLED
 #define OPTION_TO_JSON ENABLED
 
@@ -218,6 +218,12 @@
 #define debug_message_6(MSG) DEBUG_MESSAGE(6,MSG)
 #else
 #define debug_message_6(MSG)
+#endif
+
+#if OPTION_DEBUG_LEVEL >= 7
+#define debug_message_7(MSG) DEBUG_MESSAGE(7,MSG)
+#else
+#define debug_message_7(MSG)
 #endif
 /*}}}*/
 

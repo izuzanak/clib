@@ -46,6 +46,7 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CONN_SEND_PACKET_ERROR 11
 #define ERROR_RTSP_CONN_INVALID_PACKET_CHANNEL 12
 #define ERROR_RTSP_CONN_SETSOCKOPT_ERROR 13
+#define ERROR_RTSP_CONN_UDP_SETUP_ERROR 14
 
 #define ERROR_RTSP_SERVER_INVALID_STATE 1
 #define ERROR_RTSP_SERVER_INVALID_FD 2
@@ -143,8 +144,13 @@ WUR librtsp_cll_EXPORT int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a
 struct
 <
 string_s:media_url
-ui:interleaved_begin
-ui:interleaved_end
+bi:tcp
+ui:inter_port_begin
+ui:inter_port_end
+socket_address_s:udp_data_addr
+socket_address_s:udp_ctrl_addr
+socket_s:udp_data
+socket_s:udp_ctrl
 >
 rtsp_setup_s;
 @end
@@ -167,6 +173,7 @@ enum
 struct
 <
 pointer:server
+socket_address_s:client_addr
 ui:index
 epoll_fd_s:epoll_fd
 epoll_timer_s:epoll_timer
@@ -178,6 +185,7 @@ rtsp_parser_s:parser
 
 usi:packet_seq_0
 usi:packet_seq_2
+uc:pkt_channel
 bc_array_s:packet
 ulli:packet_time
 
@@ -190,7 +198,7 @@ rtsp_conn_s;
 @end
 
 librtsp_cll_EXPORT WUR int rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
-    unsigned a_index,epoll_fd_s *a_epoll_fd);
+    unsigned a_index,epoll_fd_s *a_epoll_fd,socket_address_s *a_client_addr);
 void rtsp_conn_s_append_time(bc_array_s *a_trg);
 WUR int rtsp_conn_s_send_resp(rtsp_conn_s *this,bc_array_s *a_msg);
 WUR int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll);

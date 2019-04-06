@@ -43,8 +43,9 @@ include "cl_time.h"
 #define ERROR_SOCKET_CONNECT_ERROR 6
 #define ERROR_SOCKET_SENDTO_ERROR 7
 #define ERROR_SOCKET_RECVFROM_ERROR 8
-#define ERROR_SOCKET_UDP_MAX_MSG_SIZE_EXCEEDED 9
-#define ERROR_SOCKET_ADDRESS_UNKNOWN_FORMAT 10
+#define ERROR_SOCKET_GETSOCKNAME_ERROR 9
+#define ERROR_SOCKET_UDP_MAX_MSG_SIZE_EXCEEDED 10
+#define ERROR_SOCKET_ADDRESS_UNKNOWN_FORMAT 11
 
 #define ERROR_FD_WRITE_ERROR 1
 #define ERROR_FD_READ_ERROR 2
@@ -134,6 +135,7 @@ WUR liblinux_cll_EXPORT int socket_s_accept(const socket_s *this,socket_s *a_soc
 WUR liblinux_cll_EXPORT int socket_s_connect(const socket_s *this,const socket_address_s *a_addr);
 WUR liblinux_cll_EXPORT int socket_s_sendto(const socket_s *this,const socket_address_s *a_addr,const void *a_src,size_t a_size);
 WUR liblinux_cll_EXPORT int socket_s_recvfrom(const socket_s *this,bc_array_s *a_trg,socket_address_s *a_addr);
+WUR static inline int socket_s_address(const socket_s *this,socket_address_s *a_addr);
 
 // === definition of structure pid_s ===========================================
 
@@ -443,7 +445,7 @@ static inline void socket_s_to_string(const socket_s *this,bc_array_s *a_trg)
 }/*}}}*/
 #endif
 
-WUR static inline int socket_s_create(socket_s *this,int a_domain,int a_type)
+static inline int socket_s_create(socket_s *this,int a_domain,int a_type)
 {/*{{{*/
   socket_s_clear(this);
 
@@ -454,6 +456,27 @@ WUR static inline int socket_s_create(socket_s *this,int a_domain,int a_type)
   if (*this == -1)
   {
     throw_error(SOCKET_CREATE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int socket_s_address(const socket_s *this,socket_address_s *a_addr)
+{/*{{{*/
+  debug_assert(*this != -1);
+
+  socklen_t addr_len = sizeof(struct sockaddr_in);
+
+  // - ERROR -
+  if (getsockname(*this,(struct sockaddr *)a_addr,&addr_len))
+  {
+    throw_error(SOCKET_GETSOCKNAME_ERROR);
+  }
+
+  // - ERROR -
+  if (addr_len != sizeof(struct sockaddr_in))
+  {
+    throw_error(SOCKET_ADDRESS_UNKNOWN_FORMAT);
   }
 
   return 0;
