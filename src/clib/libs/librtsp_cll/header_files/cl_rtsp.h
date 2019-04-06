@@ -8,6 +8,8 @@ include "cl_rtsp_parser.h"
 include "cl_rtsp_sdp_parser.h"
 @end
 
+#include <netinet/tcp.h>
+
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
 #define librtsp_cll_EXPORT
@@ -42,11 +44,20 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CONN_GET_TIME_ERROR 9
 #define ERROR_RTSP_CONN_NEXT_PACKET_ERROR 10
 #define ERROR_RTSP_CONN_SEND_PACKET_ERROR 11
+#define ERROR_RTSP_CONN_INVALID_PACKET_CHANNEL 12
+#define ERROR_RTSP_CONN_SETSOCKOPT_ERROR 13
 
 #define ERROR_RTSP_SERVER_INVALID_STATE 1
 #define ERROR_RTSP_SERVER_INVALID_FD 2
 #define ERROR_RTSP_SERVER_LISTEN_ERROR 3
 #define ERROR_RTSP_SERVER_ACCEPT_ERROR 4
+#define ERROR_RTSP_SERVER_CONN_CREATE_ERROR 5
+
+// === constants and definitions ===============================================
+
+#define RTP_PKT_GET_CHANNEL(PACKET) ((PACKET)[sizeof(rtsp_pkt_delay_t) + 1])
+#define RTP_PKT_GET_SEQUENCE(PACKET) ntohs(*((usi *)(this->packet.data + sizeof(rtsp_pkt_delay_t) + 6)))
+#define RTP_PKT_SET_SEQUENCE(PACKET,VALUE) *((usi *)((PACKET) + sizeof(rtsp_pkt_delay_t) + 6)) = htons(VALUE)
 
 enum
 {/*{{{*/
@@ -165,6 +176,8 @@ bc_array_s:in_msg
 bc_array_s:out_msg
 rtsp_parser_s:parser
 
+usi:packet_seq_0
+usi:packet_seq_2
 bc_array_s:packet
 ulli:packet_time
 
@@ -176,7 +189,7 @@ rtsp_setups_s:rtsp_setups
 rtsp_conn_s;
 @end
 
-librtsp_cll_EXPORT void rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
+librtsp_cll_EXPORT WUR int rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
     unsigned a_index,epoll_fd_s *a_epoll_fd);
 void rtsp_conn_s_append_time(bc_array_s *a_trg);
 WUR int rtsp_conn_s_send_resp(rtsp_conn_s *this,bc_array_s *a_msg);

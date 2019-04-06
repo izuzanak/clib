@@ -26,7 +26,7 @@ methods rtsp_setups_s
 methods rtsp_conn_s
 @end
 
-void rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
+int rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
     unsigned a_index,epoll_fd_s *a_epoll_fd)
 {/*{{{*/
   debug_message_3(fprintf(stderr,"rtsp_conn_s_create\n"));
@@ -37,9 +37,20 @@ void rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
   this->index = a_index;
   epoll_fd_s_swap(&this->epoll_fd,a_epoll_fd);
 
+  // - set no delay on packet socket -
+  int yes = 1;
+  if (setsockopt(this->epoll_fd.fd,SOL_TCP,TCP_NODELAY,&yes,sizeof(yes)))
+  {
+    epoll_fd_s_clear(&this->epoll_fd);
+
+    throw_error(RTSP_CONN_SETSOCKOPT_ERROR);
+  }
+
   this->state = c_rtsp_conn_state_RECV_COMMAND;
   this->sequence = 0;
   this->session = 0;
+
+  return 0;
 }/*}}}*/
 
 void rtsp_conn_s_append_time(bc_array_s *a_trg)
@@ -235,6 +246,10 @@ this->session);
           throw_error(RTSP_CONN_SEND_ERROR);
         }
 
+        // - initialize packet sequences -
+        this->packet_seq_0 = 0;
+        this->packet_seq_2 = 0;
+
         // - initialize packet time -
         if (clock_s_gettime(CLOCK_MONOTONIC,&this->packet_time))
         {
@@ -249,7 +264,21 @@ this->session);
       }/*}}}*/
       break;
 
-    // FIXME TODO continue ... PAUSE, TEARDOWN, ...
+    case c_rtsp_command_GET_PARAMETER:
+      {/*{{{*/
+        this->out_msg.used = 0;
+        bc_array_s_append_format(&this->out_msg,
+"RTSP/1.0 200 OK\r\n"
+"CSeq: %u\r\n"
+"\r\n",this->parser.cseq);
+
+        if (rtsp_conn_s_send_resp(this,&this->out_msg))
+        {
+          this->state = c_rtsp_conn_state_ERROR;
+          throw_error(RTSP_CONN_SEND_ERROR);
+        }
+      }/*}}}*/
+      break;
 
     default:
       throw_error(RTSP_CONN_UNKNOWN_COMMAND);
@@ -276,7 +305,18 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
       throw_error(RTSP_CONN_CALLBACK_ERROR);
     }
 
-    // FIXME TODO adjust packets sequence counters
+    uc pkt_channel = RTP_PKT_GET_CHANNEL(this->packet.data);
+
+    // - adjust packet sequence -
+    switch (pkt_channel)
+    {
+    case 0:
+      RTP_PKT_SET_SEQUENCE(this->packet.data,this->packet_seq_0++);
+      break;
+    case 2:
+      RTP_PKT_SET_SEQUENCE(this->packet.data,this->packet_seq_2++);
+      break;
+    }
 
     // - if delay is not zero -
     if ((delay = *((rtsp_pkt_delay_t *)this->packet.data)) != 0)

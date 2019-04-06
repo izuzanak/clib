@@ -77,9 +77,13 @@ int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a
           throw_error(RTSP_SERVER_ACCEPT_ERROR);
         }
 
-        epoll_fd.epoll = a_epoll;
-        rtsp_conn_s_create(&this->conn_list.data[conn_idx].object,
-            this,conn_idx,&epoll_fd);
+        if (rtsp_conn_s_create(&this->conn_list.data[conn_idx].object,
+            this,conn_idx,&epoll_fd))
+        {
+          rtsp_conn_list_s_remove(&this->conn_list,conn_idx);
+
+          throw_error(RTSP_SERVER_CONN_CREATE_ERROR);
+        }
 
         // - call conn_new_callback -
         ((rtsp_conn_new_callback_t)this->conn_new_callback)(this->cb_object,conn_idx);

@@ -611,10 +611,12 @@ int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout)
 
     unsigned time_idx = epoll_time_events_s_get_min_value_idx(time_events,time_events->root_idx);
     do {
-      epoll_time_map_s *time_map = &time_events->data[time_idx].object;
+
+      // - copy time map intentionaly -
+      epoll_time_map_s time_map = time_events->data[time_idx].object;
 
       // - if time is greater than actual time -
-      if (time_map->time > time_now)
+      if (time_map.time > time_now)
       {
         break;
       }
@@ -622,7 +624,7 @@ int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout)
       unsigned next_idx = epoll_time_events_s_get_next_idx(time_events,time_idx);
 
       // - check event callback -
-      epoll_callback_s *callback = &time_map->callback;
+      epoll_callback_s *callback = &time_map.callback;
       if (callback->function != NULL)
       {
         // - call event callback -
@@ -634,13 +636,11 @@ int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout)
 
       epoll_time_events_s_remove(time_events,time_idx);
 
-      if (time_map->period != 0)
+      if (time_map.period != 0)
       {
-        epoll_time_map_s time_map_copy = *time_map;
-
         // - reschedule timer -
-        time_map_copy.time += time_map_copy.period;
-        epoll_time_events_s_insert(time_events,&time_map_copy);
+        time_map.time += time_map.period;
+        epoll_time_events_s_insert(time_events,&time_map);
       }
 
       time_idx = next_idx;
