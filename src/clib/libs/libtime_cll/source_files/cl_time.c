@@ -37,7 +37,7 @@ void datetime_s_from_nanosec(datetime_s *this,long long unsigned a_nanosec)
   unsigned days = tmp + c_days_to_epoch;
 
   // - calculate week day -
-  this->wday = (days + 1) % 7;
+  this->wday = (days % 7) + 1;
 
   // - calculate year -
   this->year = 1601;

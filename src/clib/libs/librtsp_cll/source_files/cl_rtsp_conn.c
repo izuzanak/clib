@@ -225,18 +225,20 @@ this->session);
         }
         else
         {
-          string_s *ip = &((rtsp_server_s *)this->server)->ip;
+          rtsp_server_s *server = (rtsp_server_s *)this->server;
 
           socket_address_s data_in_addr;
           socket_address_s ctrl_in_addr;
 
-          if (socket_address_s_create(&data_in_addr,ip->data,0) ||
-              socket_s_create(&setup->udp_data,AF_INET,SOCK_DGRAM) ||
-              socket_s_create(&setup->udp_ctrl,AF_INET,SOCK_DGRAM) ||
-              socket_s_bind(&setup->udp_data,&data_in_addr) ||
-              socket_s_bind(&setup->udp_ctrl,&data_in_addr) ||
-              socket_s_address(&setup->udp_data,&data_in_addr) ||
-              socket_s_address(&setup->udp_ctrl,&ctrl_in_addr))
+          if (socket_address_s_create(&data_in_addr,server->ip.data,0) ||
+              socket_s_create(&setup->udp_data.fd,AF_INET,SOCK_DGRAM) ||
+              socket_s_create(&setup->udp_ctrl.fd,AF_INET,SOCK_DGRAM) ||
+              socket_s_bind(&setup->udp_data.fd,&data_in_addr) ||
+              socket_s_bind(&setup->udp_ctrl.fd,&data_in_addr) ||
+              socket_s_address(&setup->udp_data.fd,&data_in_addr) ||
+              socket_s_address(&setup->udp_ctrl.fd,&ctrl_in_addr) ||
+              epoll_s_fd_callback(a_epoll,&setup->udp_data,EPOLLIN | EPOLLPRI,rtsp_server_s_conn_fd_event,server,this->index) ||
+              epoll_s_fd_callback(a_epoll,&setup->udp_ctrl,EPOLLIN | EPOLLPRI,rtsp_server_s_conn_fd_event,server,this->index))
           {
             throw_error(RTSP_CONN_UDP_SETUP_ERROR);
           }
@@ -292,7 +294,7 @@ this->session);
           throw_error(RTSP_CONN_SEND_ERROR);
         }
 
-        // - initialize packet sequences -
+        // - reset packet sequences -
         this->packet_seq_0 = 0;
         this->packet_seq_2 = 0;
 
@@ -310,13 +312,42 @@ this->session);
       }/*}}}*/
       break;
 
+    case c_rtsp_command_PAUSE:
+      {/*{{{*/
+
+        // FIXME TODO pause media playing ...
+
+        this->out_msg.used = 0;
+        bc_array_s_append_format(&this->out_msg,
+"RTSP/1.0 200 OK\r\n"
+"CSeq: %u\r\n"
+"Date: ",this->parser.cseq);
+        rtsp_conn_s_append_time(&this->out_msg);
+        bc_array_s_append_format(&this->out_msg,
+"\r\n"
+"Session: %" HOST_LL_FORMAT "u\r\n"
+"\r\n",this->session);
+
+        if (rtsp_conn_s_send_resp(this,&this->out_msg))
+        {
+          this->state = c_rtsp_conn_state_ERROR;
+          throw_error(RTSP_CONN_SEND_ERROR);
+        }
+      }/*}}}*/
+      break;
+
     case c_rtsp_command_GET_PARAMETER:
       {/*{{{*/
         this->out_msg.used = 0;
         bc_array_s_append_format(&this->out_msg,
 "RTSP/1.0 200 OK\r\n"
 "CSeq: %u\r\n"
-"\r\n",this->parser.cseq);
+"Date: ",this->parser.cseq);
+        rtsp_conn_s_append_time(&this->out_msg);
+        bc_array_s_append_format(&this->out_msg,
+"\r\n"
+"Session: %" HOST_LL_FORMAT "u\r\n"
+"\r\n",this->session);
 
         if (rtsp_conn_s_send_resp(this,&this->out_msg))
         {
@@ -408,7 +439,7 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this)
   }
   else
   {
-    return socket_s_sendto(&setup->udp_data,&setup->udp_data_addr,
+    return socket_s_sendto(&setup->udp_data.fd,&setup->udp_data_addr,
         this->packet.data + sizeof(rtsp_pkt_delay_t) + 4,this->packet.used - (sizeof(rtsp_pkt_delay_t) + 4));
   }
 }/*}}}*/
@@ -439,25 +470,35 @@ int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epo
   (void)a_index;
   (void)a_epoll;
 
-  if (a_epoll_event->data.fd != this->epoll_fd.fd)
+  if (a_epoll_event->data.fd == this->epoll_fd.fd)
   {
-    throw_error(RTSP_CONN_INVALID_FD);
+    switch (this->state)
+    {
+      case c_rtsp_conn_state_RECV_COMMAND:
+        {/*{{{*/
+          if (rtsp_conn_s_recv_cmd(this,a_epoll))
+          {
+            this->state = c_rtsp_conn_state_ERROR;
+            throw_error(RTSP_CONN_RECEIVE_ERROR);
+          }
+        }/*}}}*/
+        break;
+
+      default:
+        throw_error(RTSP_CONN_INVALID_STATE);
+    }
   }
-
-  switch (this->state)
+  else
   {
-    case c_rtsp_conn_state_RECV_COMMAND:
-      {/*{{{*/
-        if (rtsp_conn_s_recv_cmd(this,a_epoll))
-        {
-          this->state = c_rtsp_conn_state_ERROR;
-          throw_error(RTSP_CONN_RECEIVE_ERROR);
-        }
-      }/*}}}*/
-      break;
+    socket_address_s address;
 
-    default:
-      throw_error(RTSP_CONN_INVALID_STATE);
+    this->buffer.used = 0;
+    if (socket_s_recvfrom(&a_epoll_event->data.fd,&this->buffer,&address))
+    {
+      throw_error(RTSP_CONN_RECEIVE_ERROR);
+    }
+
+    // FIXME TODO process data packet
   }
 
   return 0;

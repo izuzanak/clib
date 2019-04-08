@@ -149,8 +149,8 @@ ui:inter_port_begin
 ui:inter_port_end
 socket_address_s:udp_data_addr
 socket_address_s:udp_ctrl_addr
-socket_s:udp_data
-socket_s:udp_ctrl
+epoll_fd_s:udp_data
+epoll_fd_s:udp_ctrl
 >
 rtsp_setup_s;
 @end
