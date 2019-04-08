@@ -50,6 +50,7 @@ int rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
   this->state = c_rtsp_conn_state_RECV_COMMAND;
   this->sequence = 0;
   this->session = 0;
+  this->tcp = -1;
 
   return 0;
 }/*}}}*/
@@ -102,7 +103,8 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
       }
     }
 
-    // FIXME TODO process data packet
+    // FIXME TODO process control packet
+    debug_message_6(fprintf(stderr,"TCP: CONTROL PACKET\n"));
 
     bc_array_s_tail(msg,msg->used - pkt_size);
 
@@ -115,7 +117,7 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
   string_s string = {msg->used + 1,msg->data};
   if (rtsp_parser_s_parse(&this->parser,&string))
   {
-    throw_error(RTSP_CONN_PARSE_ERROR);
+    return 0;
   }
 
   switch (this->parser.command)
@@ -193,9 +195,15 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
         rtsp_setups_s_push_blank(&this->rtsp_setups);
         rtsp_setup_s *setup = rtsp_setups_s_last(&this->rtsp_setups);
         string_s_set_ptr(&setup->media_url,this->parser.url_rtsp);
-        setup->tcp = this->parser.tcp;
         setup->inter_port_begin = this->parser.inter_port_begin;
         setup->inter_port_end = this->parser.inter_port_end;
+
+        if (this->tcp != -1 && this->tcp != this->parser.tcp)
+        {
+          throw_error(RTSP_CONN_MISMATCH_RTSP_TRANSPORT);
+        }
+
+        this->tcp = this->parser.tcp;
 
         // - generate session number if needed -
         if (this->session == 0)
@@ -294,6 +302,9 @@ this->session);
           throw_error(RTSP_CONN_SEND_ERROR);
         }
 
+        // - cancel send timer -
+        epoll_timer_s_clear(&this->epoll_send_timer);
+
         // - reset packet sequences -
         this->packet_seq_0 = 0;
         this->packet_seq_2 = 0;
@@ -302,6 +313,12 @@ this->session);
         if (clock_s_gettime(CLOCK_MONOTONIC,&this->packet_time))
         {
           throw_error(RTSP_CONN_GET_TIME_ERROR);
+        }
+
+        // - burst first two seconds for rtsp-tcp -
+        if (this->tcp)
+        {
+          this->packet_time -= 2000000000ULL;
         }
 
         // - prepare first packet -
@@ -315,7 +332,8 @@ this->session);
     case c_rtsp_command_PAUSE:
       {/*{{{*/
 
-        // FIXME TODO pause media playing ...
+        // - cancel send timer -
+        epoll_timer_s_clear(&this->epoll_send_timer);
 
         this->out_msg.used = 0;
         bc_array_s_append_format(&this->out_msg,
@@ -409,7 +427,7 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
 
   // - schedule packet send timer -
   this->packet_time += delay*1000000ULL;
-  epoll_s_timer_stamp(a_epoll,this->packet_time,rtsp_server_s_conn_time_event,this->server,this->index,&this->epoll_timer);
+  epoll_s_timer_stamp(a_epoll,this->packet_time,rtsp_server_s_conn_time_event,this->server,this->index,&this->epoll_send_timer);
 
   return 0;
 }/*}}}*/
@@ -432,16 +450,14 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this)
     return 0;
   }
 
-  if (setup->tcp)
+  if (this->tcp)
   {
     return fd_s_write(&this->epoll_fd.fd,
         this->packet.data + sizeof(rtsp_pkt_delay_t),this->packet.used - sizeof(rtsp_pkt_delay_t));
   }
-  else
-  {
-    return socket_s_sendto(&setup->udp_data.fd,&setup->udp_data_addr,
-        this->packet.data + sizeof(rtsp_pkt_delay_t) + 4,this->packet.used - (sizeof(rtsp_pkt_delay_t) + 4));
-  }
+
+  return socket_s_sendto(&setup->udp_data.fd,&setup->udp_data_addr,
+      this->packet.data + sizeof(rtsp_pkt_delay_t) + 4,this->packet.used - (sizeof(rtsp_pkt_delay_t) + 4));
 }/*}}}*/
 
 int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
@@ -450,7 +466,7 @@ int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,e
   (void)a_timer;
 
   // - drop one shot timer -
-  this->epoll_timer.timer = c_idx_not_exist;
+  this->epoll_send_timer.timer = c_idx_not_exist;
 
   if (rtsp_conn_s_send_packet(this))
   {
@@ -498,7 +514,8 @@ int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epo
       throw_error(RTSP_CONN_RECEIVE_ERROR);
     }
 
-    // FIXME TODO process data packet
+    // FIXME TODO process control packet
+    debug_message_6(fprintf(stderr,"UDP: CONTROL PACKET\n"));
   }
 
   return 0;

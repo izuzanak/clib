@@ -47,6 +47,7 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CONN_INVALID_PACKET_CHANNEL 12
 #define ERROR_RTSP_CONN_SETSOCKOPT_ERROR 13
 #define ERROR_RTSP_CONN_UDP_SETUP_ERROR 14
+#define ERROR_RTSP_CONN_MISMATCH_RTSP_TRANSPORT 15
 
 #define ERROR_RTSP_SERVER_INVALID_STATE 1
 #define ERROR_RTSP_SERVER_INVALID_FD 2
@@ -144,7 +145,6 @@ WUR librtsp_cll_EXPORT int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a
 struct
 <
 string_s:media_url
-bi:tcp
 ui:inter_port_begin
 ui:inter_port_end
 socket_address_s:udp_data_addr
@@ -176,7 +176,7 @@ pointer:server
 socket_address_s:client_addr
 ui:index
 epoll_fd_s:epoll_fd
-epoll_timer_s:epoll_timer
+epoll_timer_s:epoll_send_timer
 
 bc_array_s:buffer
 bc_array_s:in_msg
@@ -193,6 +193,7 @@ ui:state
 ui:sequence
 ulli:session
 rtsp_setups_s:rtsp_setups
+bi:tcp
 >
 rtsp_conn_s;
 @end
