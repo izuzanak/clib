@@ -389,34 +389,44 @@ void test_var_dict()
   cassert(strcmp(buffer.data,"[0:A,1:B,2:C,3:D,4:E,10:0,11:0,12:0,13:0,14:0]") == 0);
 
 #if OPTION_TO_JSON == ENABLED
-//  // - loc_s_dict_to_json -
-//  buffer.used = 0;
-//  loc_s_dict_to_json(dict_0,&buffer);
-//  bc_array_s_push(&buffer,'\0');
-//  cassert(strcmp(buffer.data,"{0:\"A\",1:\"B\",2:\"C\",3:\"D\",4:\"E\",10:0,11:0,12:0,13:0,14:0}") == 0);
-//
-//  // - loc_s_dict_to_json_nice -
-//  CONT_INIT(json_nice_s,json_nice);
-//  json_nice_s_create(&json_nice,"--","==");
-//
-//  buffer.used = 0;
-//  loc_s_dict_to_json_nice(dict_0,&json_nice,&buffer);
-//  bc_array_s_push(&buffer,'\0');
-//  cassert(strcmp(buffer.data,
-//"{\n"
-//"==--0: \"A\",\n"
-//"==--1: \"B\",\n"
-//"==--2: \"C\",\n"
-//"==--3: \"D\",\n"
-//"==--4: \"E\",\n"
-//"==--10: 0,\n"
-//"==--11: 0,\n"
-//"==--12: 0,\n"
-//"==--13: 0,\n"
-//"==--14: 0\n"
-//"==}") == 0);
-//
-//  json_nice_s_clear(&json_nice);
+  VAR_CLEAR(dict_1,loc_s_dict());
+  loc_s_dict_set(dict_1,loc_s_string_ptr("first"),loc_s_int(1));
+  loc_s_dict_set(dict_1,loc_s_string_ptr("second"),loc_s_int(2));
+  loc_s_dict_set(dict_1,loc_s_string_ptr("third"),loc_s_int(3));
+
+  VAR_CLEAR(dict_2,loc_s_dict());
+  loc_s_dict_set(dict_2,loc_s_string_ptr("first"),loc_s_int(1));
+  loc_s_dict_set(dict_2,loc_s_string_ptr("second"),loc_s_int(2));
+  loc_s_dict_set(dict_2,loc_s_string_ptr("third"),loc_s_int(3));
+
+  loc_s_dict_set(dict_1,loc_s_string_ptr("fourth"),dict_2);
+
+  // - loc_s_dict_to_json -
+  buffer.used = 0;
+  loc_s_dict_to_json(dict_1,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"{\"first\":1,\"second\":2,\"third\":3,\"fourth\":{\"first\":1,\"second\":2,\"third\":3}}") == 0);
+
+  // - loc_s_dict_to_json_nice -
+  CONT_INIT(json_nice_s,json_nice);
+  json_nice_s_create(&json_nice,"--","==");
+
+  buffer.used = 0;
+  loc_s_dict_to_json_nice(dict_1,&json_nice,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,
+"{\n"
+"==--\"first\": 1,\n"
+"==--\"second\": 2,\n"
+"==--\"third\": 3,\n"
+"==--\"fourth\": {\n"
+"==----\"first\": 1,\n"
+"==----\"second\": 2,\n"
+"==----\"third\": 3\n"
+"==--}\n"
+"==}") == 0);
+
+  json_nice_s_clear(&json_nice);
 #endif
 
   var_s_clear(&dict_0);

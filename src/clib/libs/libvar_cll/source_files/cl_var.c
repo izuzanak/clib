@@ -122,26 +122,29 @@ void var_map_tree_s_to_json(const var_map_tree_s *this,bc_array_s *a_trg)
   {
     bc_array_s_push(a_trg,'{');
 
-    unsigned stack[RB_TREE_STACK_SIZE(var_map_tree_s,this)];
-    unsigned *stack_ptr = stack;
-
-    unsigned idx = var_map_tree_s_get_stack_min_value_idx(this,this->root_idx,&stack_ptr);
+    var_map_tree_s_node *ptr = this->data;
+    var_map_tree_s_node *ptr_end = ptr + this->used;
+    int comma = 0;
     do {
-      var_map_s *var_map = &(this->data + idx)->object;
-      debug_assert(var_map->key->v_type == c_bi_type_string);
-
-      var_s_to_json(&var_map->key,a_trg);
-      bc_array_s_push(a_trg,':');
-      var_s_to_json(&var_map->value,a_trg);
-
-      idx = var_map_tree_s_get_stack_next_idx(this,idx,&stack_ptr,stack);
-      if (idx == c_idx_not_exist)
+      if (ptr->valid)
       {
-        break;
-      }
+        var_map_s *var_map = &ptr->object;
+        debug_assert(var_map->key->v_type == c_bi_type_string);
 
-      bc_array_s_push(a_trg,',');
-    } while(1);
+        if (comma)
+        {
+          bc_array_s_push(a_trg,',');
+        }
+        else
+        {
+          comma = 1;
+        }
+
+        var_s_to_json(&var_map->key,a_trg);
+        bc_array_s_push(a_trg,':');
+        var_s_to_json(&var_map->value,a_trg);
+      }
+    } while(++ptr < ptr_end);
 
     bc_array_s_push(a_trg,'}');
   }
@@ -158,28 +161,31 @@ void var_map_tree_s_to_json_nice(const var_map_tree_s *this,json_nice_s *a_json_
     bc_array_s_push(a_trg,'{');
     json_nice_s_push_indent(a_json_nice,a_trg);
 
-    unsigned stack[RB_TREE_STACK_SIZE(var_map_tree_s,this)];
-    unsigned *stack_ptr = stack;
-
-    unsigned idx = var_map_tree_s_get_stack_min_value_idx(this,this->root_idx,&stack_ptr);
+    var_map_tree_s_node *ptr = this->data;
+    var_map_tree_s_node *ptr_end = ptr + this->used;
+    int comma = 0;
     do {
-      var_map_s *var_map = &(this->data + idx)->object;
-      debug_assert(var_map->key->v_type == c_bi_type_string);
-
-      var_s_to_json_nice(&var_map->key,a_json_nice,a_trg);
-      bc_array_s_push(a_trg,':');
-      bc_array_s_push(a_trg,' ');
-      var_s_to_json_nice(&var_map->value,a_json_nice,a_trg);
-
-      idx = var_map_tree_s_get_stack_next_idx(this,idx,&stack_ptr,stack);
-      if (idx == c_idx_not_exist)
+      if (ptr->valid)
       {
-        break;
-      }
+        var_map_s *var_map = &ptr->object;
+        debug_assert(var_map->key->v_type == c_bi_type_string);
 
-      bc_array_s_push(a_trg,',');
-      json_nice_s_indent(a_json_nice,a_trg);
-    } while(1);
+        if (comma)
+        {
+          bc_array_s_push(a_trg,',');
+          json_nice_s_indent(a_json_nice,a_trg);
+        }
+        else
+        {
+          comma = 1;
+        }
+
+        var_s_to_json_nice(&var_map->key,a_json_nice,a_trg);
+        bc_array_s_push(a_trg,':');
+        bc_array_s_push(a_trg,' ');
+        var_s_to_json_nice(&var_map->value,a_json_nice,a_trg);
+      }
+    } while(++ptr < ptr_end);
 
     json_nice_s_pop_indent(a_json_nice,a_trg);
     bc_array_s_push(a_trg,'}');
