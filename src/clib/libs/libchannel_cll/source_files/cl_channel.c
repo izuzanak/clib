@@ -17,34 +17,34 @@ methods channel_conn_s
 
 unsigned g_type_channel_message = c_idx_not_exist;
 
-void channel_conn_s_create(channel_conn_s *this,unsigned a_index,epoll_fd_s *a_epoll_fd,
+void channel_conn_s_create(channel_conn_s *this,epoll_fd_s *a_epoll_fd,
     channel_conn_message_callback_t a_conn_message_callback,
-    void *a_cb_object)
+    void *a_cb_object,unsigned a_cb_index)
 {/*{{{*/
   debug_message_3(fprintf(stderr,"channel_conn_s_create\n"));
 
   channel_conn_s_clear(this);
 
-  this->index = a_index;
   epoll_fd_s_swap(&this->epoll_fd,a_epoll_fd);
   this->conn_message_callback = a_conn_message_callback;
   this->cb_object = a_cb_object;
+  this->cb_index = a_cb_index;
   this->in_msg_length = 0;
   this->out_msg_offset = 0;
 }/*}}}*/
 
 int channel_conn_s_create_client(channel_conn_s *this,
-    const char *a_server_ip,unsigned short a_server_port,unsigned a_index,
+    const char *a_server_ip,unsigned short a_server_port,
     channel_conn_message_callback_t a_conn_message_callback,
-    void *a_cb_object)
+    void *a_cb_object,unsigned a_cb_index)
 {/*{{{*/
   debug_message_3(fprintf(stderr,"channel_conn_s_create_client\n"));
 
   channel_conn_s_clear(this);
 
-  this->index = a_index;
   this->conn_message_callback = a_conn_message_callback;
   this->cb_object = a_cb_object;
+  this->cb_index = a_cb_index;
   this->in_msg_length = 0;
   this->out_msg_offset = 0;
 
@@ -107,7 +107,7 @@ int channel_conn_s_recv_msg(channel_conn_s *this)
       bc_array_s message = {this->in_msg_length,this->in_msg_length,msg->data + msg_offset};
 
       // - call conn_message_callback -
-      if (((channel_conn_message_callback_t)this->conn_message_callback)(this->cb_object,this->index,&message))
+      if (((channel_conn_message_callback_t)this->conn_message_callback)(this->cb_object,this->cb_index,&message))
       {
         throw_error(CHANNEL_CONN_CALLBACK_ERROR);
       }
@@ -288,7 +288,7 @@ int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_even
 
   epoll_fd.epoll = a_epoll;
   channel_conn_s_create(&this->conn_list.data[conn_idx].object,
-      conn_idx,&epoll_fd,this->conn_message_callback,this->cb_object);
+      &epoll_fd,this->conn_message_callback,this->cb_object,conn_idx);
 
   // - call conn_new_callback -
   if (((channel_conn_new_callback_t)this->conn_new_callback)(this->cb_object,conn_idx))

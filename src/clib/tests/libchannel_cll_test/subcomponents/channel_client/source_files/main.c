@@ -47,7 +47,7 @@ int channel_comm_s_create(channel_comm_s *this,
       client->message.sequence = 0;
 
       if (channel_conn_s_create_client(&client->connection,
-            client->server_ip.data,client->server_port,client_idx,channel_comm_s_message,this))
+            client->server_ip.data,client->server_port,channel_comm_s_message,this,client_idx))
       {
         throw_error(CHANNEL_COMM_CONN_CREATE_ERROR);
       }

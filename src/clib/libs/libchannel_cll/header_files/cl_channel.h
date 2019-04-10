@@ -65,11 +65,11 @@ queue<var_s> var_queue_s;
 @begin
 struct
 <
-ui:index
 epoll_fd_s:epoll_fd
 
 pointer:conn_message_callback
 pointer:cb_object
+ui:cb_index
 
 bc_array_s:in_msg
 ui:in_msg_length
@@ -82,13 +82,13 @@ bc_array_s:buffer
 channel_conn_s;
 @end
 
-libchannel_cll_EXPORT void channel_conn_s_create(channel_conn_s *this,unsigned a_index,epoll_fd_s *a_epoll_fd,
+libchannel_cll_EXPORT void channel_conn_s_create(channel_conn_s *this,epoll_fd_s *a_epoll_fd,
     channel_conn_message_callback_t a_conn_message_callback,
-    void *a_cb_object);
+    void *a_cb_object,unsigned a_cb_index);
 WUR libchannel_cll_EXPORT int channel_conn_s_create_client(channel_conn_s *this,
-    const char *a_server_ip,unsigned short a_server_port,unsigned a_index,
+    const char *a_server_ip,unsigned short a_server_port,
     channel_conn_message_callback_t a_conn_message_callback,
-    void *a_cb_object);
+    void *a_cb_object,unsigned a_cb_index);
 WUR int channel_conn_s_recv_msg(channel_conn_s *this);
 WUR int channel_conn_s_send_msg(channel_conn_s *this);
 WUR libchannel_cll_EXPORT int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
