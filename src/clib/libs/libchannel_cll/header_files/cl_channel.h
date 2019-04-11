@@ -92,7 +92,8 @@ WUR libchannel_cll_EXPORT int channel_conn_s_create_client(channel_conn_s *this,
 WUR int channel_conn_s_recv_msg(channel_conn_s *this);
 WUR int channel_conn_s_send_msg(channel_conn_s *this);
 WUR libchannel_cll_EXPORT int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR libchannel_cll_EXPORT int channel_conn_s_schedule_message(channel_conn_s *this,bc_array_s *a_message);
+WUR static inline int channel_conn_s_schedule_message_var(channel_conn_s *this,var_s a_length_var,var_s a_data_var);
+WUR static inline int channel_conn_s_schedule_message(channel_conn_s *this,bc_array_s *a_message);
 
 // -- channel_conn_list_s --
 @begin
@@ -228,6 +229,28 @@ inlines var_queue_s
 @begin
 inlines channel_conn_s
 @end
+
+static inline int channel_conn_s_schedule_message_var(channel_conn_s *this,var_s a_length_var,var_s a_data_var)
+{/*{{{*/
+  var_queue_s_insert(&this->out_msg_queue,&a_length_var);
+  var_queue_s_insert(&this->out_msg_queue,&a_data_var);
+
+  // - modify fd epoll events: input and output -
+  if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI))
+  {
+    throw_error(CHANNEL_CONN_EPOLL_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int channel_conn_s_schedule_message(channel_conn_s *this,bc_array_s *a_message)
+{/*{{{*/
+  var_s length_var = loc_s_channel_message_buffer_length(a_message);
+  var_s data_var = loc_s_channel_message_buffer_swap(a_message);
+
+  return channel_conn_s_schedule_message_var(this,length_var,data_var);
+}/*}}}*/
 
 // -- channel_conn_list_s --
 @begin

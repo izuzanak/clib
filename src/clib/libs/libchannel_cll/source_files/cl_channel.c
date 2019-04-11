@@ -202,23 +202,6 @@ int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s 
   return 0;
 }/*}}}*/
 
-int channel_conn_s_schedule_message(channel_conn_s *this,bc_array_s *a_message)
-{/*{{{*/
-  var_s message_length = loc_s_channel_message_buffer_length(a_message);
-  var_s message_data = loc_s_channel_message_buffer_swap(a_message);
-
-  var_queue_s_insert(&this->out_msg_queue,&message_length);
-  var_queue_s_insert(&this->out_msg_queue,&message_data);
-
-  // - modify fd epoll events: input and output -
-  if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI))
-  {
-    throw_error(CHANNEL_CONN_EPOLL_ERROR);
-  }
-
-  return 0;
-}/*}}}*/
-
 // -- channel_conn_list_s --
 @begin
 methods channel_conn_list_s
