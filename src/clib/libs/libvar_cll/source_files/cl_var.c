@@ -204,7 +204,7 @@ int loc_s_array___order(const var_array_s *a_first,const var_array_s *a_second)
 {/*{{{*/
   debug_assert(a_first->used == a_second->used);
 
-  int result;
+  int res;
 
   if (a_first->used != 0)
   {
@@ -213,10 +213,10 @@ int loc_s_array___order(const var_array_s *a_first,const var_array_s *a_second)
     var_s *s_ptr = a_second->data;
 
     do {
-      result = loc_s_order(*f_ptr,*s_ptr);
-      if (result != 0)
+      res = loc_s_order(*f_ptr,*s_ptr);
+      if (res != 0)
       {
-        return result;
+        return res;
       }
     } while(++s_ptr,++f_ptr < f_ptr_end);
   }
@@ -229,7 +229,7 @@ int loc_s_dict___order(const var_map_tree_s *a_first,const var_map_tree_s *a_sec
 {/*{{{*/
   debug_assert(a_first->count == a_second->count);
 
-  int result;
+  int res;
 
   unsigned f_stack[RB_TREE_STACK_SIZE(var_map_tree_s,a_first)];
   unsigned s_stack[RB_TREE_STACK_SIZE(var_map_tree_s,a_second)];
@@ -240,13 +240,13 @@ int loc_s_dict___order(const var_map_tree_s *a_first,const var_map_tree_s *a_sec
   unsigned ft_idx = var_map_tree_s_get_stack_min_value_idx(a_first,a_first->root_idx,&f_stack_ptr);
   unsigned st_idx = var_map_tree_s_get_stack_min_value_idx(a_second,a_second->root_idx,&s_stack_ptr);
   do {
-    result = var_map_s_order(
+    res = var_map_s_order(
       &(a_first->data + ft_idx)->object,
       &(a_second->data + st_idx)->object);
 
-    if (result != 0)
+    if (res != 0)
     {
-      return result;
+      return res;
     }
 
     ft_idx = var_map_tree_s_get_stack_next_idx(a_first,ft_idx,&f_stack_ptr,f_stack);

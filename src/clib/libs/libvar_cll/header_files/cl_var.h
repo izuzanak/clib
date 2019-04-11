@@ -437,18 +437,18 @@ inlines var_map_s
 
 static inline int var_map_s_order(const var_map_s *a_first,const var_map_s *a_second)
 {/*{{{*/
-  int result;
+  int res;
 
-  result = loc_s_order(a_first->key,a_second->key);
-  if (result != 0)
+  res = loc_s_order(a_first->key,a_second->key);
+  if (res != 0)
   {
-    return result;
+    return res;
   }
 
-  result = loc_s_order(a_first->value,a_second->value);
-  if (result != 0)
+  res = loc_s_order(a_first->value,a_second->value);
+  if (res != 0)
   {
-    return result;
+    return res;
   }
 
   return 0;
