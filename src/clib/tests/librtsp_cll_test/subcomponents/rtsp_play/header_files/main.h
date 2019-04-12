@@ -57,7 +57,7 @@ void rtsp_player_s_conn_new(void *a_rtsp_player,unsigned a_index);
 void rtsp_player_s_conn_drop(void *a_rtsp_player,unsigned a_index);
 WUR int rtsp_player_s_conn_get_sdp(void *a_rtsp_player,unsigned a_index,const char *a_url,bc_array_s *a_trg);
 WUR int rtsp_player_s_conn_check_media(void *a_rtsp_player,unsigned a_index,const char *a_url);
-WUR int rtsp_player_s_conn_get_packet(void *a_rtsp_player,unsigned a_index,bc_array_s *a_trg);
+WUR int rtsp_player_s_conn_get_packet(void *a_rtsp_player,unsigned a_index,ulli *a_delay,bc_array_s *a_trg);
 
 // === inline methods of generated structures ==================================
 

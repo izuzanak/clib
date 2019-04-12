@@ -170,7 +170,7 @@ int rtsp_player_s_conn_check_media(void *a_rtsp_player,unsigned a_index,const ch
   return 0;
 }/*}}}*/
 
-int rtsp_player_s_conn_get_packet(void *a_rtsp_player,unsigned a_index,bc_array_s *a_trg)
+int rtsp_player_s_conn_get_packet(void *a_rtsp_player,unsigned a_index,ulli *a_delay,bc_array_s *a_trg)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"rtsp_player_s_conn_get_packet: %u\n",a_index));
 
@@ -188,6 +188,8 @@ int rtsp_player_s_conn_get_packet(void *a_rtsp_player,unsigned a_index,bc_array_
   {
     throw_error(PLAYER_FILE_READ_ERROR);
   }
+
+  *a_delay = *((rtsp_pkt_delay_t *)a_trg->data);
 
   return 0;
 }/*}}}*/

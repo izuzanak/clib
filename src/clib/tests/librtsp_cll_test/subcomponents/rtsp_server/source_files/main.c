@@ -63,10 +63,11 @@ int conn_check_media(void *a_rtsp_server,unsigned a_index,const char *a_url)
   return 0;
 }/*}}}*/
 
-int conn_get_packet(void *a_rtsp_server,unsigned a_index,bc_array_s *a_trg)
+int conn_get_packet(void *a_rtsp_server,unsigned a_index,ulli *a_delay,bc_array_s *a_trg)
 {/*{{{*/
   (void)a_rtsp_server;
   (void)a_index;
+  (void)a_delay;
   (void)a_trg;
 
   return 1;

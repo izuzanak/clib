@@ -388,14 +388,14 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
 {/*{{{*/
   rtsp_server_s *server = (rtsp_server_s *)this->server;
 
-  rtsp_pkt_delay_t delay;
+  ulli delay;
   do
   {
-    // - call conn_get_packet_callback -
     this->packet.used = 0;
+
+    // - call conn_get_packet_callback -
     if (((rtsp_conn_get_packet_callback_t)server->conn_get_packet_callback)(
-          server->cb_object,this->index,&this->packet) ||
-          this->packet.used < sizeof(rtsp_pkt_delay_t))
+          server->cb_object,this->index,&delay,&this->packet))
     {
       throw_error(RTSP_CONN_CALLBACK_ERROR);
     }
@@ -414,7 +414,7 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
     }
 
     // - if delay is not zero -
-    if ((delay = *((rtsp_pkt_delay_t *)this->packet.data)) != 0)
+    if (delay != 0)
     {
       break;
     }

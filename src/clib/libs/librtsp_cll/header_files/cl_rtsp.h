@@ -85,7 +85,7 @@ typedef void (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
 typedef void (*rtsp_conn_drop_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,const char *a_url,bc_array_s *a_trg);
 typedef int (*rtsp_conn_check_media_callback_t)(void *a_object,unsigned a_index,const char *a_url);
-typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,bc_array_s *a_trg);
+typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,ulli *a_delay,bc_array_s *a_trg);
 
 // === definition of generated structures ======================================
 
