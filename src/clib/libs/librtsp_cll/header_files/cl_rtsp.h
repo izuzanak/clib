@@ -81,10 +81,11 @@ typedef int (*rtsp_recv_sdp_callback_t)(void *a_object,unsigned a_index,const bc
 typedef int (*rtsp_recv_packet_callback_t)(void *a_object,unsigned a_index,const bc_array_s *a_src);
 
 typedef struct rtsp_server_s rtsp_server_s;
-typedef void (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
-typedef void (*rtsp_conn_drop_callback_t)(void *a_object,unsigned a_index);
+typedef int (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
+typedef int (*rtsp_conn_drop_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,const char *a_url,bc_array_s *a_trg);
 typedef int (*rtsp_conn_check_media_callback_t)(void *a_object,unsigned a_index,const char *a_url);
+typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session);
 typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,ulli *a_delay,bc_array_s *a_trg);
 
 // === definition of generated structures ======================================
@@ -231,6 +232,7 @@ pointer:conn_new_callback
 pointer:conn_drop_callback
 pointer:conn_get_sdp_callback
 pointer:conn_check_media_callback
+pointer:conn_playing_callback
 pointer:conn_get_packet_callback
 pointer:cb_object
 
@@ -248,6 +250,7 @@ WUR librtsp_cll_EXPORT int rtsp_server_s_create(rtsp_server_s *this,
   rtsp_conn_drop_callback_t a_conn_drop_callback,
   rtsp_conn_get_sdp_callback_t a_conn_get_sdp_callback,
   rtsp_conn_check_media_callback_t a_conn_check_media_callback,
+  rtsp_conn_playing_callback_t a_conn_playing_callback,
   rtsp_conn_get_packet_callback_t a_conn_get_packet_callback,
   void *a_cb_object);
 WUR librtsp_cll_EXPORT int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);

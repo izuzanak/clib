@@ -16,6 +16,7 @@ int rtsp_server_s_create(rtsp_server_s *this,
     rtsp_conn_drop_callback_t a_conn_drop_callback,
     rtsp_conn_get_sdp_callback_t a_conn_get_sdp_callback,
     rtsp_conn_check_media_callback_t a_conn_check_media_callback,
+    rtsp_conn_playing_callback_t a_conn_playing_callback,
     rtsp_conn_get_packet_callback_t a_conn_get_packet_callback,
     void *a_cb_object)
 {/*{{{*/
@@ -29,6 +30,7 @@ int rtsp_server_s_create(rtsp_server_s *this,
   this->conn_drop_callback = a_conn_drop_callback;
   this->conn_get_sdp_callback = a_conn_get_sdp_callback;
   this->conn_check_media_callback = a_conn_check_media_callback;
+  this->conn_playing_callback = a_conn_playing_callback;
   this->conn_get_packet_callback = a_conn_get_packet_callback;
   this->cb_object = a_cb_object;
 
@@ -86,7 +88,13 @@ int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a
         }
 
         // - call conn_new_callback -
-        ((rtsp_conn_new_callback_t)this->conn_new_callback)(this->cb_object,conn_idx);
+        if (((rtsp_conn_new_callback_t)this->conn_new_callback)(this->cb_object,conn_idx))
+        {
+          rtsp_conn_s_clear(&this->conn_list.data[conn_idx].object);
+          rtsp_conn_list_s_remove(&this->conn_list,conn_idx);
+
+          throw_error(RTSP_SERVER_CONN_CREATE_ERROR);
+        }
       }/*}}}*/
       break;
 
@@ -105,7 +113,7 @@ int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,unsigned 
   if (rtsp_conn_s_time_event(conn,0,a_timer,a_epoll))
   {
     // - call conn_drop_callback -
-    ((rtsp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);
+    (void)((rtsp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);
 
     rtsp_conn_s_clear(conn);
     rtsp_conn_list_s_remove(&this->conn_list,a_index);
@@ -122,7 +130,7 @@ int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event
   if (rtsp_conn_s_fd_event(conn,0,a_epoll_event,a_epoll))
   {
     // - call conn_drop_callback -
-    ((rtsp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);
+    (void)((rtsp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);
 
     rtsp_conn_s_clear(conn);
     rtsp_conn_list_s_remove(&this->conn_list,a_index);

@@ -76,6 +76,7 @@ int rtsp_conn_s_send_resp(rtsp_conn_s *this,bc_array_s *a_msg)
 
 int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
 {/*{{{*/
+  rtsp_server_s *server = (rtsp_server_s *)this->server;
   bc_array_s *msg = &this->in_msg;
 
   unsigned msg_old_used = msg->used;
@@ -145,7 +146,6 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
 
     case c_rtsp_command_DESCRIBE:
       {/*{{{*/
-        rtsp_server_s *server = (rtsp_server_s *)this->server;
 
         // - call conn_get_sdp_callback -
         this->buffer.used = 0;
@@ -180,7 +180,6 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
 
     case c_rtsp_command_SETUP:
       {/*{{{*/
-        rtsp_server_s *server = (rtsp_server_s *)this->server;
 
         // - check unicast -
         // - call conn_check_media_callback -
@@ -233,8 +232,6 @@ this->session);
         }
         else
         {
-          rtsp_server_s *server = (rtsp_server_s *)this->server;
-
           socket_address_s data_in_addr;
           socket_address_s ctrl_in_addr;
 
@@ -319,6 +316,13 @@ this->session);
         if (this->tcp)
         {
           this->packet_time -= 2000000000ULL;
+        }
+
+        // - call conn_playing_callback -
+        if (((rtsp_conn_playing_callback_t)server->conn_playing_callback)(
+              server->cb_object,this->index,this->session))
+        {
+          throw_error(RTSP_CONN_CALLBACK_ERROR);
         }
 
         // - prepare first packet -

@@ -36,6 +36,7 @@ int rtsp_player_s_create(rtsp_player_s *this,const char *a_base_dir,const char *
         rtsp_player_s_conn_drop,
         rtsp_player_s_conn_get_sdp,
         rtsp_player_s_conn_check_media,
+        rtsp_player_s_conn_playing,
         rtsp_player_s_conn_get_packet,
         this))
   {
@@ -75,7 +76,7 @@ int rtsp_player_s_server_fd_event(void *a_rtsp_player,unsigned a_index,epoll_eve
   return 0;
 }/*}}}*/
 
-void rtsp_player_s_conn_new(void *a_rtsp_player,unsigned a_index)
+int rtsp_player_s_conn_new(void *a_rtsp_player,unsigned a_index)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"rtsp_player_s_conn_new: %u\n",a_index));
 
@@ -85,15 +86,19 @@ void rtsp_player_s_conn_new(void *a_rtsp_player,unsigned a_index)
   {
     rtsp_readers_s_push_blank(&this->readers);
   }
+
+  return 0;
 }/*}}}*/
 
-void rtsp_player_s_conn_drop(void *a_rtsp_player,unsigned a_index)
+int rtsp_player_s_conn_drop(void *a_rtsp_player,unsigned a_index)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"rtsp_player_s_conn_drop: %u\n",a_index));
 
   rtsp_player_s *this = (rtsp_player_s *)a_rtsp_player;
 
   rtsp_reader_s_clear(this->readers.data + a_index);
+
+  return 0;
 }/*}}}*/
 
 int rtsp_player_s_conn_get_sdp(void *a_rtsp_player,unsigned a_index,const char *a_url,bc_array_s *a_trg)
@@ -166,6 +171,17 @@ int rtsp_player_s_conn_check_media(void *a_rtsp_player,unsigned a_index,const ch
       throw_error(PLAYER_FILE_OPEN_ERROR);
     }
   }
+
+  return 0;
+}/*}}}*/
+
+int rtsp_player_s_conn_playing(void *a_rtsp_player,unsigned a_index,ulli a_session)
+{/*{{{*/
+  (void)a_rtsp_player;
+  (void)a_index;
+  (void)a_session;
+
+  debug_message_6(fprintf(stderr,"rtsp_player_s_conn_playing: %u\n",a_index));
 
   return 0;
 }/*}}}*/

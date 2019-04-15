@@ -5,20 +5,24 @@ include "main.h"
 
 // === program entry function ==================================================
 
-void conn_new(void *a_rtsp_server,unsigned a_index)
+int conn_new(void *a_rtsp_server,unsigned a_index)
 {/*{{{*/
   (void)a_rtsp_server;
   (void)a_index;
 
   debug_message_6(fprintf(stderr,"conn_new\n"));
+
+  return 0;
 }/*}}}*/
 
-void conn_drop(void *a_rtsp_server,unsigned a_index)
+int conn_drop(void *a_rtsp_server,unsigned a_index)
 {/*{{{*/
   (void)a_rtsp_server;
   (void)a_index;
 
   debug_message_6(fprintf(stderr,"conn_drop\n"));
+
+  return 0;
 }/*}}}*/
 
 int conn_get_sdp(void *a_rtsp_server,unsigned a_index,const char *a_url,bc_array_s *a_trg)
@@ -59,6 +63,15 @@ int conn_check_media(void *a_rtsp_server,unsigned a_index,const char *a_url)
   (void)a_rtsp_server;
   (void)a_index;
   (void)a_url;
+
+  return 0;
+}/*}}}*/
+
+int conn_playing(void *a_rtsp_server,unsigned a_index,ulli a_session)
+{/*{{{*/
+  (void)a_rtsp_server;
+  (void)a_index;
+  (void)a_session;
 
   return 0;
 }/*}}}*/
@@ -110,6 +123,7 @@ int main(int argc,char **argv)
         conn_drop,
         conn_get_sdp,
         conn_check_media,
+        conn_playing,
         conn_get_packet,
         &server) == 0);
 
