@@ -74,7 +74,11 @@ enum
   c_rtsp_command_GET_PARAMETER = 1 << 7,
 };/*}}}*/
 
-typedef usi rtsp_pkt_delay_t;
+typedef unsigned rtsp_pkt_delay_t;
+
+#define RTSP_DELAY_TO_NANOSEC(DELAY) ((DELAY)*1000ULL)
+#define RTSP_DELAY_FROM_NANOSEC(NANOSEC) ((NANOSEC)/1000ULL)
+#define RTSP_ONE_SECOND_DELAY 1000000ULL
 
 typedef struct rtsp_client_s rtsp_client_s;
 typedef int (*rtsp_recv_sdp_callback_t)(void *a_object,unsigned a_index,const bc_array_s *a_src);

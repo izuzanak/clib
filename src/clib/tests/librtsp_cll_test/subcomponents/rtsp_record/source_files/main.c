@@ -195,7 +195,7 @@ int rtsp_recorder_s_recv_packet(void *a_rtsp_recorder,unsigned a_index,const bc_
     throw_error(RECORDER_GET_TIME_ERROR);
   }
 
-  rtsp_pkt_delay_t delay = (time - record->last_pkt_time)/1000000ULL;
+  rtsp_pkt_delay_t delay = RTSP_DELAY_FROM_NANOSEC(time - record->last_pkt_time);
 
   if (stream_s_write(&record->stream_file,&delay,sizeof(rtsp_pkt_delay_t)) ||
       stream_s_write(&record->stream_file,a_src->data,a_src->used))

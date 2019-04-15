@@ -430,7 +430,7 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
   } while(1);
 
   // - schedule packet send timer -
-  this->packet_time += delay*1000000ULL;
+  this->packet_time += RTSP_DELAY_TO_NANOSEC(delay);
   epoll_s_timer_stamp(a_epoll,this->packet_time,rtsp_server_s_conn_time_event,this->server,this->index,&this->epoll_send_timer);
 
   return 0;
