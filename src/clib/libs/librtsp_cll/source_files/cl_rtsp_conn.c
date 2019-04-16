@@ -393,41 +393,27 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
   rtsp_server_s *server = (rtsp_server_s *)this->server;
 
   ulli delay;
-  do
+  this->packet.used = 0;
+
+  // - call conn_get_packet_callback -
+  if (((rtsp_conn_get_packet_callback_t)server->conn_get_packet_callback)(
+        server->cb_object,this->index,&delay,&this->packet))
   {
-    this->packet.used = 0;
+    throw_error(RTSP_CONN_CALLBACK_ERROR);
+  }
 
-    // - call conn_get_packet_callback -
-    if (((rtsp_conn_get_packet_callback_t)server->conn_get_packet_callback)(
-          server->cb_object,this->index,&delay,&this->packet))
-    {
-      throw_error(RTSP_CONN_CALLBACK_ERROR);
-    }
+  this->pkt_channel = RTP_PKT_GET_CHANNEL(this->packet.data);
 
-    this->pkt_channel = RTP_PKT_GET_CHANNEL(this->packet.data);
-
-    // - adjust packet sequence -
-    switch (this->pkt_channel)
-    {
-    case 0:
-      RTP_PKT_SET_SEQUENCE(this->packet.data,this->packet_seq_0++);
-      break;
-    case 2:
-      RTP_PKT_SET_SEQUENCE(this->packet.data,this->packet_seq_2++);
-      break;
-    }
-
-    // - if delay is not zero -
-    if (delay != 0)
-    {
-      break;
-    }
-
-    if (rtsp_conn_s_send_packet(this))
-    {
-      throw_error(RTSP_CONN_SEND_PACKET_ERROR);
-    }
-  } while(1);
+  // - adjust packet sequence -
+  switch (this->pkt_channel)
+  {
+  case 0:
+    RTP_PKT_SET_SEQUENCE(this->packet.data,this->packet_seq_0++);
+    break;
+  case 2:
+    RTP_PKT_SET_SEQUENCE(this->packet.data,this->packet_seq_2++);
+    break;
+  }
 
   // - schedule packet send timer -
   this->packet_time += RTSP_DELAY_TO_NANOSEC(delay);
