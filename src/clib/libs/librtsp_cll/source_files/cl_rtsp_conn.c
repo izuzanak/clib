@@ -191,8 +191,8 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
         }
 
         // - store setup -
-        rtsp_setups_s_push_blank(&this->rtsp_setups);
-        rtsp_setup_s *setup = rtsp_setups_s_last(&this->rtsp_setups);
+        rtsp_setups_s_push_blank(&this->setups);
+        rtsp_setup_s *setup = rtsp_setups_s_last(&this->setups);
         string_s_set_ptr(&setup->media_url,this->parser.url_rtsp);
         setup->inter_port_begin = this->parser.inter_port_begin;
         setup->inter_port_end = this->parser.inter_port_end;
@@ -302,9 +302,15 @@ this->session);
         // - cancel send timer -
         epoll_timer_s_clear(&this->epoll_send_timer);
 
-        // - reset packet sequences -
-        this->packet_seq_0 = 0;
-        this->packet_seq_2 = 0;
+        // - reset setups packet sequences -
+        if (this->setups.used != 0)
+        {
+          rtsp_setup_s *s_ptr = this->setups.data;
+          rtsp_setup_s *s_ptr_end = s_ptr + this->setups.used;
+          do {
+            rtsp_setup_s_reset_sequences(s_ptr);
+          } while(++s_ptr < s_ptr_end);
+        }
 
         // - initialize packet time -
         if (clock_s_gettime(CLOCK_MONOTONIC,&this->packet_time))
@@ -404,16 +410,33 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
 
   this->pkt_channel = RTP_PKT_GET_CHANNEL(this->packet.data);
 
-  // - adjust packet sequence -
+  // - retrieve channel  -
+  rtsp_setup_s *rtsp_setup;
   switch (this->pkt_channel)
   {
   case 0:
-    RTP_PKT_SET_SEQUENCE(this->packet.data,this->packet_seq_0++);
+    rtsp_setup = rtsp_setups_s_at(&this->setups,0);
     break;
   case 2:
-    RTP_PKT_SET_SEQUENCE(this->packet.data,this->packet_seq_2++);
+    rtsp_setup = rtsp_setups_s_at(&this->setups,1);
     break;
   }
+
+  unsigned time_stamp = RTP_PKT_GET_TIME_STAMP(this->packet.data) + rtsp_setup->time_stamp_offset;
+
+  // - fix invalid time stamp -
+  if (time_stamp < rtsp_setup->last_time_stamp)
+  {
+    rtsp_setup->time_stamp_offset = rtsp_setup->last_time_stamp - RTP_PKT_GET_TIME_STAMP(this->packet.data);
+    time_stamp = rtsp_setup->last_time_stamp;
+  }
+
+  // - update last time stamp -
+  rtsp_setup->last_time_stamp = time_stamp;
+
+  // - modify packet data -
+  RTP_PKT_SET_SEQUENCE(this->packet.data,rtsp_setup->packet_sequence++);
+  RTP_PKT_SET_TIME_STAMP(this->packet.data,time_stamp);
 
   // - schedule packet send timer -
   this->packet_time += RTSP_DELAY_TO_NANOSEC(delay);
@@ -426,15 +449,15 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this)
 {/*{{{*/
   debug_message_7(fprintf(stderr,"rtsp_conn_s_send_packet\n"););
 
-  rtsp_setup_s *setup;
+  rtsp_setup_s *rtsp_setup;
 
   switch (this->pkt_channel)
   {
   case 0:
-    setup = this->rtsp_setups.data + 0;
+    rtsp_setup = rtsp_setups_s_at(&this->setups,0);
     break;
   case 2:
-    setup = this->rtsp_setups.data + 1;
+    rtsp_setup = rtsp_setups_s_at(&this->setups,1);
     break;
   default:
     return 0;
@@ -446,7 +469,7 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this)
         this->packet.data + sizeof(rtsp_pkt_delay_t),this->packet.used - sizeof(rtsp_pkt_delay_t));
   }
 
-  return socket_s_sendto(&setup->udp_data.fd,&setup->udp_data_addr,
+  return socket_s_sendto(&rtsp_setup->udp_data.fd,&rtsp_setup->udp_data_addr,
       this->packet.data + sizeof(rtsp_pkt_delay_t) + 4,this->packet.used - (sizeof(rtsp_pkt_delay_t) + 4));
 }/*}}}*/
 

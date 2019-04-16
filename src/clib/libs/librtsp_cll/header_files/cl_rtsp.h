@@ -60,6 +60,8 @@ include "cl_rtsp_sdp_parser.h"
 #define RTP_PKT_GET_CHANNEL(PACKET) ((PACKET)[sizeof(rtsp_pkt_delay_t) + 1])
 #define RTP_PKT_GET_SEQUENCE(PACKET) ntohs(*((usi *)(this->packet.data + sizeof(rtsp_pkt_delay_t) + 6)))
 #define RTP_PKT_SET_SEQUENCE(PACKET,VALUE) *((usi *)((PACKET) + sizeof(rtsp_pkt_delay_t) + 6)) = htons(VALUE)
+#define RTP_PKT_GET_TIME_STAMP(PACKET) ntohl(*((ui *)(this->packet.data + sizeof(rtsp_pkt_delay_t) + 8)))
+#define RTP_PKT_SET_TIME_STAMP(PACKET,VALUE) *((ui *)((PACKET) + sizeof(rtsp_pkt_delay_t) + 8)) = htonl(VALUE)
 
 enum
 {/*{{{*/
@@ -156,9 +158,15 @@ socket_address_s:udp_data_addr
 socket_address_s:udp_ctrl_addr
 epoll_fd_s:udp_data
 epoll_fd_s:udp_ctrl
+
+usi:packet_sequence
+ui:last_time_stamp
+ui:time_stamp_offset
 >
 rtsp_setup_s;
 @end
+
+static inline void rtsp_setup_s_reset_sequences(rtsp_setup_s *this);
 
 // -- rtsp_setups_s --
 @begin
@@ -188,8 +196,6 @@ bc_array_s:in_msg
 bc_array_s:out_msg
 rtsp_parser_s:parser
 
-usi:packet_seq_0
-usi:packet_seq_2
 uc:pkt_channel
 bc_array_s:packet
 ulli:packet_time
@@ -197,7 +203,7 @@ ulli:packet_time
 ui:state
 ui:sequence
 ulli:session
-rtsp_setups_s:rtsp_setups
+rtsp_setups_s:setups
 bi:tcp
 >
 rtsp_conn_s;
@@ -272,6 +278,13 @@ inlines rtsp_client_s
 @begin
 inlines rtsp_setup_s
 @end
+
+static inline void rtsp_setup_s_reset_sequences(rtsp_setup_s *this)
+{/*{{{*/
+  this->packet_sequence = 0;
+  this->last_time_stamp = 0;
+  this->time_stamp_offset = 0;
+}/*}}}*/
 
 // -- rtsp_setups_s --
 @begin
