@@ -142,7 +142,7 @@ WUR librtsp_cll_EXPORT int rtsp_client_s_create(rtsp_client_s *this,
     rtsp_recv_packet_callback_t a_recv_packet_callback,
     void *a_cb_object,unsigned a_cb_index);
 WUR int rtsp_client_s_send_cmd(rtsp_client_s *this);
-WUR int rtsp_client_s_recv_resp(rtsp_client_s *this);
+WUR int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_sdp(rtsp_client_s *this);
 WUR librtsp_cll_EXPORT int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);

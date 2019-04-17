@@ -39,7 +39,7 @@ rtsp_parser_s;
 @end
 
 unsigned rtsp_parser_s_recognize_terminal(rtsp_parser_s *this);
-WUR int rtsp_parser_s_parse(rtsp_parser_s *this,string_s *a_src);
+WUR int rtsp_parser_s_parse(rtsp_parser_s *this,string_s *a_src,int a_no_check);
 
 // === rtsp parse actions access ==========================================
 

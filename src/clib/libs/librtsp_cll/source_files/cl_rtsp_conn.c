@@ -114,11 +114,19 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
 
   debug_message_6(fprintf(stderr,"rtsp_conn_s <<<<<\n%.*s",msg->used,msg->data));
 
-  // - parse command response -
+  // - parse command -
   string_s string = {msg->used + 1,msg->data};
-  if (rtsp_parser_s_parse(&this->parser,&string))
+
+  // - parse check command -
+  if (rtsp_parser_s_parse(&this->parser,&string,0))
   {
     return 0;
+  }
+
+  // - parse process command -
+  if (rtsp_parser_s_parse(&this->parser,&string,1))
+  {
+    throw_error(RTSP_CONN_PARSE_ERROR);
   }
 
   switch (this->parser.command)
@@ -420,6 +428,8 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
   case 2:
     rtsp_setup = rtsp_setups_s_at(&this->setups,1);
     break;
+  default:
+    throw_error(RTSP_CONN_INVALID_PACKET_CHANNEL);
   }
 
   unsigned time_stamp = RTP_PKT_GET_TIME_STAMP(this->packet.data) + rtsp_setup->time_stamp_offset;

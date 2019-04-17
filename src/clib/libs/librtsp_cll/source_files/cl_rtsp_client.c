@@ -65,7 +65,7 @@ int rtsp_client_s_send_cmd(rtsp_client_s *this)
   return fd_s_write(&this->epoll_fd.fd,this->out_msg.data,this->out_msg.used);
 }/*}}}*/
 
-int rtsp_client_s_recv_resp(rtsp_client_s *this)
+int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this)
 {/*{{{*/
   bc_array_s *msg = &this->in_msg;
 
@@ -79,9 +79,17 @@ int rtsp_client_s_recv_resp(rtsp_client_s *this)
 
   // - parse command response -
   string_s string = {msg->used + 1,msg->data};
-  if (rtsp_parser_s_parse(&this->parser,&string))
+
+  // - parse check command response -
+  if (rtsp_parser_s_parse(&this->parser,&string,0))
   {
-    throw_error(RTSP_CLIENT_PARSE_ERROR);
+    return 0;
+  }
+
+  // - parse process command response -
+  if (rtsp_parser_s_parse(&this->parser,&string,1))
+  {
+    throw_error(RTSP_CONN_PARSE_ERROR);
   }
 
   bc_array_s_tail(msg,msg->used - this->parser.input_idx);
@@ -144,14 +152,22 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
     return 0;
   }
 
+  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s",msg->used,msg->data));
+
   // - parse command response -
   string_s string = {msg->used + 1,msg->data};
-  if (rtsp_parser_s_parse(&this->parser,&string))
+
+  // - parse check command response -
+  if (rtsp_parser_s_parse(&this->parser,&string,0))
   {
-    throw_error(RTSP_CLIENT_PARSE_ERROR);
+    return 0;
   }
 
-  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s",this->parser.input_idx,msg->data));
+  // - parse process command response -
+  if (rtsp_parser_s_parse(&this->parser,&string,1))
+  {
+    throw_error(RTSP_CONN_PARSE_ERROR);
+  }
 
   switch (this->parser.command)
   {
@@ -244,7 +260,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
   {
     case c_rtsp_client_state_RECV_OPTIONS:
       {/*{{{*/
-        if (rtsp_client_s_recv_resp(this))
+        if (rtsp_client_s_recv_cmd_resp(this))
         {
           this->state = c_rtsp_client_state_ERROR;
           throw_error(RTSP_CLIENT_RECEIVE_ERROR);
@@ -268,7 +284,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 
     case c_rtsp_client_state_RECV_DESCRIBE:
       {/*{{{*/
-        if (rtsp_client_s_recv_resp(this))
+        if (rtsp_client_s_recv_cmd_resp(this))
         {
           this->state = c_rtsp_client_state_ERROR;
           throw_error(RTSP_CLIENT_RECEIVE_ERROR);
@@ -316,7 +332,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 
     case c_rtsp_client_state_RECV_SETUP_VIDEO:
       {/*{{{*/
-        if (rtsp_client_s_recv_resp(this))
+        if (rtsp_client_s_recv_cmd_resp(this))
         {
           this->state = c_rtsp_client_state_ERROR;
           throw_error(RTSP_CLIENT_RECEIVE_ERROR);
@@ -370,7 +386,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 
     case c_rtsp_client_state_RECV_SETUP_AUDIO:
       {/*{{{*/
-        if (rtsp_client_s_recv_resp(this))
+        if (rtsp_client_s_recv_cmd_resp(this))
         {
           this->state = c_rtsp_client_state_ERROR;
           throw_error(RTSP_CLIENT_RECEIVE_ERROR);

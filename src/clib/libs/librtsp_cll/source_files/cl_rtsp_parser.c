@@ -3526,7 +3526,7 @@ state_312_label:
 
 }/*}}}*/
 
-int rtsp_parser_s_parse(rtsp_parser_s *this,string_s *a_src)
+int rtsp_parser_s_parse(rtsp_parser_s *this,string_s *a_src,int a_no_check)
 {/*{{{*/
   string_s_swap(&this->source_string,a_src);
 
@@ -3607,7 +3607,7 @@ int rtsp_parser_s_parse(rtsp_parser_s *this,string_s *a_src)
       parse_action -= c_rtsp_lalr_table_reduce_base;
 
       // - call function assigned to reduction -
-      if (rtsp_pa_callers[parse_action] != pa_rtsp_null)
+      if (a_no_check && rtsp_pa_callers[parse_action] != pa_rtsp_null)
       {
         rtsp_pa_callers[parse_action](this);
       }
