@@ -38,12 +38,13 @@ int rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
   this->index = a_index;
   epoll_fd_s_swap(&this->epoll_fd,a_epoll_fd);
 
-  // - set no delay on packet socket -
-  int yes = 1;
-  if (setsockopt(this->epoll_fd.fd,SOL_TCP,TCP_NODELAY,&yes,sizeof(yes)))
+  // - set size of output queue -
+  int buff_size = RTSP_TCP_OUTPUT_QUEUE_SIZE;
+  socklen_t length = sizeof(buff_size);
+  if (setsockopt(this->epoll_fd.fd,SOL_SOCKET,SO_SNDBUF,&buff_size,sizeof(buff_size)) ||
+      getsockopt(this->epoll_fd.fd,SOL_SOCKET,SO_SNDBUF,&buff_size,&length) ||
+      buff_size < RTSP_TCP_OUTPUT_QUEUE_SIZE)
   {
-    epoll_fd_s_clear(&this->epoll_fd);
-
     throw_error(RTSP_CONN_SETSOCKOPT_ERROR);
   }
 
@@ -455,7 +456,7 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
   return 0;
 }/*}}}*/
 
-int rtsp_conn_s_send_packet(rtsp_conn_s *this)
+int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
 {/*{{{*/
   debug_message_7(fprintf(stderr,"rtsp_conn_s_send_packet\n"););
 
@@ -475,30 +476,63 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this)
 
   if (this->tcp)
   {
-    return fd_s_write(&this->epoll_fd.fd,
-        this->packet.data + sizeof(rtsp_pkt_delay_t),this->packet.used - sizeof(rtsp_pkt_delay_t));
+    // - not enought space in output queue -
+    if (rtsp_setup->tcp_outq_space <= RTSP_TCP_OUTPUT_WRITE_LIMIT)
+    {
+      // - update to real queue values -
+      if (rtsp_setup_s_update_tcp_outq(rtsp_setup,this->epoll_fd.fd))
+      {
+        throw_error(RTSP_CONN_UPDATE_TCP_QUEUE_STATE_ERROR);
+      }
+
+      // - still not enought space in output queue -
+      if (rtsp_setup->tcp_outq_space <= RTSP_TCP_OUTPUT_WRITE_LIMIT)
+      {
+        // - modify fd epoll events: input and output -
+        if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI))
+        {
+          throw_error(RTSP_CONN_EPOLL_ERROR);
+        }
+
+        // - reset packet send flag -
+        *a_packet_send = 0;
+
+        return 0;
+      }
+    }
+
+    int byte_cnt = this->packet.used - sizeof(rtsp_pkt_delay_t);
+    debug_assert(byte_cnt <= RTSP_TCP_OUTPUT_WRITE_LIMIT);
+
+    // - update output queue counter -
+    rtsp_setup->tcp_outq_space -= byte_cnt;
+
+    return fd_s_write(&this->epoll_fd.fd,this->packet.data + sizeof(rtsp_pkt_delay_t),byte_cnt);
   }
 
   return socket_s_sendto(&rtsp_setup->udp_data.fd,&rtsp_setup->udp_data_addr,
       this->packet.data + sizeof(rtsp_pkt_delay_t) + 4,this->packet.used - (sizeof(rtsp_pkt_delay_t) + 4));
 }/*}}}*/
 
-int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
+int rtsp_conn_s_process_packet(rtsp_conn_s *this,epoll_s *a_epoll)
 {/*{{{*/
-  (void)a_index;
-  (void)a_timer;
 
-  // - drop one shot timer -
-  this->epoll_send_timer.timer = c_idx_not_exist;
+  // - packet was send flag -
+  int packet_send = 1;
 
-  if (rtsp_conn_s_send_packet(this))
+  if (rtsp_conn_s_send_packet(this,&packet_send))
   {
     throw_error(RTSP_CONN_SEND_PACKET_ERROR);
   }
 
-  if (rtsp_conn_s_next_packet(this,a_epoll))
+  // - packet was send -
+  if (packet_send)
   {
-    throw_error(RTSP_CONN_NEXT_PACKET_ERROR);
+    // - retrieve next packet -
+    if (rtsp_conn_s_next_packet(this,a_epoll))
+    {
+      throw_error(RTSP_CONN_NEXT_PACKET_ERROR);
+    }
   }
 
   return 0;
@@ -511,20 +545,39 @@ int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epo
 
   if (a_epoll_event->data.fd == this->epoll_fd.fd)
   {
-    switch (this->state)
+    // - process input data -
+    if (a_epoll_event->events & EPOLLIN)
     {
-      case c_rtsp_conn_state_RECV_COMMAND:
-        {/*{{{*/
-          if (rtsp_conn_s_recv_cmd(this,a_epoll))
-          {
-            this->state = c_rtsp_conn_state_ERROR;
-            throw_error(RTSP_CONN_RECEIVE_ERROR);
-          }
-        }/*}}}*/
-        break;
+      switch (this->state)
+      {
+        case c_rtsp_conn_state_RECV_COMMAND:
+          {/*{{{*/
+            if (rtsp_conn_s_recv_cmd(this,a_epoll))
+            {
+              this->state = c_rtsp_conn_state_ERROR;
+              throw_error(RTSP_CONN_RECEIVE_ERROR);
+            }
+          }/*}}}*/
+          break;
 
-      default:
-        throw_error(RTSP_CONN_INVALID_STATE);
+        default:
+          throw_error(RTSP_CONN_INVALID_STATE);
+      }
+    }
+    
+    // - write previously blocked packets -
+    if (a_epoll_event->events & EPOLLOUT)
+    {
+      // - modify fd epoll events: only input -
+      if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLPRI))
+      {
+        throw_error(RTSP_CONN_EPOLL_ERROR);
+      }
+
+      if (rtsp_conn_s_process_packet(this,a_epoll))
+      {
+        throw_error(RTSP_CONN_PROCESS_PACKET_ERROR);
+      }
     }
   }
   else

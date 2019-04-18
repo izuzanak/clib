@@ -44,10 +44,14 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CONN_GET_TIME_ERROR 9
 #define ERROR_RTSP_CONN_NEXT_PACKET_ERROR 10
 #define ERROR_RTSP_CONN_SEND_PACKET_ERROR 11
-#define ERROR_RTSP_CONN_INVALID_PACKET_CHANNEL 12
-#define ERROR_RTSP_CONN_SETSOCKOPT_ERROR 13
-#define ERROR_RTSP_CONN_UDP_SETUP_ERROR 14
-#define ERROR_RTSP_CONN_MISMATCH_RTSP_TRANSPORT 15
+#define ERROR_RTSP_CONN_PROCESS_PACKET_ERROR 12
+#define ERROR_RTSP_CONN_INVALID_PACKET_CHANNEL 13
+#define ERROR_RTSP_CONN_SETSOCKOPT_ERROR 14
+#define ERROR_RTSP_CONN_IOCTL_ERROR 15
+#define ERROR_RTSP_CONN_EPOLL_ERROR 16
+#define ERROR_RTSP_CONN_UPDATE_TCP_QUEUE_STATE_ERROR 17
+#define ERROR_RTSP_CONN_UDP_SETUP_ERROR 18
+#define ERROR_RTSP_CONN_MISMATCH_RTSP_TRANSPORT 19
 
 #define ERROR_RTSP_SERVER_INVALID_STATE 1
 #define ERROR_RTSP_SERVER_INVALID_FD 2
@@ -56,6 +60,9 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_SERVER_CONN_CREATE_ERROR 5
 
 // === constants and definitions ===============================================
+
+#define RTSP_TCP_OUTPUT_QUEUE_SIZE 327680
+#define RTSP_TCP_OUTPUT_WRITE_LIMIT 32768
 
 #define RTP_PKT_GET_CHANNEL(PACKET) ((PACKET)[sizeof(rtsp_pkt_delay_t) + 1])
 #define RTP_PKT_GET_SEQUENCE(PACKET) ntohs(*((usi *)(this->packet.data + sizeof(rtsp_pkt_delay_t) + 6)))
@@ -154,10 +161,13 @@ struct
 string_s:media_url
 ui:inter_port_begin
 ui:inter_port_end
+
 socket_address_s:udp_data_addr
 socket_address_s:udp_ctrl_addr
 epoll_fd_s:udp_data
 epoll_fd_s:udp_ctrl
+
+bi:tcp_outq_space
 
 usi:packet_sequence
 ui:last_time_stamp
@@ -166,6 +176,7 @@ ui:time_stamp_offset
 rtsp_setup_s;
 @end
 
+WUR static inline int rtsp_setup_s_update_tcp_outq(rtsp_setup_s *this,int a_fd);
 static inline void rtsp_setup_s_reset_sequences(rtsp_setup_s *this);
 
 // -- rtsp_setups_s --
@@ -215,8 +226,9 @@ void rtsp_conn_s_append_time(bc_array_s *a_trg);
 WUR int rtsp_conn_s_send_resp(rtsp_conn_s *this,bc_array_s *a_msg);
 WUR int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll);
 WUR int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll);
-WUR int rtsp_conn_s_send_packet(rtsp_conn_s *this);
-WUR librtsp_cll_EXPORT int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
+WUR int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send);
+WUR librtsp_cll_EXPORT int rtsp_conn_s_process_packet(rtsp_conn_s *this,epoll_s *a_epoll);
+WUR static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
 WUR librtsp_cll_EXPORT int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // -- rtsp_conn_list_s --
@@ -279,8 +291,25 @@ inlines rtsp_client_s
 inlines rtsp_setup_s
 @end
 
+static inline int rtsp_setup_s_update_tcp_outq(rtsp_setup_s *this,int a_fd)
+{/*{{{*/
+
+  // - retrieve count of bytes in outq -
+  int outq_count;
+  if (ioctl(a_fd,TIOCOUTQ,&outq_count))
+  {
+    throw_error(RTSP_CONN_IOCTL_ERROR);
+  }
+
+  this->tcp_outq_space = RTSP_TCP_OUTPUT_QUEUE_SIZE - outq_count;
+
+  return 0;
+}/*}}}*/
+
 static inline void rtsp_setup_s_reset_sequences(rtsp_setup_s *this)
 {/*{{{*/
+  this->tcp_outq_space = 0;
+
   this->packet_sequence = 0;
   this->last_time_stamp = 0;
   this->time_stamp_offset = 0;
@@ -295,6 +324,22 @@ inlines rtsp_setups_s
 @begin
 inlines rtsp_conn_s
 @end
+
+static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
+{/*{{{*/
+  (void)a_index;
+  (void)a_timer;
+
+  // - drop one shot timer -
+  this->epoll_send_timer.timer = c_idx_not_exist;
+
+  if (rtsp_conn_s_process_packet(this,a_epoll))
+  {
+    throw_error(RTSP_CONN_PROCESS_PACKET_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
 
 // -- rtsp_conn_list_s --
 @begin

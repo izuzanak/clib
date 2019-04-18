@@ -21,7 +21,6 @@ void fuse_fs_getattr(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
   fuse_reply_err(req,ENOENT);
 }/*}}}*/
 
-
 void fuse_fs_readdir(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fuse_file_info *fi)
 {/*{{{*/
   fprintf(stderr,"fuse_fs_readdir\n");
