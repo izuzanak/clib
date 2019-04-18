@@ -27,7 +27,12 @@ include "cl_struct.h"
 
 // === definition of structure fuse_session_s ==================================
 
-typedef struct fuse_session * fuse_session_s;
+typedef struct fuse_session_s
+{
+  struct fuse_session *se;
+  struct fuse_buf buffer;
+} fuse_session_s;
+
 @begin
 define fuse_session_s dynamic
 @end
@@ -54,15 +59,21 @@ static inline int fuse_session_s_fd(fuse_session_s *this);
 
 static inline void fuse_session_s_init(fuse_session_s *this)
 {/*{{{*/
-  *this = NULL;
+  this->se = NULL;
+  memset(&this->buffer,0,sizeof(this->buffer));
 }/*}}}*/
 
 static inline void fuse_session_s_clear(fuse_session_s *this)
 {/*{{{*/
-  if (*this != NULL)
+  if (this->se != NULL)
   {
-    fuse_session_unmount(*this);
-    fuse_session_destroy(*this);
+    fuse_session_unmount(this->se);
+    fuse_session_destroy(this->se);
+  }
+
+  if (this->buffer.mem != NULL)
+  {
+    free(this->buffer.mem);
   }
 
   fuse_session_s_init(this);
@@ -89,22 +100,26 @@ static inline void fuse_session_s_copy(const fuse_session_s *this,const fuse_ses
 
 static inline int fuse_session_s_compare(const fuse_session_s *this,const fuse_session_s *a_second)
 {/*{{{*/
-  return *this == *a_second;
+  (void)this;
+  (void)a_second;
+
+  cassert(0);
+  return 0;
 }/*}}}*/
 
 #if OPTION_TO_STRING == ENABLED
 static inline void fuse_session_s_to_string(const fuse_session_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  bc_array_s_append_format(a_trg,"fuse_session_s{%p}",*this);
+  bc_array_s_append_format(a_trg,"fuse_session_s{se:%p}",this->se);
 }/*}}}*/
 #endif
 
 static inline int fuse_session_s_mount(fuse_session_s *this,const char *a_mountpoint)
 {/*{{{*/
-  fuse_session_unmount(*this);
+  fuse_session_unmount(this->se);
 
   // - ERROR -
-  if (fuse_session_mount(*this,a_mountpoint))
+  if (fuse_session_mount(this->se,a_mountpoint))
   {
     throw_error(FUSE_SESSION_MOUNT_ERROR);
   }
@@ -114,7 +129,7 @@ static inline int fuse_session_s_mount(fuse_session_s *this,const char *a_mountp
 
 static inline int fuse_session_s_fd(fuse_session_s *this)
 {/*{{{*/
-  return fuse_session_fd(*this);
+  return fuse_session_fd(this->se);
 }/*}}}*/
 
 // === inline methods of generated structures ==================================

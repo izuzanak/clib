@@ -24,11 +24,11 @@ int fuse_session_s_create(fuse_session_s *this,string_array_s *a_args,
     } while(++a_ptr < a_ptr_end);
   }
 
-  *this = fuse_session_new(&args,a_fuse_ll_ops,sizeof(*a_fuse_ll_ops),a_user_data);
+  this->se = fuse_session_new(&args,a_fuse_ll_ops,sizeof(*a_fuse_ll_ops),a_user_data);
   fuse_opt_free_args(&args);
 
   // - ERROR -
-  if (*this == NULL)
+  if (this->se == NULL)
   {
     throw_error(FUSE_SESSION_CREATE_ERROR);
   }
@@ -38,8 +38,7 @@ int fuse_session_s_create(fuse_session_s *this,string_array_s *a_args,
 
 int fuse_session_s_process(fuse_session_s *this)
 {/*{{{*/
-  struct fuse_buf buffer;
-  int req_size = fuse_session_receive_buf(*this,&buffer);
+  int req_size = fuse_session_receive_buf(this->se,&this->buffer);
 
   if (req_size < 0)
   {
@@ -48,7 +47,7 @@ int fuse_session_s_process(fuse_session_s *this)
 
   if (req_size > 0)
   {
-    fuse_session_process_buf(*this,&buffer);
+    fuse_session_process_buf(this->se,&this->buffer);
   }
 
   return 0;
