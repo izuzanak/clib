@@ -301,6 +301,7 @@ static inline int rtsp_setup_s_update_tcp_outq(rtsp_setup_s *this,int a_fd)
     throw_error(RTSP_CONN_IOCTL_ERROR);
   }
 
+  // - compute space in outq -
   this->tcp_outq_space = RTSP_TCP_OUTPUT_QUEUE_SIZE - outq_count;
 
   return 0;

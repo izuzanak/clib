@@ -17,6 +17,7 @@ include "cl_time.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <aio.h>
 
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
@@ -49,6 +50,11 @@ include "cl_time.h"
 
 #define ERROR_FD_WRITE_ERROR 1
 #define ERROR_FD_READ_ERROR 2
+
+#define ERROR_AIO_WRITE_ERROR 1
+#define ERROR_AIO_READ_ERROR 2
+#define ERROR_AIO_RETURN_ERROR 3
+#define ERROR_AIO_ERROR_ERROR 4
 
 #define ERROR_PID_MISSING_PROGRAM_NAME 1
 #define ERROR_PID_CANNOT_CREATE_NEW_PROCESS 2
@@ -136,6 +142,28 @@ WUR liblinux_cll_EXPORT int socket_s_connect(const socket_s *this,const socket_a
 WUR liblinux_cll_EXPORT int socket_s_sendto(const socket_s *this,const socket_address_s *a_addr,const void *a_src,size_t a_size);
 WUR liblinux_cll_EXPORT int socket_s_recvfrom(const socket_s *this,bc_array_s *a_trg,socket_address_s *a_addr);
 WUR static inline int socket_s_address(const socket_s *this,socket_address_s *a_addr);
+
+// === definition of structure aio_s ===========================================
+
+typedef struct aiocb aio_s;
+@begin
+define aio_s dynamic
+@end
+
+static inline void aio_s_init(aio_s *this);
+static inline void aio_s_clear(aio_s *this);
+static inline void aio_s_flush_all(aio_s *this);
+static inline void aio_s_swap(aio_s *this,aio_s *a_second);
+static inline void aio_s_copy(const aio_s *this,const aio_s *a_src);
+static inline int aio_s_compare(const aio_s *this,const aio_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void aio_s_to_string(const aio_s *this,bc_array_s *a_trg);
+#endif
+
+WUR static inline int aio_s_write(aio_s *this,int a_fd,off_t a_offset,void *a_src,size_t a_size);
+WUR static inline int aio_s_read(aio_s *this,int a_fd,off_t a_offset,void *a_src,size_t a_size);
+WUR static inline int aio_s_return(aio_s *this,ssize_t *a_return);
+WUR static inline int aio_s_is_done(aio_s *this,int *a_done);
 
 // === definition of structure pid_s ===========================================
 
@@ -477,6 +505,137 @@ static inline int socket_s_address(const socket_s *this,socket_address_s *a_addr
   if (addr_len != sizeof(struct sockaddr_in))
   {
     throw_error(SOCKET_ADDRESS_UNKNOWN_FORMAT);
+  }
+
+  return 0;
+}/*}}}*/
+
+// === inline methods of structure aio_s =======================================
+
+static inline void aio_s_init(aio_s *this)
+{/*{{{*/
+  this->aio_fildes = -1;
+}/*}}}*/
+
+static inline void aio_s_clear(aio_s *this)
+{/*{{{*/
+  if (this->aio_fildes != -1)
+  {
+    aio_cancel(this->aio_fildes,this);
+  }
+
+  aio_s_init(this);
+}/*}}}*/
+
+static inline void aio_s_flush_all(aio_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void aio_s_swap(aio_s *this,aio_s *a_second)
+{/*{{{*/
+  aio_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void aio_s_copy(const aio_s *this,const aio_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int aio_s_compare(const aio_s *this,const aio_s *a_second)
+{/*{{{*/
+  (void)this;
+  (void)a_second;
+
+  cassert(0);
+  return 0;
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void aio_s_to_string(const aio_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"aio_s{%d}",this->aio_fildes);
+}/*}}}*/
+#endif
+
+static inline int aio_s_write(aio_s *this,int a_fd,off_t a_offset,void *a_src,size_t a_size)
+{/*{{{*/
+  aio_s_clear(this);
+
+  this->aio_fildes = a_fd;
+  this->aio_offset = a_offset;
+  this->aio_buf = a_src;
+  this->aio_nbytes = a_size;
+  this->aio_reqprio = 0;
+  this->aio_sigevent.sigev_notify = SIGEV_NONE;
+  this->aio_lio_opcode = 0;
+
+  // - ERROR -
+  if (aio_write(this))
+  {
+    aio_s_init(this);
+
+    throw_error(AIO_WRITE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int aio_s_read(aio_s *this,int a_fd,off_t a_offset,void *a_src,size_t a_size)
+{/*{{{*/
+  aio_s_clear(this);
+
+  this->aio_fildes = a_fd;
+  this->aio_offset = a_offset;
+  this->aio_buf = a_src;
+  this->aio_nbytes = a_size;
+  this->aio_reqprio = 0;
+  this->aio_sigevent.sigev_notify = SIGEV_NONE;
+  this->aio_lio_opcode = 0;
+
+  // - ERROR -
+  if (aio_read(this))
+  {
+    aio_s_init(this);
+
+    throw_error(AIO_READ_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int aio_s_return(aio_s *this,ssize_t *a_return)
+{/*{{{*/
+  if ((*a_return = aio_return(this)) == - 1)
+  {
+    throw_error(AIO_RETURN_ERROR);
+  }
+
+  aio_s_init(this);
+
+  return 0;
+}/*}}}*/
+
+static inline int aio_s_is_done(aio_s *this,int *a_done)
+{/*{{{*/
+  int err = aio_error(this);
+
+  switch (err)
+  {
+    case 0:
+      *a_done = 1;
+      break;
+    case EINPROGRESS:
+      *a_done = 0;
+      break;
+
+    // - ERROR -
+    default:
+      throw_error(AIO_ERROR_ERROR);
   }
 
   return 0;

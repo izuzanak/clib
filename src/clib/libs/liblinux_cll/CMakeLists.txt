@@ -8,6 +8,7 @@ if(OS_LINUX)
   set(CONF_COMP_DEFS)
   set(CONF_LINK_LIBS
     libbase_cll
-    libtime_cll)
+    libtime_cll
+    rt)
 endif()
 

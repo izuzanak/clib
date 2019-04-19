@@ -30,6 +30,7 @@ void test_socket_address();
 void test_socket();
 void test_socket_udp();
 void test_socket_tcp();
+void test_aio();
 void test_pid();
 void test_epoll();
 

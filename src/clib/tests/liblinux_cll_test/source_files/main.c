@@ -14,6 +14,7 @@ const char *test_names[] =
   "socket",
   "socket_udp",
   "socket_tcp",
+  "aio",
   "pid",
   "epoll",
 };/*}}}*/
@@ -25,6 +26,7 @@ test_function_t test_functions[] =
   test_socket,
   test_socket_udp,
   test_socket_tcp,
+  test_aio,
   test_pid,
   test_epoll,
 };/*}}}*/
@@ -178,6 +180,81 @@ void test_socket_tcp()
   pid_s_clear(&client_pid);
   pid_s_clear(&server_pid);
   string_array_s_clear(&arguments);
+}/*}}}*/
+
+void test_aio()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT(bc_array_s,buffer);
+
+#define AIO_S_TO_BUFFER(NAME) \
+{/*{{{*/\
+  buffer.used = 0;\
+  aio_s_to_string(NAME,&buffer);\
+  bc_array_s_push(&buffer,'\0');\
+}/*}}}*/
+
+  // - aio_s_write -
+  CONT_INIT_CLEAR(file_s,file);
+  cassert(file_s_open(&file,"tests/liblinux_cll_test/aio/write","w") == 0);
+
+  CONT_INIT_CLEAR(aio_s,aio);
+
+  const char write_data[] =
+"{\n"
+"  \"null\": null,\n"
+"  \"integer\": 123,\n"
+"  \"float\": 123.400000,\n"
+"  \"string\": \"Hello world!\",\n"
+"  \"array\": [\n"
+"    0,\n"
+"    1,\n"
+"    2,\n"
+"    3,\n"
+"    4,\n"
+"    5,\n"
+"    6,\n"
+"    7,\n"
+"    8,\n"
+"    9\n"
+"  ],\n"
+"  \"object\": {\n"
+"    \"first\": 0,\n"
+"    \"second\": 1,\n"
+"    \"third\": 2\n"
+"  }\n"
+"}";
+
+  size_t data_size = sizeof(write_data);
+  cassert(aio_s_write(&aio,stream_s_fd(&file),0,(void *)write_data,data_size) == 0);
+
+  int done;
+  do {
+    usleep(100);
+
+    cassert(aio_s_is_done(&aio,&done) == 0);
+  } while(!done);
+
+  ssize_t result;
+  cassert(aio_s_return(&aio,&result) == 0 && result == data_size);
+
+  // - aio_s_read -
+  cassert(file_s_open(&file,"tests/liblinux_cll_test/aio/write","r") == 0);
+
+  char read_data[data_size];
+  cassert(aio_s_read(&aio,stream_s_fd(&file),0,(void *)read_data,data_size) == 0);
+
+  do {
+    usleep(100);
+
+    cassert(aio_s_is_done(&aio,&done) == 0);
+  } while(!done);
+
+  cassert(aio_s_return(&aio,&result) == 0 && result == data_size);
+  cassert(strcmp(write_data,read_data) == 0);
+
+  bc_array_s_clear(&buffer);
+#endif
 }/*}}}*/
 
 void test_pid()
