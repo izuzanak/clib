@@ -160,7 +160,7 @@ static inline int aio_s_compare(const aio_s *this,const aio_s *a_second);
 static inline void aio_s_to_string(const aio_s *this,bc_array_s *a_trg);
 #endif
 
-WUR static inline int aio_s_write(aio_s *this,int a_fd,off_t a_offset,void *a_src,size_t a_size);
+WUR static inline int aio_s_write(aio_s *this,int a_fd,off_t a_offset,const void *a_src,size_t a_size);
 WUR static inline int aio_s_read(aio_s *this,int a_fd,off_t a_offset,void *a_src,size_t a_size);
 WUR static inline int aio_s_return(aio_s *this,ssize_t *a_return);
 WUR static inline int aio_s_is_done(aio_s *this,int *a_done);
@@ -562,13 +562,13 @@ static inline void aio_s_to_string(const aio_s *this,bc_array_s *a_trg)
 }/*}}}*/
 #endif
 
-static inline int aio_s_write(aio_s *this,int a_fd,off_t a_offset,void *a_src,size_t a_size)
+static inline int aio_s_write(aio_s *this,int a_fd,off_t a_offset,const void *a_src,size_t a_size)
 {/*{{{*/
   aio_s_clear(this);
 
   this->aio_fildes = a_fd;
   this->aio_offset = a_offset;
-  this->aio_buf = a_src;
+  this->aio_buf = (void *)a_src;
   this->aio_nbytes = a_size;
   this->aio_reqprio = 0;
   this->aio_sigevent.sigev_notify = SIGEV_NONE;

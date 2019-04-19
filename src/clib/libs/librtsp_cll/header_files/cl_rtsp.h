@@ -64,11 +64,11 @@ include "cl_rtsp_sdp_parser.h"
 #define RTSP_TCP_OUTPUT_QUEUE_SIZE 327680
 #define RTSP_TCP_OUTPUT_WRITE_LIMIT 32768
 
-#define RTP_PKT_GET_CHANNEL(PACKET) ((PACKET)[sizeof(rtsp_pkt_delay_t) + 1])
-#define RTP_PKT_GET_SEQUENCE(PACKET) ntohs(*((usi *)(this->packet.data + sizeof(rtsp_pkt_delay_t) + 6)))
-#define RTP_PKT_SET_SEQUENCE(PACKET,VALUE) *((usi *)((PACKET) + sizeof(rtsp_pkt_delay_t) + 6)) = htons(VALUE)
-#define RTP_PKT_GET_TIME_STAMP(PACKET) ntohl(*((ui *)(this->packet.data + sizeof(rtsp_pkt_delay_t) + 8)))
-#define RTP_PKT_SET_TIME_STAMP(PACKET,VALUE) *((ui *)((PACKET) + sizeof(rtsp_pkt_delay_t) + 8)) = htonl(VALUE)
+#define RTP_PKT_GET_CHANNEL(PACKET) ((PACKET)[1])
+#define RTP_PKT_GET_SEQUENCE(PACKET) ntohs(*((usi *)((PACKET) + 6)))
+#define RTP_PKT_SET_SEQUENCE(PACKET,VALUE) *((usi *)((PACKET) + 6)) = htons(VALUE)
+#define RTP_PKT_GET_TIME_STAMP(PACKET) ntohl(*((ui *)((PACKET) + 8)))
+#define RTP_PKT_SET_TIME_STAMP(PACKET,VALUE) *((ui *)((PACKET) + 8)) = htonl(VALUE)
 
 enum
 {/*{{{*/

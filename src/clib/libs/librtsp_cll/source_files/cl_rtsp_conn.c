@@ -501,17 +501,16 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
       }
     }
 
-    int byte_cnt = this->packet.used - sizeof(rtsp_pkt_delay_t);
-    debug_assert(byte_cnt <= RTSP_TCP_OUTPUT_WRITE_LIMIT);
+    debug_assert(this->packet.used <= RTSP_TCP_OUTPUT_WRITE_LIMIT);
 
     // - update output queue counter -
-    rtsp_setup->tcp_outq_space -= byte_cnt;
+    rtsp_setup->tcp_outq_space -= this->packet.used;
 
-    return fd_s_write(&this->epoll_fd.fd,this->packet.data + sizeof(rtsp_pkt_delay_t),byte_cnt);
+    return fd_s_write(&this->epoll_fd.fd,this->packet.data,this->packet.used);
   }
 
   return socket_s_sendto(&rtsp_setup->udp_data.fd,&rtsp_setup->udp_data_addr,
-      this->packet.data + sizeof(rtsp_pkt_delay_t) + 4,this->packet.used - (sizeof(rtsp_pkt_delay_t) + 4));
+      this->packet.data + 4,this->packet.used - (4));
 }/*}}}*/
 
 int rtsp_conn_s_process_packet(rtsp_conn_s *this,epoll_s *a_epoll)
