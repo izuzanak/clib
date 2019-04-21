@@ -5,6 +5,8 @@ include "main.h"
 
 volatile int g_terminate = 0;
 
+// === methods of generated structures =========================================
+
 // === global functions ========================================================
 
 void fuse_fs_lookup(fuse_req_t req,fuse_ino_t parent,const char *name)
@@ -16,16 +18,68 @@ void fuse_fs_lookup(fuse_req_t req,fuse_ino_t parent,const char *name)
 
 void fuse_fs_getattr(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 {/*{{{*/
+  (void)fi;
+
   fprintf(stderr,"fuse_fs_getattr\n");
 
-  fuse_reply_err(req,ENOENT);
+  struct stat stbuf;
+  memset(&stbuf,0,sizeof(stbuf));
+
+  if (ino == 1)
+  {
+    stbuf.st_mode = S_IFDIR | 0755;
+    stbuf.st_nlink = 1;
+
+    fuse_reply_attr(req,&stbuf,1.0);
+  }
+  else
+  {
+    fuse_reply_err(req,ENOENT);
+  }
+}/*}}}*/
+
+void fuse_fs_opendir(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
+{/*{{{*/
+  fprintf(stderr,"fuse_fs_opendir\n");
+
+  if (ino == 1)
+  {
+    fuse_reply_open(req,fi);
+  }
+  else {
+    fuse_reply_err(req,ENOTDIR);
+  }
+}/*}}}*/
+
+void fuse_fs_releasedir(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
+{/*{{{*/
+  (void)req;
+  (void)ino;
+  (void)fi;
+
+  fprintf(stderr,"fuse_fs_releasedir\n");
+
+  fuse_reply_err(req,0);
 }/*}}}*/
 
 void fuse_fs_readdir(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fuse_file_info *fi)
 {/*{{{*/
+  (void)fi;
+
   fprintf(stderr,"fuse_fs_readdir\n");
 
-  fuse_reply_err(req,ENOTDIR);
+  if (ino == 1)
+  {
+    CONT_INIT_CLEAR(bc_array_s,dirbuf);
+
+    fuse_dirbuf_s_add(&dirbuf,req,".",1);
+    fuse_dirbuf_s_add(&dirbuf,req,"..",1);
+
+    fuse_dirbuf_s_reply(&dirbuf,req,size,off);
+  }
+  else {
+    fuse_reply_err(req,ENOTDIR);
+  }
 }/*}}}*/
 
 void fuse_fs_open(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
@@ -42,8 +96,6 @@ void fuse_fs_read(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fus
 
 int fuse_fd_event(void *a_fuse_session,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll)
 {/*{{{*/
-  fprintf(stderr,"fuse_fd_event\n");
-
   fuse_session_s *session = (fuse_session_s *)a_fuse_session;
   return fuse_session_s_process(session);
 }/*}}}*/
@@ -79,11 +131,13 @@ int main(int argc,char **argv)
   {
     struct fuse_lowlevel_ops fuse_oper =
     {
-      .lookup  = fuse_fs_lookup,
-      .getattr = fuse_fs_getattr,
-      .readdir = fuse_fs_readdir,
-      .open    = fuse_fs_open,
-      .read    = fuse_fs_read,
+      .lookup     = fuse_fs_lookup,
+      .getattr    = fuse_fs_getattr,
+      .opendir    = fuse_fs_opendir,
+      .releasedir = fuse_fs_releasedir,
+      .readdir    = fuse_fs_readdir,
+      .open       = fuse_fs_open,
+      .read       = fuse_fs_read,
     };
 
     CONT_INIT_CLEAR(string_array_s,args);
@@ -114,8 +168,6 @@ int main(int argc,char **argv)
       {
         g_terminate = 1;
       }
-
-      fprintf(stderr,"looping ...\n");
 
     } while(g_terminate == 0);
   }
