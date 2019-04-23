@@ -9,11 +9,52 @@ volatile int g_terminate = 0;
 
 // === global functions ========================================================
 
+int fuse_fs_stat(fuse_ino_t ino,struct stat *stbuf)
+{/*{{{*/
+  switch (ino)
+  {
+  case 1:
+    stbuf->st_mode = S_IFDIR | 0755;
+    stbuf->st_nlink = 2;
+    break;
+  case 2:
+    stbuf->st_mode = S_IFREG | 0444;
+    stbuf->st_nlink = 1;
+    stbuf->st_atime = time(NULL);
+    stbuf->st_mtime = stbuf->st_atime;
+    stbuf->st_ctime = stbuf->st_atime;
+    break;
+  default:
+    return 1;
+  }
+
+  return 0;
+}/*}}}*/
+
 void fuse_fs_lookup(fuse_req_t req,fuse_ino_t parent,const char *name)
 {/*{{{*/
   fprintf(stderr,"fuse_fs_lookup\n");
 
-  fuse_reply_err(req,ENOENT);
+  switch (parent)
+  {
+  case 1:
+    if (strcmp(name,"numbers") == 0)
+    {
+      struct fuse_entry_param entry = {};
+      entry.ino = 2;
+      entry.attr_timeout = 1.0;
+      entry.entry_timeout = 1.0;
+      fuse_fs_stat(entry.ino,&entry.attr);
+      fuse_reply_entry(req,&entry);
+    }
+    else
+    {
+      fuse_reply_err(req,ENOENT);
+    }
+    break;
+  default:
+    fuse_reply_err(req,ENOENT);
+  }
 }/*}}}*/
 
 void fuse_fs_getattr(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
@@ -22,31 +63,26 @@ void fuse_fs_getattr(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 
   fprintf(stderr,"fuse_fs_getattr\n");
 
-  struct stat stbuf;
-  memset(&stbuf,0,sizeof(stbuf));
-
-  if (ino == 1)
-  {
-    stbuf.st_mode = S_IFDIR | 0755;
-    stbuf.st_nlink = 1;
-
-    fuse_reply_attr(req,&stbuf,1.0);
-  }
-  else
+  struct stat stbuf = {};
+  if (fuse_fs_stat(ino,&stbuf))
   {
     fuse_reply_err(req,ENOENT);
+    return;
   }
+
+  fuse_reply_attr(req,&stbuf,1.0);
 }/*}}}*/
 
 void fuse_fs_opendir(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 {/*{{{*/
   fprintf(stderr,"fuse_fs_opendir\n");
 
-  if (ino == 1)
+  switch (ino)
   {
+  case 1:
     fuse_reply_open(req,fi);
-  }
-  else {
+    break;
+  default:
     fuse_reply_err(req,ENOTDIR);
   }
 }/*}}}*/
@@ -68,16 +104,20 @@ void fuse_fs_readdir(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct 
 
   fprintf(stderr,"fuse_fs_readdir\n");
 
-  if (ino == 1)
+  switch (ino)
   {
-    CONT_INIT_CLEAR(bc_array_s,dirbuf);
+  case 1:
+    {
+      CONT_INIT_CLEAR(bc_array_s,dirbuf);
 
-    fuse_dirbuf_s_add(&dirbuf,req,".",1);
-    fuse_dirbuf_s_add(&dirbuf,req,"..",1);
+      fuse_dirbuf_s_add(&dirbuf,req,".",1);
+      fuse_dirbuf_s_add(&dirbuf,req,"..",1);
+      fuse_dirbuf_s_add(&dirbuf,req,"numbers",2);
 
-    fuse_dirbuf_s_reply(&dirbuf,req,size,off);
-  }
-  else {
+      fuse_dirbuf_s_reply(&dirbuf,req,size,off);
+    }
+    break;
+  default:
     fuse_reply_err(req,ENOTDIR);
   }
 }/*}}}*/
@@ -86,12 +126,70 @@ void fuse_fs_open(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 {/*{{{*/
   fprintf(stderr,"fuse_fs_open\n");
 
-  fuse_reply_err(req,EACCES);
+  if ((fi->flags & O_ACCMODE) != O_RDONLY)
+  {
+    fuse_reply_err(req,EACCES);
+    return;
+  }
+
+  switch (ino)
+  {
+  case 2:
+    fi->direct_io = 1;
+    fi->nonseekable = 1;
+
+    unsigned *counter = cmalloc(sizeof(unsigned));
+    *counter = 0;
+    fi->fh = (uintptr_t)counter;
+
+    fuse_reply_open(req,fi);
+    break;
+  default:
+    fuse_reply_err(req,EACCES);
+  }
+}/*}}}*/
+
+void fuse_fs_release(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
+{/*{{{*/
+  (void)req;
+  (void)ino;
+  (void)fi;
+
+  fprintf(stderr,"fuse_fs_release\n");
+
+  unsigned *counter = (unsigned *)(uintptr_t)fi->fh;
+  cfree(counter);
+
+  fuse_reply_err(req,0);
 }/*}}}*/
 
 void fuse_fs_read(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fuse_file_info *fi)
 {/*{{{*/
   fprintf(stderr,"fuse_fs_read\n");
+
+  if (ino == 2)
+  {
+    CONT_INIT_CLEAR(bc_array_s,buffer);
+
+    unsigned *counter = (unsigned *)(uintptr_t)fi->fh;
+
+    while (*counter < 100000)
+    {
+      unsigned old_used = buffer.used;
+      ui_to_string(counter,&buffer);
+      bc_array_s_push(&buffer,'\n');
+      
+      if (buffer.used > size)
+      {
+        buffer.used = old_used;
+        break;
+      }
+
+      ++*counter;
+    }
+
+    fuse_reply_buf(req,buffer.data,buffer.used);
+  }
 }/*}}}*/
 
 int fuse_fd_event(void *a_fuse_session,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll)
@@ -137,11 +235,12 @@ int main(int argc,char **argv)
       .releasedir = fuse_fs_releasedir,
       .readdir    = fuse_fs_readdir,
       .open       = fuse_fs_open,
+      .release    = fuse_fs_release,
       .read       = fuse_fs_read,
     };
 
     CONT_INIT_CLEAR(string_array_s,args);
-    string_array_s_push_ptr(&args,"create");
+    string_array_s_push_ptr(&args,"fuse_fs");
 
     CONT_INIT_CLEAR(fuse_session_s,session);
     cassert(fuse_session_s_create(&session,&args,&fuse_oper,NULL) == 0);
