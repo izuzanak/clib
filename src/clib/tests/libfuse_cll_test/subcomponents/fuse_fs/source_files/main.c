@@ -14,10 +14,12 @@ int fuse_fs_stat(fuse_ino_t ino,struct stat *stbuf)
   switch (ino)
   {
   case 1:
+    stbuf->st_ino = ino;
     stbuf->st_mode = S_IFDIR | 0755;
     stbuf->st_nlink = 2;
     break;
   case 2:
+    stbuf->st_ino = ino;
     stbuf->st_mode = S_IFREG | 0444;
     stbuf->st_nlink = 1;
     stbuf->st_atime = time(NULL);
@@ -110,11 +112,11 @@ void fuse_fs_readdir(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct 
     {
       CONT_INIT_CLEAR(bc_array_s,dirbuf);
 
-      fuse_dirbuf_s_add(&dirbuf,req,".",1);
-      fuse_dirbuf_s_add(&dirbuf,req,"..",1);
-      fuse_dirbuf_s_add(&dirbuf,req,"numbers",2);
+      fuse_dirbuff_s_add(&dirbuf,req,".",1);
+      fuse_dirbuff_s_add(&dirbuf,req,"..",1);
+      fuse_dirbuff_s_add(&dirbuf,req,"numbers",2);
 
-      fuse_dirbuf_s_reply(&dirbuf,req,size,off);
+      fuse_dirbuff_s_reply(&dirbuf,req,size,off);
     }
     break;
   default:
