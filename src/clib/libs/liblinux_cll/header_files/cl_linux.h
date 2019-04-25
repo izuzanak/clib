@@ -6,6 +6,7 @@
 include "cl_time.h"
 @end
 
+#include <aio.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/fs.h>
@@ -17,7 +18,6 @@ include "cl_time.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <aio.h>
 
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX

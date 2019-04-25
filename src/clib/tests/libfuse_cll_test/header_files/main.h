@@ -11,6 +11,7 @@ include "cl_fuse.h"
 
 // === test execution functions ================================================
 
+void test_ino_size();
 void test_create();
 
 // === program entry function ==================================================

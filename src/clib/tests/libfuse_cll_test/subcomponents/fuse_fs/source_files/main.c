@@ -97,11 +97,13 @@ void fuse_fs_releasedir(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 
   fprintf(stderr,"fuse_fs_releasedir\n");
 
-  throw_fuse_error(req,0);
+  fuse_reply_err(req,0);
+  return;
 }/*}}}*/
 
 void fuse_fs_readdir(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fuse_file_info *fi)
 {/*{{{*/
+  (void)off;
   (void)fi;
 
   fprintf(stderr,"fuse_fs_readdir\n");
@@ -167,7 +169,9 @@ void fuse_fs_release(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 
 void fuse_fs_read(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fuse_file_info *fi)
 {/*{{{*/
-  fprintf(stderr,"fuse_fs_read\n");
+  (void)off;
+
+  fprintf(stderr,"fuse_fs_read, off: %llu, size: %llu\n",(ulli)off,(ulli)size);
 
   if (ino == 2)
   {
@@ -196,6 +200,10 @@ void fuse_fs_read(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fus
 
 int fuse_fd_event(void *a_fuse_session,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll)
 {/*{{{*/
+  (void)a_index;
+  (void)a_event;
+  (void)a_epoll;
+
   fuse_session_s *session = (fuse_session_s *)a_fuse_session;
   return fuse_session_s_process(session);
 }/*}}}*/
@@ -254,7 +262,7 @@ int main(int argc,char **argv)
 
     CONT_INIT_CLEAR(epoll_fd_s,epoll_fd);
     cassert((epoll_fd.fd = dup(fuse_session_s_fd(&session))) != -1);
-    cassert(epoll_s_fd_callback(&epoll,&epoll_fd,EPOLLIN || EPOLLPRI,fuse_fd_event,&session,0) == 0);
+    cassert(epoll_s_fd_callback(&epoll,&epoll_fd,EPOLLIN | EPOLLPRI,fuse_fd_event,&session,0) == 0);
 
     do {
 
