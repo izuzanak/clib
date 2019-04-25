@@ -89,18 +89,6 @@ void fuse_fs_opendir(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
   }
 }/*}}}*/
 
-void fuse_fs_releasedir(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
-{/*{{{*/
-  (void)req;
-  (void)ino;
-  (void)fi;
-
-  fprintf(stderr,"fuse_fs_releasedir\n");
-
-  fuse_reply_err(req,0);
-  return;
-}/*}}}*/
-
 void fuse_fs_readdir(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fuse_file_info *fi)
 {/*{{{*/
   (void)off;
@@ -242,7 +230,6 @@ int main(int argc,char **argv)
       .lookup     = fuse_fs_lookup,
       .getattr    = fuse_fs_getattr,
       .opendir    = fuse_fs_opendir,
-      .releasedir = fuse_fs_releasedir,
       .readdir    = fuse_fs_readdir,
       .open       = fuse_fs_open,
       .release    = fuse_fs_release,
