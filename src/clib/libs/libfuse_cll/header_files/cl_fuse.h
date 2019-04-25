@@ -25,6 +25,14 @@ include "cl_struct.h"
 #define ERROR_FUSE_SESSION_MOUNT_ERROR 2
 #define ERROR_FUSE_SESSION_RECEIVE_BUFFER_ERROR 3
 
+// - error macros -
+#define throw_fuse_error(REQUEST,ERROR_ID)\
+{/*{{{*/\
+  debug_message_1(fprintf(stderr,"ERROR: " #ERROR_ID ", %s +%d, function: %s\n",__FILE__,__LINE__,__FUNCTION__));\
+  fuse_reply_err(REQUEST,ERROR_ID);\
+  return;\
+}/*}}}*/
+
 // === definition of structure fuse_dirbuff_s ==================================
 
 static inline void fuse_dirbuff_s_add(bc_array_s *this,fuse_req_t a_req,const char *a_name,fuse_ino_t a_ino);

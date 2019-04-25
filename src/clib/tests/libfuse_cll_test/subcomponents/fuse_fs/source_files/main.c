@@ -51,11 +51,11 @@ void fuse_fs_lookup(fuse_req_t req,fuse_ino_t parent,const char *name)
     }
     else
     {
-      fuse_reply_err(req,ENOENT);
+      throw_fuse_error(req,ENOENT);
     }
     break;
   default:
-    fuse_reply_err(req,ENOENT);
+    throw_fuse_error(req,ENOENT);
   }
 }/*}}}*/
 
@@ -68,7 +68,7 @@ void fuse_fs_getattr(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
   struct stat stbuf = {};
   if (fuse_fs_stat(ino,&stbuf))
   {
-    fuse_reply_err(req,ENOENT);
+    throw_fuse_error(req,ENOENT);
     return;
   }
 
@@ -85,7 +85,7 @@ void fuse_fs_opendir(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
     fuse_reply_open(req,fi);
     break;
   default:
-    fuse_reply_err(req,ENOTDIR);
+    throw_fuse_error(req,ENOTDIR);
   }
 }/*}}}*/
 
@@ -97,7 +97,7 @@ void fuse_fs_releasedir(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 
   fprintf(stderr,"fuse_fs_releasedir\n");
 
-  fuse_reply_err(req,0);
+  throw_fuse_error(req,0);
 }/*}}}*/
 
 void fuse_fs_readdir(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fuse_file_info *fi)
@@ -120,7 +120,7 @@ void fuse_fs_readdir(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct 
     }
     break;
   default:
-    fuse_reply_err(req,ENOTDIR);
+    throw_fuse_error(req,ENOTDIR);
   }
 }/*}}}*/
 
@@ -130,7 +130,7 @@ void fuse_fs_open(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 
   if ((fi->flags & O_ACCMODE) != O_RDONLY)
   {
-    fuse_reply_err(req,EACCES);
+    throw_fuse_error(req,EACCES);
     return;
   }
 
@@ -147,7 +147,7 @@ void fuse_fs_open(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
     fuse_reply_open(req,fi);
     break;
   default:
-    fuse_reply_err(req,EACCES);
+    throw_fuse_error(req,EACCES);
   }
 }/*}}}*/
 
