@@ -201,10 +201,6 @@ void signal_handler(int a_signum)
   switch (a_signum)
   {
   case SIGCHLD:
-    {
-      int status;
-      wait(&status);
-    }
     break;
   default:
 
