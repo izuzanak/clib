@@ -28,33 +28,30 @@ int rtsp_client_s_create(rtsp_client_s *this,
   this->cb_object = a_cb_object;
   this->cb_index = a_cb_index;
 
-  // - connect to server -
+  int nonblock_io = 1;
+
+  // - create and setup client socket -
   socket_address_s address;
   if (socket_address_s_create(&address,this->server_ip.data,this->server_port) ||
       socket_s_create(&this->epoll_fd.fd,AF_INET,SOCK_STREAM) ||
-      socket_s_connect(&this->epoll_fd.fd,&address))
+      ioctl(this->epoll_fd.fd,FIONBIO,&nonblock_io))
   {
     this->state = c_rtsp_client_state_ERROR;
     throw_error(RTSP_CLIENT_CONNECT_ERROR);
   }
 
-  // - reset sequence -
-  this->sequence = 0;
-
-  this->out_msg.used = 0;
-  bc_array_s_append_format(&this->out_msg,
-"OPTIONS %s RTSP/1.0\r\n"
-"CSeq: %u\r\n"
-"\r\n",this->media_url.data,this->sequence++);
-
-  if (rtsp_client_s_send_cmd(this))
+  // - connect to server -
+  if (connect(this->epoll_fd.fd,(struct sockaddr *)&address,sizeof(struct sockaddr_in)) != 0)
   {
-    this->state = c_rtsp_client_state_ERROR;
-    throw_error(RTSP_CLIENT_SEND_ERROR);
+    if (errno != EINPROGRESS)
+    {
+      this->state = c_rtsp_client_state_ERROR;
+      throw_error(RTSP_CLIENT_CONNECT_ERROR);
+    }
   }
 
-  this->state = c_rtsp_client_state_RECV_OPTIONS;
-
+  // - connect in progress -
+  this->state = c_rtsp_client_state_CONNECTING;
   return 0;
 }/*}}}*/
 
@@ -258,6 +255,43 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 
   switch (this->state)
   {
+    case c_rtsp_client_state_CONNECTING:
+      {/*{{{*/
+        int nonblock_io = 0;
+        int error;
+        socklen_t length = sizeof(error);
+
+        // - check connect result -
+        // - disable nonblocking io -
+        // - modify fd epoll events: only input -
+        if (getsockopt(this->epoll_fd.fd,SOL_SOCKET,SO_ERROR,&error,&length) ||
+            error != 0 ||
+            ioctl(this->epoll_fd.fd,FIONBIO,&nonblock_io) ||
+            epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLPRI))
+        {
+          this->state = c_rtsp_client_state_ERROR;
+          throw_error(RTSP_CLIENT_CONNECT_ERROR);
+        }
+
+        // - reset sequence -
+        this->sequence = 0;
+
+        this->out_msg.used = 0;
+        bc_array_s_append_format(&this->out_msg,
+      "OPTIONS %s RTSP/1.0\r\n"
+      "CSeq: %u\r\n"
+      "\r\n",this->media_url.data,this->sequence++);
+
+        if (rtsp_client_s_send_cmd(this))
+        {
+          this->state = c_rtsp_client_state_ERROR;
+          throw_error(RTSP_CLIENT_SEND_ERROR);
+        }
+
+        this->state = c_rtsp_client_state_RECV_OPTIONS;
+      }/*}}}*/
+      break;
+
     case c_rtsp_client_state_RECV_OPTIONS:
       {/*{{{*/
         if (rtsp_client_s_recv_cmd_resp(this))

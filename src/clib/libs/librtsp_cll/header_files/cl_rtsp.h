@@ -109,6 +109,7 @@ enum
 {/*{{{*/
   c_rtsp_client_state_UNKNOWN = 0,
   c_rtsp_client_state_ERROR,
+  c_rtsp_client_state_CONNECTING,
   c_rtsp_client_state_RECV_OPTIONS,
   c_rtsp_client_state_RECV_DESCRIBE,
   c_rtsp_client_state_RECV_SDP,

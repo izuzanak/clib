@@ -68,20 +68,20 @@ int main(int argc,char **argv)
   //const unsigned short port = 8080;
   //const char *media = "video/h264";
 
-  //const char *server_ip = "127.0.0.1";
-  //const unsigned short port = 8080;
-  //const char *media = "video";
+  const char *server_ip = "127.0.0.1";
+  const unsigned short port = 8000;
+  const char *media = "video";
 
   //const char *server_ip = "10.2.1.18";
   //const unsigned short port = 554;
   //const char *media = "11";
 
-  const char *server_ip = "10.2.1.176";
-  //const char *server_ip = "127.0.0.1";
-  const unsigned short port = 8006;
-  const char *media = "56035002/3480";
-  //const char *media = "56035002/1390";
-  //const char *media = "56035002/time_20150101103015";
+  //const char *server_ip = "10.2.1.176";
+  ////const char *server_ip = "127.0.0.1";
+  //const unsigned short port = 8006;
+  //const char *media = "56035002/3480";
+  ////const char *media = "56035002/1390";
+  ////const char *media = "56035002/time_20150101103015";
 
   //const char *server_ip = "10.2.1.10";
   //const unsigned short port = 8080;
@@ -108,7 +108,7 @@ int main(int argc,char **argv)
         client_recv_packet,
         &client_list,client_idx) == 0);
 
-    cassert(epoll_s_fd_callback(&epoll,&client->epoll_fd,EPOLLIN | EPOLLPRI,client_fd_event,&client_list,idx) == 0);
+    cassert(epoll_s_fd_callback(&epoll,&client->epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,client_fd_event,&client_list,idx) == 0);
   } while(++idx < client_cnt);
 
   //unsigned count = 1000;
