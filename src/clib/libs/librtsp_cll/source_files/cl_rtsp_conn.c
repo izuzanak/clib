@@ -451,7 +451,9 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
 
   // - schedule packet send timer -
   this->packet_time += RTSP_DELAY_TO_NANOSEC(delay);
-  if (epoll_s_timer_stamp(a_epoll,this->packet_time,rtsp_server_s_conn_time_event,this->server,this->index,&this->epoll_send_timer))
+
+  struct itimerspec itimerspec = {{0,0},{this->packet_time/1000000000,this->packet_time%1000000000}};
+  if (epoll_s_timer_callback(a_epoll,&this->epoll_send_timer,&itimerspec,TFD_TIMER_ABSTIME,rtsp_server_s_conn_time_event,this->server,this->index))
   {
     throw_error(RTSP_CONN_TIMER_CREATE_ERROR);
   }

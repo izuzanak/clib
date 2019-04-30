@@ -56,7 +56,8 @@ int rtsp_recorder_s_create(rtsp_recorder_s *this,const char *a_base_dir,unsigned
       }
 
       // - schedule reconnect timer-
-      if (epoll_s_timer_delay(&this->epoll,1ULL,rtsp_recorder_s_record_time_event,this,record_idx,&record->epoll_timer))
+      struct itimerspec itimerspec = {{0,0},{0,1}};
+      if (epoll_s_timer_callback(&this->epoll,&record->epoll_timer,&itimerspec,0,rtsp_recorder_s_record_time_event,this,record_idx))
       {
         throw_error(RECORDER_EPOLL_ERROR);
       }
@@ -110,7 +111,8 @@ int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,epo
       rtsp_client_list_s_remove(&this->client_list,client_idx);
 
       // - schedule next reconnect try timer -
-      if (epoll_s_timer_delay(&this->epoll,5000000000ULL,rtsp_recorder_s_record_time_event,this,a_index,&record->epoll_timer))
+      struct itimerspec itimerspec = {{0,0},{5,0}};
+      if (epoll_s_timer_callback(&this->epoll,&record->epoll_timer,&itimerspec,0,rtsp_recorder_s_record_time_event,this,a_index))
       {
         throw_error(RECORDER_EPOLL_ERROR);
       }
@@ -153,7 +155,8 @@ int rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll
     record->client_idx = c_idx_not_exist;
 
     // - schedule reconnect timer-
-    if (epoll_s_timer_delay(&this->epoll,5000000000ULL,rtsp_recorder_s_record_time_event,this,a_index,&record->epoll_timer))
+    struct itimerspec itimerspec = {{0,0},{5,0}};
+    if (epoll_s_timer_callback(&this->epoll,&record->epoll_timer,&itimerspec,0,rtsp_recorder_s_record_time_event,this,a_index))
     {
       throw_error(RECORDER_EPOLL_ERROR);
     }

@@ -61,7 +61,8 @@ int channel_comm_s_create(channel_comm_s *this,
       }
 
       // - register epoll timer -
-      if (epoll_s_timer_period_now(&this->epoll,100000000ULL,channel_comm_s_client_time_event,this,client_idx,&client->epoll_timer))
+      struct itimerspec itimerspec = {{0,100000000},{0,100000000}};
+      if (epoll_s_timer_callback(&this->epoll,&client->epoll_timer,&itimerspec,0,channel_comm_s_client_time_event,this,client_idx))
       {
         channel_client_list_s_remove(&this->client_list,client_idx);
 
