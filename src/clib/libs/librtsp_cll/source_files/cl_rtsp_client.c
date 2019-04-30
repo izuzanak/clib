@@ -98,10 +98,11 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
 {/*{{{*/
   bc_array_s *msg = &this->in_msg;
 
+  unsigned msg_old_used = msg->used;
+
   // - read message header -
   if (msg->used < 4)
   {
-    unsigned msg_old_used = msg->used;
     if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
     {
       throw_error(RTSP_CLIENT_READ_ERROR);
@@ -120,8 +121,8 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
 
     if (msg->used < pkt_size)
     {
-      unsigned msg_old_used = msg->used;
-      if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
+      unsigned pkt_msg_old_used = msg->used;
+      if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == pkt_msg_old_used)
       {
         throw_error(RTSP_CLIENT_READ_ERROR);
       }
@@ -150,6 +151,15 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
   }
 
   debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s",msg->used,msg->data));
+
+  // - read new data if available -
+  if (msg_old_used == msg->used)
+  {
+    if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
+    {
+      throw_error(RTSP_CLIENT_READ_ERROR);
+    }
+  }
 
   // - parse command response -
   string_s string = {msg->used + 1,msg->data};
