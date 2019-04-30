@@ -14,7 +14,8 @@ include "cl_channel.h"
 #define ERROR_CHANNEL_COMM_CONN_CREATE_ERROR 1
 #define ERROR_CHANNEL_COMM_CONN_EPOLL_ERROR 2
 #define ERROR_CHANNEL_COMM_EPOLL_ERROR 3
-#define ERROR_CHANNEL_COMM_CONN_SCHEDULE_MESSAGE_ERROR 4
+#define ERROR_CHANNEL_COMM_TIMER_READ_ERROR 4
+#define ERROR_CHANNEL_COMM_CONN_SCHEDULE_MESSAGE_ERROR 5
 
 // === definition of generated structures ======================================
 
@@ -62,7 +63,7 @@ channel_comm_s;
 WUR int channel_comm_s_create(channel_comm_s *this,
   unsigned a_count,const char **a_server_ips,const usi *a_server_ports);
 WUR int channel_comm_s_run(channel_comm_s *this);
-WUR int channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
+WUR int channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR int channel_comm_s_client_fd_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR int channel_comm_s_message(void *a_channel_comm,unsigned a_index,const bc_array_s *a_message);
 

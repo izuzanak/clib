@@ -515,34 +515,6 @@ int epoll_s_fd_update(epoll_s *this,
 
 int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout)
 {/*{{{*/
-  epoll_time_events_s *time_events = &this->time_events;
-
-  // - adjust timeout -
-  if (this->time_events.root_idx != c_idx_not_exist)
-  {
-    unsigned time_first_idx = epoll_time_events_s_get_min_value_idx(time_events,time_events->root_idx);
-    ulli time_first = time_events->data[time_first_idx].object.time;
-
-    ulli time_now;
-    if (clock_s_gettime(CLOCK_MONOTONIC,&time_now))
-    {
-      throw_error(EPOLL_GET_TIME_ERROR);
-    }
-
-    if (time_first <= time_now)
-    {
-      a_timeout = 0;
-    }
-    else
-    {
-      int timeout = (time_first - time_now)/1000000;
-
-      if (a_timeout == -1 || timeout < a_timeout)
-      {
-        a_timeout = timeout;
-      }
-    }
-  }
 
   // - call epoll_wait -
   struct epoll_event stack_events[32];
@@ -598,53 +570,6 @@ int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout)
   if (events != stack_events)
   {
     cfree(events);
-  }
-
-  // - process time events -
-  if (time_events->root_idx != c_idx_not_exist)
-  {
-    ulli time_now;
-    if (clock_s_gettime(CLOCK_MONOTONIC,&time_now))
-    {
-      throw_error(EPOLL_GET_TIME_ERROR);
-    }
-
-    unsigned time_idx = epoll_time_events_s_get_min_value_idx(time_events,time_events->root_idx);
-    do {
-
-      // - copy time map intentionaly -
-      epoll_time_map_s time_map = time_events->data[time_idx].object;
-
-      // - if time is greater than actual time -
-      if (time_map.time > time_now)
-      {
-        break;
-      }
-
-      unsigned next_idx = epoll_time_events_s_get_next_idx(time_events,time_idx);
-
-      // - check event callback -
-      epoll_callback_s *callback = &time_map.callback;
-      if (callback->function != NULL)
-      {
-        // - call event callback -
-        if (((epoll_time_callback_t)callback->function)(callback->object,callback->index,time_idx,this))
-        {
-          throw_error(EPOLL_TIMER_CALLBACK_ERROR);
-        }
-      }
-
-      epoll_time_events_s_remove(time_events,time_idx);
-
-      if (time_map.period != 0)
-      {
-        // - reschedule timer -
-        time_map.time += time_map.period;
-        epoll_time_events_s_insert(time_events,&time_map);
-      }
-
-      time_idx = next_idx;
-    } while(time_idx != c_idx_not_exist);
   }
 
   return 0;

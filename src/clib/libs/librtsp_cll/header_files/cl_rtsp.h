@@ -49,15 +49,17 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CONN_SETSOCKOPT_ERROR 14
 #define ERROR_RTSP_CONN_IOCTL_ERROR 15
 #define ERROR_RTSP_CONN_EPOLL_ERROR 16
-#define ERROR_RTSP_CONN_UPDATE_TCP_QUEUE_STATE_ERROR 17
-#define ERROR_RTSP_CONN_UDP_SETUP_ERROR 18
-#define ERROR_RTSP_CONN_MISMATCH_RTSP_TRANSPORT 19
+#define ERROR_RTSP_CONN_TIMER_CREATE_ERROR 17
+#define ERROR_RTSP_CONN_UPDATE_TCP_QUEUE_STATE_ERROR 18
+#define ERROR_RTSP_CONN_UDP_SETUP_ERROR 19
+#define ERROR_RTSP_CONN_MISMATCH_RTSP_TRANSPORT 20
 
 #define ERROR_RTSP_SERVER_INVALID_STATE 1
 #define ERROR_RTSP_SERVER_INVALID_FD 2
 #define ERROR_RTSP_SERVER_LISTEN_ERROR 3
 #define ERROR_RTSP_SERVER_ACCEPT_ERROR 4
 #define ERROR_RTSP_SERVER_CONN_CREATE_ERROR 5
+#define ERROR_RTSP_SERVER_TIMER_READ_ERROR 6
 
 // === constants and definitions ===============================================
 
@@ -229,7 +231,7 @@ WUR int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll);
 WUR int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll);
 WUR int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send);
 WUR librtsp_cll_EXPORT int rtsp_conn_s_process_packet(rtsp_conn_s *this,epoll_s *a_epoll);
-WUR static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
+WUR static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR librtsp_cll_EXPORT int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // -- rtsp_conn_list_s --
@@ -277,7 +279,7 @@ WUR librtsp_cll_EXPORT int rtsp_server_s_create(rtsp_server_s *this,
   rtsp_conn_get_packet_callback_t a_conn_get_packet_callback,
   void *a_cb_object);
 WUR librtsp_cll_EXPORT int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR librtsp_cll_EXPORT int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
+WUR librtsp_cll_EXPORT int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR librtsp_cll_EXPORT int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // === inline methods of generated structures ==================================
@@ -327,13 +329,10 @@ inlines rtsp_setups_s
 inlines rtsp_conn_s
 @end
 
-static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
+static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_index;
-  (void)a_timer;
-
-  // - drop one shot timer -
-  this->epoll_send_timer.timer = c_idx_not_exist;
+  (void)a_epoll_event;
 
   if (rtsp_conn_s_process_packet(this,a_epoll))
   {

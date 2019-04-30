@@ -92,10 +92,16 @@ int channel_comm_s_run(channel_comm_s *this)
   return 0;
 }/*}}}*/
 
-int channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
+int channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
-  (void)a_timer;
   (void)a_epoll;
+
+  // - read timer expiration counter -
+  uint64_t timer_exps;
+  if (read(a_epoll_event->data.fd,&timer_exps,sizeof(timer_exps)) != sizeof(timer_exps))
+  {
+    throw_error(CHANNEL_COMM_TIMER_READ_ERROR);
+  }
 
   channel_comm_s *this = (channel_comm_s *)a_channel_comm;
   channel_client_s *client = &this->client_list.data[a_index].object;

@@ -56,7 +56,7 @@ int rtsp_recorder_s_create(rtsp_recorder_s *this,const char *a_base_dir,unsigned
       }
 
       // - schedule reconnect timer-
-      if (epoll_s_timer_delay(&this->epoll,0,rtsp_recorder_s_record_time_event,this,record_idx,&record->epoll_timer))
+      if (epoll_s_timer_delay(&this->epoll,1ULL,rtsp_recorder_s_record_time_event,this,record_idx,&record->epoll_timer))
       {
         throw_error(RECORDER_EPOLL_ERROR);
       }
@@ -80,18 +80,21 @@ void rtsp_recorder_s_run(rtsp_recorder_s *this)
   } while(g_terminate == 0);
 }/*}}}*/
 
-int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
+int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
-  (void)a_timer;
   (void)a_epoll;
 
   debug_message_6(fprintf(stderr,"rtsp_recorder_s_record_time_event: %u\n",a_index));
 
+  // - read timer expiration counter -
+  uint64_t timer_exps;
+  if (read(a_epoll_event->data.fd,&timer_exps,sizeof(timer_exps)) != sizeof(timer_exps))
+  {
+    throw_error(RECORDER_TIMER_READ_ERROR);
+  }
+
   rtsp_recorder_s *this = (rtsp_recorder_s *)a_rtsp_recorder;
   rtsp_record_s *record = this->records.data + a_index;
-
-  // - drop timer identifier -
-  record->epoll_timer.timer = c_idx_not_exist;
 
   // - if record client does not exist -
   if (record->client_idx == c_idx_not_exist)

@@ -105,12 +105,20 @@ int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a
   return 0;
 }/*}}}*/
 
-int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,unsigned a_timer,epoll_s *a_epoll)
+int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
+
+  // - read timer expiration counter -
+  uint64_t timer_exps;
+  if (read(a_epoll_event->data.fd,&timer_exps,sizeof(timer_exps)) != sizeof(timer_exps))
+  {
+    throw_error(RTSP_SERVER_TIMER_READ_ERROR);
+  }
+
   rtsp_server_s *this = (rtsp_server_s *)a_rtsp_server;
   rtsp_conn_s *conn = &this->conn_list.data[a_index].object;
 
-  if (rtsp_conn_s_time_event(conn,0,a_timer,a_epoll))
+  if (rtsp_conn_s_time_event(conn,0,a_epoll_event,a_epoll))
   {
     // - call conn_drop_callback -
     (void)((rtsp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);

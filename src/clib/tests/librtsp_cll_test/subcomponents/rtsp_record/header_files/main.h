@@ -13,6 +13,7 @@ include "cl_rtsp.h"
 #define ERROR_RECORDER_FILE_WRITE_ERROR 2
 #define ERROR_RECORDER_GET_TIME_ERROR 3
 #define ERROR_RECORDER_EPOLL_ERROR 4
+#define ERROR_RECORDER_TIMER_READ_ERROR 5
 
 // === definition of generated structures ======================================
 
@@ -58,7 +59,7 @@ rtsp_recorder_s;
 WUR int rtsp_recorder_s_create(rtsp_recorder_s *this,const char *a_base_dir,unsigned a_count,
   const char **a_server_ips,const usi *a_server_ports,const char **a_media,const char **a_file_names);
 void rtsp_recorder_s_run(rtsp_recorder_s *this);
-WUR int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,unsigned a_timer,epoll_s *a_epoll);
+WUR int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR int rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR int rtsp_recorder_s_recv_sdp(void *a_rtsp_recorder,unsigned a_index,const bc_array_s *a_src);
 WUR int rtsp_recorder_s_recv_packet(void *a_rtsp_recorder,unsigned a_index,const bc_array_s *a_src);
