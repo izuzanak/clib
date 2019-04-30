@@ -263,7 +263,6 @@ WUR liblinux_cll_EXPORT int epoll_s_fd_update(epoll_s *this,
 WUR static inline int epoll_s_timer_callback(epoll_s *this,
     epoll_timer_s *a_epoll_timer,struct itimerspec *a_itimerspec,int a_flags,
     epoll_fd_callback_t a_callback,void *a_object,unsigned a_index);
-static inline void epoll_s_timer_remove(epoll_s *this,epoll_timer_s *a_epoll_timer);
 WUR liblinux_cll_EXPORT int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout);
 
 // === definition of structure epoll_fd_s ======================================
@@ -799,11 +798,6 @@ static inline int epoll_s_timer_callback(epoll_s *this,
   }
 
   return 0;
-}/*}}}*/
-
-static inline void epoll_s_timer_remove(epoll_s *this,epoll_timer_s *a_epoll_timer)
-{/*{{{*/
-  epoll_timer_s_clear(a_epoll_timer);
 }/*}}}*/
 
 // === inline methods of structure epoll_fd_s ===============================
