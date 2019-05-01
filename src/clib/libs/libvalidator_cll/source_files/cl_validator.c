@@ -577,7 +577,7 @@ state_55_label:
 \
     ERR_CODE;\
 \
-    return ERROR_VALIDATOR_INVALID_VALUE_VALUE;\
+    return ERROR_VALIDATOR_INVALID_VALUE;\
   }\
 }/*}}}*/
 
@@ -593,7 +593,7 @@ state_55_label:
     {\
       ERR_CODE;\
 \
-      return ERROR_VALIDATOR_INVALID_VALUE_VALUE;\
+      return ERROR_VALIDATOR_INVALID_VALUE;\
     }\
   }\
 }/*}}}*/
@@ -698,7 +698,7 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
         {
           VALIDATE_STACKS_PUSH_PROP_KEY();
 
-          throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+          throw_error(VALIDATOR_INVALID_VALUE);
         }
       }/*}}}*/
       break;
@@ -770,7 +770,7 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
         {
           VALIDATE_STACKS_PUSH_PROP_KEY();
 
-          throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+          throw_error(VALIDATOR_INVALID_VALUE);
         }
       }/*}}}*/
       break;
@@ -822,7 +822,7 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
               {
                 VALIDATE_STACKS_PUSH_ITEMS();
 
-                throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+                throw_error(VALIDATOR_INVALID_VALUE);
               }
 
               long long int index = loc_s_int_value(item_key);
@@ -832,7 +832,7 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
               {
                 VALIDATE_STACKS_PUSH_ITEMS();
 
-                throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+                throw_error(VALIDATOR_INVALID_VALUE);
               }
 
               VALIDATE_PAIR_CALL(*var_array_s_at(value_array,index),item_props,
@@ -857,7 +857,7 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
               {
                 VALIDATE_STACKS_PUSH_ITEMS();
 
-                throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+                throw_error(VALIDATOR_INVALID_VALUE);
               }
 
               VALIDATE_PAIR_CALL(item,item_props,
@@ -872,8 +872,99 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
           default:
             VALIDATE_STACKS_PUSH_PROP_KEY();
 
-            throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+            throw_error(VALIDATOR_INVALID_VALUE);
           }
+        }
+      }/*}}}*/
+      break;
+      case c_validator_prop_all_items:
+      {/*{{{*/
+        switch (a_value->v_type)
+        {
+        case c_bi_type_array:
+        {/*{{{*/
+          var_array_s *value_array = loc_s_array_value(a_value);
+
+          if (value_array->used != 0)
+          {
+            var_s *ptr = value_array->data;
+            var_s *ptr_end = ptr + value_array->used;
+            do {
+              VALIDATE_PAIR_CALL(*ptr,prop_value,
+                var_s index = loc_s_int(ptr - value_array->data);
+
+                var_array_s_push_loc(&this->value_stack,index);
+                var_array_s_push_loc(&this->props_stack,index);
+
+                VALIDATE_STACKS_PUSH_PROP_KEY();
+              );
+            } while(++ptr < ptr_end);
+          }
+        }/*}}}*/
+        break;
+        case c_bi_type_dict:
+        {/*{{{*/
+          var_map_tree_s *tree = loc_s_dict_value(a_value);
+
+          if (tree->root_idx != c_idx_not_exist)
+          {
+            var_map_tree_s_node *ptr = tree->data;
+            var_map_tree_s_node *ptr_end = ptr + tree->used;
+            do {
+              if (ptr->valid)
+              {
+                VALIDATE_PAIR_CALL(ptr->object.value,prop_value,
+                  var_array_s_push_loc(&this->value_stack,ptr->object.key);
+                  var_array_s_push_loc(&this->props_stack,ptr->object.key);
+
+                  VALIDATE_STACKS_PUSH_PROP_KEY();
+                );
+              }
+            } while(++ptr < ptr_end);
+          }
+        }/*}}}*/
+        break;
+
+        // - ERROR -
+        default:
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_VALUE);
+        }
+      }/*}}}*/
+      break;
+      case c_validator_prop_all_keys:
+      {/*{{{*/
+        switch (a_value->v_type)
+        {
+        case c_bi_type_dict:
+        {/*{{{*/
+          var_map_tree_s *tree = loc_s_dict_value(a_value);
+
+          if (tree->root_idx != c_idx_not_exist)
+          {
+            var_map_tree_s_node *ptr = tree->data;
+            var_map_tree_s_node *ptr_end = ptr + tree->used;
+            do {
+              if (ptr->valid)
+              {
+                VALIDATE_PAIR_CALL(ptr->object.key,prop_value,
+                  var_array_s_push_loc(&this->value_stack,ptr->object.key);
+                  var_array_s_push_loc(&this->props_stack,ptr->object.key);
+
+                  VALIDATE_STACKS_PUSH_PROP_KEY();
+                );
+              }
+            } while(++ptr < ptr_end);
+          }
+        }/*}}}*/
+        break;
+
+        // - ERROR -
+        default:
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_VALUE);
         }
       }/*}}}*/
       break;
