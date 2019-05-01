@@ -9,7 +9,16 @@ include "cl_validator.h"
 
 // === test execution functions ================================================
 
-void test_type();
+void test_prop_type();
+void test_prop_equal();
+void test_prop_not_equal();
+void test_prop_lesser();
+void test_prop_greater();
+void test_prop_lesser_equal();
+void test_prop_greater_equal();
+void test_prop_reference();
+void test_prop_regex();
+void test_prop_items();
 
 // === program entry function ==================================================
 

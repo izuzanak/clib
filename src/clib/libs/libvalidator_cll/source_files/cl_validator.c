@@ -559,6 +559,45 @@ state_55_label:
 
 }/*}}}*/
 
+#define VALIDATE_PAIR_REFERENCE(VALUE,PROPS_REF,ERR_CODE) \
+{/*{{{*/\
+  var_s props = loc_s_dict_get(this->schema,PROPS_REF);\
+\
+  /* - ERROR - */\
+  if (props == NULL)\
+  {\
+    ERR_CODE;\
+\
+    throw_error(VALIDATOR_INVALID_VALIDATION_ENTRY);\
+  }\
+\
+  if (validator_s_validate_pair(this,VALUE,props))\
+  {\
+    var_array_s_push_loc(&this->props_stack,PROPS_REF);\
+\
+    ERR_CODE;\
+\
+    return ERROR_VALIDATOR_INVALID_VALUE_VALUE;\
+  }\
+}/*}}}*/
+
+#define VALIDATE_PAIR_CALL(VALUE,PROPS,ERR_CODE) \
+{/*{{{*/\
+  if (PROPS->v_type == c_bi_type_string)\
+  {\
+    VALIDATE_PAIR_REFERENCE(VALUE,PROPS,ERR_CODE);\
+  }\
+  else\
+  {\
+    if (validator_s_validate_pair(this,VALUE,PROPS))\
+    {\
+      ERR_CODE;\
+\
+      return ERROR_VALIDATOR_INVALID_VALUE_VALUE;\
+    }\
+  }\
+}/*}}}*/
+
 int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
 {/*{{{*/
 
@@ -619,6 +658,222 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
           VALIDATE_STACKS_PUSH_PROP_KEY();
 
           throw_error(VALIDATOR_INVALID_VALUE_TYPE);
+        }
+      }/*}}}*/
+      break;
+      case c_validator_prop_equal:
+      case c_validator_prop_not_equal:
+      case c_validator_prop_lesser:
+      case c_validator_prop_greater:
+      case c_validator_prop_lesser_equal:
+      case c_validator_prop_greater_equal:
+      {/*{{{*/
+        int result = loc_s_order(a_value,prop_value);
+        int ok;
+
+        switch (prop_id)
+        {
+          case c_validator_prop_equal:
+            ok = result == 0;
+            break;
+          case c_validator_prop_not_equal:
+            ok = result != 0;
+            break;
+          case c_validator_prop_lesser:
+            ok = result < 0;
+            break;
+          case c_validator_prop_greater:
+            ok = result > 0;
+            break;
+          case c_validator_prop_lesser_equal:
+            ok = result <= 0;
+            break;
+          case c_validator_prop_greater_equal:
+            ok = result >= 0;
+            break;
+        }
+
+        // - ERROR -
+        if (!ok)
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+        }
+      }/*}}}*/
+      break;
+      case c_validator_prop_reference:
+      {/*{{{*/
+
+        // - ERROR -
+        if (prop_value->v_type != c_bi_type_string)
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_PROPERTY_TYPE);
+        }
+
+        VALIDATE_PAIR_REFERENCE(a_value,prop_value,
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+        );
+      }/*}}}*/
+      break;
+      case c_validator_prop_regex:
+      {/*{{{*/
+
+        // - ERROR -
+        if (prop_value->v_type != c_bi_type_string)
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_PROPERTY_TYPE);
+        }
+
+        // - ERROR -
+        if (a_value->v_type != c_bi_type_string)
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_VALUE_TYPE);
+        }
+
+        // - retrieve regular expression index -
+        const string_s *string = loc_s_string_value(prop_value);
+        unsigned regex_idx = string_tree_s_unique_insert(&this->regex_map,string);
+
+        regex_s *regex;
+        if (regex_idx >= this->regex_list.used)
+        {
+          while (this->regex_list.used <= regex_idx)
+          {
+            regex_array_s_push_blank(&this->regex_list);
+          }
+
+          regex = regex_array_s_last(&this->regex_list);
+
+          // - ERROR -
+          if (regex_s_create(regex,string->data))
+          {
+            VALIDATE_STACKS_PUSH_PROP_KEY();
+
+            throw_error(VALIDATOR_INVALID_PROPERTY_REGULAR_EXPRESSION);
+          }
+        }
+        else
+        {
+          regex = regex_array_s_at(&this->regex_list,regex_idx);
+        }
+
+        // - ERROR -
+        regmatch_s match;
+        if (!regex_s_match(regex,loc_s_string_value(a_value)->data,&match))
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+        }
+      }/*}}}*/
+      break;
+      case c_validator_prop_items:
+      {/*{{{*/
+
+        // - ERROR -
+        if (prop_value->v_type != c_bi_type_array)
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_PROPERTY_TYPE);
+        }
+
+        var_array_s *item_array = loc_s_array_value(prop_value);
+
+        // - ERROR -
+        if (item_array->used & 0x01)
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_PROPERTIES_ARRAY_SIZE);
+        }
+
+#define VALIDATE_STACKS_PUSH_ITEMS() \
+/*{{{*/\
+  var_array_s_push(&this->value_stack,&item_key);\
+  var_array_s_push(&this->props_stack,&item_key);\
+\
+  VALIDATE_STACKS_PUSH_PROP_KEY();\
+/*}}}*/
+
+        if (item_array->used != 0)
+        {
+          switch (a_value->v_type)
+          {
+          case c_bi_type_array:
+          {/*{{{*/
+            var_array_s *value_array = loc_s_array_value(a_value);
+
+            var_s *i_ptr = item_array->data;
+            var_s *i_ptr_end = i_ptr + item_array->used;
+            do {
+              var_s item_key = i_ptr[0];
+              var_s item_props = i_ptr[1];
+
+              // - ERROR -
+              if (item_key->v_type != c_bi_type_integer)
+              {
+                VALIDATE_STACKS_PUSH_ITEMS();
+
+                throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+              }
+
+              long long int index = loc_s_int_value(item_key);
+
+              // - ERROR -
+              if (index >= value_array->used)
+              {
+                VALIDATE_STACKS_PUSH_ITEMS();
+
+                throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+              }
+
+              VALIDATE_PAIR_CALL(*var_array_s_at(value_array,index),item_props,
+                VALIDATE_STACKS_PUSH_ITEMS();
+              );
+
+            } while((i_ptr += 2) < i_ptr_end);
+          }/*}}}*/
+          break;
+          case c_bi_type_dict:
+          {/*{{{*/
+            var_s *i_ptr = item_array->data;
+            var_s *i_ptr_end = i_ptr + item_array->used;
+            do {
+              var_s item_key = i_ptr[0];
+              var_s item_props = i_ptr[1];
+
+              var_s item = loc_s_dict_get(a_value,item_key);
+
+              // - ERROR -
+              if (item == NULL)
+              {
+                VALIDATE_STACKS_PUSH_ITEMS();
+
+                throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+              }
+
+              VALIDATE_PAIR_CALL(item,item_props,
+                VALIDATE_STACKS_PUSH_ITEMS();
+              );
+
+            } while((i_ptr += 2) < i_ptr_end);
+          }/*}}}*/
+          break;
+
+          // - ERROR -
+          default:
+            VALIDATE_STACKS_PUSH_PROP_KEY();
+
+            throw_error(VALIDATOR_INVALID_VALUE_VALUE);
+          }
         }
       }/*}}}*/
       break;

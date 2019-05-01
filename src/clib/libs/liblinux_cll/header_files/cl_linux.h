@@ -73,7 +73,6 @@ include "cl_time.h"
 #define ERROR_EPOLL_TIMER_CREATE_ERROR 8
 #define ERROR_EPOLL_TIMER_SETTIME_ERROR 9
 #define ERROR_EPOLL_FD_CALLBACK_ERROR 10
-#define ERROR_EPOLL_TIMER_CALLBACK_ERROR 11
 
 // === constants and definitions ===============================================
 
