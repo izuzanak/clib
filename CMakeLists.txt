@@ -114,10 +114,10 @@ else()
 endif()
 
 # - process libraries -
-process_components("clib/libs" "_cll$")
+process_components("src/clib/libs" "_cll$")
 
 # - process tests -
-process_components("clib/tests" "_cll$")
+process_components("src/clib/tests" "_cll$")
 
 # - process programs -
 

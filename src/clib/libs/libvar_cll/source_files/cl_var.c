@@ -198,7 +198,7 @@ void var_map_tree_s_to_json_nice(const var_map_tree_s *this,json_nice_s *a_json_
 #endif
 
 // === methods of loc_s types ==================================================
-//
+
 // - type ARRAY -
 int loc_s_array___order(const var_array_s *a_first,const var_array_s *a_second)
 {/*{{{*/
