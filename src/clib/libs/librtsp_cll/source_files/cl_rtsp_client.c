@@ -72,8 +72,6 @@ int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this)
     throw_error(RTSP_CLIENT_READ_ERROR);
   }
 
-  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s",msg->used,msg->data));
-
   // - parse command response -
   string_s string = {msg->used + 1,msg->data};
 
@@ -88,6 +86,8 @@ int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this)
   {
     throw_error(RTSP_CONN_PARSE_ERROR);
   }
+
+  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s",this->parser.input_idx,msg->data));
 
   bc_array_s_tail(msg,msg->used - this->parser.input_idx);
 
@@ -150,8 +150,6 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
     return 0;
   }
 
-  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s",msg->used,msg->data));
-
   // - read new data if available -
   if (msg_old_used == msg->used)
   {
@@ -175,6 +173,8 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
   {
     throw_error(RTSP_CONN_PARSE_ERROR);
   }
+
+  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s",this->parser.input_idx,msg->data));
 
   switch (this->parser.command)
   {

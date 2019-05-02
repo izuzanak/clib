@@ -113,8 +113,6 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
     return 0;
   }
 
-  debug_message_6(fprintf(stderr,"rtsp_conn_s <<<<<\n%.*s",msg->used,msg->data));
-
   // - parse command -
   string_s string = {msg->used + 1,msg->data};
 
@@ -129,6 +127,8 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
   {
     throw_error(RTSP_CONN_PARSE_ERROR);
   }
+
+  debug_message_6(fprintf(stderr,"rtsp_conn_s <<<<<\n%.*s",this->parser.input_idx,msg->data));
 
   switch (this->parser.command)
   {
