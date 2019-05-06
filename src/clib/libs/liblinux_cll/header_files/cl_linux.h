@@ -17,6 +17,7 @@ include "cl_time.h"
 #include <sys/stat.h>
 #include <sys/timerfd.h>
 #include <sys/types.h>
+#include <sys/uio.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -100,6 +101,7 @@ static inline void fd_s_to_string(const fd_s *this,bc_array_s *a_trg);
 #endif
 
 WUR liblinux_cll_EXPORT int fd_s_write(const fd_s *this,const void *a_src,size_t a_size);
+WUR liblinux_cll_EXPORT int fd_s_writev(const fd_s *this,struct iovec *a_iov,int a_iovcnt,size_t a_size);
 WUR liblinux_cll_EXPORT int fd_s_read(const fd_s *this,bc_array_s *a_trg);
 WUR liblinux_cll_EXPORT int fd_s_read_cnt(const fd_s *this,size_t a_count,bc_array_s *a_trg);
 

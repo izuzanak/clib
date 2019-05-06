@@ -28,6 +28,45 @@ int fd_s_write(const fd_s *this,const void *a_src,size_t a_size)
   return 0;
 }/*}}}*/
 
+int fd_s_writev(const fd_s *this,struct iovec *a_iov,int a_iovcnt,size_t a_size)
+{/*{{{*/
+  debug_assert(*this != -1);
+
+  ssize_t cnt;
+  size_t writed = 0;
+
+  do
+  {
+    // - ERROR -
+    if ((cnt = writev(*this,a_iov,a_iovcnt)) == -1)
+    {
+      throw_error(FD_WRITE_ERROR);
+    }
+
+    // - all data writed -
+    if ((writed += cnt) >= a_size)
+    {
+      break;
+    }
+
+    // - remove completely writed buffers -
+    while (cnt >= a_iov->iov_len)
+    {
+      cnt -= a_iov->iov_len;
+
+      ++a_iov;
+      --a_iovcnt;
+    }
+
+    // - adjust partially writed buffer -
+    a_iov->iov_base += cnt;
+    a_iov->iov_len -= cnt;
+
+  } while(1);
+
+  return 0;
+}/*}}}*/
+
 int fd_s_read(const fd_s *this,bc_array_s *a_trg)
 {/*{{{*/
   debug_assert(*this != -1);
