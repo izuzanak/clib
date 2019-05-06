@@ -420,34 +420,14 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
   this->pkt_channel = RTP_PKT_GET_CHANNEL(this->packet.data);
 
   // - retrieve channel  -
-  rtsp_setup_s *rtsp_setup;
   switch (this->pkt_channel)
   {
   case 0:
-    rtsp_setup = rtsp_setups_s_at(&this->setups,0);
-    break;
   case 2:
-    rtsp_setup = rtsp_setups_s_at(&this->setups,1);
     break;
   default:
     throw_error(RTSP_CONN_INVALID_PACKET_CHANNEL);
   }
-
-  unsigned time_stamp = RTP_PKT_GET_TIME_STAMP(this->packet.data) + rtsp_setup->time_stamp_offset;
-
-  // - fix invalid time stamp -
-  if (time_stamp < rtsp_setup->last_time_stamp)
-  {
-    rtsp_setup->time_stamp_offset = rtsp_setup->last_time_stamp - RTP_PKT_GET_TIME_STAMP(this->packet.data);
-    time_stamp = rtsp_setup->last_time_stamp;
-  }
-
-  // - update last time stamp -
-  rtsp_setup->last_time_stamp = time_stamp;
-
-  // - modify packet data -
-  RTP_PKT_SET_SEQUENCE(this->packet.data,rtsp_setup->packet_sequence++);
-  RTP_PKT_SET_TIME_STAMP(this->packet.data,time_stamp);
 
   // - schedule packet send timer -
   this->packet_time += RTSP_DELAY_TO_NANOSEC(delay);
@@ -478,6 +458,26 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
   default:
     return 0;
   }
+
+#define RTSP_CONN_S_SEND_PACKET_MODIFY_PACKET() \
+/*{{{*/\
+  unsigned old_time_stamp = RTP_PKT_GET_TIME_STAMP(this->packet.data);\
+  unsigned time_stamp = old_time_stamp + rtsp_setup->time_stamp_offset;\
+\
+  /* - fix invalid time stamp - */\
+  if (time_stamp < rtsp_setup->last_time_stamp)\
+  {\
+    rtsp_setup->time_stamp_offset = rtsp_setup->last_time_stamp - RTP_PKT_GET_TIME_STAMP(this->packet.data);\
+    time_stamp = rtsp_setup->last_time_stamp;\
+  }\
+\
+  /* - update last time stamp - */\
+  rtsp_setup->last_time_stamp = time_stamp;\
+\
+  /* - modify packet data - */\
+  RTP_PKT_SET_SEQUENCE(this->packet.data,rtsp_setup->packet_sequence++);\
+  RTP_PKT_SET_TIME_STAMP(this->packet.data,time_stamp);\
+/*}}}*/
 
   if (this->tcp)
   {
@@ -511,11 +511,27 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
     // - update output queue counter -
     rtsp_setup->tcp_outq_space -= this->packet.used;
 
-    return fd_s_write(&this->epoll_fd.fd,this->packet.data,this->packet.used);
+    // - modify packet sequence and time stamp -
+    RTSP_CONN_S_SEND_PACKET_MODIFY_PACKET();
+
+    int result = fd_s_write(&this->epoll_fd.fd,this->packet.data,this->packet.used);
+
+    // - reset time stamp -
+    RTP_PKT_SET_TIME_STAMP(this->packet.data,old_time_stamp);
+
+    return result;
   }
 
-  return socket_s_sendto(&rtsp_setup->udp_data.fd,&rtsp_setup->udp_data_addr,
+  // - modify packet sequence and time stamp -
+  RTSP_CONN_S_SEND_PACKET_MODIFY_PACKET();
+
+  int result = socket_s_sendto(&rtsp_setup->udp_data.fd,&rtsp_setup->udp_data_addr,
       this->packet.data + 4,this->packet.used - (4));
+
+  // - reset time stamp -
+  RTP_PKT_SET_TIME_STAMP(this->packet.data,old_time_stamp);
+
+  return result;
 }/*}}}*/
 
 int rtsp_conn_s_process_packet(rtsp_conn_s *this,epoll_s *a_epoll)
