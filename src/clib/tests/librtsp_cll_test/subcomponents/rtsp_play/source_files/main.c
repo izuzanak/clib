@@ -186,7 +186,7 @@ int rtsp_player_s_conn_playing(void *a_rtsp_player,unsigned a_index,ulli a_sessi
   return 0;
 }/*}}}*/
 
-int rtsp_player_s_conn_get_packet(void *a_rtsp_player,unsigned a_index,ulli *a_delay,static_buffer_s *a_trg)
+int rtsp_player_s_conn_get_packet(void *a_rtsp_player,unsigned a_index,ulli *a_delay,bc_block_s *a_trg)
 {/*{{{*/
   (void)a_rtsp_player;
   (void)a_index;

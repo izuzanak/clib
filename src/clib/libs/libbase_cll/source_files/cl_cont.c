@@ -40,6 +40,11 @@ void bc_array_s_append_format(bc_array_s *this,const char *a_format,...)
   }
 }/*}}}*/
 
+// -- bc_block_s --
+@begin
+methods bc_block_s
+@end
+
 // -- ui_array_s --
 @begin
 methods ui_array_s

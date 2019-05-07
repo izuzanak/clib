@@ -96,25 +96,14 @@ typedef int (*rtsp_recv_sdp_callback_t)(void *a_object,unsigned a_index,const bc
 typedef int (*rtsp_recv_packet_callback_t)(void *a_object,unsigned a_index,const bc_array_s *a_src);
 
 typedef struct rtsp_server_s rtsp_server_s;
-typedef struct static_buffer_s static_buffer_s;
 typedef int (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_drop_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,const char *a_url,bc_array_s *a_trg);
 typedef int (*rtsp_conn_check_media_callback_t)(void *a_object,unsigned a_index,const char *a_url);
 typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session);
-typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,ulli *a_delay,static_buffer_s *a_trg);
+typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,ulli *a_delay,bc_block_s *a_trg);
 
 // === definition of generated structures ======================================
-
-// -- static_buffer_s --
-@begin
-struct
-<
-bc_pointer:data
-ui:size
->
-static_buffer_s;
-@end
 
 // -- rtsp_client_s --
 
@@ -222,7 +211,7 @@ bc_array_s:out_msg
 rtsp_parser_s:parser
 
 uc:pkt_channel
-static_buffer_s:packet
+bc_block_s:packet
 ulli:packet_time
 
 ui:state
@@ -294,11 +283,6 @@ WUR librtsp_cll_EXPORT int rtsp_server_s_conn_time_event(void *a_rtsp_server,uns
 WUR librtsp_cll_EXPORT int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // === inline methods of generated structures ==================================
-
-// -- static_buffer_s --
-@begin
-inlines static_buffer_s
-@end
 
 // -- rtsp_client_s --
 @begin

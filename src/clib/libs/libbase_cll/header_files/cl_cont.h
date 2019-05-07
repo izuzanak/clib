@@ -31,6 +31,16 @@ static inline void bc_array_s_tail(bc_array_s *this,unsigned a_count);
 bc_array_s;
 @end
 
+// -- bc_block_s --
+@begin
+struct
+<
+bc_pointer:data
+ui:size
+>
+bc_block_s;
+@end
+
 // -- ui_array_s --
 @begin
 array<ui>
@@ -176,6 +186,11 @@ static inline void bc_array_s_tail(bc_array_s *this,unsigned a_count)
 
   this->used = a_count;
 }/*}}}*/
+
+// -- bc_block_s --
+@begin
+inlines bc_block_s
+@end
 
 // -- ui_array_s --
 @begin

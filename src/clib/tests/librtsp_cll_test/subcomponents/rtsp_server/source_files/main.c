@@ -76,7 +76,7 @@ int conn_playing(void *a_rtsp_server,unsigned a_index,ulli a_session)
   return 0;
 }/*}}}*/
 
-int conn_get_packet(void *a_rtsp_server,unsigned a_index,ulli *a_delay,static_buffer_s *a_trg) // NOLINT
+int conn_get_packet(void *a_rtsp_server,unsigned a_index,ulli *a_delay,bc_block_s *a_trg) // NOLINT
 {/*{{{*/
   (void)a_rtsp_server;
   (void)a_index;
