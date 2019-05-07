@@ -186,28 +186,16 @@ int rtsp_player_s_conn_playing(void *a_rtsp_player,unsigned a_index,ulli a_sessi
   return 0;
 }/*}}}*/
 
-int rtsp_player_s_conn_get_packet(void *a_rtsp_player,unsigned a_index,ulli *a_delay,bc_array_s *a_trg)
+int rtsp_player_s_conn_get_packet(void *a_rtsp_player,unsigned a_index,ulli *a_delay,static_buffer_s *a_trg)
 {/*{{{*/
+  (void)a_rtsp_player;
+  (void)a_index;
+  (void)a_delay;
+  (void)a_trg;
+
   debug_message_6(fprintf(stderr,"rtsp_player_s_conn_get_packet: %u\n",a_index));
 
-  rtsp_player_s *this = (rtsp_player_s *)a_rtsp_player;
-  rtsp_reader_s *reader = this->readers.data + a_index;
-
-  if (stream_s_read_cnt(&reader->stream_file,a_trg,sizeof(rtsp_pkt_delay_t) + 4))
-  {
-    throw_error(PLAYER_FILE_READ_ERROR);
-  }
-
-  usi pkt_size = ntohs(*((usi *)(a_trg->data + sizeof(rtsp_pkt_delay_t) + 2)));
-
-  if (stream_s_read_cnt(&reader->stream_file,a_trg,pkt_size))
-  {
-    throw_error(PLAYER_FILE_READ_ERROR);
-  }
-
-  *a_delay = *((rtsp_pkt_delay_t *)a_trg->data);
-
-  return 0;
+  return 1;
 }/*}}}*/
 
 // === global functions ========================================================

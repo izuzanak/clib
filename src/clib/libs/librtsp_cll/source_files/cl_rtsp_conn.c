@@ -408,7 +408,6 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
   rtsp_server_s *server = (rtsp_server_s *)this->server;
 
   ulli delay;
-  this->packet.used = 0;
 
   // - call conn_get_packet_callback -
   if (((rtsp_conn_get_packet_callback_t)server->conn_get_packet_callback)(
@@ -506,15 +505,15 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
       }
     }
 
-    debug_assert(this->packet.used <= RTSP_TCP_OUTPUT_WRITE_LIMIT);
+    debug_assert(this->packet.size <= RTSP_TCP_OUTPUT_WRITE_LIMIT);
 
     // - update output queue counter -
-    rtsp_setup->tcp_outq_space -= this->packet.used;
+    rtsp_setup->tcp_outq_space -= this->packet.size;
 
     // - modify packet sequence and time stamp -
     RTSP_CONN_S_SEND_PACKET_MODIFY_PACKET();
 
-    int result = fd_s_write(&this->epoll_fd.fd,this->packet.data,this->packet.used);
+    int result = fd_s_write(&this->epoll_fd.fd,this->packet.data,this->packet.size);
 
     // - reset time stamp -
     RTP_PKT_SET_TIME_STAMP(this->packet.data,old_time_stamp);
@@ -526,7 +525,7 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
   RTSP_CONN_S_SEND_PACKET_MODIFY_PACKET();
 
   int result = socket_s_sendto(&rtsp_setup->udp_data.fd,&rtsp_setup->udp_data_addr,
-      this->packet.data + 4,this->packet.used - (4));
+      this->packet.data + 4,this->packet.size - (4));
 
   // - reset time stamp -
   RTP_PKT_SET_TIME_STAMP(this->packet.data,old_time_stamp);

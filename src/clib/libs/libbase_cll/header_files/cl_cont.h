@@ -110,6 +110,7 @@ BASIC_TYPE_TO_STRING_DEFINE(lli);
 BASIC_TYPE_TO_STRING_DEFINE(ulli);
 BASIC_TYPE_TO_STRING_DEFINE(bd);
 BASIC_TYPE_TO_STRING_DEFINE(pointer);
+BASIC_TYPE_TO_STRING_DEFINE(bc_pointer);
 
 // === definition of to_json methods for basic data types ======================
 
@@ -321,6 +322,7 @@ BASIC_TYPE_TO_STRING_INLINE(lli,"%" HOST_LL_FORMAT "d");
 BASIC_TYPE_TO_STRING_INLINE(ulli,"%" HOST_LL_FORMAT "u");
 BASIC_TYPE_TO_STRING_INLINE(bd,"%f");
 BASIC_TYPE_TO_STRING_INLINE(pointer,"%p");
+BASIC_TYPE_TO_STRING_INLINE(bc_pointer,"%p");
 
 #endif
 

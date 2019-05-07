@@ -229,8 +229,11 @@
 
 // - pointer typedef -
 typedef void * pointer;
+typedef char * bc_pointer;
+
 @begin
 define pointer basic
+define bc_pointer basic
 @end
 
 #endif
