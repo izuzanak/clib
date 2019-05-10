@@ -470,16 +470,6 @@ methods epoll_fd_event_s
 methods epoll_fd_events_s
 @end
 
-// -- epoll_time_map_s --
-@begin
-methods epoll_time_map_s
-@end
-
-// -- epoll_time_events_s --
-@begin
-methods epoll_time_events_s
-@end
-
 // -- epoll_s --
 @begin
 methods epoll_s

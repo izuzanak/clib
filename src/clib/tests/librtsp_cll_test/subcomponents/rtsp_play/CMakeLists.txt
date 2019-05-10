@@ -6,7 +6,6 @@ if(TARGET librtsp_cll)
     "${CMAKE_CURRENT_SOURCE_DIR}/src/clib/libs/libbase_cll/header_files"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/clib/libs/libsys_cll/header_files"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/clib/libs/libregex_cll/header_files"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/clib/libs/libtime_cll/header_files"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/clib/libs/liblinux_cll/header_files"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/clib/libs/librtsp_cll/header_files")
   set(CONF_INCLUDE_DIRS)

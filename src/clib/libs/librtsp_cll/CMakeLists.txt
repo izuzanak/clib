@@ -8,6 +8,7 @@ if(OS_LINUX)
   set(CONF_INCLUDE_DIRS)
   set(CONF_COMP_DEFS)
   set(CONF_LINK_LIBS
+    libtime_cll
     liblinux_cll)
 endif()
 

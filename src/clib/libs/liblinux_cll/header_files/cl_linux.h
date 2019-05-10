@@ -3,7 +3,7 @@
 #define __CL_LINUX_H
 
 @begin
-include "cl_time.h"
+include "cl_struct.h"
 @end
 
 #include <aio.h>
@@ -224,22 +224,6 @@ epoll_fd_event_s;
 // -- epoll_fd_events_s --
 @begin
 array<epoll_fd_event_s> epoll_fd_events_s;
-@end
-
-// -- epoll_time_map_s --
-@begin
-struct
-<
-ulli:time
-ulli:period
-epoll_callback_s:callback
->
-epoll_time_map_s;
-@end
-
-// -- epoll_time_events_s --
-@begin
-safe_rb_tree<epoll_time_map_s> epoll_time_events_s;
 @end
 
 // -- epoll_s --
@@ -718,26 +702,6 @@ inlines epoll_fd_event_s
 @begin
 inlines epoll_fd_events_s
 @end
-
-// -- epoll_time_map_s --
-@begin
-inlines epoll_time_map_s
-@end
-
-// -- epoll_time_events_s --
-@begin
-inlines epoll_time_events_s
-@end
-
-static inline int epoll_time_events_s___compare_value(const epoll_time_events_s *this,const epoll_time_map_s *a_first,const epoll_time_map_s *a_second)
-{/*{{{*/
-  (void)this;
-
-  ulli f_time = a_first->time;
-  ulli s_time = a_second->time;
-
-  return f_time < s_time ? -1 : f_time > s_time ? 1 : 0;
-}/*}}}*/
 
 // -- epoll_s --
 @begin
