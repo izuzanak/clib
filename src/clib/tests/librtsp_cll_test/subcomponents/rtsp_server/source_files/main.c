@@ -58,13 +58,14 @@ int conn_get_sdp(void *a_rtsp_server,unsigned a_index,const char *a_url,bc_array
   return 0;
 }/*}}}*/
 
-int conn_check_media(void *a_rtsp_server,unsigned a_index,const char *a_url)
+int conn_check_media(void *a_rtsp_server,unsigned a_index,const char *a_url,unsigned *a_channel)
 {/*{{{*/
   (void)a_rtsp_server;
   (void)a_index;
   (void)a_url;
+  (void)a_channel;
 
-  return 0;
+  return 1;
 }/*}}}*/
 
 int conn_playing(void *a_rtsp_server,unsigned a_index,ulli a_session)

@@ -81,13 +81,13 @@ int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this)
     return 0;
   }
 
+  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s\n",this->parser.input_idx,msg->data));
+
   // - parse process command response -
   if (rtsp_parser_s_parse(&this->parser,&string,1))
   {
     throw_error(RTSP_CONN_PARSE_ERROR);
   }
-
-  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s",this->parser.input_idx,msg->data));
 
   bc_array_s_tail(msg,msg->used - this->parser.input_idx);
 
@@ -168,13 +168,13 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
     return 0;
   }
 
+  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s\n",this->parser.input_idx,msg->data));
+
   // - parse process command response -
   if (rtsp_parser_s_parse(&this->parser,&string,1))
   {
     throw_error(RTSP_CONN_PARSE_ERROR);
   }
-
-  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s",this->parser.input_idx,msg->data));
 
   switch (this->parser.command)
   {
@@ -223,7 +223,7 @@ int rtsp_client_s_recv_sdp(rtsp_client_s *this)
     }
   }
 
-  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s",msg->used,msg->data));
+  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s\n",msg->used,msg->data));
 
   // - call recv_sdp_callback -
   if (((rtsp_recv_sdp_callback_t)this->recv_sdp_callback)(this->cb_object,this->cb_index,msg))

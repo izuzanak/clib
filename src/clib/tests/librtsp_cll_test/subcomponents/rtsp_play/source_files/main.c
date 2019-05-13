@@ -140,37 +140,16 @@ int rtsp_player_s_conn_get_sdp(void *a_rtsp_player,unsigned a_index,const char *
   return 0;
 }/*}}}*/
 
-int rtsp_player_s_conn_check_media(void *a_rtsp_player,unsigned a_index,const char *a_url)
+int rtsp_player_s_conn_check_media(void *a_rtsp_player,unsigned a_index,const char *a_url,unsigned *a_channel)
 {/*{{{*/
+  (void)a_rtsp_player;
+  (void)a_index;
+  (void)a_url;
+  (void)a_channel;
+
   debug_message_6(fprintf(stderr,"rtsp_player_s_conn_check_media: %u\n",a_index));
 
-  rtsp_player_s *this = (rtsp_player_s *)a_rtsp_player;
-  rtsp_reader_s *reader = this->readers.data + a_index;
-
-  if (reader->stream_file == NULL)
-  {
-    // - retrieve media name from url -
-    if (!regex_s_match_n(&this->url_path_regex,a_url,2,&this->match_array) ||
-        this->match_array.used != 2)
-    {
-      throw_error(PLAYER_INVALID_MEDIA_URL);
-    }
-
-    this->buffer.used = 0;
-    bc_array_s_append_format(&this->buffer,"%s/%s.stream",this->base_dir.data,a_url + this->match_array.data[1].rm_so);
-    bc_array_s_push(&this->buffer,'\0');
-
-    struct stat statbuf;
-    if (stat(this->buffer.data,&statbuf))
-    {
-      throw_error(PLAYER_INVALID_MEDIA_URL);
-    }
-
-    if (file_s_open(&reader->stream_file,this->buffer.data,"rb"))
-    {
-      throw_error(PLAYER_FILE_OPEN_ERROR);
-    }
-  }
+  throw_error(PLAYER_INVALID_MEDIA_URL);
 
   return 0;
 }/*}}}*/

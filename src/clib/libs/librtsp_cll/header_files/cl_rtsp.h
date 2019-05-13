@@ -68,6 +68,7 @@ include "cl_rtsp_sdp_parser.h"
 #define RTSP_TCP_OUTPUT_WRITE_LIMIT 32768
 
 #define RTP_PKT_GET_CHANNEL(PACKET) ((PACKET)[1])
+#define RTP_PKT_SET_CHANNEL(PACKET,VALUE) ((PACKET)[1] = (VALUE))
 #define RTP_PKT_GET_SEQUENCE(PACKET) ntohs(*((usi *)((PACKET) + 6)))
 #define RTP_PKT_SET_SEQUENCE(PACKET,VALUE) *((usi *)((PACKET) + 6)) = htons(VALUE)
 #define RTP_PKT_GET_TIME_STAMP(PACKET) ntohl(*((ui *)((PACKET) + 8)))
@@ -91,6 +92,7 @@ typedef unsigned rtsp_pkt_delay_t;
 #define RTSP_DELAY_TO_NANOSEC(DELAY) ((DELAY)*1000ULL)
 #define RTSP_DELAY_FROM_NANOSEC(NANOSEC) ((NANOSEC)/1000ULL)
 #define RTSP_ONE_SECOND_DELAY 1000000ULL
+#define RTSP_HALF_SECOND_DELAY 500000ULL
 
 typedef struct rtsp_client_s rtsp_client_s;
 typedef int (*rtsp_recv_sdp_callback_t)(void *a_object,unsigned a_index,const bc_array_s *a_src);
@@ -100,7 +102,7 @@ typedef struct rtsp_server_s rtsp_server_s;
 typedef int (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_drop_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,const char *a_url,bc_array_s *a_trg);
-typedef int (*rtsp_conn_check_media_callback_t)(void *a_object,unsigned a_index,const char *a_url);
+typedef int (*rtsp_conn_check_media_callback_t)(void *a_object,unsigned a_index,const char *a_url,unsigned *a_channel);
 typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session);
 typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,ulli *a_delay,bc_block_s *a_trg);
 
@@ -219,6 +221,7 @@ ui:state
 ui:sequence
 ulli:session
 rtsp_setups_s:setups
+ui_array_s:setup_map
 bi:tcp
 >
 rtsp_conn_s;

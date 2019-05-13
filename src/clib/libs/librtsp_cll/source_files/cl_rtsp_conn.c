@@ -122,13 +122,13 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
     return 0;
   }
 
+  debug_message_6(fprintf(stderr,"rtsp_conn_s <<<<<\n%.*s\n",this->parser.input_idx,msg->data));
+
   // - parse process command -
   if (rtsp_parser_s_parse(&this->parser,&string,1))
   {
     throw_error(RTSP_CONN_PARSE_ERROR);
   }
-
-  debug_message_6(fprintf(stderr,"rtsp_conn_s <<<<<\n%.*s",this->parser.input_idx,msg->data));
 
   switch (this->parser.command)
   {
@@ -192,12 +192,22 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
 
         // - check unicast -
         // - call conn_check_media_callback -
+        unsigned channel = c_idx_not_exist;
         if (this->parser.unicast == 0 ||
             ((rtsp_conn_check_media_callback_t)server->conn_check_media_callback)(
-              server->cb_object,this->index,this->parser.url_rtsp))
+              server->cb_object,this->index,this->parser.url_rtsp,&channel) ||
+              channel == c_idx_not_exist)
         {
           throw_error(RTSP_CONN_CALLBACK_ERROR);
         }
+
+        // - update channel to setup map -
+        while (this->setup_map.used < channel)
+        {
+          ui_array_s_push(&this->setup_map,c_idx_not_exist);
+        }
+
+        ui_array_s_push(&this->setup_map,this->setups.used);
 
         // - store setup -
         rtsp_setups_s_push_blank(&this->setups);
@@ -423,6 +433,7 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
   {
   case 0:
   case 2:
+  case 4:
     break;
   default:
     throw_error(RTSP_CONN_INVALID_PACKET_CHANNEL);
@@ -444,19 +455,8 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
 {/*{{{*/
   debug_message_7(fprintf(stderr,"rtsp_conn_s_send_packet\n"););
 
-  rtsp_setup_s *rtsp_setup;
-
-  switch (this->pkt_channel)
-  {
-  case 0:
-    rtsp_setup = rtsp_setups_s_at(&this->setups,0);
-    break;
-  case 2:
-    rtsp_setup = rtsp_setups_s_at(&this->setups,1);
-    break;
-  default:
-    return 0;
-  }
+  rtsp_setup_s *rtsp_setup = rtsp_setups_s_at(&this->setups,
+    *ui_array_s_at(&this->setup_map,this->pkt_channel));
 
 #define RTSP_CONN_S_SEND_PACKET_MODIFY_PACKET() \
 /*{{{*/\
@@ -464,7 +464,8 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
   unsigned time_stamp = old_time_stamp + rtsp_setup->time_stamp_offset;\
 \
   /* - fix invalid time stamp - */\
-  if (time_stamp < rtsp_setup->last_time_stamp)\
+  if (time_stamp < rtsp_setup->last_time_stamp ||\
+      time_stamp - rtsp_setup->last_time_stamp > 100000)\
   {\
     rtsp_setup->time_stamp_offset = rtsp_setup->last_time_stamp - RTP_PKT_GET_TIME_STAMP(this->packet.data);\
     time_stamp = rtsp_setup->last_time_stamp;\
@@ -474,6 +475,7 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
   rtsp_setup->last_time_stamp = time_stamp;\
 \
   /* - modify packet data - */\
+  RTP_PKT_SET_CHANNEL(this->packet.data,rtsp_setup->inter_port_begin);\
   RTP_PKT_SET_SEQUENCE(this->packet.data,rtsp_setup->packet_sequence++);\
   RTP_PKT_SET_TIME_STAMP(this->packet.data,time_stamp);\
 /*}}}*/
@@ -515,7 +517,8 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
 
     int result = fd_s_write(&this->epoll_fd.fd,this->packet.data,this->packet.size);
 
-    // - reset time stamp -
+    // - reset packet channel and time stamp -
+    RTP_PKT_SET_CHANNEL(this->packet.data,this->pkt_channel);
     RTP_PKT_SET_TIME_STAMP(this->packet.data,old_time_stamp);
 
     return result;
@@ -527,7 +530,8 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
   int result = socket_s_sendto(&rtsp_setup->udp_data.fd,&rtsp_setup->udp_data_addr,
       this->packet.data + 4,this->packet.size - (4));
 
-  // - reset time stamp -
+  // - reset packet channel and time stamp -
+  RTP_PKT_SET_CHANNEL(this->packet.data,this->pkt_channel);
   RTP_PKT_SET_TIME_STAMP(this->packet.data,old_time_stamp);
 
   return result;
