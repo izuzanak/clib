@@ -16,6 +16,12 @@ const char *test_names[] =
   "prop_greater",
   "prop_lesser_equal",
   "prop_greater_equal",
+  "prop_length_equal",
+  "prop_length_not_equal",
+  "prop_length_lesser",
+  "prop_length_greater",
+  "prop_length_lesser_equal",
+  "prop_length_greater_equal",
   "prop_reference",
   "prop_regex",
   "prop_items",
@@ -32,6 +38,12 @@ test_function_t test_functions[] =
   test_prop_greater,
   test_prop_lesser_equal,
   test_prop_greater_equal,
+  test_prop_length_equal,
+  test_prop_length_not_equal,
+  test_prop_length_lesser,
+  test_prop_length_greater,
+  test_prop_length_lesser_equal,
+  test_prop_length_greater_equal,
   test_prop_reference,
   test_prop_regex,
   test_prop_items,
@@ -193,6 +205,136 @@ void test_prop_greater_equal()
   cassert(validator_s_create(&validator,schema) == 0);
   cassert(validator_s_validate(&validator,str_test_var,value_0) == 0);
   cassert(validator_s_validate(&validator,str_test_var,value_1));
+}/*}}}*/
+
+void test_prop_length_equal()
+{/*{{{*/
+  VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
+
+  VAR_CLEAR(schema,loc_s_dict());
+
+  var_s test = loc_s_array();
+  loc_s_dict_set(schema,str_test_var,test);
+
+  loc_s_array_push(test,loc_s_string_ptr("length =="));
+  loc_s_array_push(test,loc_s_int(11));
+
+  VAR_CLEAR(value_0,loc_s_string_ptr("Hello world"));
+  VAR_CLEAR(value_1,loc_s_string_ptr("Hello world!"));
+
+  CONT_INIT_CLEAR(validator_s,validator);
+  cassert(validator_s_create(&validator,schema) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_0) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_1));
+}/*}}}*/
+
+void test_prop_length_not_equal()
+{/*{{{*/
+  VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
+
+  VAR_CLEAR(schema,loc_s_dict());
+
+  var_s test = loc_s_array();
+  loc_s_dict_set(schema,str_test_var,test);
+
+  loc_s_array_push(test,loc_s_string_ptr("length !="));
+  loc_s_array_push(test,loc_s_int(11));
+
+  VAR_CLEAR(value_0,loc_s_string_ptr("Hello world!"));
+  VAR_CLEAR(value_1,loc_s_string_ptr("Hello world"));
+
+  CONT_INIT_CLEAR(validator_s,validator);
+  cassert(validator_s_create(&validator,schema) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_0) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_1));
+}/*}}}*/
+
+void test_prop_length_lesser()
+{/*{{{*/
+  VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
+
+  VAR_CLEAR(schema,loc_s_dict());
+
+  var_s test = loc_s_array();
+  loc_s_dict_set(schema,str_test_var,test);
+
+  loc_s_array_push(test,loc_s_string_ptr("length <"));
+  loc_s_array_push(test,loc_s_int(11));
+
+  VAR_CLEAR(value_0,loc_s_string_ptr("Hello worl"));
+  VAR_CLEAR(value_1,loc_s_string_ptr("Hello world"));
+
+  CONT_INIT_CLEAR(validator_s,validator);
+  cassert(validator_s_create(&validator,schema) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_0) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_1));
+}/*}}}*/
+
+void test_prop_length_greater()
+{/*{{{*/
+  VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
+
+  VAR_CLEAR(schema,loc_s_dict());
+
+  var_s test = loc_s_array();
+  loc_s_dict_set(schema,str_test_var,test);
+
+  loc_s_array_push(test,loc_s_string_ptr("length >"));
+  loc_s_array_push(test,loc_s_int(11));
+
+  VAR_CLEAR(value_0,loc_s_string_ptr("Hello world!"));
+  VAR_CLEAR(value_1,loc_s_string_ptr("Hello world"));
+
+  CONT_INIT_CLEAR(validator_s,validator);
+  cassert(validator_s_create(&validator,schema) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_0) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_1));
+}/*}}}*/
+
+void test_prop_length_lesser_equal()
+{/*{{{*/
+  VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
+
+  VAR_CLEAR(schema,loc_s_dict());
+
+  var_s test = loc_s_array();
+  loc_s_dict_set(schema,str_test_var,test);
+
+  loc_s_array_push(test,loc_s_string_ptr("length <="));
+  loc_s_array_push(test,loc_s_int(11));
+
+  VAR_CLEAR(value_0,loc_s_string_ptr("Hello worl"));
+  VAR_CLEAR(value_1,loc_s_string_ptr("Hello world"));
+  VAR_CLEAR(value_2,loc_s_string_ptr("Hello world!"));
+
+  CONT_INIT_CLEAR(validator_s,validator);
+  cassert(validator_s_create(&validator,schema) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_0) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_1) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_2));
+}/*}}}*/
+
+void test_prop_length_greater_equal()
+{/*{{{*/
+  VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
+
+  VAR_CLEAR(schema,loc_s_dict());
+
+  var_s test = loc_s_array();
+  loc_s_dict_set(schema,str_test_var,test);
+
+  loc_s_array_push(test,loc_s_string_ptr("length >="));
+  loc_s_array_push(test,loc_s_int(11));
+
+  VAR_CLEAR(value_0,loc_s_string_ptr("Hello world!"));
+  VAR_CLEAR(value_1,loc_s_string_ptr("Hello world"));
+  VAR_CLEAR(value_2,loc_s_string_ptr("Hello worl"));
+
+  CONT_INIT_CLEAR(validator_s,validator);
+  cassert(validator_s_create(&validator,schema) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_0) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_1) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_2));
 }/*}}}*/
 
 void test_prop_reference()

@@ -702,6 +702,76 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
         }
       }/*}}}*/
       break;
+      case c_validator_prop_length_equal:
+      case c_validator_prop_length_not_equal:
+      case c_validator_prop_length_lesser:
+      case c_validator_prop_length_greater:
+      case c_validator_prop_length_lesser_equal:
+      case c_validator_prop_length_greater_equal:
+      {/*{{{*/
+
+        // - ERROR -
+        if (prop_value->v_type != c_bi_type_integer)
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_PROPERTY_TYPE);
+        }
+
+        long long int prop_length = loc_s_int_value(prop_value);
+        long long int value_length;
+        int ok;
+
+        switch (a_value->v_type)
+        {
+        case c_bi_type_string:
+          value_length = loc_s_string_value(a_value)->size - 1;
+          break;
+        case c_bi_type_array:
+          value_length = loc_s_array_value(a_value)->used;
+          break;
+        case c_bi_type_dict:
+          value_length = loc_s_dict_value(a_value)->count;
+          break;
+
+        // - ERROR -
+        default:
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_VALUE_TYPE);
+        }
+
+        switch (prop_id)
+        {
+          case c_validator_prop_length_equal:
+            ok = value_length == prop_length;
+            break;
+          case c_validator_prop_length_not_equal:
+            ok = value_length != prop_length;
+            break;
+          case c_validator_prop_length_lesser:
+            ok = value_length < prop_length;
+            break;
+          case c_validator_prop_length_greater:
+            ok = value_length > prop_length;
+            break;
+          case c_validator_prop_length_lesser_equal:
+            ok = value_length <= prop_length;
+            break;
+          case c_validator_prop_length_greater_equal:
+            ok = value_length >= prop_length;
+            break;
+        }
+
+        // - ERROR -
+        if (!ok)
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_VALUE);
+        }
+      }/*}}}*/
+      break;
       case c_validator_prop_reference:
       {/*{{{*/
 
