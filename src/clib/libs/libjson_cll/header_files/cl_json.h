@@ -1,6 +1,6 @@
 
-#ifndef __JSON_H
-#define __JSON_H
+#ifndef __CL_JSON_H
+#define __CL_JSON_H
 
 @begin
 include "cl_var.h"
