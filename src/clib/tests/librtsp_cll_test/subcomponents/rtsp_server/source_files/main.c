@@ -58,7 +58,7 @@ int conn_get_sdp(void *a_rtsp_server,unsigned a_index,const char *a_url,bc_array
   return 0;
 }/*}}}*/
 
-int conn_check_media(void *a_rtsp_server,unsigned a_index,const char *a_url,unsigned *a_channel)
+int conn_check_media(void *a_rtsp_server,unsigned a_index,const char *a_url,unsigned *a_channel) // NOLINT
 {/*{{{*/
   (void)a_rtsp_server;
   (void)a_index;

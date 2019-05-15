@@ -140,7 +140,7 @@ int rtsp_player_s_conn_get_sdp(void *a_rtsp_player,unsigned a_index,const char *
   return 0;
 }/*}}}*/
 
-int rtsp_player_s_conn_check_media(void *a_rtsp_player,unsigned a_index,const char *a_url,unsigned *a_channel)
+int rtsp_player_s_conn_check_media(void *a_rtsp_player,unsigned a_index,const char *a_url,unsigned *a_channel) // NOLINT
 {/*{{{*/
   (void)a_rtsp_player;
   (void)a_index;
