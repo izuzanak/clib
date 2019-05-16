@@ -108,7 +108,8 @@ function(include_component COMP_REL_DIR)
 
     if(CONF_DO_BUILD)
 
-      set(CONF_HEADER_DIRS "${COMP_DIR}/header_files")
+      # - append this component header directory -
+      list(APPEND CONF_HEADER_DIRS "${COMP_DIR}/header_files")
 
       # - process component dependencies -
       foreach(COMP_COMP_REL_DIR ${CONF_COMPONENTS})
@@ -125,8 +126,9 @@ function(include_component COMP_REL_DIR)
         endif()
 
         # - update component header directories -
-        list(GET INCLUDE_COMP_HEADER_DIRS ${ID_INDEX} LINK_INCLUDE_DIRS)
-        set(CONF_HEADER_DIRS "${CONF_HEADER_DIRS},${LINK_INCLUDE_DIRS}")
+        list(GET INCLUDE_COMP_HEADER_DIRS ${ID_INDEX} COMP_COMP_INCLUDE_DIRS_STR)
+        string(REPLACE "," ";" COMP_COMP_INCLUDE_DIRS "${COMP_COMP_INCLUDE_DIRS_STR}")
+        list(APPEND CONF_HEADER_DIRS ${COMP_COMP_INCLUDE_DIRS})
 
         # - update component link libraries -
         get_filename_component(COMP_COMP_NAME ${COMP_COMP_REL_DIR} NAME)
@@ -135,14 +137,13 @@ function(include_component COMP_REL_DIR)
       endforeach()
 
       # - remove header directories duplicities -
-      string(REPLACE "," ";" CONF_HEADER_DIRS_LIST "${CONF_HEADER_DIRS}")
-      list(REMOVE_DUPLICATES CONF_HEADER_DIRS_LIST)
-      list(JOIN CONF_HEADER_DIRS_LIST "," CONF_HEADER_DIRS)
+      list(REMOVE_DUPLICATES CONF_HEADER_DIRS)
+      list(JOIN CONF_HEADER_DIRS "," CONF_HEADER_DIRS_STR)
 
       set_property(GLOBAL APPEND PROPERTY GP_INCLUDE_COMP_REL_DIRS ${COMP_REL_DIR})
-      set_property(GLOBAL APPEND PROPERTY GP_INCLUDE_COMP_HEADER_DIRS "${CONF_HEADER_DIRS}")
+      set_property(GLOBAL APPEND PROPERTY GP_INCLUDE_COMP_HEADER_DIRS "${CONF_HEADER_DIRS_STR}")
 
-      set(COMP_HEADER_DIRS ${CONF_HEADER_DIRS_LIST})
+      set(COMP_HEADER_DIRS ${CONF_HEADER_DIRS})
       set(COMP_SOURCE_DIRS "${COMP_DIR}/source_files")
       set(COMP_INCLUDE_DIRS ${CONF_INCLUDE_DIRS})
       set(COMP_COMP_DEFS ${CONF_COMP_DEFS})

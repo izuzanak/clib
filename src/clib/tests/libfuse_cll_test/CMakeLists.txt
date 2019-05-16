@@ -5,6 +5,7 @@ set(CONF_COMPONENTS
   "src/clib/libs/libsys_cll"
   "src/clib/libs/liblinux_cll"
   "src/clib/libs/libfuse_cll")
+set(CONF_HEADER_DIRS)
 set(CONF_INCLUDE_DIRS)
 set(CONF_COMP_DEFS)
 set(CONF_LINK_LIBS)
