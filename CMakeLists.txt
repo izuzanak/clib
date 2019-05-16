@@ -13,12 +13,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 enable_testing()
 
 define_property(GLOBAL PROPERTY GP_INCLUDE_COMP_REL_DIRS
-    BRIEF_DOCS "Global include dir keys"
-    FULL_DOCS "Global include dir keys")
+    BRIEF_DOCS "Global include components relative directories"
+    FULL_DOCS "Global include components relative directories")
 
 define_property(GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS
-    BRIEF_DOCS "Global include dir values"
-    FULL_DOCS "Global include dir values")
+    BRIEF_DOCS "Global include components header directories"
+    FULL_DOCS "Global include components header directories")
 
 set_property(GLOBAL PROPERTY GP_INCLUDE_COMP_REL_DIRS)
 set_property(GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS)
@@ -119,9 +119,9 @@ function(include_component COMP_REL_DIR)
 
         list(FIND INCLUDE_COMP_REL_DIRS ${COMP_COMP_REL_DIR} ID_INDEX)
 
-        # - ERROR -
         if(${ID_INDEX} EQUAL "-1")
-          message(FATAL_ERROR "COMPONENT ${COMP_NAME} DEPENDS ON UNAVAILABLE ${COMP_COMP_REL_DIR}")
+          message("WARNING: Component ${COMP_NAME} depends on unavailable component: ${COMP_COMP_REL_DIR}")
+          return()
         endif()
 
         # - update component header directories -
