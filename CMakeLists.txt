@@ -6,24 +6,38 @@ find_package(PkgConfig)
 project(clib)
 
 set(PROC_DIR "${CMAKE_CURRENT_BINARY_DIR}/proc_files")
-set(TEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/tests")
-file(MAKE_DIRECTORY "${PROC_DIR}" "${TEST_DIR}")
+set(TESTS_DIR "${CMAKE_CURRENT_BINARY_DIR}/tests")
+file(MAKE_DIRECTORY "${PROC_DIR}" "${TESTS_DIR}")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 enable_testing()
 
+define_property(GLOBAL PROPERTY GP_INCLUDE_COMP_REL_DIRS
+    BRIEF_DOCS "Global include dir keys"
+    FULL_DOCS "Global include dir keys")
+
+define_property(GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS
+    BRIEF_DOCS "Global include dir values"
+    FULL_DOCS "Global include dir values")
+
+set_property(GLOBAL PROPERTY GP_INCLUDE_COMP_REL_DIRS)
+set_property(GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS)
+
 # - process target source file -
 function(process_source TARGET)
+# {{{
   execute_process(COMMAND process_c --deps "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS}
       OUTPUT_VARIABLE DEPS
       ERROR_QUIET)
   add_custom_command(OUTPUT "${PROC_DIR}/p.${TARGET}.c"
       DEPENDS ${DEPS}
       COMMAND process_c "--output" "${PROC_DIR}/p.${TARGET}.c" "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS})
+# }}}
 endfunction()
 
 # - process component -
 function(process_component)
+# {{{
   set(PROC_DIR "${PROC_DIR}/${COMP_NAME}")
   file(MAKE_DIRECTORY ${PROC_DIR})
 
@@ -40,18 +54,19 @@ function(process_component)
     endforeach()
   endforeach()
 
-  if(${COMP_NAME} MATCHES ${COMP_LIB_MATCH})
+  if(${COMP_NAME} MATCHES "_[a-z]*l$")
     add_library(${COMP_NAME} SHARED ${PROC_SOURCE_FILES})
     set_target_properties(${COMP_NAME} PROPERTIES PREFIX "")
+    install(TARGETS ${COMP_NAME} LIBRARY DESTINATION lib)
   else()
     add_executable(${COMP_NAME} ${PROC_SOURCE_FILES})
 
     if(${COMP_NAME} MATCHES "_test$")
-      set(TEST_DIR "${TEST_DIR}/${COMP_NAME}")
-      file(MAKE_DIRECTORY "${TEST_DIR}")
+      set(TESTS_DIR "${TESTS_DIR}/${COMP_NAME}")
+      file(MAKE_DIRECTORY "${TESTS_DIR}")
 
       if(EXISTS "${COMP_DIR}/resources")
-        file(COPY "${COMP_DIR}/resources" DESTINATION "${TEST_DIR}")
+        file(COPY "${COMP_DIR}/resources" DESTINATION "${TESTS_DIR}")
       endif()
 
       add_test("${COMP_NAME}_all" ${COMP_NAME} all)
@@ -65,47 +80,97 @@ function(process_component)
   if(EXISTS "${COMP_DIR}/subcomponents")
     set(PARENT_COMP_NAME "${COMP_NAME}_")
     string(REGEX REPLACE "^${CMAKE_CURRENT_SOURCE_DIR}/" "" SUBCOMPONENTS_DIR "${COMP_DIR}/subcomponents")
-    process_components("${SUBCOMPONENTS_DIR}" "${COMP_LIB_MATCH}")
+    include_component_dir("${SUBCOMPONENTS_DIR}")
   endif()
+# }}}
 endfunction()
 
-# - process components -
-function(process_components COMPS_DIR LIB_MATCH)
-file(GLOB MODULE_DIRS "" "${CMAKE_CURRENT_SOURCE_DIR}/${COMPS_DIR}/*")
-foreach(COMP_DIR ${MODULE_DIRS})
+# - include component -
+function(include_component COMP_REL_DIR)
+# {{{
+  get_property(INCLUDE_COMP_REL_DIRS GLOBAL PROPERTY GP_INCLUDE_COMP_REL_DIRS)
+
+  # - component was already included -
+  list(FIND INCLUDE_COMP_REL_DIRS ${COMP_REL_DIR} ID_INDEX)
+  if(NOT ${ID_INDEX} EQUAL "-1")
+    return()
+  endif()
+
+  set(COMP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${COMP_REL_DIR}")
   get_filename_component(COMP_NAME ${COMP_DIR} NAME)
   set(COMP_NAME "${PARENT_COMP_NAME}${COMP_NAME}")
 
-  set(CONF_DO_BUILD FALSE)
-  set(COMP_DO_BUILD FALSE)
-
   if(EXISTS ${COMP_DIR}/CMakeLists.txt)
+
+    # - read component cmake file -
+    set(CONF_DO_BUILD FALSE)
     include(${COMP_DIR}/CMakeLists.txt)
 
     if(CONF_DO_BUILD)
-      set(COMP_DO_BUILD TRUE)
-    endif()
 
-    if(COMP_DO_BUILD)
-      set(COMP_HEADER_DIRS "${COMP_DIR}/header_files" ${CONF_HEADER_DIRS})
+      set(CONF_HEADER_DIRS "${COMP_DIR}/header_files")
+
+      # - process component dependencies -
+      foreach(COMP_COMP_REL_DIR ${CONF_COMPONENTS})
+        include_component(${COMP_COMP_REL_DIR})
+
+        get_property(INCLUDE_COMP_REL_DIRS GLOBAL PROPERTY GP_INCLUDE_COMP_REL_DIRS)
+        get_property(INCLUDE_COMP_HEADER_DIRS GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS)
+
+        list(FIND INCLUDE_COMP_REL_DIRS ${COMP_COMP_REL_DIR} ID_INDEX)
+
+        # - ERROR -
+        if(${ID_INDEX} EQUAL "-1")
+          message(FATAL_ERROR "COMPONENT ${COMP_NAME} DEPENDS ON UNAVAILABLE ${COMP_COMP_REL_DIR}")
+        endif()
+
+        # - update component header directories -
+        list(GET INCLUDE_COMP_HEADER_DIRS ${ID_INDEX} LINK_INCLUDE_DIRS)
+        set(CONF_HEADER_DIRS "${CONF_HEADER_DIRS},${LINK_INCLUDE_DIRS}")
+
+        # - update component link libraries -
+        get_filename_component(COMP_COMP_NAME ${COMP_COMP_REL_DIR} NAME)
+        list(APPEND CONF_LINK_LIBS ${COMP_COMP_NAME})
+
+      endforeach()
+
+      # - remove header directories duplicities -
+      string(REPLACE "," ";" CONF_HEADER_DIRS_LIST "${CONF_HEADER_DIRS}")
+      list(REMOVE_DUPLICATES CONF_HEADER_DIRS_LIST)
+      list(JOIN CONF_HEADER_DIRS_LIST "," CONF_HEADER_DIRS)
+
+      set_property(GLOBAL APPEND PROPERTY GP_INCLUDE_COMP_REL_DIRS ${COMP_REL_DIR})
+      set_property(GLOBAL APPEND PROPERTY GP_INCLUDE_COMP_HEADER_DIRS "${CONF_HEADER_DIRS}")
+
+      set(COMP_HEADER_DIRS ${CONF_HEADER_DIRS_LIST})
       set(COMP_SOURCE_DIRS "${COMP_DIR}/source_files")
       set(COMP_INCLUDE_DIRS ${CONF_INCLUDE_DIRS})
       set(COMP_COMP_DEFS ${CONF_COMP_DEFS})
       set(COMP_LINK_LIBS ${CONF_LINK_LIBS})
-      set(COMP_LIB_MATCH ${LIB_MATCH})
 
       process_component()
     endif()
   endif()
+# }}}
+endfunction()
+
+# - include component directory -
+function(include_component_dir COMPS_DIR)
+# {{{
+file(GLOB MODULE_DIRS "" "${CMAKE_CURRENT_SOURCE_DIR}/${COMPS_DIR}/*")
+foreach(COMP_DIR ${MODULE_DIRS})
+  string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" COMP_DIR_WP "${COMP_DIR}")
+  include_component(${COMP_DIR_WP})
 endforeach()
+# }}}
 endfunction()
 
 # - set global variables -
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(OS_LINUX TRUE)
   set(OS_WINDOWS FALSE)
-  add_definitions(-g -Wall -Wfatal-errors -DLINUX)
-  #add_definitions(-g -fsanitize=address -fsanitize=undefined -Wall -Wfatal-errors -DLINUX)
+  #add_definitions(-g -Wall -Wfatal-errors -DLINUX)
+  add_definitions(-g -fsanitize=address -fsanitize=undefined -Wall -Wfatal-errors -DLINUX)
   #add_definitions(-O3 -DNDEBUG -Wall -Wfatal-errors -DLINUX)
 else()
   set(OS_LINUX FALSE)
@@ -113,11 +178,9 @@ else()
   add_definitions("/DWINDOWS /D_CRT_SECURE_NO_WARNINGS /wd4244")
 endif()
 
-# - process libraries -
-process_components("src/clib/libs" "_cll$")
+# - process libs -
+include_component_dir("src/clib/libs")
 
 # - process tests -
-process_components("src/clib/tests" "_cll$")
-
-# - process programs -
+include_component_dir("src/clib/tests")
 
