@@ -244,7 +244,7 @@ static inline var_s loc_s_array_pop(var_s this);
 static inline var_s *loc_s_array_at(var_s this,unsigned a_idx);
 
 // - type DICT -
-static inline var_s loc_s_dict();
+static inline var_s loc_s_dict(void);
 static inline void loc_s_dict_clear(var_s this);
 static inline int loc_s_dict_order(var_s a_first,var_s a_second);
 libvar_cll_EXPORT int loc_s_dict___order(const var_map_tree_s *a_first,const var_map_tree_s *a_second);
@@ -264,7 +264,7 @@ static inline var_s loc_s_dict_get(var_s this,var_s a_key);
 
 // === inline methods of structure loc_s =======================================
 
-static inline var_s loc_s___new()
+static inline var_s loc_s___new(void)
 {/*{{{*/
   return (var_s)cmalloc(sizeof(loc_s));
 }/*}}}*/
@@ -478,7 +478,7 @@ static inline int var_map_tree_s___compare_value(const var_map_tree_s *this,cons
 // === inline methods of loc_s types ===========================================
 
 // - type BLANK -
-static inline var_s loc_s_blank()
+static inline var_s loc_s_blank(void)
 {/*{{{*/
   var_s var = loc_s___new();
   var->v_type = c_bi_type_blank;
@@ -738,7 +738,7 @@ static inline const string_s *loc_s_string_value(var_s this)
 }/*}}}*/
 
 // - type ARRAY -
-static inline var_s loc_s_array()
+static inline var_s loc_s_array(void)
 {/*{{{*/
   var_array_s *array = (var_array_s *)cmalloc(sizeof(var_array_s));
   var_array_s_init(array);
@@ -849,7 +849,7 @@ static inline var_s *loc_s_array_at(var_s this,unsigned a_idx)
 }/*}}}*/
 
 // - type DICT -
-static inline var_s loc_s_dict()
+static inline var_s loc_s_dict(void)
 {/*{{{*/
   var_map_tree_s *tree = (var_map_tree_s *)cmalloc(sizeof(var_map_tree_s));
   var_map_tree_s_init(tree);

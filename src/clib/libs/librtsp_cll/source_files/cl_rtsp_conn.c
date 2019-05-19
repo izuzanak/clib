@@ -587,7 +587,7 @@ int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epo
           throw_error(RTSP_CONN_INVALID_STATE);
       }
     }
-    
+
     // - write previously blocked packets -
     if (a_epoll_event->events & EPOLLOUT)
     {

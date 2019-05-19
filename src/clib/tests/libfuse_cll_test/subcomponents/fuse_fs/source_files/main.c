@@ -172,7 +172,7 @@ void fuse_fs_read(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fus
       unsigned old_used = buffer.used;
       ui_to_string(counter,&buffer);
       bc_array_s_push(&buffer,'\n');
-      
+
       if (buffer.used > size)
       {
         buffer.used = old_used;
