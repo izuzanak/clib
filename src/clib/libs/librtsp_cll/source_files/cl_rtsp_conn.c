@@ -105,7 +105,6 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
       }
     }
 
-    // FIXME TODO process control packet
     debug_message_6(fprintf(stderr,"TCP: CONTROL PACKET\n"));
 
     bc_array_s_tail(msg,msg->used - pkt_size);
@@ -615,7 +614,6 @@ int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epo
       throw_error(RTSP_CONN_RECEIVE_ERROR);
     }
 
-    // FIXME TODO process control packet
     debug_message_6(fprintf(stderr,"UDP: CONTROL PACKET\n"));
   }
 

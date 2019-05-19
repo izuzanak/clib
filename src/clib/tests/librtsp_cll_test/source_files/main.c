@@ -21,8 +21,6 @@ test_function_t test_functions[] =
 
 void test_rtsp()
 {/*{{{*/
-
-  // FIXME TODO continue ...
 }/*}}}*/
 
 // === program entry function ==================================================

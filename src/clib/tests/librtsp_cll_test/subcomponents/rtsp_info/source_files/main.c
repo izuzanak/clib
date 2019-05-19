@@ -46,8 +46,6 @@ int rtsp_info_s_print_packet(rtsp_info_s *this)
   // - print packet info -
   fprintf(stdout,"pkt_info: %hu, %c, %hhu, %hu\n",pkt_time,pkt_char,pkt_channel,pkt_size);
 
-  // FIXME TODO continue ...
-
   //if (
   //  //pkt_channel == 0
   //  //pkt_channel == 2
