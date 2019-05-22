@@ -336,12 +336,6 @@ this->session);
           throw_error(RTSP_CONN_GET_TIME_ERROR);
         }
 
-        // - burst first two seconds for rtsp-tcp -
-        if (this->tcp)
-        {
-          this->packet_time -= 2000000000ULL;
-        }
-
         // - call conn_playing_callback -
         if (((rtsp_conn_playing_callback_t)server->conn_playing_callback)(
               server->cb_object,this->index,this->session))
