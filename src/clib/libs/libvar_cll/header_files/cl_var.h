@@ -261,6 +261,7 @@ static inline int loc_s_dict_has_key(var_s this,var_s a_key);
 static inline void loc_s_dict_remove_key(var_s this,var_s a_key);
 static inline void loc_s_dict_set(var_s this,var_s a_key,var_s a_value);
 static inline var_s loc_s_dict_get(var_s this,var_s a_key);
+static inline var_s loc_s_dict_str_get(var_s this,const char *a_str_key);
 
 // === inline methods of structure loc_s =======================================
 
@@ -987,6 +988,14 @@ static inline var_s loc_s_dict_get(var_s this,var_s a_key)
   }
 
   return (tree->data + index)->object.value;
+}/*}}}*/
+
+static inline var_s loc_s_dict_str_get(var_s this,const char *a_str_key)
+{/*{{{*/
+  string_s string = {strlen(a_str_key) + 1,(char *)a_str_key};
+  loc_s loc = {c_bi_type_string,{0},{.ptr = &string}};
+
+  return loc_s_dict_get(this,&loc);
 }/*}}}*/
 
 #endif
