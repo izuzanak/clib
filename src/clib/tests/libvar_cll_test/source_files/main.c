@@ -283,7 +283,7 @@ void test_var_array()
 
   // - loc_s_array_to_json_nice -
   CONT_INIT(json_nice_s,json_nice);
-  json_nice_s_create(&json_nice,"--","==");
+  json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
   loc_s_array_to_json_nice(array_3,&json_nice,&buffer);
@@ -409,7 +409,7 @@ void test_var_dict()
 
   // - loc_s_dict_to_json_nice -
   CONT_INIT(json_nice_s,json_nice);
-  json_nice_s_create(&json_nice,"--","==");
+  json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
   loc_s_dict_to_json_nice(dict_1,&json_nice,&buffer);
@@ -483,7 +483,7 @@ void test_register_type()
 
   // - var_array_s_to_json_nice -
   CONT_INIT(json_nice_s,json_nice);
-  json_nice_s_create(&json_nice,"--","==");
+  json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
   var_array_s_to_json_nice(&array_0,&json_nice,&buffer);

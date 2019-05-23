@@ -40,6 +40,11 @@ void bc_array_s_append_format(bc_array_s *this,const char *a_format,...)
   }
 }/*}}}*/
 
+// -- json_nice_s --
+@begin
+methods json_nice_s
+@end
+
 // -- bc_block_s --
 @begin
 methods bc_block_s

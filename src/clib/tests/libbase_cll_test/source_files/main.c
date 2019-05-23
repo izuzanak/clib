@@ -227,7 +227,7 @@ void test_static()
 
   // - static_s_to_json_nice -
   CONT_INIT(json_nice_s,json_nice);
-  json_nice_s_create(&json_nice,"--","==");
+  json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
   static_s_to_json_nice(&static_0,&json_nice,&buffer);
@@ -487,7 +487,7 @@ void test_static_type_array()
 
   // - static_array_s_to_json_nice -
   CONT_INIT(json_nice_s,json_nice);
-  json_nice_s_create(&json_nice,"--","==");
+  json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
   static_array_s_to_json_nice(&array_0,&json_nice,&buffer);
@@ -704,7 +704,7 @@ void test_static_type_queue()
 
   // - static_queue_s_to_json_nice -
   CONT_INIT(json_nice_s,json_nice);
-  json_nice_s_create(&json_nice,"--","==");
+  json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
   static_queue_s_to_json_nice(&queue_0,&json_nice,&buffer);
@@ -840,7 +840,7 @@ void test_static_type_list()
 
   // - static_list_s_to_json_nice -
   CONT_INIT(json_nice_s,json_nice);
-  json_nice_s_create(&json_nice,"--","==");
+  json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
   static_list_s_to_json_nice(&list_0,&json_nice,&buffer);
@@ -977,7 +977,7 @@ void test_static_type_tree()
 
   // - static_tree_s_to_json_nice -
   CONT_INIT(json_nice_s,json_nice);
-  json_nice_s_create(&json_nice,"--","==");
+  json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
   static_tree_s_to_json_nice(&tree_0,&json_nice,&buffer);

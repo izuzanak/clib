@@ -31,6 +31,23 @@ static inline void bc_array_s_tail(bc_array_s *this,unsigned a_count);
 bc_array_s;
 @end
 
+// -- json_nice_s --
+@begin
+struct
+<
+bc_array_s:tabulator
+bc_array_s:indent_buffer
+ui:indent_size
+pointer:user
+>
+json_nice_s;
+@end
+
+static inline void json_nice_s_create(json_nice_s *this,const char *a_tabulator,const char *a_indentation,void *a_user);
+static inline void json_nice_s_push_indent(json_nice_s *this,bc_array_s *a_trg);
+static inline void json_nice_s_pop_indent(json_nice_s *this,bc_array_s *a_trg);
+static inline void json_nice_s_indent(const json_nice_s *this,bc_array_s *a_trg);
+
 // -- bc_block_s --
 @begin
 struct
@@ -44,7 +61,7 @@ bc_block_s;
 // -- ui_array_s --
 @begin
 array<ui>
-options ( to_json )
+options ( to_json to_json_nice )
 ui_array_s;
 @end
 
@@ -185,6 +202,43 @@ static inline void bc_array_s_tail(bc_array_s *this,unsigned a_count)
   }
 
   this->used = a_count;
+}/*}}}*/
+
+// -- json_nice_s --
+@begin
+inlines json_nice_s
+@end
+
+static inline void json_nice_s_create(json_nice_s *this,const char *a_tabulator,const char *a_indentation,void *a_user)
+{/*{{{*/
+  json_nice_s_clear(this);
+
+  bc_array_s_set(&this->tabulator,strlen(a_tabulator),a_tabulator);
+  bc_array_s_push(&this->indent_buffer,'\n');
+  bc_array_s_append_ptr(&this->indent_buffer,a_indentation);
+  this->indent_size = this->indent_buffer.used;
+  this->user = a_user;
+}/*}}}*/
+
+static inline void json_nice_s_push_indent(json_nice_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  if ((this->indent_size += this->tabulator.used) > this->indent_buffer.used)
+  {
+    bc_array_s_append(&this->indent_buffer,this->tabulator.used,this->tabulator.data);
+  }
+
+  bc_array_s_append(a_trg,this->indent_size,this->indent_buffer.data);
+}/*}}}*/
+
+static inline void json_nice_s_pop_indent(json_nice_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  this->indent_size -= this->tabulator.used;
+  bc_array_s_append(a_trg,this->indent_size,this->indent_buffer.data);
+}/*}}}*/
+
+static inline void json_nice_s_indent(const json_nice_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append(a_trg,this->indent_size,this->indent_buffer.data);
 }/*}}}*/
 
 // -- bc_block_s --
