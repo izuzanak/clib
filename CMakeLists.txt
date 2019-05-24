@@ -138,7 +138,10 @@ function(include_component COMP_REL_DIR)
 
       # - remove header directories duplicities -
       list(REMOVE_DUPLICATES CONF_HEADER_DIRS)
-      list(JOIN CONF_HEADER_DIRS "," CONF_HEADER_DIRS_STR)
+      string(REPLACE ";" "," CONF_HEADER_DIRS_STR "${CONF_HEADER_DIRS}")
+
+      # FIXME debug output header directories
+      #message("${COMP_NAME} -> ${CONF_HEADER_DIRS_STR}")
 
       set_property(GLOBAL APPEND PROPERTY GP_INCLUDE_COMP_REL_DIRS ${COMP_REL_DIR})
       set_property(GLOBAL APPEND PROPERTY GP_INCLUDE_COMP_HEADER_DIRS "${CONF_HEADER_DIRS_STR}")
