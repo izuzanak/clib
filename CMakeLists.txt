@@ -26,12 +26,12 @@ set_property(GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS)
 # - process target source file -
 function(process_source TARGET)
 # {{{
-  execute_process(COMMAND process_c --deps "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS}
+  execute_process(COMMAND ${PROCESS_BIN} --deps "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS}
       OUTPUT_VARIABLE DEPS
       ERROR_QUIET)
   add_custom_command(OUTPUT "${PROC_DIR}/p.${TARGET}.c"
       DEPENDS ${DEPS}
-      COMMAND process_c "--output" "${PROC_DIR}/p.${TARGET}.c" "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS})
+      COMMAND ${PROCESS_BIN} "--output" "${PROC_DIR}/p.${TARGET}.c" "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS})
 # }}}
 endfunction()
 
@@ -180,6 +180,14 @@ else()
   set(OS_LINUX FALSE)
   set(OS_WINDOWS TRUE)
   add_definitions("/DWINDOWS /D_CRT_SECURE_NO_WARNINGS /wd4244")
+endif()
+
+# - find process binary -
+find_program(PROCESS_BIN cont_c)
+
+if(NOT PROCESS_BIN)
+  message("WARNING: Cannot found container generator")
+  return()
 endif()
 
 # - process libs -
