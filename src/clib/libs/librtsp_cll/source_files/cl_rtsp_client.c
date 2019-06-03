@@ -415,7 +415,8 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 "SETUP %s RTSP/1.0\r\n"
 "CSeq: %u\r\n"
 "Transport: RTP/AVP/TCP;unicast;interleaved=2-3\r\n"
-"\r\n",this->audio_control.data,this->sequence++);
+"Session: %s\r\n"
+"\r\n",this->audio_control.data,this->sequence++,this->session.data);
 
           if (rtsp_client_s_send_cmd(this))
           {

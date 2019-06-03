@@ -24,8 +24,9 @@ include "cl_struct.h"
 
 #define ERROR_TIME_WRONG_INIT_STRING 1
 
-#define ERROR_CLOCK_CANNOT_GET_RESOLUTION 1
-#define ERROR_CLOCK_CANNOT_GET_TIME 2
+#define ERROR_CLOCK_GET_RESOLUTION_ERROR 1
+#define ERROR_CLOCK_GET_TIME_ERROR 2
+#define ERROR_CLOCK_SET_TIME_ERROR 3
 
 // === constants and definitions ===============================================
 
@@ -89,6 +90,7 @@ static inline void time_s_datetime(const time_s *this,datetime_s *a_datetime);
 
 WUR static inline int clock_s_getres(clockid_t a_clock_id,ulli *a_nanosec);
 WUR static inline int clock_s_gettime(clockid_t a_clock_id,ulli *a_nanosec);
+WUR static inline int clock_s_settime(clockid_t a_clock_id,ulli a_nanosec);
 
 // === inline methods of generated structures ==================================
 
@@ -201,7 +203,7 @@ static inline int clock_s_getres(clockid_t a_clock_id,ulli *a_nanosec)
   // - ERROR -
   if (clock_getres(a_clock_id,&res) != 0)
   {
-    throw_error(CLOCK_CANNOT_GET_RESOLUTION);
+    throw_error(CLOCK_GET_RESOLUTION_ERROR);
   }
 
   *a_nanosec = res.tv_sec*1000000000LL + res.tv_nsec;
@@ -216,10 +218,26 @@ static inline int clock_s_gettime(clockid_t a_clock_id,ulli *a_nanosec)
   // - ERROR -
   if (clock_gettime(a_clock_id,&tp) != 0)
   {
-    throw_error(CLOCK_CANNOT_GET_TIME);
+    throw_error(CLOCK_GET_TIME_ERROR);
   }
 
   *a_nanosec = tp.tv_sec*1000000000ULL + tp.tv_nsec;
+
+  return 0;
+}/*}}}*/
+
+static inline int clock_s_settime(clockid_t a_clock_id,ulli a_nanosec)
+{/*{{{*/
+  struct timespec tp;
+
+  tp.tv_sec = a_nanosec / 1000000000ULL;
+  tp.tv_nsec = a_nanosec % 1000000000ULL;
+
+  // - ERROR -
+  if (clock_settime(a_clock_id,&tp) != 0)
+  {
+    throw_error(CLOCK_SET_TIME_ERROR);
+  }
 
   return 0;
 }/*}}}*/
