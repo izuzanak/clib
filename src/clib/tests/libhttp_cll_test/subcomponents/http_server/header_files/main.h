@@ -5,6 +5,7 @@
 @begin
 include "cl_test.h"
 include "cl_linux.h"
+include "cl_http.h"
 @end
 
 // === program entry function ==================================================

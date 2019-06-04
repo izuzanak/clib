@@ -10,13 +10,23 @@ include "cl_http.h"
 methods pointer_list_s
 @end
 
+// -- http_header_s --
+@begin
+methods http_header_s
+@end
+
+// -- http_header_tree_s --
+@begin
+methods http_header_tree_s
+@end
+
 // === methods of structure http_server_s ======================================
 
 int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
     const char *url,const char *method,const char *version,
     const char *upload_data,size_t *upload_data_size,void **con_cls)
 {/*{{{*/
-  http_server_s *srv_ptr = (http_server_s *)cls;
+  http_server_s *server = (http_server_s *)cls;
 
   // - connection pointer -
   http_conn_s *conn_ptr;
@@ -28,7 +38,7 @@ int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
     http_conn_s_init(conn_ptr);
 
     // - set pointer to server -
-    conn_ptr->srv_ptr = srv_ptr;
+    conn_ptr->server = server;
 
     // - retrieve connection type -
     unsigned conn_type;
@@ -69,10 +79,10 @@ int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
 
     // - set connection properties -
     conn_ptr->conn_type = conn_type;
-    conn_ptr->connection_ptr = connection;
+    conn_ptr->connection = connection;
 
     // - set user data pointer to blank location -
-    conn_ptr->user_data_ptr = NULL;
+    conn_ptr->user_data = NULL;
 
     conn_ptr->url = url;
     conn_ptr->method = method;
@@ -93,7 +103,7 @@ int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
 
   // -----
 
-  int res = srv_ptr->connection_cb(conn_ptr);
+  int res = server->connection_cb(conn_ptr);
 
   // - reset upload data variables -
   conn_ptr->upload_data = NULL;
@@ -101,9 +111,24 @@ int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
 
   if (res)
   {
-    srv_ptr->ret_code = 1;
+    server->ret_code = 1;
     return MHD_NO;
   }
+
+  return MHD_YES;
+}/*}}}*/
+
+int conn_key_value_func(void *cls,enum MHD_ValueKind kind,
+    const char *key,const char *value)
+{/*{{{*/
+  http_conn_s *conn_ptr = (http_conn_s *)cls;
+
+  CONT_INIT_CLEAR(http_header_s,http_header);
+  string_s_set(&http_header.key,strlen(key),key);
+  string_s_set(&http_header.value,strlen(value),value);
+
+  // - insert header to tree -
+  http_header_tree_s_unique_swap_insert(conn_ptr->http_header_tree,&http_header);
 
   return MHD_YES;
 }/*}}}*/
@@ -119,6 +144,7 @@ void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
   if (conn_ptr != NULL)
   {
     http_conn_s_clear(conn_ptr);
+    cfree(conn_ptr);
   }
 }/*}}}*/
 
@@ -127,20 +153,20 @@ int http_server_s_create(http_server_s *this,usi a_port,http_connection_cb_t a_c
   http_server_s_clear(this);
 
   // - start http server -
-  struct MHD_Daemon *daemon_ptr = MHD_start_daemon(
+  struct MHD_Daemon *daemon = MHD_start_daemon(
       MHD_USE_SUSPEND_RESUME,a_port,NULL,NULL,
       http_server_s_connection_func,this,
       MHD_OPTION_NOTIFY_COMPLETED,http_server_s_completed_func,NULL,
       MHD_OPTION_END);
 
   // - ERROR -
-  if (daemon_ptr == NULL)
+  if (daemon == NULL)
   {
     throw_error(HTTP_SERVER_CANNOT_START_DAEMON);
   }
 
   // - set server daemon pointer -
-  this->daemon_ptr = daemon_ptr;
+  this->daemon = daemon;
 
   // - set server connection callback -
   this->connection_cb = a_connection_cb;
@@ -148,7 +174,7 @@ int http_server_s_create(http_server_s *this,usi a_port,http_connection_cb_t a_c
   return 0;
 }/*}}}*/
 
-int http_server_s_get_fds(http_server_s *this,pollfd_array_s *a_trg)
+int http_server_s_fds(http_server_s *this,pollfd_array_s *a_trg)
 {/*{{{*/
   a_trg->used = 0;
 
@@ -160,10 +186,10 @@ int http_server_s_get_fds(http_server_s *this,pollfd_array_s *a_trg)
   // - ERROR -
 #if MHD_VERSION <= 0x00093300
   int max_fd = 0;
-  if (MHD_YES != MHD_get_fdset(this->daemon_ptr,&rs,&ws,&es,&max_fd))
+  if (MHD_YES != MHD_get_fdset(this->daemon,&rs,&ws,&es,&max_fd))
 #else
   MHD_socket max_fd = 0;
-  if (MHD_YES != MHD_get_fdset2(this->daemon_ptr,&rs,&ws,&es,&max_fd,FD_SETSIZE))
+  if (MHD_YES != MHD_get_fdset2(this->daemon,&rs,&ws,&es,&max_fd,FD_SETSIZE))
 #endif
   {
     throw_error(HTTP_SERVER_INTERNAL_ERROR);
@@ -212,4 +238,67 @@ int http_server_s_get_fds(http_server_s *this,pollfd_array_s *a_trg)
 }/*}}}*/
 
 // === methods of structure http_conn_s ========================================
+
+void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_header_tree_s *a_trg)
+{/*{{{*/
+  http_header_tree_s_clear(a_trg);
+
+  // - retrieve key value locations -
+  this->http_header_tree = a_trg;
+  MHD_get_connection_values(this->connection,a_value_kind,&conn_key_value_func,this);
+  this->http_header_tree = NULL;
+}/*}}}*/
+
+int http_conn_s_queue_response(http_conn_s *this,unsigned a_status_code,http_resp_s *a_resp)
+{/*{{{*/
+
+  // - queue response to be transmitted to client -
+  int result = MHD_queue_response(this->connection,a_status_code,a_resp->response);
+
+  // - ERROR -
+  if (result != MHD_YES)
+  {
+    throw_error(HTTP_CONN_CANNOT_QUEUE_RESPONSE);
+  }
+
+  return 0;
+}/*}}}*/
+
+// === methods of structure http_resp_s ========================================
+
+int http_resp_s_create_from_buffer_copy(http_resp_s *this,const bc_array_s *a_src)
+{/*{{{*/
+  http_resp_s_clear(this);
+
+  // - create http_resp object -
+  struct MHD_Response *response = MHD_create_response_from_buffer(
+      a_src->used,a_src->data,MHD_RESPMEM_MUST_COPY);
+
+  // - ERROR -
+  if (response == NULL)
+  {
+    throw_error(HTTP_RESP_CREATE_ERROR);
+  }
+
+  this->response = response;
+
+  return 0;
+}/*}}}*/
+
+int http_resp_s_create_from_fd(http_resp_s *this,off_t a_size,int a_fd)
+{/*{{{*/
+
+  // - create http_resp object -
+  struct MHD_Response *response = MHD_create_response_from_fd(a_size,a_fd);
+
+  // - ERROR -
+  if (response == NULL)
+  {
+    throw_error(HTTP_RESP_CREATE_ERROR);
+  }
+
+  this->response = response;
+
+  return 0;
+}/*}}}*/
 

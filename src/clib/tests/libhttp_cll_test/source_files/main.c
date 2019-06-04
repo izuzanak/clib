@@ -9,21 +9,21 @@ const char *test_name = "libhttp_cll_test";
 
 const char *test_names[] =
 {/*{{{*/
-  "dummy",
+  "create",
 };/*}}}*/
 
 test_function_t test_functions[] =
 {/*{{{*/
-  test_dummy,
+  test_create,
 };/*}}}*/
 
 // === methods of generated structures =========================================
 
 // === test execution functions ================================================
 
-void test_dummy()
+void test_create()
 {/*{{{*/
-
+  
   // FIXME TODO continue ...
 }/*}}}*/
 

@@ -32,8 +32,13 @@ include "cl_sys.h"
 #define ERROR_HTTP_SERVER_CANNOT_START_DAEMON 1
 #define ERROR_HTTP_SERVER_INTERNAL_ERROR 2
 
+#define ERROR_HTTP_CONN_CANNOT_QUEUE_RESPONSE 1
+
+#define ERROR_HTTP_RESP_CREATE_ERROR 1
+
 typedef struct http_server_s http_server_s;
 typedef struct http_conn_s http_conn_s;
+typedef struct http_resp_s http_resp_s;
 
 // - connection types -
 enum
@@ -56,13 +61,28 @@ enum
 safe_list<pointer> pointer_list_s;
 @end
 
+// -- http_header_s --
+@begin
+struct
+<
+string_s:key
+string_s:value
+>
+http_header_s;
+@end
+
+// -- http_header_tree_s --
+@begin
+rb_tree<http_header_s> http_header_tree_s;
+@end
+
 // === definition of structure http_server_s ===================================
 
 typedef int (*http_connection_cb_t)(http_conn_s *a_conn);
 
 typedef struct http_server_s
 {
-  struct MHD_Daemon *daemon_ptr;
+  struct MHD_Daemon *daemon;
   http_connection_cb_t connection_cb;
   pointer_list_s suspended_conns;
   int ret_code;
@@ -85,22 +105,26 @@ static inline void http_server_s_to_string(const http_server_s *this,bc_array_s 
 int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
     const char *url,const char *method,const char *version,
     const char *upload_data,size_t *upload_data_size,void **con_cls);
+int conn_key_value_func(void *cls,enum MHD_ValueKind kind,
+    const char *key,const char *value);
 void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
     void **con_cls,enum MHD_RequestTerminationCode toe);
 
-int http_server_s_create(http_server_s *this,usi a_port,http_connection_cb_t a_connection_cb);
-int http_server_s_get_fds(http_server_s *this,pollfd_array_s *a_trg);
+WUR libhttp_cll_EXPORT int http_server_s_create(http_server_s *this,usi a_port,http_connection_cb_t a_connection_cb);
+WUR libhttp_cll_EXPORT int http_server_s_fds(http_server_s *this,pollfd_array_s *a_trg);
+static inline ulli http_server_s_timeout(http_server_s *this);
+WUR static inline int http_server_s_process(http_server_s *this);
 
 // === definition of structure http_conn_s =====================================
 
 typedef struct http_conn_s
 {
-  http_server_s *srv_ptr;
+  http_server_s *server;
 
   unsigned conn_type;
-  struct MHD_Connection *connection_ptr;
-  pointer_array_s *key_value_arr_ptr;
-  pointer user_data_ptr;
+  struct MHD_Connection *connection;
+  http_header_tree_s *http_header_tree;
+  pointer user_data;
   unsigned suspend_idx;
 
   const char *url;
@@ -124,6 +148,34 @@ static inline int http_conn_s_compare(const http_conn_s *this,const http_conn_s 
 static inline void http_conn_s_to_string(const http_conn_s *this,bc_array_s *a_trg);
 #endif
 
+void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_header_tree_s *a_trg);
+WUR libhttp_cll_EXPORT int http_conn_s_queue_response(http_conn_s *this,
+    unsigned a_status_code,http_resp_s *a_resp);
+
+// === definition of structure http_resp_s =====================================
+
+typedef struct http_resp_s
+{
+  struct MHD_Response *response;
+} http_resp_s;
+
+@begin
+define http_resp_s dynamic
+@end
+
+static inline void http_resp_s_init(http_resp_s *this);
+static inline void http_resp_s_clear(http_resp_s *this);
+static inline void http_resp_s_flush_all(http_resp_s *this);
+static inline void http_resp_s_swap(http_resp_s *this,http_resp_s *a_second);
+static inline void http_resp_s_copy(const http_resp_s *this,const http_resp_s *a_src);
+static inline int http_resp_s_compare(const http_resp_s *this,const http_resp_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void http_resp_s_to_string(const http_resp_s *this,bc_array_s *a_trg);
+#endif
+
+WUR libhttp_cll_EXPORT int http_resp_s_create_from_buffer_copy(http_resp_s *this,const bc_array_s *a_src);
+WUR libhttp_cll_EXPORT int http_resp_s_create_from_fd(http_resp_s *this,off_t a_size,int a_fd);
+
 // === inline methods of generated structures ==================================
 
 // -- pointer_list_s --
@@ -131,11 +183,29 @@ static inline void http_conn_s_to_string(const http_conn_s *this,bc_array_s *a_t
 inlines pointer_list_s
 @end
 
+// -- http_header_s --
+@begin
+inlines http_header_s
+@end
+
+// -- http_header_tree_s --
+@begin
+inlines http_header_tree_s
+@end
+
+static inline int http_header_tree_s___compare_value(const http_header_tree_s *this,const http_header_s *a_first,const http_header_s *a_second)
+{/*{{{*/
+  if (a_first->key.size < a_second->key.size) { return -1; }
+  if (a_first->key.size > a_second->key.size) { return 1; }
+
+  return memcmp(a_first->key.data,a_second->key.data,a_first->key.size - 1);
+}/*}}}*/
+
 // === inline methods of structure http_server_s ===============================
 
 static inline void http_server_s_init(http_server_s *this)
 {/*{{{*/
-  this->daemon_ptr = NULL;
+  this->daemon = NULL;
   this->connection_cb = NULL;
   pointer_list_s_init(&this->suspended_conns);
   this->ret_code = 0;
@@ -154,7 +224,7 @@ static inline void http_server_s_clear(http_server_s *this)
       http_conn_s *conn_ptr = (http_conn_s *)pointer_list_s_at(&this->suspended_conns,sc_idx);
       
       // - resume suspended connection -
-      MHD_resume_connection(conn_ptr->connection_ptr);
+      MHD_resume_connection(conn_ptr->connection);
       conn_ptr->suspend_idx = c_idx_not_exist;
 
       sc_idx = pointer_list_s_next_idx(&this->suspended_conns,sc_idx);
@@ -163,9 +233,9 @@ static inline void http_server_s_clear(http_server_s *this)
 
   pointer_list_s_clear(&this->suspended_conns);
 
-  if (this->daemon_ptr != NULL)
+  if (this->daemon != NULL)
   {
-    MHD_stop_daemon(this->daemon_ptr);
+    MHD_stop_daemon(this->daemon);
   }
 
   http_server_s_init(this);
@@ -205,16 +275,50 @@ static inline void http_server_s_to_string(const http_server_s *this,bc_array_s 
 }/*}}}*/
 #endif
 
+static inline ulli http_server_s_timeout(http_server_s *this)
+{/*{{{*/
+  MHD_UNSIGNED_LONG_LONG mhd_timeout;
+
+  // - retrieve mhd timeout -
+  if (MHD_get_timeout(this->daemon,&mhd_timeout) == MHD_YES)
+  {
+    return mhd_timeout;
+  }
+  else
+  {
+    return LLONG_MAX;
+  }
+}/*}}}*/
+
+static inline int http_server_s_process(http_server_s *this)
+{/*{{{*/
+  this->ret_code = 0;
+
+  // - ERROR -
+  if (MHD_run(this->daemon) != MHD_YES)
+  {
+    throw_error(HTTP_SERVER_INTERNAL_ERROR);
+  }
+
+  // - if exception occurred -
+  if (this->ret_code)
+  {
+    return this->ret_code;
+  }
+
+  return 0;
+}/*}}}*/
+
 // === inline methods of structure http_conn_s =================================
 
 static inline void http_conn_s_init(http_conn_s *this)
 {/*{{{*/
-  this->srv_ptr = NULL;
+  this->server = NULL;
 
   this->conn_type = c_http_conn_type_NONE;
-  this->connection_ptr = NULL;
-  this->key_value_arr_ptr = NULL;
-  this->user_data_ptr = NULL;
+  this->connection = NULL;
+  this->http_header_tree = NULL;
+  this->user_data = NULL;
   this->suspend_idx = c_idx_not_exist;
 
   this->url = NULL;
@@ -260,6 +364,57 @@ static inline int http_conn_s_compare(const http_conn_s *this,const http_conn_s 
 static inline void http_conn_s_to_string(const http_conn_s *this,bc_array_s *a_trg)
 {/*{{{*/
   bc_array_s_append_format(a_trg,"http_conn_s{%p}",this);
+}/*}}}*/
+#endif
+
+// === inline methods of structure http_resp_s =================================
+
+static inline void http_resp_s_init(http_resp_s *this)
+{/*{{{*/
+  this->response = NULL;
+}/*}}}*/
+
+static inline void http_resp_s_clear(http_resp_s *this)
+{/*{{{*/
+  if (this->response != NULL)
+  {
+    MHD_destroy_response(this->response);
+  }
+
+  http_resp_s_init(this);
+}/*}}}*/
+
+static inline void http_resp_s_flush_all(http_resp_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void http_resp_s_swap(http_resp_s *this,http_resp_s *a_second)
+{/*{{{*/
+  http_resp_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void http_resp_s_copy(const http_resp_s *this,const http_resp_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int http_resp_s_compare(const http_resp_s *this,const http_resp_s *a_second)
+{/*{{{*/
+  (void)this;
+  (void)a_second;
+
+  cassert(0);
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void http_resp_s_to_string(const http_resp_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"http_resp_s{%p}",this);
 }/*}}}*/
 #endif
 
