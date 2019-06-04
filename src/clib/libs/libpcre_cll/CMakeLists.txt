@@ -1,4 +1,8 @@
 
+set(CONF_COMPONENTS
+  "src/clib/libs/libbase_cll")
+set(CONF_HEADER_DIRS)
+
 set(PCRE_DEFS)
 
 if(PKG_CONFIG_FOUND)
@@ -12,9 +16,6 @@ endif()
 
 if(PCRE_FOUND)
   set(CONF_DO_BUILD TRUE)
-  set(CONF_COMPONENTS
-    "src/clib/libs/libbase_cll")
-  set(CONF_HEADER_DIRS)
   set(CONF_INCLUDE_DIRS
     ${PCRE_INCLUDE_DIRS})
   set(CONF_COMP_DEFS

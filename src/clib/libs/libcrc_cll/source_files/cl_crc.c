@@ -38,7 +38,7 @@ const unsigned short crc16_table[] =
   0x3DE3, 0x2C6A, 0x1EF1, 0x0F78
 };/*}}}*/
 
-// === methods of structure crc16_s =============================================
+// === methods of structure crc16_s ============================================
 
 void crc16_s_update(crc16_s *this,unsigned a_size,const void *a_data)
 {//{{{

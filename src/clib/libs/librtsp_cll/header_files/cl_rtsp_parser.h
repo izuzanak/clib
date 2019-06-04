@@ -41,11 +41,11 @@ rtsp_parser_s;
 unsigned rtsp_parser_s_recognize_terminal(rtsp_parser_s *this);
 WUR int rtsp_parser_s_parse(rtsp_parser_s *this,string_s *a_src,int a_no_check);
 
-// === rtsp parse actions access ==========================================
+// === rtsp parse actions access ===============================================
 
 extern void (*rtsp_pa_callers[])(rtsp_parser_s *this);
 
-// === rtsp parse actions =================================================
+// === rtsp parse actions ======================================================
 
 void pa_rtsp_null(rtsp_parser_s *this);
 void pa_rtsp_command(rtsp_parser_s *this);

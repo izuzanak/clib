@@ -103,6 +103,13 @@ WUR static inline int pipe_s_popen(pipe_s *this,const char *a_command,const char
 WUR static inline int pipe_s_write_close(pipe_s *this,const void *a_src,size_t a_size);
 WUR static inline int pipe_s_read_close(pipe_s *this,bc_array_s *a_trg);
 
+// === definition of generated structures ======================================
+
+// -- pollfd_array_s --
+@begin
+array<pollfd_s> pollfd_array_s;
+@end
+
 // === inline methods of structure pollfd_s ====================================
 
 static inline int pollfd_s_compare(const pollfd_s *this,const pollfd_s *a_second)
@@ -378,6 +385,13 @@ static inline int pipe_s_read_close(pipe_s *this,bc_array_s *a_trg)
 
   return 0;
 }/*}}}*/
+
+// === inline methods of generated structures ==================================
+
+// -- pollfd_array_s --
+@begin
+inlines pollfd_array_s
+@end
 
 #endif
 

@@ -54,3 +54,10 @@ int stream_s_read_max(stream_s *this,bc_array_s *a_trg,size_t a_size)
   return 0;
 }/*}}}*/
 
+// === methods of generated structures =========================================
+
+// -- pollfd_array_s --
+@begin
+methods pollfd_array_s
+@end
+

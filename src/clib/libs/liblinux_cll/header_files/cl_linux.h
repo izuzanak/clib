@@ -765,7 +765,7 @@ static inline int epoll_s_timer_callback(epoll_s *this,
   return 0;
 }/*}}}*/
 
-// === inline methods of structure epoll_fd_s ===============================
+// === inline methods of structure epoll_fd_s ==================================
 
 static inline void epoll_fd_s_init(epoll_fd_s *this)
 {/*{{{*/

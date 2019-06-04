@@ -9,11 +9,6 @@ include "cl_sys.h"
 
 // === definition of generated structures ======================================
 
-// -- pollfd_array_s --
-@begin
-array<pollfd_s> pollfd_array_s;
-@end
-
 // -- pollfd_tree_s --
 @begin
 rb_tree<pollfd_s> pollfd_tree_s;
@@ -30,11 +25,6 @@ array<pipe_s> pipe_array_s;
 @end
 
 // === inline methods of generated structures ==================================
-
-// -- pollfd_array_s --
-@begin
-inlines pollfd_array_s
-@end
 
 // -- pollfd_tree_s --
 @begin

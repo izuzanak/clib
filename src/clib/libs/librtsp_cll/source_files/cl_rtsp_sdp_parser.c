@@ -31,7 +31,7 @@ const unsigned rtsp_sdp_lalr_table[rtsp_sdp_lalr_state_cnt*c_rtsp_sdp_terminal_p
        rtsp_sdp_blank,       rtsp_sdp_blank,       rtsp_sdp_blank,       rtsp_sdp_blank,       rtsp_sdp_blank,       rtsp_sdp_blank,       rtsp_sdp_blank,       rtsp_sdp_blank,
 };/*}}}*/
 
-// === rtsp parse actions access ==========================================
+// === rtsp parse actions access ===============================================
 
 #define c_rtsp_sdp_parse_action_cnt 7
 void (*rtsp_sdp_pa_callers[c_rtsp_sdp_parse_action_cnt])(rtsp_sdp_parser_s *this) =
@@ -45,7 +45,7 @@ void (*rtsp_sdp_pa_callers[c_rtsp_sdp_parse_action_cnt])(rtsp_sdp_parser_s *this
   pa_rtsp_sdp_control,
 };/*}}}*/
 
-// === rtsp parse actions =================================================
+// === rtsp parse actions ======================================================
 
 void pa_rtsp_sdp_null(rtsp_sdp_parser_s *this)
 {/*{{{*/

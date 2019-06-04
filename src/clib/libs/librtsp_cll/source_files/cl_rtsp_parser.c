@@ -90,7 +90,7 @@ const unsigned rtsp_lalr_table[rtsp_lalr_state_cnt*c_rtsp_terminal_plus_nontermi
        rtsp_blank,       rtsp_blank,  RTSP_REDUCE(32),  RTSP_REDUCE(32),  RTSP_REDUCE(32),  RTSP_REDUCE(32),  RTSP_REDUCE(32),  RTSP_REDUCE(32),  RTSP_REDUCE(32),  RTSP_REDUCE(32),  RTSP_REDUCE(32),  RTSP_REDUCE(32),  RTSP_REDUCE(32),       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,  RTSP_REDUCE(32),       rtsp_blank,  RTSP_REDUCE(32),       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,       rtsp_blank,
 };/*}}}*/
 
-// === rtsp parse actions access ==========================================
+// === rtsp parse actions access ===============================================
 
 #define c_rtsp_parse_action_cnt 42
 void (*rtsp_pa_callers[c_rtsp_parse_action_cnt])(rtsp_parser_s *this) =
@@ -139,7 +139,7 @@ void (*rtsp_pa_callers[c_rtsp_parse_action_cnt])(rtsp_parser_s *this) =
   pa_rtsp_null,
 };/*}}}*/
 
-// === rtsp parse actions =================================================
+// === rtsp parse actions ======================================================
 
 void pa_rtsp_null(rtsp_parser_s *this)
 {/*{{{*/

@@ -23,11 +23,6 @@ test_function_t test_functions[] =
 
 // === methods of generated structures =========================================
 
-// -- pollfd_array_s --
-@begin
-methods pollfd_array_s
-@end
-
 // -- pollfd_tree_s --
 @begin
 methods pollfd_tree_s
