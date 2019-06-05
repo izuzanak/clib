@@ -226,7 +226,7 @@ int rtsp_client_s_recv_sdp(rtsp_client_s *this)
   debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s\n",msg->used,msg->data));
 
   // - call recv_sdp_callback -
-  if (((rtsp_recv_sdp_callback_t)this->recv_sdp_callback)(this->cb_object,this->cb_index,msg))
+  if (((rtsp_recv_sdp_callback_t)this->recv_sdp_callback)(this->cb_object,this->cb_index,&this->server_num_ip,msg))
   {
     throw_error(RTSP_CLIENT_CALLBACK_ERROR);
   }
@@ -281,6 +281,22 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
         {
           this->state = c_rtsp_client_state_ERROR;
           throw_error(RTSP_CLIENT_CONNECT_ERROR);
+        }
+
+        // - retrieve server numeric ip address -
+        {
+          CONT_INIT_CLEAR(bc_array_s,buffer);
+
+          socket_address_s addr;
+          socklen_t addr_length = sizeof(addr);
+
+          if (getpeername(this->epoll_fd.fd,&addr,&addr_length) ||
+              socket_address_s_name(&addr,&buffer))
+          {
+            throw_error(RTSP_CLIENT_RETRIEVE_SERVER_IP_ERROR);
+          }
+
+          string_s_set(&this->server_num_ip,buffer.used,buffer.data);
         }
 
         // - reset sequence -

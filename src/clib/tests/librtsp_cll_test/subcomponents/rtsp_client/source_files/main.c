@@ -12,7 +12,7 @@ methods rtsp_client_list_s
 
 // === program entry function ==================================================
 
-int client_recv_sdp(void *a_client_list,unsigned a_index,const bc_array_s *a_src)
+int client_recv_sdp(void *a_client_list,unsigned a_index,const string_s *a_server_ip,const bc_array_s *a_src)
 {/*{{{*/
   (void)a_client_list;
   (void)a_index;

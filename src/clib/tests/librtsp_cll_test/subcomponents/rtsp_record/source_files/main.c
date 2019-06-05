@@ -165,8 +165,10 @@ int rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll
   return 0;
 }/*}}}*/
 
-int rtsp_recorder_s_recv_sdp(void *a_rtsp_recorder,unsigned a_index,const bc_array_s *a_src)
+int rtsp_recorder_s_recv_sdp(void *a_rtsp_recorder,unsigned a_index,const string_s *a_server_ip,const bc_array_s *a_src)
 {/*{{{*/
+  (void)a_server_ip;
+
   debug_message_1(fprintf(stderr,"rtsp_recorder_s_recv_sdp: %u\n",a_index));
 
   rtsp_recorder_s *this = (rtsp_recorder_s *)a_rtsp_recorder;

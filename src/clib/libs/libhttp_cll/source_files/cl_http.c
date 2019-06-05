@@ -159,7 +159,7 @@ int http_server_s_create(http_server_s *this,usi a_port,
 
   // - start http server -
   struct MHD_Daemon *daemon = MHD_start_daemon(
-      MHD_USE_SUSPEND_RESUME,a_port,NULL,NULL,
+      MHD_USE_SUSPEND_RESUME | MHD_USE_EPOLL_LINUX_ONLY,a_port,NULL,NULL,
       http_server_s_connection_func,this,
       MHD_OPTION_NOTIFY_COMPLETED,http_server_s_completed_func,this,
       MHD_OPTION_END);

@@ -33,6 +33,7 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CLIENT_SEND_ERROR 8
 #define ERROR_RTSP_CLIENT_RECEIVE_ERROR 9
 #define ERROR_RTSP_CLIENT_SESSION_ERROR 10
+#define ERROR_RTSP_CLIENT_RETRIEVE_SERVER_IP_ERROR 11
 
 #define ERROR_RTSP_CONN_INVALID_STATE 1
 #define ERROR_RTSP_CONN_INVALID_FD 2
@@ -95,7 +96,7 @@ typedef unsigned rtsp_pkt_delay_t;
 #define RTSP_HALF_SECOND_DELAY 500000ULL
 
 typedef struct rtsp_client_s rtsp_client_s;
-typedef int (*rtsp_recv_sdp_callback_t)(void *a_object,unsigned a_index,const bc_array_s *a_src);
+typedef int (*rtsp_recv_sdp_callback_t)(void *a_object,unsigned a_index,const string_s *a_server_ip,const bc_array_s *a_src);
 typedef int (*rtsp_recv_packet_callback_t)(void *a_object,unsigned a_index,const bc_array_s *a_src);
 
 typedef struct rtsp_server_s rtsp_server_s;
@@ -127,6 +128,7 @@ enum
 struct
 <
 string_s:server_ip
+string_s:server_num_ip
 usi:server_port
 string_s:media_url
 
