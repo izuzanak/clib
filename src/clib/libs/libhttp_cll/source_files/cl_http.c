@@ -151,7 +151,9 @@ void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
 }/*}}}*/
 
 int http_server_s_create(http_server_s *this,usi a_port,
-    http_connection_cb_t a_connection_cb,http_completed_cb_t a_completed_cb)
+    http_connection_cb_t a_connection_cb,
+    http_completed_cb_t a_completed_cb,
+    void *a_user_data)
 {/*{{{*/
   http_server_s_clear(this);
 
@@ -174,6 +176,9 @@ int http_server_s_create(http_server_s *this,usi a_port,
   // - set server callbacks -
   this->connection_cb = a_connection_cb;
   this->completed_cb = a_completed_cb;
+
+  // - store user data -
+  this->user_data = a_user_data;
 
   return 0;
 }/*}}}*/

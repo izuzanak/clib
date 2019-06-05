@@ -118,7 +118,7 @@ int main(int argc,char **argv)
 
   {
     CONT_INIT_CLEAR(http_server_s,server);
-    cassert(http_server_s_create(&server,8888,http_connection,http_completed) == 0);
+    cassert(http_server_s_create(&server,8888,http_connection,http_completed,NULL) == 0);
 
     CONT_INIT_CLEAR(pollfd_array_s,pollfd_array);
 

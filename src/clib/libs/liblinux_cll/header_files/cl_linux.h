@@ -274,6 +274,23 @@ static inline void epoll_fd_s_to_string(const epoll_fd_s *this,bc_array_s *a_trg
 
 WUR static inline int epoll_fd_s_modify_events(epoll_fd_s *this,unsigned a_evts);
 
+// === definition of structure epoll_borrow_fd_s ===============================
+
+typedef epoll_fd_s epoll_borrow_fd_s;
+@begin
+define epoll_borrow_fd_s dynamic
+@end
+
+static inline void epoll_borrow_fd_s_init(epoll_borrow_fd_s *this);
+static inline void epoll_borrow_fd_s_clear(epoll_borrow_fd_s *this);
+static inline void epoll_borrow_fd_s_flush_all(epoll_borrow_fd_s *this);
+static inline void epoll_borrow_fd_s_swap(epoll_borrow_fd_s *this,epoll_borrow_fd_s *a_second);
+static inline void epoll_borrow_fd_s_copy(const epoll_borrow_fd_s *this,const epoll_borrow_fd_s *a_src);
+static inline int epoll_borrow_fd_s_compare(const epoll_borrow_fd_s *this,const epoll_borrow_fd_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void epoll_borrow_fd_s_to_string(const epoll_borrow_fd_s *this,bc_array_s *a_trg);
+#endif
+
 // === definition of structure epoll_timer_s ===================================
 
 typedef epoll_fd_s epoll_timer_s;
@@ -825,6 +842,55 @@ static inline int epoll_fd_s_modify_events(epoll_fd_s *this,unsigned a_evts)
   epoll_callback_s callback = {NULL,NULL,0};
   return epoll_s_fd_update(this->epoll,this,a_evts,0,&callback);
 }/*}}}*/
+
+// === inline methods of structure epoll_borrow_fd_s ===========================
+
+static inline void epoll_borrow_fd_s_init(epoll_borrow_fd_s *this)
+{/*{{{*/
+  this->epoll = NULL;
+  this->fd = -1;
+}/*}}}*/
+
+static inline void epoll_borrow_fd_s_clear(epoll_borrow_fd_s *this)
+{/*{{{*/
+  if (this->epoll != NULL && this->fd != -1)
+  {
+    cassert(epoll_s_fd(this->epoll,this,0) == 0);
+  }
+
+  epoll_borrow_fd_s_init(this);
+}/*}}}*/
+
+static inline void epoll_borrow_fd_s_flush_all(epoll_borrow_fd_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void epoll_borrow_fd_s_swap(epoll_borrow_fd_s *this,epoll_borrow_fd_s *a_second)
+{/*{{{*/
+  epoll_borrow_fd_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void epoll_borrow_fd_s_copy(const epoll_borrow_fd_s *this,const epoll_borrow_fd_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int epoll_borrow_fd_s_compare(const epoll_borrow_fd_s *this,const epoll_borrow_fd_s *a_second)
+{/*{{{*/
+  return this->epoll == a_second->epoll && this->fd == a_second->fd;
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void epoll_borrow_fd_s_to_string(const epoll_borrow_fd_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"epoll_borrow_fd_s{%p,%d}",this->epoll,this->fd);
+}/*}}}*/
+#endif
 
 // === inline methods of structure epoll_timer_s ===============================
 

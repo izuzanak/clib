@@ -86,6 +86,7 @@ typedef struct http_server_s
   struct MHD_Daemon *daemon;
   http_connection_cb_t connection_cb;
   http_completed_cb_t completed_cb;
+  void *user_data;
   pointer_list_s suspended_conns;
   int ret_code;
 } http_server_s;
@@ -113,8 +114,9 @@ void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
     void **con_cls,enum MHD_RequestTerminationCode toe);
 
 WUR libhttp_cll_EXPORT int http_server_s_create(http_server_s *this,usi a_port,
-  http_connection_cb_t a_connection_cb,
-  http_completed_cb_t a_completed_cb);
+    http_connection_cb_t a_connection_cb,
+    http_completed_cb_t a_completed_cb,
+    void *a_user_data);
 WUR libhttp_cll_EXPORT int http_server_s_fds(http_server_s *this,pollfd_array_s *a_trg);
 static inline ulli http_server_s_timeout(http_server_s *this);
 WUR static inline int http_server_s_process(http_server_s *this);
@@ -128,7 +130,7 @@ typedef struct http_conn_s
   unsigned conn_type;
   struct MHD_Connection *connection;
   http_key_value_tree_s *http_key_value_tree;
-  pointer user_data;
+  void *user_data;
   unsigned suspend_idx;
 
   const char *url;
@@ -212,6 +214,7 @@ static inline void http_server_s_init(http_server_s *this)
 {/*{{{*/
   this->daemon = NULL;
   this->connection_cb = NULL;
+  this->user_data = NULL;
   pointer_list_s_init(&this->suspended_conns);
   this->ret_code = 0;
 }/*}}}*/
@@ -287,11 +290,11 @@ static inline ulli http_server_s_timeout(http_server_s *this)
   // - retrieve mhd timeout -
   if (MHD_get_timeout(this->daemon,&mhd_timeout) == MHD_YES)
   {
-    return mhd_timeout;
+    return mhd_timeout*1000000ULL;
   }
   else
   {
-    return LLONG_MAX;
+    return 0;
   }
 }/*}}}*/
 

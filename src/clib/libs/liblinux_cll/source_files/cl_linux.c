@@ -521,7 +521,11 @@ int epoll_s_fd_update(epoll_s *this,
       // - ERROR -
       if (epoll_ctl(this->fd,EPOLL_CTL_DEL,a_epoll_fd->fd,&epoll_event) == -1)
       {
-        throw_error(EPOLL_CONTROL_DELETE_ERROR);
+        // - closed fd, not problem -
+        if (errno != EBADF)
+        {
+          throw_error(EPOLL_CONTROL_DELETE_ERROR);
+        }
       }
 
       a_epoll_fd->epoll = this;
