@@ -61,29 +61,31 @@ enum
 safe_list<pointer> pointer_list_s;
 @end
 
-// -- http_header_s --
+// -- http_key_value_s --
 @begin
 struct
 <
 string_s:key
 string_s:value
 >
-http_header_s;
+http_key_value_s;
 @end
 
-// -- http_header_tree_s --
+// -- http_key_value_tree_s --
 @begin
-rb_tree<http_header_s> http_header_tree_s;
+rb_tree<http_key_value_s> http_key_value_tree_s;
 @end
 
 // === definition of structure http_server_s ===================================
 
 typedef int (*http_connection_cb_t)(http_conn_s *a_conn);
+typedef int (*http_completed_cb_t)(http_conn_s *a_conn);
 
 typedef struct http_server_s
 {
   struct MHD_Daemon *daemon;
   http_connection_cb_t connection_cb;
+  http_completed_cb_t completed_cb;
   pointer_list_s suspended_conns;
   int ret_code;
 } http_server_s;
@@ -110,7 +112,9 @@ int conn_key_value_func(void *cls,enum MHD_ValueKind kind,
 void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
     void **con_cls,enum MHD_RequestTerminationCode toe);
 
-WUR libhttp_cll_EXPORT int http_server_s_create(http_server_s *this,usi a_port,http_connection_cb_t a_connection_cb);
+WUR libhttp_cll_EXPORT int http_server_s_create(http_server_s *this,usi a_port,
+  http_connection_cb_t a_connection_cb,
+  http_completed_cb_t a_completed_cb);
 WUR libhttp_cll_EXPORT int http_server_s_fds(http_server_s *this,pollfd_array_s *a_trg);
 static inline ulli http_server_s_timeout(http_server_s *this);
 WUR static inline int http_server_s_process(http_server_s *this);
@@ -123,7 +127,7 @@ typedef struct http_conn_s
 
   unsigned conn_type;
   struct MHD_Connection *connection;
-  http_header_tree_s *http_header_tree;
+  http_key_value_tree_s *http_key_value_tree;
   pointer user_data;
   unsigned suspend_idx;
 
@@ -148,7 +152,7 @@ static inline int http_conn_s_compare(const http_conn_s *this,const http_conn_s 
 static inline void http_conn_s_to_string(const http_conn_s *this,bc_array_s *a_trg);
 #endif
 
-void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_header_tree_s *a_trg);
+void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_key_value_tree_s *a_trg);
 WUR libhttp_cll_EXPORT int http_conn_s_queue_response(http_conn_s *this,
     unsigned a_status_code,http_resp_s *a_resp);
 
@@ -173,8 +177,9 @@ static inline int http_resp_s_compare(const http_resp_s *this,const http_resp_s 
 static inline void http_resp_s_to_string(const http_resp_s *this,bc_array_s *a_trg);
 #endif
 
-WUR libhttp_cll_EXPORT int http_resp_s_create_from_buffer_copy(http_resp_s *this,const bc_array_s *a_src);
-WUR libhttp_cll_EXPORT int http_resp_s_create_from_fd(http_resp_s *this,off_t a_size,int a_fd);
+static inline int http_resp_s_create_from_buffer(http_resp_s *this,
+    size_t a_size,void *a_data,enum MHD_ResponseMemoryMode a_mode);
+static inline int http_resp_s_create_from_fd(http_resp_s *this,uint64_t a_size,int a_fd);
 
 // === inline methods of generated structures ==================================
 
@@ -183,17 +188,17 @@ WUR libhttp_cll_EXPORT int http_resp_s_create_from_fd(http_resp_s *this,off_t a_
 inlines pointer_list_s
 @end
 
-// -- http_header_s --
+// -- http_key_value_s --
 @begin
-inlines http_header_s
+inlines http_key_value_s
 @end
 
-// -- http_header_tree_s --
+// -- http_key_value_tree_s --
 @begin
-inlines http_header_tree_s
+inlines http_key_value_tree_s
 @end
 
-static inline int http_header_tree_s___compare_value(const http_header_tree_s *this,const http_header_s *a_first,const http_header_s *a_second)
+static inline int http_key_value_tree_s___compare_value(const http_key_value_tree_s *this,const http_key_value_s *a_first,const http_key_value_s *a_second)
 {/*{{{*/
   if (a_first->key.size < a_second->key.size) { return -1; }
   if (a_first->key.size > a_second->key.size) { return 1; }
@@ -317,7 +322,7 @@ static inline void http_conn_s_init(http_conn_s *this)
 
   this->conn_type = c_http_conn_type_NONE;
   this->connection = NULL;
-  this->http_header_tree = NULL;
+  this->http_key_value_tree = NULL;
   this->user_data = NULL;
   this->suspend_idx = c_idx_not_exist;
 
@@ -417,6 +422,33 @@ static inline void http_resp_s_to_string(const http_resp_s *this,bc_array_s *a_t
   bc_array_s_append_format(a_trg,"http_resp_s{%p}",this);
 }/*}}}*/
 #endif
+
+static inline int http_resp_s_create_from_buffer(http_resp_s *this,
+    size_t a_size,void *a_data,enum MHD_ResponseMemoryMode a_mode)
+{/*{{{*/
+  http_resp_s_clear(this);
+
+  // - ERROR -
+  if ((this->response = MHD_create_response_from_buffer(a_size,a_data,a_mode)) == NULL)
+  {
+    throw_error(HTTP_RESP_CREATE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int http_resp_s_create_from_fd(http_resp_s *this,uint64_t a_size,int a_fd)
+{/*{{{*/
+  http_resp_s_clear(this);
+
+  // - ERROR -
+  if ((this->response = MHD_create_response_from_fd(a_size,a_fd)) == NULL)
+  {
+    throw_error(HTTP_RESP_CREATE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
 
 #endif
 

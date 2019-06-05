@@ -10,14 +10,14 @@ include "cl_http.h"
 methods pointer_list_s
 @end
 
-// -- http_header_s --
+// -- http_key_value_s --
 @begin
-methods http_header_s
+methods http_key_value_s
 @end
 
-// -- http_header_tree_s --
+// -- http_key_value_tree_s --
 @begin
-methods http_header_tree_s
+methods http_key_value_tree_s
 @end
 
 // === methods of structure http_server_s ======================================
@@ -101,8 +101,7 @@ int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
   conn_ptr->upload_data = upload_data;
   conn_ptr->upload_data_size = upload_data_size;
 
-  // -----
-
+  // - call connection callback -
   int res = server->connection_cb(conn_ptr);
 
   // - reset upload data variables -
@@ -123,12 +122,12 @@ int conn_key_value_func(void *cls,enum MHD_ValueKind kind,
 {/*{{{*/
   http_conn_s *conn_ptr = (http_conn_s *)cls;
 
-  CONT_INIT_CLEAR(http_header_s,http_header);
+  CONT_INIT_CLEAR(http_key_value_s,http_header);
   string_s_set(&http_header.key,strlen(key),key);
   string_s_set(&http_header.value,strlen(value),value);
 
   // - insert header to tree -
-  http_header_tree_s_unique_swap_insert(conn_ptr->http_header_tree,&http_header);
+  http_key_value_tree_s_unique_swap_insert(conn_ptr->http_key_value_tree,&http_header);
 
   return MHD_YES;
 }/*}}}*/
@@ -136,19 +135,23 @@ int conn_key_value_func(void *cls,enum MHD_ValueKind kind,
 void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
     void **con_cls,enum MHD_RequestTerminationCode toe)
 {/*{{{*/
-
-  // - retrieve connection object -
+  http_server_s *server = (http_server_s *)cls;
   http_conn_s *conn_ptr = (http_conn_s *)*con_cls;
 
   // - if connection object exists -
   if (conn_ptr != NULL)
   {
+    // - call completed callback -
+    server->completed_cb(conn_ptr);
+
+    // - release http connection -
     http_conn_s_clear(conn_ptr);
     cfree(conn_ptr);
   }
 }/*}}}*/
 
-int http_server_s_create(http_server_s *this,usi a_port,http_connection_cb_t a_connection_cb)
+int http_server_s_create(http_server_s *this,usi a_port,
+    http_connection_cb_t a_connection_cb,http_completed_cb_t a_completed_cb)
 {/*{{{*/
   http_server_s_clear(this);
 
@@ -156,7 +159,7 @@ int http_server_s_create(http_server_s *this,usi a_port,http_connection_cb_t a_c
   struct MHD_Daemon *daemon = MHD_start_daemon(
       MHD_USE_SUSPEND_RESUME,a_port,NULL,NULL,
       http_server_s_connection_func,this,
-      MHD_OPTION_NOTIFY_COMPLETED,http_server_s_completed_func,NULL,
+      MHD_OPTION_NOTIFY_COMPLETED,http_server_s_completed_func,this,
       MHD_OPTION_END);
 
   // - ERROR -
@@ -168,8 +171,9 @@ int http_server_s_create(http_server_s *this,usi a_port,http_connection_cb_t a_c
   // - set server daemon pointer -
   this->daemon = daemon;
 
-  // - set server connection callback -
+  // - set server callbacks -
   this->connection_cb = a_connection_cb;
+  this->completed_cb = a_completed_cb;
 
   return 0;
 }/*}}}*/
@@ -239,14 +243,14 @@ int http_server_s_fds(http_server_s *this,pollfd_array_s *a_trg)
 
 // === methods of structure http_conn_s ========================================
 
-void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_header_tree_s *a_trg)
+void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_key_value_tree_s *a_trg)
 {/*{{{*/
-  http_header_tree_s_clear(a_trg);
+  http_key_value_tree_s_clear(a_trg);
 
   // - retrieve key value locations -
-  this->http_header_tree = a_trg;
+  this->http_key_value_tree = a_trg;
   MHD_get_connection_values(this->connection,a_value_kind,&conn_key_value_func,this);
-  this->http_header_tree = NULL;
+  this->http_key_value_tree = NULL;
 }/*}}}*/
 
 int http_conn_s_queue_response(http_conn_s *this,unsigned a_status_code,http_resp_s *a_resp)
@@ -265,40 +269,4 @@ int http_conn_s_queue_response(http_conn_s *this,unsigned a_status_code,http_res
 }/*}}}*/
 
 // === methods of structure http_resp_s ========================================
-
-int http_resp_s_create_from_buffer_copy(http_resp_s *this,const bc_array_s *a_src)
-{/*{{{*/
-  http_resp_s_clear(this);
-
-  // - create http_resp object -
-  struct MHD_Response *response = MHD_create_response_from_buffer(
-      a_src->used,a_src->data,MHD_RESPMEM_MUST_COPY);
-
-  // - ERROR -
-  if (response == NULL)
-  {
-    throw_error(HTTP_RESP_CREATE_ERROR);
-  }
-
-  this->response = response;
-
-  return 0;
-}/*}}}*/
-
-int http_resp_s_create_from_fd(http_resp_s *this,off_t a_size,int a_fd)
-{/*{{{*/
-
-  // - create http_resp object -
-  struct MHD_Response *response = MHD_create_response_from_fd(a_size,a_fd);
-
-  // - ERROR -
-  if (response == NULL)
-  {
-    throw_error(HTTP_RESP_CREATE_ERROR);
-  }
-
-  this->response = response;
-
-  return 0;
-}/*}}}*/
 
