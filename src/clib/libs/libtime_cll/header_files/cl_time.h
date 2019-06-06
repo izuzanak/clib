@@ -74,6 +74,7 @@ static inline void time_s_to_string(const time_s *this,bc_array_s *a_trg);
 #if OPTION_TO_JSON == ENABLED
 static inline void time_s_to_json(const time_s *this,bc_array_s *a_trg);
 #endif
+static inline void time_s_to_string_reduced(const time_s *this,bc_array_s *a_trg);
 static inline void time_s_now(time_s *this);
 WUR libtime_cll_EXPORT int time_s_from_string(time_s *this,unsigned a_length,const char *a_data);
 WUR static inline int time_s_from_string_ptr(time_s *this,const char *a_data);
@@ -130,6 +131,17 @@ static inline void time_s_to_json(const time_s *this,bc_array_s *a_trg)
   ulli_to_json(this,a_trg);
 }/*}}}*/
 #endif
+
+static inline void time_s_to_string_reduced(const time_s *this,bc_array_s *a_trg)
+{/*{{{*/
+
+  // - convert time to datetime structure -
+  datetime_s datetime;
+  datetime_s_from_nanosec(&datetime,*this);
+
+  bc_array_s_append_format(a_trg,"%4.4hu%2.2hu%2.2hu%2.2hu%2.2hu%2.2hu"
+    ,datetime.year,datetime.month,datetime.day,datetime.hour,datetime.min,datetime.sec);
+}/*}}}*/
 
 static inline void time_s_now(time_s *this)
 {/*{{{*/
