@@ -7,11 +7,11 @@ include "cl_sys.h"
 @end
 
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
+#include <fcntl.h>
 #include <poll.h>
-#include <fcntl.h>
 #elif SYSTEM_TYPE == SYSTEM_TYPE_WINDOWS
-#include <io.h>
 #include <fcntl.h>
+#include <io.h>
 #include <sys/stat.h>
 #endif 
 
@@ -202,6 +202,8 @@ inlines http_key_value_tree_s
 
 static inline int http_key_value_tree_s___compare_value(const http_key_value_tree_s *this,const http_key_value_s *a_first,const http_key_value_s *a_second)
 {/*{{{*/
+  (void)this;
+
   if (a_first->key.size < a_second->key.size) { return -1; }
   if (a_first->key.size > a_second->key.size) { return 1; }
 
@@ -292,10 +294,8 @@ static inline ulli http_server_s_timeout(http_server_s *this)
   {
     return mhd_timeout*1000000ULL;
   }
-  else
-  {
-    return 0;
-  }
+
+  return 0;
 }/*}}}*/
 
 static inline int http_server_s_process(http_server_s *this)

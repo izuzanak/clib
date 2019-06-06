@@ -3,9 +3,9 @@
 #define __MAIN_H
 
 @begin
-include "cl_test.h"
-include "cl_linux.h"
 include "cl_http.h"
+include "cl_linux.h"
+include "cl_test.h"
 @end
 
 // === program entry function ==================================================

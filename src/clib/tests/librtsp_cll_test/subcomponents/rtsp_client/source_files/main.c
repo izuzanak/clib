@@ -16,6 +16,7 @@ int client_recv_sdp(void *a_client_list,unsigned a_index,const string_s *a_serve
 {/*{{{*/
   (void)a_client_list;
   (void)a_index;
+  (void)a_server_ip;
   (void)a_src;
 
   debug_message_1(fprintf(stderr,"client_recv_sdp\n"));

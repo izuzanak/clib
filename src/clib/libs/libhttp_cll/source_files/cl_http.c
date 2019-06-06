@@ -120,6 +120,8 @@ int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
 int conn_key_value_func(void *cls,enum MHD_ValueKind kind,
     const char *key,const char *value)
 {/*{{{*/
+  (void)kind;
+
   http_conn_s *conn_ptr = (http_conn_s *)cls;
 
   CONT_INIT_CLEAR(http_key_value_s,http_header);
@@ -135,6 +137,9 @@ int conn_key_value_func(void *cls,enum MHD_ValueKind kind,
 void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
     void **con_cls,enum MHD_RequestTerminationCode toe)
 {/*{{{*/
+  (void)connection;
+  (void)toe;
+
   http_server_s *server = (http_server_s *)cls;
   http_conn_s *conn_ptr = (http_conn_s *)*con_cls;
 
