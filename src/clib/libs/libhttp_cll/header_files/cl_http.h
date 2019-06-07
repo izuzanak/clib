@@ -182,6 +182,8 @@ static inline void http_resp_s_to_string(const http_resp_s *this,bc_array_s *a_t
 static inline int http_resp_s_create_from_buffer(http_resp_s *this,
     size_t a_size,void *a_data,enum MHD_ResponseMemoryMode a_mode);
 static inline int http_resp_s_create_from_fd(http_resp_s *this,uint64_t a_size,int a_fd);
+static inline int http_resp_s_create_from_callback(http_resp_s *this,uint64_t a_size,size_t a_block_size,
+    MHD_ContentReaderCallback a_crc,void *a_crc_cls,MHD_ContentReaderFreeCallback a_crfc);
 
 // === inline methods of generated structures ==================================
 
@@ -446,6 +448,21 @@ static inline int http_resp_s_create_from_fd(http_resp_s *this,uint64_t a_size,i
 
   // - ERROR -
   if ((this->response = MHD_create_response_from_fd(a_size,a_fd)) == NULL)
+  {
+    throw_error(HTTP_RESP_CREATE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int http_resp_s_create_from_callback(http_resp_s *this,uint64_t a_size,size_t a_block_size,
+    MHD_ContentReaderCallback a_crc,void *a_crc_cls,MHD_ContentReaderFreeCallback a_crfc)
+{/*{{{*/
+  http_resp_s_clear(this);
+
+  // - ERROR -
+  if ((this->response = MHD_create_response_from_callback(
+          a_size,a_block_size,a_crc,a_crc_cls,a_crfc)) == NULL)
   {
     throw_error(HTTP_RESP_CREATE_ERROR);
   }

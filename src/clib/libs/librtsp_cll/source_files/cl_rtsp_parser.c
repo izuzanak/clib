@@ -2743,6 +2743,9 @@ state_227_label:
    RTSP_CLOSE_CHAR(c_idx_not_exist);
    RTSP_GET_NEXT_CHAR();
 
+   if (in_char == 43) {
+      goto state_249_label;
+   }
    if (in_char >= 45 && in_char < 59) {
       goto state_249_label;
    }
@@ -2969,6 +2972,9 @@ state_249_label:
    RTSP_CLOSE_CHAR(23);
    RTSP_GET_NEXT_CHAR();
 
+   if (in_char == 43) {
+      goto state_249_label;
+   }
    if (in_char >= 45 && in_char < 59) {
       goto state_249_label;
    }
