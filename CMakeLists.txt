@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 find_package(PkgConfig)
 
 project(clib)
+#set(CMAKE_C_CPPCHECK "cppcheck")
 
 set(PROC_DIR "${CMAKE_CURRENT_BINARY_DIR}/proc_files")
 set(TESTS_DIR "${CMAKE_CURRENT_BINARY_DIR}/tests")
@@ -31,7 +32,7 @@ function(process_source TARGET)
       ERROR_QUIET)
   add_custom_command(OUTPUT "${PROC_DIR}/p.${TARGET}.c"
       DEPENDS ${DEPS}
-      COMMAND ${PROCESS_BIN} "--output" "${PROC_DIR}/p.${TARGET}.c" "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS})
+      COMMAND ${PROCESS_BIN} --geninc "--output" "${PROC_DIR}/p.${TARGET}.c" "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS})
 # }}}
 endfunction()
 
