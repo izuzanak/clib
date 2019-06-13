@@ -100,6 +100,7 @@ function(include_component COMP_REL_DIR)
   set(COMP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${COMP_REL_DIR}")
   get_filename_component(COMP_NAME ${COMP_DIR} NAME)
   set(COMP_NAME "${PARENT_COMP_NAME}${COMP_NAME}")
+  set(PARENT_COMP_NAME)
 
   if(EXISTS ${COMP_DIR}/CMakeLists.txt)
 
