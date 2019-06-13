@@ -1,0 +1,26 @@
+
+if(PKG_CONFIG_FOUND)
+  pkg_search_module(LIBWEBSOCKETS "libwebsockets = 1.3")
+else()
+  if(OS_WINDOWS AND LIBWEBSOCKETS_INCLUDE_DIRS AND LIBWEBSOCKETS_LIBRARIES)
+    set(LIBWEBSOCKETS_FOUND TRUE)
+    set(WSOCK32_LIBS
+      wsock32
+      ws2_32)
+  endif()
+endif()
+
+set(CONF_COMPONENTS
+  "src/clib/libs/libbase_cll")
+set(CONF_HEADER_DIRS)
+
+if(LIBWEBSOCKETS_FOUND)
+  set(CONF_DO_BUILD TRUE)
+  set(CONF_INCLUDE_DIRS
+      ${LIBWEBSOCKETS_INCLUDE_DIRS})
+  set(CONF_COMP_DEFS)
+  set(CONF_LINK_LIBS
+      ${LIBWEBSOCKETS_LIBRARIES}
+      ${WSOCK32_LIBS})
+endif()
+
