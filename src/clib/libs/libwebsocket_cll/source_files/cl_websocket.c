@@ -21,8 +21,22 @@ int ws_context_s_http_func(struct libwebsocket_context *ctx,struct libwebsocket 
     case LWS_CALLBACK_DEL_POLL_FD:
     case LWS_CALLBACK_CHANGE_MODE_POLL_FD:
       {
-        // FIXME TODO continue ...
-        cassert(0);
+        ws_context_s *wsc_ptr = (ws_context_s *)libwebsocket_context_user(ctx);
+        struct libwebsocket_pollargs *args_ptr = (struct libwebsocket_pollargs *)in;
+
+#if SYSTEM_TYPE == SYSTEM_TYPE_WINDOWS
+        unsigned events =
+          ((args_ptr->events & 0x01) ? POLLIN  : 0) |
+          // - POLLPRI ignored on windows -
+          ((args_ptr->events & 0x04) ? POLLOUT : 0) |
+          // - POLLERR ignored on windows -
+          ((args_ptr->events & 0x10) ? POLLHUP : 0);
+
+        wsc_ptr->ws_fd_event_cb(wsc_ptr,reason,args_ptr->fd,events);
+#else
+        wsc_ptr->ws_fd_event_cb(wsc_ptr,reason,args_ptr->fd,args_ptr->events);
+#endif
+        // FIXME TODO process callback result value
       }
       break;
     default:
@@ -58,7 +72,8 @@ int ws_context_s_protocol_func(struct libwebsocket_context *ctx,struct libwebsoc
 }/*}}}*/
 
 int ws_context_s_create(ws_context_s *this,
-    usi a_port,string_array_s *a_prot_names,pointer_array_s *a_prot_callbacks,void *a_user_data)
+    usi a_port,string_array_s *a_prot_names,pointer_array_s *a_prot_callbacks,
+    ws_fd_event_cb_t a_ws_fd_event_cb,void *a_user_data)
 {/*{{{*/
   ws_context_s_clear(this);
 
@@ -117,6 +132,18 @@ int ws_context_s_create(ws_context_s *this,
   info.options = 0;
   info.user = this;
 
+  // - store protocol names -
+  string_array_s_copy(&this->prot_names,a_prot_names);
+
+  // - store protocol callbacks -
+  pointer_array_s_copy(&this->prot_callbacks,a_prot_callbacks);
+
+  // - store fd change event callback -
+  this->ws_fd_event_cb = a_ws_fd_event_cb;
+
+  // - store user data -
+  this->user_data = a_user_data;
+
   // - create wesocket context -
   this->context = libwebsocket_create_context(&info);
 
@@ -127,15 +154,6 @@ int ws_context_s_create(ws_context_s *this,
 
     throw_error(WS_CONTEXT_CREATE_ERROR);
   }
-
-  // - store protocol names -
-  string_array_s_copy(&this->prot_names,a_prot_names);
-
-  // - store protocol callbacks -
-  pointer_array_s_copy(&this->prot_callbacks,a_prot_callbacks);
-
-  // - store user data -
-  this->user_data = a_user_data;
 
   return 0;
 }/*}}}*/

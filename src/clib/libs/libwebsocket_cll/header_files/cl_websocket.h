@@ -33,8 +33,8 @@ typedef struct ws_conn_s ws_conn_s;
 
 // === definition of structure ws_context_s ====================================
 
-int (*ws_fd_event_cb_t)(int a_fd,unsigned a_events);
-int (*ws_prot_conn_cb_t)(ws_conn_s *a_conn);
+typedef int (*ws_fd_event_cb_t)(ws_context_s *a_ctx,enum libwebsocket_callback_reasons a_reason,int a_fd,unsigned a_events);
+typedef int (*ws_prot_conn_cb_t)(ws_conn_s *a_conn);
 
 typedef struct ws_context_s
 {
@@ -44,6 +44,7 @@ typedef struct ws_context_s
 
   string_array_s prot_names;
   pointer_array_s prot_callbacks;
+  ws_fd_event_cb_t ws_fd_event_cb;
 } ws_context_s;
 
 @begin
@@ -67,7 +68,8 @@ int ws_context_s_protocol_func(struct libwebsocket_context *ctx,struct libwebsoc
     enum libwebsocket_callback_reasons reason,void *user,void *in,size_t len);
 
 WUR libwebsockets_cll_EXPORT int ws_context_s_create(ws_context_s *this,
-    usi a_port,string_array_s *a_prot_names,pointer_array_s *a_prot_callbacks,void *a_user_data);
+    usi a_port,string_array_s *a_prot_names,pointer_array_s *a_prot_callbacks,
+    ws_fd_event_cb_t a_ws_fd_event_cb,void *a_user_data);
 
 // === definition of generated structures ======================================
 
