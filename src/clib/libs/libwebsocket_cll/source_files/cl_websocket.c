@@ -7,8 +7,6 @@ include "cl_websocket.h"
 
 void ws_context_s_log_emit(int level,const char *line)
 {/*{{{*/
-
-  // FIXME debug output
   //fprintf(stderr,"LWS_LOG: %d,%s",level,line);
 }/*}}}*/
 
@@ -36,11 +34,18 @@ int ws_context_s_http_func(struct libwebsocket_context *ctx,struct libwebsocket 
           // - POLLERR ignored on windows -
           ((args_ptr->events & 0x10) ? POLLHUP : 0);
 
-        wsc_ptr->ws_fd_event_cb(wsc_ptr,reason,args_ptr->fd,events);
+        int res = wsc_ptr->ws_fd_event_cb(wsc_ptr,reason,args_ptr->fd,events);
 #else
-        wsc_ptr->ws_fd_event_cb(wsc_ptr,reason,args_ptr->fd,args_ptr->events);
+        int res = wsc_ptr->ws_fd_event_cb(wsc_ptr,reason,args_ptr->fd,args_ptr->events);
 #endif
-        // FIXME TODO process callback result value
+        
+        // - ERROR -
+        if (res)
+        {
+          wsc_ptr->ret_code = 1;
+
+          return 1;
+        }
       }
       break;
     default:
