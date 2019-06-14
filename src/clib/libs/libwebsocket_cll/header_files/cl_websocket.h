@@ -36,13 +36,13 @@ typedef struct ws_client_s ws_client_s;
 // === definition of structure ws_context_s ====================================
 
 typedef int (*ws_fd_event_cb_t)(ws_context_s *a_ws_context,
-    enum libwebsocket_callback_reasons a_reason,int a_fd,unsigned a_events);
+    enum lws_callback_reasons a_reason,int a_fd,unsigned a_events);
 typedef int (*ws_prot_conn_cb_t)(ws_conn_s *a_conn);
 
 typedef struct ws_context_s
 {
-  struct libwebsocket_context *context;
-  struct libwebsocket_protocols *protocols;
+  struct lws_context *context;
+  struct lws_protocols *protocols;
   void *user_data;
 
   string_array_s prot_names;
@@ -67,17 +67,15 @@ static inline void ws_context_s_to_string(const ws_context_s *this,bc_array_s *a
 #endif
 
 void ws_context_s_log_emit(int level,const char *line);
-int ws_context_s_http_func(struct libwebsocket_context *ctx,struct libwebsocket *wsi,
-    enum libwebsocket_callback_reasons reason,void *user,void *in,size_t len);
-int ws_context_s_protocol_func(struct libwebsocket_context *ctx,struct libwebsocket *wsi,
-    enum libwebsocket_callback_reasons reason,void *user,void *in,size_t len);
+int ws_context_s_http_func(struct lws *wsi,enum lws_callback_reasons reason,void *user,void *in,size_t len);
+int ws_context_s_protocol_func(struct lws *wsi,enum lws_callback_reasons reason,void *user,void *in,size_t len);
 
 WUR libwebsockets_cll_EXPORT int ws_context_s_create(ws_context_s *this,
     usi a_port,string_array_s *a_prot_names,pointer_array_s *a_prot_callbacks,
     ws_fd_event_cb_t a_ws_fd_event_cb,void *a_user_data);
 WUR static inline int ws_context_s_process_fd(ws_context_s *this,struct pollfd *a_pollfd);
 
-static inline unsigned ws_context_s_get_protocol_idx(ws_context_s *this,struct libwebsocket *a_wsi);
+static inline unsigned ws_context_s_get_protocol_idx(ws_context_s *this,struct lws *a_wsi);
 
 // === definition of structure ws_conn_s =======================================
 
@@ -85,8 +83,8 @@ typedef struct ws_conn_s
 {
   ws_context_s *wsc_ptr;
   unsigned prot_idx;
-  struct libwebsocket *ws_ptr;
-  enum libwebsocket_callback_reasons reason;
+  struct lws *ws_ptr;
+  enum lws_callback_reasons reason;
   void *user_data;
   bc_array_s data_buffer;
   void *data_in;
@@ -117,7 +115,7 @@ static inline void ws_conn_s_set_timeout(ws_conn_s *this,enum pending_timeout a_
 typedef struct ws_client_s
 {
   ws_context_s *wsc_ptr;
-  struct libwebsocket *ws_ptr;
+  struct lws *ws_ptr;
   ws_client_s **wscl_udp_ptr;
   int connected;
 } ws_client_s;
@@ -164,7 +162,7 @@ static inline void ws_context_s_clear(ws_context_s *this)
   // - destroy websocket context -
   if (this->context != NULL)
   {
-    libwebsocket_context_destroy(this->context);
+    lws_context_destroy(this->context);
   }
 
   // - release protocols -
@@ -219,7 +217,7 @@ static inline int ws_context_s_process_fd(ws_context_s *this,struct pollfd *a_po
   // - reset return code -
   this->ret_code = 0;
 
-  if (libwebsocket_service_fd(this->context,a_pollfd) < 0)
+  if (lws_service_fd(this->context,a_pollfd) < 0)
   {
     throw_error(WS_CONTEXT_SERVICE_FD_ERROR);
   }
@@ -233,11 +231,11 @@ static inline int ws_context_s_process_fd(ws_context_s *this,struct pollfd *a_po
   return 0;
 }/*}}}*/
 
-static inline unsigned ws_context_s_get_protocol_idx(ws_context_s *this,struct libwebsocket *a_wsi)
+static inline unsigned ws_context_s_get_protocol_idx(ws_context_s *this,struct lws *a_wsi)
 {/*{{{*/
 
   // - retrieve websocket protocol -
-  const struct libwebsocket_protocols *protocol = libwebsockets_get_protocol(a_wsi);
+  const struct lws_protocols *protocol = lws_get_protocol(a_wsi);
 
   string_s search_string = {strlen(protocol->name) + 1,(char *)protocol->name};
   return string_array_s_get_idx(&this->prot_names,&search_string);
@@ -304,17 +302,17 @@ static inline void **ws_conn_s_ctx_user_data(ws_conn_s *this)
 
 static inline const char *ws_conn_s_protocol_name(ws_conn_s *this)
 {/*{{{*/
-  return libwebsockets_get_protocol(this->ws_ptr)->name;
+  return lws_get_protocol(this->ws_ptr)->name;
 }/*}}}*/
 
 static inline void ws_conn_s_callback_on_writable(ws_conn_s *this)
 {/*{{{*/
-  libwebsocket_callback_on_writable(this->wsc_ptr->context,this->ws_ptr);
+  lws_callback_on_writable(this->ws_ptr);
 }/*}}}*/
 
 static inline void ws_conn_s_set_timeout(ws_conn_s *this,enum pending_timeout a_reason,int a_seconds)
 {/*{{{*/
-  libwebsocket_set_timeout(this->ws_ptr,a_reason,a_seconds);
+  lws_set_timeout(this->ws_ptr,a_reason,a_seconds);
 }/*}}}*/
 
 // === inline methods of structure ws_client_s =================================

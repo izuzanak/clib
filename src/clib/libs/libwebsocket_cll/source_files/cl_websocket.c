@@ -3,6 +3,13 @@
 include "cl_websocket.h"
 @end
 
+static const struct lws_extension ws_default_extensions[] =
+{/*{{{*/
+  { "permessage-deflate",lws_extension_callback_pm_deflate,"permessage-deflate" },
+  { "deflate-frame",lws_extension_callback_pm_deflate,"deflate_frame" },
+  { NULL,NULL,NULL }
+};/*}}}*/
+
 // === methods of structure ws_context_s =======================================
 
 void ws_context_s_log_emit(int level,const char *line)
@@ -10,8 +17,7 @@ void ws_context_s_log_emit(int level,const char *line)
   //fprintf(stderr,"LWS_LOG: %d,%s",level,line);
 }/*}}}*/
 
-int ws_context_s_http_func(struct libwebsocket_context *ctx,struct libwebsocket *wsi,
-    enum libwebsocket_callback_reasons reason,void *user,void *in,size_t len)
+int ws_context_s_http_func(struct lws *wsi,enum lws_callback_reasons reason,void *user,void *in,size_t len)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"ws_context_s_http_func\n"));
 
@@ -23,8 +29,8 @@ int ws_context_s_http_func(struct libwebsocket_context *ctx,struct libwebsocket 
     case LWS_CALLBACK_DEL_POLL_FD:
     case LWS_CALLBACK_CHANGE_MODE_POLL_FD:
       {
-        ws_context_s *wsc_ptr = (ws_context_s *)libwebsocket_context_user(ctx);
-        struct libwebsocket_pollargs *args_ptr = (struct libwebsocket_pollargs *)in;
+        ws_context_s *wsc_ptr = (ws_context_s *)lws_context_user(lws_get_context(wsi));
+        struct lws_pollargs *args_ptr = (struct lws_pollargs *)in;
 
 #if SYSTEM_TYPE == SYSTEM_TYPE_WINDOWS
         unsigned events =
@@ -38,7 +44,7 @@ int ws_context_s_http_func(struct libwebsocket_context *ctx,struct libwebsocket 
 #else
         int res = wsc_ptr->ws_fd_event_cb(wsc_ptr,reason,args_ptr->fd,args_ptr->events);
 #endif
-        
+
         // - ERROR -
         if (res)
         {
@@ -55,8 +61,7 @@ int ws_context_s_http_func(struct libwebsocket_context *ctx,struct libwebsocket 
   return 0;
 }/*}}}*/
 
-int ws_context_s_protocol_func(struct libwebsocket_context *ctx,struct libwebsocket *wsi,
-    enum libwebsocket_callback_reasons reason,void *user,void *in,size_t len)
+int ws_context_s_protocol_func(struct lws *wsi,enum lws_callback_reasons reason,void *user,void *in,size_t len)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"ws_context_s_protocol_func\n"));
 
@@ -71,7 +76,7 @@ int ws_context_s_protocol_func(struct libwebsocket_context *ctx,struct libwebsoc
     case LWS_CALLBACK_CLIENT_WRITEABLE:
     case LWS_CALLBACK_SERVER_WRITEABLE:
       {
-        ws_context_s *wsc_ptr = (ws_context_s *)libwebsocket_context_user(ctx);
+        ws_context_s *wsc_ptr = (ws_context_s *)lws_context_user(lws_get_context(wsi));
 
         if (wsc_ptr->ret_code == 0)
         {
@@ -110,7 +115,7 @@ int ws_context_s_protocol_func(struct libwebsocket_context *ctx,struct libwebsoc
           ws_conn_s *wscn_ptr = (ws_conn_s *)*((pointer *)user);
 
           // - retrieve count of remaining bytes of message -
-          size_t remaining = libwebsockets_remaining_packet_payload(wsi);
+          size_t remaining = lws_remaining_packet_payload(wsi);
           bc_array_s *data_buffer = &wscn_ptr->data_buffer;
 
           // - message is not complete or buffered data exists -
@@ -186,10 +191,10 @@ int ws_context_s_create(ws_context_s *this,
   }
 
   // - create websocket protocols structure -
-  this->protocols = (struct libwebsocket_protocols *)cmalloc((2 + a_prot_names->used)*sizeof(struct libwebsocket_protocols));
+  this->protocols = (struct lws_protocols *)cmalloc((2 + a_prot_names->used)*sizeof(struct lws_protocols));
 
   // - configure http protocol -
-  struct libwebsocket_protocols *http_prot = this->protocols;
+  struct lws_protocols *http_prot = this->protocols;
   http_prot->name = "http-only";
   http_prot->callback = ws_context_s_http_func;
   http_prot->per_session_data_size = 0;
@@ -199,17 +204,16 @@ int ws_context_s_create(ws_context_s *this,
   do
   {
     // - configure websocket protocol -
-    struct libwebsocket_protocols *ws_prot = this->protocols + prot_idx + 1;
+    struct lws_protocols *ws_prot = this->protocols + prot_idx + 1;
     ws_prot->name = a_prot_names->data[prot_idx].data;
     ws_prot->callback = ws_context_s_protocol_func;
     ws_prot->per_session_data_size = sizeof(pointer);
     ws_prot->rx_buffer_size = 0;
-    ws_prot->no_buffer_all_partial_tx = 1;
 
   } while(++prot_idx < a_prot_names->used);
 
   // - configure terminator protocol -
-  struct libwebsocket_protocols *term_prot = this->protocols + prot_idx + 1;
+  struct lws_protocols *term_prot = this->protocols + prot_idx + 1;
   term_prot->name = NULL;
   term_prot->callback = NULL;
   term_prot->per_session_data_size = 0;
@@ -222,7 +226,7 @@ int ws_context_s_create(ws_context_s *this,
   info.port = a_port;
   info.iface = NULL;
   info.protocols = this->protocols;
-  info.extensions = libwebsocket_get_internal_extensions();
+  info.extensions = ws_default_extensions;
   info.gid = -1;
   info.uid = -1;
   info.options = 0;
@@ -241,7 +245,7 @@ int ws_context_s_create(ws_context_s *this,
   this->user_data = a_user_data;
 
   // - create wesocket context -
-  this->context = libwebsocket_create_context(&info);
+  this->context = lws_create_context(&info);
 
   // - ERROR -
   if (this->context == NULL)

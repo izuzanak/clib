@@ -25,7 +25,7 @@ int epoll_ws_fd_event(void *a_ws_context,unsigned a_index,epoll_event_s *a_event
   return ws_context_s_process_fd(ws_context,&pollfd);
 }/*}}}*/
 
-int ws_fd_event_cb(ws_context_s *a_ws_context,enum libwebsocket_callback_reasons a_reason,int a_fd,unsigned a_events)
+int ws_fd_event_cb(ws_context_s *a_ws_context,enum lws_callback_reasons a_reason,int a_fd,unsigned a_events)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"ws_fd_event_cb\n"));
 
