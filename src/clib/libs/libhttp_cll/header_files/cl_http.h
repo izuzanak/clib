@@ -88,6 +88,7 @@ typedef struct http_server_s
   http_completed_cb_t completed_cb;
   void *user_data;
   pointer_list_s suspended_conns;
+
   int ret_code;
 } http_server_s;
 
@@ -302,6 +303,8 @@ static inline ulli http_server_s_timeout(http_server_s *this)
 
 static inline int http_server_s_process(http_server_s *this)
 {/*{{{*/
+
+  // - reset return code -
   this->ret_code = 0;
 
   // - ERROR -
@@ -310,7 +313,7 @@ static inline int http_server_s_process(http_server_s *this)
     throw_error(HTTP_SERVER_INTERNAL_ERROR);
   }
 
-  // - if exception occurred -
+  // - ERROR -
   if (this->ret_code)
   {
     return this->ret_code;

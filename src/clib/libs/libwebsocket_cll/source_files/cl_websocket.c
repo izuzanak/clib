@@ -7,12 +7,16 @@ include "cl_websocket.h"
 
 void ws_context_s_log_emit(int level,const char *line)
 {/*{{{*/
+
+  // FIXME debug output
   //fprintf(stderr,"LWS_LOG: %d,%s",level,line);
 }/*}}}*/
 
 int ws_context_s_http_func(struct libwebsocket_context *ctx,struct libwebsocket *wsi,
     enum libwebsocket_callback_reasons reason,void *user,void *in,size_t len)
 {/*{{{*/
+  debug_message_6(fprintf(stderr,"ws_context_s_http_func\n"));
+
   switch (reason)
   {
     case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
@@ -49,6 +53,8 @@ int ws_context_s_http_func(struct libwebsocket_context *ctx,struct libwebsocket 
 int ws_context_s_protocol_func(struct libwebsocket_context *ctx,struct libwebsocket *wsi,
     enum libwebsocket_callback_reasons reason,void *user,void *in,size_t len)
 {/*{{{*/
+  debug_message_6(fprintf(stderr,"ws_context_s_protocol_func\n"));
+
   switch (reason)
   {
     case LWS_CALLBACK_ESTABLISHED:
@@ -60,8 +66,93 @@ int ws_context_s_protocol_func(struct libwebsocket_context *ctx,struct libwebsoc
     case LWS_CALLBACK_CLIENT_WRITEABLE:
     case LWS_CALLBACK_SERVER_WRITEABLE:
       {
-        // FIXME TODO continue ...
-        cassert(0);
+        ws_context_s *wsc_ptr = (ws_context_s *)libwebsocket_context_user(ctx);
+
+        if (wsc_ptr->ret_code == 0)
+        {
+          // - if connection established -
+          if (reason == LWS_CALLBACK_ESTABLISHED ||
+              reason == LWS_CALLBACK_CLIENT_ESTABLISHED)
+          {
+            // - create websocket connection object -
+            ws_conn_s *wscn_ptr = (ws_conn_s *)cmalloc(sizeof(ws_conn_s));
+            ws_conn_s_init(wscn_ptr);
+
+            // - set websocket context pointer -
+            wscn_ptr->wsc_ptr = wsc_ptr;
+
+            // - set protocol index pointer -
+            wscn_ptr->prot_idx = ws_context_s_get_protocol_idx(wsc_ptr,wsi);
+            debug_assert(wscn_ptr->prot_idx != c_idx_not_exist);
+
+            // - set websocket pointer -
+            wscn_ptr->ws_ptr = wsi;
+
+            // - set websocket client status -
+            if (reason == LWS_CALLBACK_CLIENT_ESTABLISHED)
+            {
+              ws_client_s *wscl_ptr = *((ws_client_s **)user);
+
+              // - set websocket client connected flag -
+              wscl_ptr->connected = 1;
+            }
+
+            // - store websocket connection -
+            *((pointer *)user) = wscn_ptr;
+          }
+
+          // - retrieve connection pointer -
+          ws_conn_s *wscn_ptr = (ws_conn_s *)*((pointer *)user);
+
+          // - retrieve count of remaining bytes of message -
+          size_t remaining = libwebsockets_remaining_packet_payload(wsi);
+          bc_array_s *data_buffer = &wscn_ptr->data_buffer;
+
+          // - message is not complete or buffered data exists -
+          if (remaining != 0 || data_buffer->used != 0)
+          {
+            bc_array_s_reserve(data_buffer,len + remaining);
+            bc_array_s_append(data_buffer,len,(const char *)in);
+          }
+
+          if (remaining == 0)
+          {
+            // - set callback reason -
+            wscn_ptr->reason = reason;
+
+            // - set callback input data -
+            if (data_buffer->used != 0)
+            {
+              wscn_ptr->data_in = data_buffer->data;
+              wscn_ptr->data_len = data_buffer->used;
+              data_buffer->used = 0;
+            }
+            else
+            {
+              wscn_ptr->data_in = in;
+              wscn_ptr->data_len = len;
+            }
+
+            if (((ws_prot_conn_cb_t)wsc_ptr->prot_callbacks.data[wscn_ptr->prot_idx])(wscn_ptr))
+            {
+              wsc_ptr->ret_code = 1;
+
+              // - release connection -
+              ws_conn_s_clear(wscn_ptr);
+              cfree(wscn_ptr);
+
+              return 1;
+            }
+          }
+
+          // - if connection closed -
+          if (reason == LWS_CALLBACK_CLOSED)
+          {
+            // - release connection -
+            ws_conn_s_clear(wscn_ptr);
+            cfree(wscn_ptr);
+          }
+        }
       }
       break;
     default:
@@ -105,7 +196,7 @@ int ws_context_s_create(ws_context_s *this,
     // - configure websocket protocol -
     struct libwebsocket_protocols *ws_prot = this->protocols + prot_idx + 1;
     ws_prot->name = a_prot_names->data[prot_idx].data;
-    ws_prot->callback = a_prot_callbacks->data[prot_idx];
+    ws_prot->callback = ws_context_s_protocol_func;
     ws_prot->per_session_data_size = sizeof(pointer);
     ws_prot->rx_buffer_size = 0;
     ws_prot->no_buffer_all_partial_tx = 1;
@@ -157,6 +248,10 @@ int ws_context_s_create(ws_context_s *this,
 
   return 0;
 }/*}}}*/
+
+// === methods of structure ws_conn_s ==========================================
+
+// === methods of structure ws_client_s ========================================
 
 // === methods of generated structures =========================================
 

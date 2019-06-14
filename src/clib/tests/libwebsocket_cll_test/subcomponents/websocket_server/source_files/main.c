@@ -15,17 +15,57 @@ void signal_handler(int a_signum)
   __sync_add_and_fetch(&g_terminate,1);
 }/*}}}*/
 
-int ws_fd_event_cb(ws_context_s *a_ctx,enum libwebsocket_callback_reasons a_reason,int a_fd,unsigned a_events)
+int epoll_ws_fd_event(void *a_ws_context,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll)
+{/*{{{*/
+  debug_message_6(fprintf(stderr,"epoll_ws_fd_event\n"));
+
+  ws_context_s *ws_context = (ws_context_s *)a_ws_context;
+
+  struct pollfd pollfd = {a_event->data.fd,a_event->events,a_event->events};
+  return ws_context_s_process_fd(ws_context,&pollfd);
+}/*}}}*/
+
+int ws_fd_event_cb(ws_context_s *a_ws_context,enum libwebsocket_callback_reasons a_reason,int a_fd,unsigned a_events)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"ws_fd_event_cb\n"));
 
   epoll_fd_s epoll_fd = {NULL,a_fd};
-  return epoll_s_fd(a_ctx->user_data,&epoll_fd,a_events);
+  return epoll_s_fd_callback(a_ws_context->user_data,&epoll_fd,a_events,epoll_ws_fd_event,a_ws_context,0);
 }/*}}}*/
 
 int ws_prot_conn_cb(ws_conn_s *a_conn)
 {/*{{{*/
-  (void)a_conn;
+  debug_message_6(fprintf(stderr,"ws_prot_conn_cb\n"));
+
+  switch (a_conn->reason)
+  {
+    case LWS_CALLBACK_ESTABLISHED:
+      debug_message_6(fprintf(stderr,"LWS_CALLBACK_ESTABLISHED\n"));
+      break;
+    case LWS_CALLBACK_CLIENT_ESTABLISHED:
+      debug_message_6(fprintf(stderr,"LWS_CALLBACK_CLIENT_ESTABLISHED\n"));
+      break;
+    case LWS_CALLBACK_CLOSED:
+      debug_message_6(fprintf(stderr,"LWS_CALLBACK_CLOSED\n"));
+      break;
+    case LWS_CALLBACK_RECEIVE:
+      debug_message_6(fprintf(stderr,"LWS_CALLBACK_RECEIVE\n"));
+      break;
+    case LWS_CALLBACK_CLIENT_RECEIVE:
+      debug_message_6(fprintf(stderr,"LWS_CALLBACK_CLIENT_RECEIVE\n"));
+      break;
+    case LWS_CALLBACK_CLIENT_RECEIVE_PONG:
+      debug_message_6(fprintf(stderr,"LWS_CALLBACK_CLIENT_RECEIVE_PONG\n"));
+      break;
+    case LWS_CALLBACK_CLIENT_WRITEABLE:
+      debug_message_6(fprintf(stderr,"LWS_CALLBACK_CLIENT_WRITEABLE\n"));
+      break;
+    case LWS_CALLBACK_SERVER_WRITEABLE:
+      debug_message_6(fprintf(stderr,"LWS_CALLBACK_SERVER_WRITEABLE\n"));
+      break;
+    default:
+      break;
+  }
 
   return 0;
 }/*}}}*/
@@ -65,9 +105,6 @@ int main(int argc,char **argv)
       {
         cassert(err == ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED);
       }
-
-      // FIXME debug output
-      fprintf(stderr,"epoll fired\n");
     }
   }
 
