@@ -65,67 +65,70 @@ int ws_context_s_protocol_func(struct lws *wsi,enum lws_callback_reasons reason,
 {/*{{{*/
   debug_message_6(fprintf(stderr,"ws_context_s_protocol_func\n"));
 
+  ws_context_s *wsc_ptr = (ws_context_s *)lws_context_user(lws_get_context(wsi));
+  ws_conn_s *wscn_ptr = NULL;
+
   switch (reason)
   {
     case LWS_CALLBACK_ESTABLISHED:
     case LWS_CALLBACK_CLIENT_ESTABLISHED:
+      {/*{{{*/
+
+        // - create websocket connection object -
+        wscn_ptr = (ws_conn_s *)cmalloc(sizeof(ws_conn_s));
+        ws_conn_s_init(wscn_ptr);
+
+        // - set websocket context pointer -
+        wscn_ptr->wsc_ptr = wsc_ptr;
+
+        // - set protocol index pointer -
+        wscn_ptr->prot_idx = ws_context_s_get_protocol_idx(wsc_ptr,wsi);
+        debug_assert(wscn_ptr->prot_idx != c_idx_not_exist);
+
+        // - set websocket pointer -
+        wscn_ptr->ws_ptr = wsi;
+
+        // - store websocket connection -
+        *((pointer *)user) = wscn_ptr;
+      }/*}}}*/
+      break;
     case LWS_CALLBACK_CLOSED:
     case LWS_CALLBACK_RECEIVE:
     case LWS_CALLBACK_CLIENT_RECEIVE:
     case LWS_CALLBACK_CLIENT_RECEIVE_PONG:
     case LWS_CALLBACK_CLIENT_WRITEABLE:
     case LWS_CALLBACK_SERVER_WRITEABLE:
-      {
-        ws_context_s *wsc_ptr = (ws_context_s *)lws_context_user(lws_get_context(wsi));
+      {/*{{{*/
 
-        if (wsc_ptr->ret_code == 0)
-        {
-          // - if connection established -
-          if (reason == LWS_CALLBACK_ESTABLISHED ||
-              reason == LWS_CALLBACK_CLIENT_ESTABLISHED)
-          {
-            // - create websocket connection object -
-            ws_conn_s *wscn_ptr = (ws_conn_s *)cmalloc(sizeof(ws_conn_s));
-            ws_conn_s_init(wscn_ptr);
+        // - retrieve ws connection -
+        wscn_ptr = (ws_conn_s *)*((pointer *)user);
+      }/*}}}*/
+      break;
+    default:
+      break;
+  }
 
-            // - set websocket context pointer -
-            wscn_ptr->wsc_ptr = wsc_ptr;
+  if (wsc_ptr->ret_code == 0)
+  {
+    switch (reason)
+    {
+      case LWS_CALLBACK_RECEIVE:
+      case LWS_CALLBACK_CLIENT_RECEIVE:
+        {/*{{{*/
 
-            // - set protocol index pointer -
-            wscn_ptr->prot_idx = ws_context_s_get_protocol_idx(wsc_ptr,wsi);
-            debug_assert(wscn_ptr->prot_idx != c_idx_not_exist);
-
-            // - set websocket pointer -
-            wscn_ptr->ws_ptr = wsi;
-
-            // - set websocket client status -
-            if (reason == LWS_CALLBACK_CLIENT_ESTABLISHED)
-            {
-              ws_client_s *wscl_ptr = *((ws_client_s **)user);
-
-              // - set websocket client connected flag -
-              wscl_ptr->connected = 1;
-            }
-
-            // - store websocket connection -
-            *((pointer *)user) = wscn_ptr;
-          }
-
-          // - retrieve connection pointer -
-          ws_conn_s *wscn_ptr = (ws_conn_s *)*((pointer *)user);
-
-          // - retrieve count of remaining bytes of message -
+          // - retrieve count of remaining bytes of packet -
           size_t remaining = lws_remaining_packet_payload(wsi);
+          int final_frag = lws_is_final_fragment(wsi);
           bc_array_s *data_buffer = &wscn_ptr->data_buffer;
 
           // - message is not complete or buffered data exists -
-          if (remaining != 0 || data_buffer->used != 0)
+          if (remaining != 0 || !final_frag || data_buffer->used != 0)
           {
             bc_array_s_reserve(data_buffer,len + remaining);
             bc_array_s_append(data_buffer,len,(const char *)in);
           }
 
-          if (remaining == 0)
+          if (remaining == 0 && (data_buffer->used == 0 || final_frag))
           {
             // - set callback reason -
             wscn_ptr->reason = reason;
@@ -154,6 +157,32 @@ int ws_context_s_protocol_func(struct lws *wsi,enum lws_callback_reasons reason,
               return 1;
             }
           }
+        }/*}}}*/
+        break;
+      case LWS_CALLBACK_ESTABLISHED:
+      case LWS_CALLBACK_CLIENT_ESTABLISHED:
+      case LWS_CALLBACK_CLOSED:
+      case LWS_CALLBACK_CLIENT_RECEIVE_PONG:
+      case LWS_CALLBACK_CLIENT_WRITEABLE:
+      case LWS_CALLBACK_SERVER_WRITEABLE:
+        {/*{{{*/
+
+          // - set callback reason -
+          wscn_ptr->reason = reason;
+
+          wscn_ptr->data_in = NULL;
+          wscn_ptr->data_len = 0;
+
+          if (((ws_prot_conn_cb_t)wsc_ptr->prot_callbacks.data[wscn_ptr->prot_idx])(wscn_ptr))
+          {
+            wsc_ptr->ret_code = 1;
+
+            // - release connection -
+            ws_conn_s_clear(wscn_ptr);
+            cfree(wscn_ptr);
+
+            return 1;
+          }
 
           // - if connection closed -
           if (reason == LWS_CALLBACK_CLOSED)
@@ -162,11 +191,11 @@ int ws_context_s_protocol_func(struct lws *wsi,enum lws_callback_reasons reason,
             ws_conn_s_clear(wscn_ptr);
             cfree(wscn_ptr);
           }
-        }
-      }
-      break;
+        }/*}}}*/
+        break;
     default:
       break;
+    }
   }
 
   return 0;
@@ -261,6 +290,42 @@ int ws_context_s_create(ws_context_s *this,
 // === methods of structure ws_conn_s ==========================================
 
 // === methods of structure ws_client_s ========================================
+
+int ws_client_s_create(ws_client_s *this,ws_context_s *a_ctx,
+    const char *a_address,usi a_port,const char *a_path,const char *a_protocol)
+{/*{{{*/
+  ws_client_s_clear(this);
+
+  // - fill client connect info structure -
+  struct lws_client_connect_info info;
+  memset(&info,0,sizeof(info));
+
+  info.context = a_ctx->context;
+  info.address = a_address;
+  info.port = a_port;
+  info.ssl_connection = 0;
+  info.path = a_path;
+  info.host = a_address;
+  info.protocol = a_protocol;
+  info.ietf_version_or_minus_one = -1;
+
+  // - connect client to server -
+  struct lws *wsi = lws_client_connect_via_info(&info);
+
+  // - ERROR -
+  if (wsi == NULL)
+  {
+    throw_error(WS_CLIENT_CREATE_ERROR);
+  }
+
+  // - store client context pointer -
+  this->wsc_ptr = a_ctx;
+
+  // - store client wsi pointer -
+  this->ws_ptr = wsi;
+
+  return 0;
+}/*}}}*/
 
 // === methods of generated structures =========================================
 

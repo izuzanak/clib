@@ -49,7 +49,7 @@ int ws_prot_conn_cb(ws_conn_s *a_conn)
       debug_message_6(fprintf(stderr,"LWS_CALLBACK_CLOSED\n"));
       break;
     case LWS_CALLBACK_RECEIVE:
-      debug_message_6(fprintf(stderr,"LWS_CALLBACK_RECEIVE\n"));
+      debug_message_6(fprintf(stderr,"LWS_CALLBACK_RECEIVE: %u\n",(unsigned)a_conn->data_len));
       break;
     case LWS_CALLBACK_CLIENT_RECEIVE:
       debug_message_6(fprintf(stderr,"LWS_CALLBACK_CLIENT_RECEIVE\n"));

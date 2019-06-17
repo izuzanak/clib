@@ -29,6 +29,8 @@ include "cl_struct.h"
 #define ERROR_WS_CONTEXT_CREATE_ERROR 3
 #define ERROR_WS_CONTEXT_SERVICE_FD_ERROR 4
 
+#define ERROR_WS_CLIENT_CREATE_ERROR 1
+
 typedef struct ws_context_s ws_context_s;
 typedef struct ws_conn_s ws_conn_s;
 typedef struct ws_client_s ws_client_s;
@@ -116,8 +118,6 @@ typedef struct ws_client_s
 {
   ws_context_s *wsc_ptr;
   struct lws *ws_ptr;
-  ws_client_s **wscl_udp_ptr;
-  int connected;
 } ws_client_s;
 
 @begin
@@ -135,6 +135,9 @@ static inline void ws_client_s_to_string(const ws_client_s *this,bc_array_s *a_t
 #endif
 
 // === definition of generated structures ======================================
+WUR libwebsockets_cll_EXPORT int ws_client_s_create(ws_client_s *this,
+    ws_context_s *a_ctx,const char *a_address,usi a_port,const char *a_path,
+    const char *a_protocol);
 
 // === definition of global functions ==========================================
 
@@ -321,19 +324,10 @@ static inline void ws_client_s_init(ws_client_s *this)
 {/*{{{*/
   this->wsc_ptr = NULL;
   this->ws_ptr = NULL;
-  this->wscl_udp_ptr = NULL;
-  this->connected = 0;
 }/*}}}*/
 
 static inline void ws_client_s_clear(ws_client_s *this)
 {/*{{{*/
-
-  // - relese websocket user data -
-  if (!this->connected && this->wscl_udp_ptr != NULL)
-  {
-    free(this->wscl_udp_ptr);
-  }
-
   ws_client_s_init(this);
 }/*}}}*/
 
