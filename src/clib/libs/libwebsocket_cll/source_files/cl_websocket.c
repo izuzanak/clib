@@ -19,6 +19,9 @@ void ws_context_s_log_emit(int level,const char *line)
 
 int ws_context_s_http_func(struct lws *wsi,enum lws_callback_reasons reason,void *user,void *in,size_t len)
 {/*{{{*/
+  (void)user;
+  (void)len;
+
   debug_message_6(fprintf(stderr,"ws_context_s_http_func\n"));
 
   switch (reason)
@@ -326,8 +329,6 @@ int ws_client_s_create(ws_client_s *this,ws_context_s *a_ctx,
 
   return 0;
 }/*}}}*/
-
-// === methods of generated structures =========================================
 
 // === global functions ========================================================
 

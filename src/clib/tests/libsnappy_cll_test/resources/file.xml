@@ -1,0 +1,72 @@
+<ROOT>
+    <CONSIST id="0">
+      <VEHICLE>Description of vehicle 0 of consist 0</VEHICLE>
+      <VEHICLE>Description of vehicle 1 of consist 0</VEHICLE>
+      <VEHICLE>Description of vehicle 2 of consist 0</VEHICLE>
+      <VEHICLE>Description of vehicle 3 of consist 0</VEHICLE>
+      <VEHICLE>Description of vehicle 4 of consist 0</VEHICLE>
+    </CONSIST>
+    <CONSIST id="1">
+      <VEHICLE>Description of vehicle 0 of consist 1</VEHICLE>
+      <VEHICLE>Description of vehicle 1 of consist 1</VEHICLE>
+      <VEHICLE>Description of vehicle 2 of consist 1</VEHICLE>
+      <VEHICLE>Description of vehicle 3 of consist 1</VEHICLE>
+      <VEHICLE>Description of vehicle 4 of consist 1</VEHICLE>
+    </CONSIST>
+    <CONSIST id="2">
+      <VEHICLE>Description of vehicle 0 of consist 2</VEHICLE>
+      <VEHICLE>Description of vehicle 1 of consist 2</VEHICLE>
+      <VEHICLE>Description of vehicle 2 of consist 2</VEHICLE>
+      <VEHICLE>Description of vehicle 3 of consist 2</VEHICLE>
+      <VEHICLE>Description of vehicle 4 of consist 2</VEHICLE>
+    </CONSIST>
+    <CONSIST id="3">
+      <VEHICLE>Description of vehicle 0 of consist 3</VEHICLE>
+      <VEHICLE>Description of vehicle 1 of consist 3</VEHICLE>
+      <VEHICLE>Description of vehicle 2 of consist 3</VEHICLE>
+      <VEHICLE>Description of vehicle 3 of consist 3</VEHICLE>
+      <VEHICLE>Description of vehicle 4 of consist 3</VEHICLE>
+    </CONSIST>
+    <CONSIST id="4">
+      <VEHICLE>Description of vehicle 0 of consist 4</VEHICLE>
+      <VEHICLE>Description of vehicle 1 of consist 4</VEHICLE>
+      <VEHICLE>Description of vehicle 2 of consist 4</VEHICLE>
+      <VEHICLE>Description of vehicle 3 of consist 4</VEHICLE>
+      <VEHICLE>Description of vehicle 4 of consist 4</VEHICLE>
+    </CONSIST>
+    <CONSIST id="5">
+      <VEHICLE>Description of vehicle 0 of consist 5</VEHICLE>
+      <VEHICLE>Description of vehicle 1 of consist 5</VEHICLE>
+      <VEHICLE>Description of vehicle 2 of consist 5</VEHICLE>
+      <VEHICLE>Description of vehicle 3 of consist 5</VEHICLE>
+      <VEHICLE>Description of vehicle 4 of consist 5</VEHICLE>
+    </CONSIST>
+    <CONSIST id="6">
+      <VEHICLE>Description of vehicle 0 of consist 6</VEHICLE>
+      <VEHICLE>Description of vehicle 1 of consist 6</VEHICLE>
+      <VEHICLE>Description of vehicle 2 of consist 6</VEHICLE>
+      <VEHICLE>Description of vehicle 3 of consist 6</VEHICLE>
+      <VEHICLE>Description of vehicle 4 of consist 6</VEHICLE>
+    </CONSIST>
+    <CONSIST id="7">
+      <VEHICLE>Description of vehicle 0 of consist 7</VEHICLE>
+      <VEHICLE>Description of vehicle 1 of consist 7</VEHICLE>
+      <VEHICLE>Description of vehicle 2 of consist 7</VEHICLE>
+      <VEHICLE>Description of vehicle 3 of consist 7</VEHICLE>
+      <VEHICLE>Description of vehicle 4 of consist 7</VEHICLE>
+    </CONSIST>
+    <CONSIST id="8">
+      <VEHICLE>Description of vehicle 0 of consist 8</VEHICLE>
+      <VEHICLE>Description of vehicle 1 of consist 8</VEHICLE>
+      <VEHICLE>Description of vehicle 2 of consist 8</VEHICLE>
+      <VEHICLE>Description of vehicle 3 of consist 8</VEHICLE>
+      <VEHICLE>Description of vehicle 4 of consist 8</VEHICLE>
+    </CONSIST>
+    <CONSIST id="9">
+      <VEHICLE>Description of vehicle 0 of consist 9</VEHICLE>
+      <VEHICLE>Description of vehicle 1 of consist 9</VEHICLE>
+      <VEHICLE>Description of vehicle 2 of consist 9</VEHICLE>
+      <VEHICLE>Description of vehicle 3 of consist 9</VEHICLE>
+      <VEHICLE>Description of vehicle 4 of consist 9</VEHICLE>
+    </CONSIST>
+  </ROOT>

@@ -17,6 +17,9 @@ void signal_handler(int a_signum)
 
 int epoll_ws_fd_event(void *a_ws_context,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll)
 {/*{{{*/
+  (void)a_index;
+  (void)a_epoll;
+
   debug_message_6(fprintf(stderr,"epoll_ws_fd_event\n"));
 
   ws_context_s *ws_context = (ws_context_s *)a_ws_context;
@@ -27,6 +30,8 @@ int epoll_ws_fd_event(void *a_ws_context,unsigned a_index,epoll_event_s *a_event
 
 int ws_fd_event_cb(ws_context_s *a_ws_context,enum lws_callback_reasons a_reason,int a_fd,unsigned a_events)
 {/*{{{*/
+  (void)a_reason;
+
   debug_message_6(fprintf(stderr,"ws_fd_event_cb\n"));
 
   epoll_fd_s epoll_fd = {NULL,a_fd};

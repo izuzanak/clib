@@ -134,7 +134,6 @@ static inline int ws_client_s_compare(const ws_client_s *this,const ws_client_s 
 static inline void ws_client_s_to_string(const ws_client_s *this,bc_array_s *a_trg);
 #endif
 
-// === definition of generated structures ======================================
 WUR libwebsockets_cll_EXPORT int ws_client_s_create(ws_client_s *this,
     ws_context_s *a_ctx,const char *a_address,usi a_port,const char *a_path,
     const char *a_protocol);
@@ -364,8 +363,6 @@ static inline void ws_client_s_to_string(const ws_client_s *this,bc_array_s *a_t
   bc_array_s_append_format(a_trg,"ws_client_s{%p}",this);
 }/*}}}*/
 #endif
-
-// === inline methods of generated structures ==================================
 
 #endif
 
