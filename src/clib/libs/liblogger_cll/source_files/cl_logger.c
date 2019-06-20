@@ -12,6 +12,8 @@ methods log_file_s
 
 int log_file_s_rotate(log_file_s *this)
 {/*{{{*/
+  debug_assert(this->path.size != 0);
+
   struct stat st;
 
   // - close log file -
