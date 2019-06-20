@@ -25,7 +25,8 @@ additions
 {
 static inline void bc_array_s_append(bc_array_s *this,unsigned a_count,const char *a_data);
 static inline void bc_array_s_append_ptr(bc_array_s *this,const char *a_data);
-libbase_cll_EXPORT void bc_array_s_append_format(bc_array_s *this,const char *a_format,...);
+static inline  void bc_array_s_append_format(bc_array_s *this,const char *a_format,...);
+libbase_cll_EXPORT void bc_array_s_append_format_ap(bc_array_s *this,const char *a_format,va_list a_ap);
 static inline void bc_array_s_tail(bc_array_s *this,unsigned a_count);
 }
 bc_array_s;
@@ -181,6 +182,14 @@ static inline void bc_array_s_append(bc_array_s *this,unsigned a_count,const cha
 static inline void bc_array_s_append_ptr(bc_array_s *this,const char *a_data)
 {/*{{{*/
   bc_array_s_append(this,strlen(a_data),a_data);
+}/*}}}*/
+
+static inline void bc_array_s_append_format(bc_array_s *this,const char *a_format,...)
+{/*{{{*/
+  va_list ap;
+  va_start(ap,a_format);
+  bc_array_s_append_format_ap(this,a_format,ap);
+  va_end(ap);
 }/*}}}*/
 
 static inline void bc_array_s_tail(bc_array_s *this,unsigned a_count)

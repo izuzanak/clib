@@ -128,3 +128,58 @@ int logger_s_add_file(logger_s *this,
   return 0;
 }/*}}}*/
 
+int logger_s_write(logger_s *this,unsigned a_level,const char *a_format,...)
+{/*{{{*/
+  this->buffer.used = 0;
+
+  time_s time;
+  if (clock_s_gettime(CLOCK_REALTIME,&time))
+  {
+    throw_error(LOGGER_GET_TIME_ERROR);
+  }
+
+  // - format message prefix -
+  time_s_to_string(&time,&this->buffer);
+  bc_array_s_append_format(&this->buffer," %u %s: ",a_level,this->user.data);
+
+  // - format user message -
+  va_list ap;
+  va_start(ap,a_format);
+  bc_array_s_append_format_ap(&this->buffer,a_format,ap);
+  va_end(ap);
+
+  // - append end of line -
+  bc_array_s_push(&this->buffer,'\n');
+
+  int write_error = 0;
+
+  if (this->log_files.root_idx != c_idx_not_exist)
+  {
+    log_file_tree_s_node *lftn_ptr = this->log_files.data;
+    log_file_tree_s_node *lftn_ptr_end = lftn_ptr + this->log_files.used;
+    do {
+      if (lftn_ptr->valid)
+      {
+        log_file_s *log_file = &lftn_ptr->object;
+
+        // - check log level -
+        if (log_file->level <= a_level)
+        {
+          if (log_file_s_write(log_file,this->buffer.used,this->buffer.data))
+          {
+            write_error |= 1;
+          }
+        }
+      }
+    } while(++lftn_ptr < lftn_ptr_end);
+  }
+
+  // - ERROR -
+  if (write_error)
+  {
+    throw_error(LOGGER_LOG_WRITE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+

@@ -4,6 +4,7 @@
 
 @begin
 include "cl_sys.h"
+include "cl_time.h"
 @end
 
 // - function export definitions -
@@ -21,6 +22,8 @@ include "cl_sys.h"
 #define ERROR_LOGGER_LOG_FILE_INVALID_PARAMETERS 1
 #define ERROR_LOGGER_LOG_FILE_ALREADY_REGISTERED 2
 #define ERROR_LOGGER_LOG_FILE_CREATE_ERROR 3
+#define ERROR_LOGGER_GET_TIME_ERROR 4
+#define ERROR_LOGGER_LOG_WRITE_ERROR 5
 
 #define ERROR_LOG_FILE_OPEN_ERROR 1
 #define ERROR_LOG_FILE_FTELL_ERROR 2
@@ -60,12 +63,15 @@ struct
 <
 string_s:user
 log_file_tree_s:log_files
+bc_array_s:buffer
 >
 logger_s;
 @end
 
+static inline void logger_s_create(logger_s *this,const char *a_user);
 liblogger_cll_EXPORT WUR int logger_s_add_file(logger_s *this,
     unsigned a_level,const char *a_path,unsigned a_max_size,unsigned a_max_count);
+liblogger_cll_EXPORT WUR int logger_s_write(logger_s *this,unsigned a_level,const char *a_format,...);
 
 // === inline methods of generated structures ==================================
 
@@ -141,6 +147,13 @@ static inline int log_file_tree_s___compare_value(const log_file_tree_s *this,co
 @begin
 inlines logger_s
 @end
+
+static inline void logger_s_create(logger_s *this,const char *a_user)
+{/*{{{*/
+  logger_s_clear(this);
+
+  string_s_set_ptr(&this->user,a_user);
+}/*}}}*/
 
 #endif
 

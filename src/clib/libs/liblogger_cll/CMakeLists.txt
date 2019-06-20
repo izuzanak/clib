@@ -1,6 +1,7 @@
 
 set(CONF_COMPONENTS
-  "src/clib/libs/libsys_cll")
+  "src/clib/libs/libsys_cll"
+  "src/clib/libs/libtime_cll")
 set(CONF_HEADER_DIRS)
 
 set(CONF_DO_BUILD TRUE)

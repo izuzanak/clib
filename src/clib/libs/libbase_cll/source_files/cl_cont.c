@@ -10,13 +10,12 @@ include "cl_cont.h"
 methods bc_array_s
 @end
 
-void bc_array_s_append_format(bc_array_s *this,const char *a_format,...)
+void bc_array_s_append_format_ap(bc_array_s *this,const char *a_format,va_list a_ap)
 {/*{{{*/
-  va_list ap;
-
   int reserved = this->size - this->used;
 
-  va_start(ap,a_format);
+  va_list ap;
+  va_copy(ap,a_ap);
   int length = vsnprintf(this->data + this->used,reserved,a_format,ap);
   va_end(ap);
 
@@ -31,9 +30,7 @@ void bc_array_s_append_format(bc_array_s *this,const char *a_format,...)
     unsigned size = length + 1;
     bc_array_s_push_blanks(this,size);
 
-    va_start(ap,a_format);
-    vsnprintf(this->data + old_used,size,a_format,ap);
-    va_end(ap);
+    vsnprintf(this->data + old_used,size,a_format,a_ap);
 
     // - remove terminating character -
     --this->used;
