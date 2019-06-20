@@ -71,7 +71,8 @@ logger_s;
 static inline void logger_s_create(logger_s *this,const char *a_user);
 liblogger_cll_EXPORT WUR int logger_s_add_file(logger_s *this,
     unsigned a_level,const char *a_path,unsigned a_max_size,unsigned a_max_count);
-liblogger_cll_EXPORT WUR int logger_s_write(logger_s *this,unsigned a_level,const char *a_format,...);
+WUR static inline int logger_s_write(logger_s *this,unsigned a_level,const char *a_format,...);
+liblogger_cll_EXPORT WUR int logger_s_write_ap(logger_s *this,unsigned a_level,const char *a_format,va_list a_ap);
 
 // === inline methods of generated structures ==================================
 
@@ -153,6 +154,16 @@ static inline void logger_s_create(logger_s *this,const char *a_user)
   logger_s_clear(this);
 
   string_s_set_ptr(&this->user,a_user);
+}/*}}}*/
+
+static inline int logger_s_write(logger_s *this,unsigned a_level,const char *a_format,...)
+{/*{{{*/
+  va_list ap;
+  va_start(ap,a_format);
+  int res = logger_s_write_ap(this,a_level,a_format,ap);
+  va_end(ap);
+
+  return res;
 }/*}}}*/
 
 #endif

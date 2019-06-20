@@ -128,7 +128,7 @@ int logger_s_add_file(logger_s *this,
   return 0;
 }/*}}}*/
 
-int logger_s_write(logger_s *this,unsigned a_level,const char *a_format,...)
+int logger_s_write_ap(logger_s *this,unsigned a_level,const char *a_format,va_list a_ap)
 {/*{{{*/
   this->buffer.used = 0;
 
@@ -143,10 +143,7 @@ int logger_s_write(logger_s *this,unsigned a_level,const char *a_format,...)
   bc_array_s_append_format(&this->buffer," %u %s: ",a_level,this->user.data);
 
   // - format user message -
-  va_list ap;
-  va_start(ap,a_format);
-  bc_array_s_append_format_ap(&this->buffer,a_format,ap);
-  va_end(ap);
+  bc_array_s_append_format_ap(&this->buffer,a_format,a_ap);
 
   // - append end of line -
   bc_array_s_push(&this->buffer,'\n');
