@@ -157,7 +157,8 @@ static inline int log_file_s_write(log_file_s *this,unsigned a_size,const char *
   }
 
   // - ERROR -
-  if (stream_s_write(&this->file,a_data,a_size))
+  if (stream_s_write(&this->file,a_data,a_size) ||
+      stream_s_fflush(&this->file))
   {
     throw_error(LOG_FILE_WRITE_ERROR);
   }
