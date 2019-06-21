@@ -3,6 +3,10 @@
 include "cl_logger.h"
 @end
 
+// === constants and definitions ===============================================
+
+logger_s *g_logger = NULL;
+
 // === methods of generated structures =========================================
 
 // -- log_file_s --
@@ -162,7 +166,7 @@ int logger_s_write_ap(logger_s *this,unsigned a_level,const char *a_format,va_li
         log_file_s *log_file = &lftn_ptr->object;
 
         // - check log level -
-        if (log_file->level <= a_level)
+        if (log_file->level >= a_level)
         {
           if (log_file_s_write(log_file,this->buffer.used,this->buffer.data))
           {
