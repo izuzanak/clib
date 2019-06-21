@@ -37,6 +37,11 @@ include "cl_time.h"
 typedef struct logger_s logger_s;
 extern logger_s *g_logger;
 
+#define LOG_MSG_MAX 1024
+#define LOG_MSG_FORMAT "%.*s%s"
+#define LOG_MSG_PARAMETERS(LENGTH,DATA) \
+  (LENGTH) < LOG_MSG_MAX ? (LENGTH) : LOG_MSG_MAX,DATA,(LENGTH) < LOG_MSG_MAX ? "" : " ..."
+
 // - camsys processes log levels -
 enum
 {/*{{{*/
