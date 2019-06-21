@@ -52,7 +52,7 @@ static inline void loc_s_channel_message_to_string(var_s this,bc_array_s *a_trg)
 static inline void loc_s_channel_message_to_json(var_s this,bc_array_s *a_trg);
 static inline void loc_s_channel_message_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 #endif
-static inline bc_array_s *loc_s_channel_message_value(var_s this);
+static inline const bc_array_s *loc_s_channel_message_value(var_s this);
 
 // === definition of generated structures ======================================
 
@@ -211,7 +211,7 @@ static inline void loc_s_channel_message_to_json_nice(var_s this,json_nice_s *a_
 }/*}}}*/
 #endif
 
-static inline bc_array_s *loc_s_channel_message_value(var_s this)
+static inline const bc_array_s *loc_s_channel_message_value(var_s this)
 {/*{{{*/
   debug_assert(this->v_type == g_type_channel_message);
 

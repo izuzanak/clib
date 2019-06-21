@@ -128,7 +128,7 @@ int channel_conn_s_send_msg(channel_conn_s *this)
 {/*{{{*/
   if (this->out_msg_queue.used != 0)
   {
-    bc_array_s *message = loc_s_channel_message_value(*var_queue_s_first(&this->out_msg_queue));
+    const bc_array_s *message = loc_s_channel_message_value(*var_queue_s_first(&this->out_msg_queue));
     size_t write_cnt = message->used - this->out_msg_offset;
 
     // - limit maximal write size -
@@ -148,12 +148,6 @@ int channel_conn_s_send_msg(channel_conn_s *this)
     // - whole message was send -
     if ((this->out_msg_offset += cnt) >= message->used)
     {
-      // - release too big buffers -
-      if (message->size > 65536)
-      {
-        bc_array_s_clear(message);
-      }
-
       // - remove message from queue -
       var_queue_s_next(&this->out_msg_queue);
 
