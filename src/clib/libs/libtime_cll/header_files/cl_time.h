@@ -68,9 +68,7 @@ typedef ulli time_s;
 define time_s basic
 @end
 
-#if OPTION_TO_STRING == ENABLED
 static inline void time_s_to_string(const time_s *this,bc_array_s *a_trg);
-#endif
 #if OPTION_TO_JSON == ENABLED
 static inline void time_s_to_json(const time_s *this,bc_array_s *a_trg);
 #endif
@@ -112,7 +110,6 @@ static inline int datetime_s_is_leap_year(unsigned a_year)
 
 // === inline methods of structure time_s ======================================
 
-#if OPTION_TO_STRING == ENABLED
 static inline void time_s_to_string(const time_s *this,bc_array_s *a_trg)
 {/*{{{*/
 
@@ -123,7 +120,6 @@ static inline void time_s_to_string(const time_s *this,bc_array_s *a_trg)
   bc_array_s_append_format(a_trg,"%4.4hu/%2.2hu/%2.2hu %2.2hu:%2.2hu:%2.2hu"
     ,datetime.year,datetime.month,datetime.day,datetime.hour,datetime.min,datetime.sec);
 }/*}}}*/
-#endif
 
 #if OPTION_TO_JSON == ENABLED
 static inline void time_s_to_json(const time_s *this,bc_array_s *a_trg)

@@ -54,26 +54,40 @@ enum
   log_lvl_verbose = 8,
 };/*}}}*/
 
-#define log_fatal(FORMAT, ...) \
-  debug_assert(logger_s_write(g_logger,log_lvl_fatal,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+#if ! __clang__
 
-#define log_error(FORMAT, ...) \
-  debug_assert(logger_s_write(g_logger,log_lvl_error,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+  // - define log macros -
+  #define log_fatal(FORMAT, ...) \
+    cassert(logger_s_write(g_logger,log_lvl_fatal,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
 
-#define log_warning(FORMAT, ...) \
-  debug_assert(logger_s_write(g_logger,log_lvl_warning,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+  #define log_error(FORMAT, ...) \
+    cassert(logger_s_write(g_logger,log_lvl_error,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
 
-#define log_info_0(FORMAT, ...) \
-  debug_assert(logger_s_write(g_logger,log_lvl_info_0,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+  #define log_warning(FORMAT, ...) \
+    cassert(logger_s_write(g_logger,log_lvl_warning,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
 
-#define log_info_1(FORMAT, ...) \
-  debug_assert(logger_s_write(g_logger,log_lvl_info_1,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+  #define log_info_0(FORMAT, ...) \
+    cassert(logger_s_write(g_logger,log_lvl_info_0,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
 
-#define log_info_2(FORMAT, ...) \
-  debug_assert(logger_s_write(g_logger,log_lvl_info_2,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+  #define log_info_1(FORMAT, ...) \
+    cassert(logger_s_write(g_logger,log_lvl_info_1,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
 
-#define log_verbose(FORMAT, ...) \
-  debug_assert(logger_s_write(g_logger,log_lvl_verbose,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+  #define log_info_2(FORMAT, ...) \
+    cassert(logger_s_write(g_logger,log_lvl_info_2,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+
+  #define log_verbose(FORMAT, ...) \
+    cassert(logger_s_write(g_logger,log_lvl_verbose,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+#else
+
+  // - empty log macros -
+  #define log_fatal(FORMAT, ...)
+  #define log_error(FORMAT, ...)
+  #define log_warning(FORMAT, ...)
+  #define log_info_0(FORMAT, ...)
+  #define log_info_1(FORMAT, ...)
+  #define log_info_2(FORMAT, ...)
+  #define log_verbose(FORMAT, ...)
+#endif
 
 // === definition of generated structures ======================================
 
