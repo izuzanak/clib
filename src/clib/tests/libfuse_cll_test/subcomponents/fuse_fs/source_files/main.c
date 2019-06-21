@@ -159,7 +159,7 @@ void fuse_fs_read(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fus
 {/*{{{*/
   (void)off;
 
-  fprintf(stderr,"fuse_fs_read, off: %llu, size: %llu\n",(ulli)off,(ulli)size);
+  fprintf(stderr,"fuse_fs_read, off: %llu, size: %" HOST_LL_FORMAT "u\n",(ulli)off,(ulli)size);
 
   if (ino == 2)
   {
