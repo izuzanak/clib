@@ -62,25 +62,26 @@ enum
 
   // - define log macros -
   #define log_fatal(FORMAT, ...) \
-    cassert(logger_s_write(g_logger,log_lvl_fatal,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_fatal,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
 
   #define log_error(FORMAT, ...) \
-    cassert(logger_s_write(g_logger,log_lvl_error,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_error,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
 
   #define log_warning(FORMAT, ...) \
-    cassert(logger_s_write(g_logger,log_lvl_warning,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_warning,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
 
   #define log_info_0(FORMAT, ...) \
-    cassert(logger_s_write(g_logger,log_lvl_info_0,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_info_0,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
 
   #define log_info_1(FORMAT, ...) \
-    cassert(logger_s_write(g_logger,log_lvl_info_1,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_info_1,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
 
   #define log_info_2(FORMAT, ...) \
-    cassert(logger_s_write(g_logger,log_lvl_info_2,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_info_2,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
 
   #define log_verbose(FORMAT, ...) \
-    cassert(logger_s_write(g_logger,log_lvl_verbose,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0)
+    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_verbose,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
+
 #else
 
   // - empty log macros -
