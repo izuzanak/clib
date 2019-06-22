@@ -17,14 +17,22 @@ test_function_t test_functions[] =
   test_dummy,
 };/*}}}*/
 
-// === methods of generated structures =========================================
-
 // === test execution functions ================================================
+
+int curl_socket_cb(curl_multi_s *a_curl_multi)
+{/*{{{*/
+  return 0;
+}/*}}}*/
+
+int curl_response_cb(curl_result_s *a_curl_result)
+{/*{{{*/
+  return 0;
+}/*}}}*/
 
 void test_dummy()
 {/*{{{*/
-  
-  // FIXME TODO continue ...
+  CONT_INIT_CLEAR(curl_multi_s,curl);
+  cassert(curl_multi_s_create(&curl,curl_socket_cb,curl_response_cb) == 0);
 }/*}}}*/
 
 // === program entry function ==================================================

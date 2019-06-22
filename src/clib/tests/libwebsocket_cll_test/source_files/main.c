@@ -17,8 +17,6 @@ test_function_t test_functions[] =
   test_create,
 };/*}}}*/
 
-// === methods of generated structures =========================================
-
 // === test execution functions ================================================
 
 void test_create()
