@@ -54,7 +54,11 @@ enum
   log_lvl_verbose = 8,
 };/*}}}*/
 
-#if ! __clang__
+#define VA_OPT_SUPPORTED_II(a,b,c,...) c
+#define VA_OPT_SUPPORTED_I(...) VA_OPT_SUPPORTED_II(__VA_OPT__(,),1,0,)
+#define VA_OPT_SUPPORTED VA_OPT_SUPPORTED_I(?)
+
+#if VA_OPT_SUPPORTED
 
   // - define log macros -
   #define log_fatal(FORMAT, ...) \
