@@ -20,3 +20,8 @@ methods lalr_stack_s
 methods pointer_array_s
 @end
 
+// -- pointer_list_s --
+@begin
+methods pointer_list_s
+@end
+

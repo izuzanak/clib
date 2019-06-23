@@ -5,11 +5,6 @@ include "cl_http.h"
 
 // === methods of generated structures =========================================
 
-// -- pointer_list_s --
-@begin
-methods pointer_list_s
-@end
-
 // -- http_key_value_s --
 @begin
 methods http_key_value_s

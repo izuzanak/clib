@@ -33,6 +33,11 @@ static inline void lalr_stack_s_push_state_all(lalr_stack_s *this,unsigned a_lal
 array<pointer> pointer_array_s;
 @end
 
+// -- pointer_list_s --
+@begin
+safe_list<pointer> pointer_list_s;
+@end
+
 // === inline methods of generated structures ==================================
 
 // -- lalr_stack_element_s --
@@ -60,6 +65,11 @@ static inline void lalr_stack_s_push_state_all(lalr_stack_s *this,unsigned a_lal
 // -- pointer_array_s --
 @begin
 inlines pointer_array_s
+@end
+
+// -- pointer_list_s --
+@begin
+inlines pointer_list_s
 @end
 
 #endif

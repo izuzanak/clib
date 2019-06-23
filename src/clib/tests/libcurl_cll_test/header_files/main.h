@@ -9,7 +9,7 @@ include "cl_curl.h"
 
 // === test execution functions ================================================
 
-void test_dummy();
+void test_create();
 
 // === program entry function ==================================================
 

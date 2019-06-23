@@ -56,11 +56,6 @@ enum
 
 // === definition of generated structures ======================================
 
-// -- pointer_list_s --
-@begin
-safe_list<pointer> pointer_list_s;
-@end
-
 // -- http_key_value_s --
 @begin
 struct
@@ -187,11 +182,6 @@ static inline int http_resp_s_create_from_callback(http_resp_s *this,uint64_t a_
     MHD_ContentReaderCallback a_crc,void *a_crc_cls,MHD_ContentReaderFreeCallback a_crfc);
 
 // === inline methods of generated structures ==================================
-
-// -- pointer_list_s --
-@begin
-inlines pointer_list_s
-@end
 
 // -- http_key_value_s --
 @begin
