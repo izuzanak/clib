@@ -37,13 +37,7 @@ int curl_socket_cb(curl_multi_s *a_curl_multi,int a_what,int a_fd,unsigned a_eve
   epoll_s *epoll = (epoll_s *)a_curl_multi->user_data;
   epoll_fd_s epoll_fd = {NULL,a_fd};
 
-  if (epoll_s_fd_callback(epoll,&epoll_fd,a_events,epoll_curl_fd_event,a_curl_multi,0) ||
-      curl_multi_s_response_actions(a_curl_multi))
-  {
-    return 1;
-  }
-
-  return 0;
+  return epoll_s_fd_callback(epoll,&epoll_fd,a_events,epoll_curl_fd_event,a_curl_multi,0);
 }/*}}}*/
 
 int curl_response_cb(curl_result_s *a_curl_result)
@@ -75,7 +69,10 @@ int main(int argc,char **argv)
     CONT_INIT_CLEAR(curl_multi_s,curl_multi);
     cassert(curl_multi_s_create(&curl_multi,curl_socket_cb,curl_response_cb,&epoll) == 0);
 
-    cassert(curl_multi_s_GET(&curl_multi,"http://127.0.0.1",NULL) == 0);
+    unsigned idx = 0;
+    do {
+      cassert(curl_multi_s_GET(&curl_multi,"http://127.0.0.1",(void *)idx) == 0);
+    } while(++idx < 100);
 
     int running;
     cassert(curl_multi_s_socket_action(&curl_multi,CURL_SOCKET_TIMEOUT,0,&running) == 0);

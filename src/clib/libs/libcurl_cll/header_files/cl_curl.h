@@ -213,7 +213,8 @@ static inline int curl_multi_s_socket_action(curl_multi_s *this,
 {/*{{{*/
   
   // - ERROR -
-  if (curl_multi_socket_action(this->curlm_ptr,a_sockfd,a_events,a_running) != CURLM_OK)
+  if (curl_multi_socket_action(this->curlm_ptr,a_sockfd,a_events,a_running) != CURLM_OK ||
+      curl_multi_s_response_actions(this))
   {
     throw_error(CURL_MULTI_SOCKET_ACTION_ERROR);
   }
