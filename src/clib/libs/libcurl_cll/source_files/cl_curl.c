@@ -43,7 +43,7 @@ size_t curl_multi_s_write_buffer_func(void *ptr,size_t size,size_t nmemb,void *s
 }/*}}}*/
 
 int curl_multi_s_create(curl_multi_s *this,
-    curl_socket_cb_t a_curl_socket_cb,curl_response_cb_t a_curl_response_cb)
+    curl_socket_cb_t a_curl_socket_cb,curl_response_cb_t a_curl_response_cb,void *a_user_data)
 {/*{{{*/
   curl_multi_s_clear(this);
 
@@ -63,6 +63,9 @@ int curl_multi_s_create(curl_multi_s *this,
 
   // - set curl response callback -
   this->curl_response_cb = a_curl_response_cb;
+
+  // - store user data -
+  this->user_data = a_user_data;
 
   return 0;
 }/*}}}*/

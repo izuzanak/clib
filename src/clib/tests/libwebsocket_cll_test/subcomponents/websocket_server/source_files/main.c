@@ -34,8 +34,10 @@ int ws_fd_event_cb(ws_context_s *a_ws_context,enum lws_callback_reasons a_reason
 
   debug_message_6(fprintf(stderr,"ws_fd_event_cb\n"));
 
+  epoll_s *epoll = (epoll_s *)a_ws_context->user_data;
   epoll_fd_s epoll_fd = {NULL,a_fd};
-  return epoll_s_fd_callback(a_ws_context->user_data,&epoll_fd,a_events,epoll_ws_fd_event,a_ws_context,0);
+
+  return epoll_s_fd_callback(epoll,&epoll_fd,a_events,epoll_ws_fd_event,a_ws_context,0);
 }/*}}}*/
 
 int ws_prot_conn_cb(ws_conn_s *a_conn)

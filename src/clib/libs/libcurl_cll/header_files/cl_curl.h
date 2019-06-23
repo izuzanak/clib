@@ -45,6 +45,7 @@ typedef struct curl_multi_s
   long long int unique_counter;
   curl_socket_cb_t curl_socket_cb;
   curl_response_cb_t curl_response_cb;
+  void *user_data;
 } curl_multi_s;
 
 @begin
@@ -65,7 +66,7 @@ int curl_multi_s_socket_func(CURL *easy,curl_socket_t socket,int what,void *user
 size_t curl_multi_s_write_buffer_func(void *ptr,size_t size,size_t nmemb,void *stream);
 
 WUR libcurl_cll_EXPORT int curl_multi_s_create(curl_multi_s *this,
-    curl_socket_cb_t a_curl_socket_cb,curl_response_cb_t a_curl_response_cb);
+    curl_socket_cb_t a_curl_socket_cb,curl_response_cb_t a_curl_response_cb,void *a_user_data);
 WUR libcurl_cll_EXPORT int curl_multi_s_GET(curl_multi_s *this,const char *a_address,void *a_user_data);
 WUR static inline int curl_multi_s_socket_action(curl_multi_s *this,
     curl_socket_t a_sockfd,int a_events,int *a_running);
@@ -134,6 +135,7 @@ static inline void curl_multi_s_init(curl_multi_s *this)
   this->unique_counter = 0;
   this->curl_socket_cb = NULL;
   this->curl_response_cb = NULL;
+  this->user_data = NULL;
 }/*}}}*/
 
 static inline void curl_multi_s_clear(curl_multi_s *this)
