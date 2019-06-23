@@ -37,7 +37,13 @@ int curl_socket_cb(curl_multi_s *a_curl_multi,int a_what,int a_fd,unsigned a_eve
   epoll_s *epoll = (epoll_s *)a_curl_multi->user_data;
   epoll_fd_s epoll_fd = {NULL,a_fd};
 
-  return epoll_s_fd_callback(epoll,&epoll_fd,a_events,epoll_curl_fd_event,a_curl_multi,0);
+  if (epoll_s_fd_callback(epoll,&epoll_fd,a_events,epoll_curl_fd_event,a_curl_multi,0) ||
+      curl_multi_s_response_actions(a_curl_multi))
+  {
+    return 1;
+  }
+
+  return 0;
 }/*}}}*/
 
 int curl_response_cb(curl_result_s *a_curl_result)
@@ -45,6 +51,8 @@ int curl_response_cb(curl_result_s *a_curl_result)
   debug_message_6(fprintf(stderr,"curl_response_cb\n"));
 
   // FIXME TODO continue ...
+  fprintf(stderr,"a_curl_result->data.used: %u\n",a_curl_result->data.used);
+  fprintf(stderr,"a_curl_result->user_data: %p\n",a_curl_result->user_data);
 
   return 0;
 }/*}}}*/

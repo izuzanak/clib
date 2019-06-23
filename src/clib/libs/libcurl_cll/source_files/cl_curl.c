@@ -110,6 +110,57 @@ int curl_multi_s_GET(curl_multi_s *this,const char *a_address,void *a_user_data)
   return 0;
 }/*}}}*/
 
+int curl_multi_s_response_actions(curl_multi_s *this)
+{/*{{{*/
+  int msg_cnt;
+  CURLMsg *msg = curl_multi_info_read(this->curlm_ptr,&msg_cnt);
+
+  // - if there are any messages in completed transfers queue -
+  if (msg != NULL)
+  {
+    do {
+      CURL *curl_ptr = msg->easy_handle;
+
+      // - retrieve curl properties -
+      curl_props_s *curl_props;
+      curl_easy_getinfo(curl_ptr,CURLINFO_PRIVATE,(char **)&curl_props);
+
+      // - reset private data -
+      curl_easy_setopt(curl_ptr,CURLOPT_PRIVATE,NULL);
+
+      CONT_INIT_CLEAR(curl_result_s,result);
+
+      // - set result curl pointer -
+      result.curl_ptr = curl_ptr;
+      curl_props->curl_ptr = NULL;
+
+      // - set result data -
+      bc_array_s_swap(&result.data,&curl_props->write_buffer);
+
+      // - set user data location -
+      result.user_data = curl_props->user_data;
+      curl_props->user_data = NULL;
+
+      // - remove curl from list -
+      pointer_list_s_remove(&this->curl_list,curl_props->index);
+
+      // - release curl properties -
+      curl_props_s_clear(curl_props);
+      cfree(curl_props);
+
+      // - call response callback -
+      if (this->curl_response_cb(&result))
+      {
+        return 1;
+      }
+
+      msg = curl_multi_info_read(this->curlm_ptr,&msg_cnt);
+    } while(msg != NULL);
+  }
+
+  return 0;
+}/*}}}*/
+
 // === methods of structure curl_result_s ======================================
 
 // === global functions ========================================================

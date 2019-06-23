@@ -70,6 +70,7 @@ WUR libcurl_cll_EXPORT int curl_multi_s_create(curl_multi_s *this,
 WUR libcurl_cll_EXPORT int curl_multi_s_GET(curl_multi_s *this,const char *a_address,void *a_user_data);
 WUR static inline int curl_multi_s_socket_action(curl_multi_s *this,
     curl_socket_t a_sockfd,int a_events,int *a_running);
+WUR libcurl_cll_EXPORT int curl_multi_s_response_actions(curl_multi_s *this);
 
 // === definition of structure curl_props_s ====================================
 
@@ -296,7 +297,7 @@ static inline void curl_result_s_clear(curl_result_s *this)
 {/*{{{*/
   if (this->curl_ptr != NULL)
   {
-    curl_easy_cleanup(&this->curl_ptr);
+    curl_easy_cleanup(this->curl_ptr);
   }
 
   bc_array_s_clear(&this->data);
