@@ -7,6 +7,9 @@ include "cl_curl.h"
 
 int curl_multi_s_socket_func(CURL *easy,curl_socket_t socket,int what,void *userp,void *socketp)
 {/*{{{*/
+  (void)easy;
+  (void)socketp;
+
   unsigned events = 0;
 
   switch (what)
@@ -36,6 +39,8 @@ int curl_multi_s_socket_func(CURL *easy,curl_socket_t socket,int what,void *user
 
 size_t curl_multi_s_write_buffer_func(void *ptr,size_t size,size_t nmemb,void *stream)
 {/*{{{*/
+  (void)size;
+
   bc_array_s *buff_ptr = (bc_array_s *)stream;
   bc_array_s_append(buff_ptr,nmemb,(const char *)ptr);
 

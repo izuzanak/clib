@@ -71,7 +71,7 @@ int main(int argc,char **argv)
 
     unsigned idx = 0;
     do {
-      cassert(curl_multi_s_GET(&curl_multi,"http://127.0.0.1",(void *)idx) == 0);
+      cassert(curl_multi_s_GET(&curl_multi,"http://127.0.0.1",(void *)(uintptr_t)idx) == 0);
     } while(++idx < 100);
 
     int running;
