@@ -146,7 +146,8 @@ int logger_s_write_ap(logger_s *this,unsigned a_level,const char *a_format,va_li
 
   // - format message prefix -
   time_s_to_string(&time,&this->buffer);
-  bc_array_s_append_format(&this->buffer," %u %s: ",a_level,this->user.data);
+  bc_array_s_append_format(&this->buffer,".%3.3u %u %s: ",
+    (unsigned)(time_s_milli(&time) % 1000ULL),a_level,this->user.data);
 
   // - format user message -
   bc_array_s_append_format_ap(&this->buffer,a_format,a_ap);
