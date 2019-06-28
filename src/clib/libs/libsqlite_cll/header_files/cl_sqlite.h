@@ -1,5 +1,5 @@
 
-#ifndef __CL_SQLITE_H
+#ifndef __CL_SQLITE_H // NOLINT
 #define __CL_SQLITE_H
 
 @begin
