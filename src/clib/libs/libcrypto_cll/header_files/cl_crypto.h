@@ -7,9 +7,9 @@ include "cl_struct.h"
 @end
 
 #include <openssl/conf.h>
+#include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
-#include <openssl/err.h>
 #include <openssl/rand.h>
 
 // - function export definitions -
