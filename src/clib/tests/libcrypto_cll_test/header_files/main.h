@@ -9,7 +9,10 @@ include "cl_crypto.h"
 
 // === test execution functions ================================================
 
-void test_dummy();
+void test_random();
+void test_base16();
+void test_base64();
+void test_pkey_load();
 
 // === program entry function ==================================================
 
