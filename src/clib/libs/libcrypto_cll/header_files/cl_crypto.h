@@ -33,6 +33,8 @@ include "cl_struct.h"
 #define ERROR_CRYPTO_DIGEST_UPDATE_ERROR 3
 #define ERROR_CRYPTO_DIGEST_VALUE_ERROR 4
 
+#define ERROR_CRYPTO_CIPHER_INVALID_ALGORITHM_NAME 1
+
 // === definition of structure crypto_pkey_s ===================================
 
 typedef struct crypto_pkey_s
@@ -103,6 +105,29 @@ static inline void crypto_digest_s_to_string(const crypto_digest_s *this,bc_arra
 WUR libcrypto_cll_EXPORT int crypto_digest_s_create(crypto_digest_s *this,crypto_digest_info_s *a_digest_info);
 WUR static inline int crypto_digest_s_update(crypto_digest_s *this,const char *a_data,unsigned a_size);
 WUR libcrypto_cll_EXPORT int crypto_digest_s_value(crypto_digest_s *this,bc_array_s *a_trg);
+
+// === definition of structure crypto_cipher_info_s ============================
+
+typedef const EVP_CIPHER *crypto_cipher_info_s;
+@begin
+define crypto_cipher_info_s dynamic
+@end
+
+static inline void crypto_cipher_info_s_init(crypto_cipher_info_s *this);
+static inline void crypto_cipher_info_s_clear(crypto_cipher_info_s *this);
+static inline void crypto_cipher_info_s_flush_all(crypto_cipher_info_s *this);
+static inline void crypto_cipher_info_s_swap(crypto_cipher_info_s *this,crypto_cipher_info_s *a_second);
+static inline void crypto_cipher_info_s_copy(crypto_cipher_info_s *this,const crypto_cipher_info_s *a_src);
+static inline int crypto_cipher_info_s_compare(const crypto_cipher_info_s *this,const crypto_cipher_info_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void crypto_cipher_info_s_to_string(const crypto_cipher_info_s *this,bc_array_s *a_trg);
+#endif
+
+WUR static inline int crypto_cipher_info_s_get_by_name(crypto_cipher_info_s *this,const char *a_name);
+static inline const char *crypto_cipher_info_s_name(crypto_cipher_info_s *this);
+static inline unsigned crypto_cipher_info_s_block_size(crypto_cipher_info_s *this);
+static inline unsigned crypto_cipher_info_s_key_length(crypto_cipher_info_s *this);
+static inline unsigned crypto_cipher_info_s_iv_length(crypto_cipher_info_s *this);
 
 // === definition of global functions ==========================================
 
@@ -287,6 +312,87 @@ static inline int crypto_digest_s_update(crypto_digest_s *this,const char *a_dat
   }
 
   return 0;
+}/*}}}*/
+
+// === inline methods of structure crypto_cipher_info_s ========================
+
+static inline void crypto_cipher_info_s_init(crypto_cipher_info_s *this)
+{/*{{{*/
+  *this = NULL;
+}/*}}}*/
+
+static inline void crypto_cipher_info_s_clear(crypto_cipher_info_s *this)
+{/*{{{*/
+  crypto_cipher_info_s_init(this);
+}/*}}}*/
+
+static inline void crypto_cipher_info_s_flush_all(crypto_cipher_info_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void crypto_cipher_info_s_swap(crypto_cipher_info_s *this,crypto_cipher_info_s *a_second)
+{/*{{{*/
+  crypto_cipher_info_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void crypto_cipher_info_s_copy(crypto_cipher_info_s *this,const crypto_cipher_info_s *a_src)
+{/*{{{*/
+  *this = *a_src;
+}/*}}}*/
+
+static inline int crypto_cipher_info_s_compare(const crypto_cipher_info_s *this,const crypto_cipher_info_s *a_second)
+{/*{{{*/
+  return *this == *a_second;
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void crypto_cipher_info_s_to_string(const crypto_cipher_info_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"crypto_cipher_info_s{%p}",*this);
+}/*}}}*/
+#endif
+
+static inline int crypto_cipher_info_s_get_by_name(crypto_cipher_info_s *this,const char *a_name)
+{/*{{{*/
+  crypto_cipher_info_s_clear(this);
+
+  // - ERROR -
+  if ((*this = EVP_get_cipherbyname(a_name)) == NULL)
+  {
+    throw_error(CRYPTO_CIPHER_INVALID_ALGORITHM_NAME);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline const char *crypto_cipher_info_s_name(crypto_cipher_info_s *this)
+{/*{{{*/
+  debug_assert(*this != NULL);
+
+  return EVP_CIPHER_name(*this);
+}/*}}}*/
+
+static inline unsigned crypto_cipher_info_s_block_size(crypto_cipher_info_s *this)
+{/*{{{*/
+  debug_assert(*this != NULL);
+
+  return EVP_CIPHER_block_size(*this);
+}/*}}}*/
+
+static inline unsigned crypto_cipher_info_s_key_length(crypto_cipher_info_s *this)
+{/*{{{*/
+  debug_assert(*this != NULL);
+
+  return EVP_CIPHER_key_length(*this);
+}/*}}}*/
+
+static inline unsigned crypto_cipher_info_s_iv_length(crypto_cipher_info_s *this)
+{/*{{{*/
+  debug_assert(*this != NULL);
+
+  return EVP_CIPHER_iv_length(*this);
 }/*}}}*/
 
 #endif

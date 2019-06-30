@@ -139,6 +139,8 @@ int crypto_digest_s_value(crypto_digest_s *this,bc_array_s *a_trg)
   return 0;
 }/*}}}*/
 
+// === methods of structure crypto_cipher_info_s ===============================
+
 // === global functions ========================================================
 
 void crypto_random(int a_count,bc_array_s *a_trg)

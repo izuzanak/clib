@@ -13,8 +13,8 @@ const char *test_names[] =
   "base16",
   "base64",
   "pkey",
-  "digest_info",
   "digest",
+  "cipher",
 };/*}}}*/
 
 test_function_t test_functions[] =
@@ -23,16 +23,9 @@ test_function_t test_functions[] =
   test_base16,
   test_base64,
   test_pkey,
-  test_digest_info,
   test_digest,
+  test_cipher,
 };/*}}}*/
-
-// === methods of generated structures =========================================
-
-// -- crypto_digest_info_array_s --
-@begin
-methods crypto_digest_info_array_s
-@end
 
 // === test execution functions ================================================
 
@@ -81,18 +74,6 @@ void test_pkey()
   cassert(crypto_pkey_s_load_public(&private,"tests/libcrypto_cll_test/resources/public.pem","password") == 0);
 }/*}}}*/
 
-void test_digest_info()
-{/*{{{*/
-  CONT_INIT_CLEAR(crypto_digest_info_s,digest_info);
-  cassert(crypto_digest_info_s_get_by_name(&digest_info,"sha256") == 0);
-
-  CONT_INIT_CLEAR(crypto_digest_info_array_s,digest_infos);
-  unsigned idx = 0;
-  do {
-    crypto_digest_info_array_s_push(&digest_infos,&digest_info);
-  } while(++idx < 10);
-}/*}}}*/
-
 void test_digest()
 {/*{{{*/
   CONT_INIT_CLEAR(file_s,file);
@@ -102,7 +83,7 @@ void test_digest()
   cassert(file_s_read_close(&file,&data) == 0);
 
   CONT_INIT_CLEAR(crypto_digest_info_s,digest_info);
-  cassert(crypto_digest_info_s_get_by_name(&digest_info,"sha256") == 0);
+  cassert(crypto_digest_info_s_get_by_name(&digest_info,"SHA256") == 0);
 
   CONT_INIT_CLEAR(crypto_digest_s,digest);
   cassert(crypto_digest_s_create(&digest,&digest_info) == 0);
@@ -116,6 +97,20 @@ void test_digest()
   bc_array_s_push(&data,'\0');
   printf("digest: %.*s\n",data.used,data.data);
   cassert(strcmp(data.data,"1bd5ec15650c4dc0c3b1cf48c8d32cc05664aa807a8d11651133a9fe3e6076be") == 0);
+}/*}}}*/
+
+void test_cipher()
+{/*{{{*/
+  CONT_INIT_CLEAR(crypto_cipher_info_s,cipher_info);
+  cassert(crypto_cipher_info_s_get_by_name(&cipher_info,"AES-256-CBC") == 0);
+
+  printf("cipher name: %s\n",crypto_cipher_info_s_name(&cipher_info));
+  printf("cipher block_size: %u\n",crypto_cipher_info_s_block_size(&cipher_info));
+  printf("cipher key_length: %u\n",crypto_cipher_info_s_key_length(&cipher_info));
+  printf("cipher iv_length: %u\n",crypto_cipher_info_s_iv_length(&cipher_info));
+
+  // FIXME TODO continue ...
+
 }/*}}}*/
 
 // === program entry function ==================================================
