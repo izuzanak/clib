@@ -34,6 +34,11 @@ include "cl_struct.h"
 #define ERROR_CRYPTO_DIGEST_VALUE_ERROR 4
 
 #define ERROR_CRYPTO_CIPHER_INVALID_ALGORITHM_NAME 1
+#define ERROR_CRYPTO_CIPHER_INVALID_KEY_LENGTH 2
+#define ERROR_CRYPTO_CIPHER_INVALID_INIT_VECTOR_LENGTH 3
+#define ERROR_CRYPTO_CIPHER_NEW_INIT_ERROR 4
+#define ERROR_CRYPTO_CIPHER_UPDATE_ERROR 5
+#define ERROR_CRYPTO_CIPHER_FINALIZE_ERROR 6
 
 // === definition of structure crypto_pkey_s ===================================
 
@@ -128,6 +133,64 @@ static inline const char *crypto_cipher_info_s_name(crypto_cipher_info_s *this);
 static inline unsigned crypto_cipher_info_s_block_size(crypto_cipher_info_s *this);
 static inline unsigned crypto_cipher_info_s_key_length(crypto_cipher_info_s *this);
 static inline unsigned crypto_cipher_info_s_iv_length(crypto_cipher_info_s *this);
+
+// === definition of structure crypto_encrypt_s ================================
+
+typedef struct crypto_encrypt_s
+{
+  EVP_CIPHER_CTX *context;
+} crypto_encrypt_s;
+
+@begin
+define crypto_encrypt_s dynamic
+@end
+
+static inline void crypto_encrypt_s_init(crypto_encrypt_s *this);
+static inline void crypto_encrypt_s_clear(crypto_encrypt_s *this);
+static inline void crypto_encrypt_s_flush_all(crypto_encrypt_s *this);
+static inline void crypto_encrypt_s_swap(crypto_encrypt_s *this,crypto_encrypt_s *a_second);
+static inline void crypto_encrypt_s_copy(const crypto_encrypt_s *this,const crypto_encrypt_s *a_src);
+static inline int crypto_encrypt_s_compare(const crypto_encrypt_s *this,const crypto_encrypt_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void crypto_encrypt_s_to_string(const crypto_encrypt_s *this,bc_array_s *a_trg);
+#endif
+
+WUR libcrypto_cll_EXPORT int crypto_encrypt_s_create(crypto_encrypt_s *this,
+    crypto_cipher_info_s *a_cipher_info,
+    const char *a_key,unsigned a_key_length,
+    const char *a_iv,unsigned a_iv_length);
+WUR static inline int crypto_encrypt_s_update(crypto_encrypt_s *this,
+    const char *a_data,unsigned a_size,bc_array_s *a_trg);
+WUR libcrypto_cll_EXPORT int crypto_encrypt_s_finalize(crypto_encrypt_s *this,bc_array_s *a_trg);
+
+// === definition of structure crypto_decrypt_s ================================
+
+typedef struct crypto_decrypt_s
+{
+  EVP_CIPHER_CTX *context;
+} crypto_decrypt_s;
+
+@begin
+define crypto_decrypt_s dynamic
+@end
+
+static inline void crypto_decrypt_s_init(crypto_decrypt_s *this);
+static inline void crypto_decrypt_s_clear(crypto_decrypt_s *this);
+static inline void crypto_decrypt_s_flush_all(crypto_decrypt_s *this);
+static inline void crypto_decrypt_s_swap(crypto_decrypt_s *this,crypto_decrypt_s *a_second);
+static inline void crypto_decrypt_s_copy(const crypto_decrypt_s *this,const crypto_decrypt_s *a_src);
+static inline int crypto_decrypt_s_compare(const crypto_decrypt_s *this,const crypto_decrypt_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void crypto_decrypt_s_to_string(const crypto_decrypt_s *this,bc_array_s *a_trg);
+#endif
+
+WUR libcrypto_cll_EXPORT int crypto_decrypt_s_create(crypto_decrypt_s *this,
+    crypto_cipher_info_s *a_cipher_info,
+    const char *a_key,unsigned a_key_length,
+    const char *a_iv,unsigned a_iv_length);
+WUR static inline int crypto_decrypt_s_update(crypto_decrypt_s *this,
+    const char *a_data,unsigned a_size,bc_array_s *a_trg);
+WUR libcrypto_cll_EXPORT int crypto_decrypt_s_finalize(crypto_decrypt_s *this,bc_array_s *a_trg);
 
 // === definition of global functions ==========================================
 
@@ -393,6 +456,148 @@ static inline unsigned crypto_cipher_info_s_iv_length(crypto_cipher_info_s *this
   debug_assert(*this != NULL);
 
   return EVP_CIPHER_iv_length(*this);
+}/*}}}*/
+
+// === inline methods of structure crypto_encrypt_s ============================
+
+static inline void crypto_encrypt_s_init(crypto_encrypt_s *this)
+{/*{{{*/
+  this->context = NULL;
+}/*}}}*/
+
+static inline void crypto_encrypt_s_clear(crypto_encrypt_s *this)
+{/*{{{*/
+  if (this->context != NULL)
+  {
+    EVP_CIPHER_CTX_free(this->context);
+  }
+
+  crypto_encrypt_s_init(this);
+}/*}}}*/
+
+static inline void crypto_encrypt_s_flush_all(crypto_encrypt_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void crypto_encrypt_s_swap(crypto_encrypt_s *this,crypto_encrypt_s *a_second)
+{/*{{{*/
+  crypto_encrypt_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void crypto_encrypt_s_copy(const crypto_encrypt_s *this,const crypto_encrypt_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int crypto_encrypt_s_compare(const crypto_encrypt_s *this,const crypto_encrypt_s *a_second)
+{/*{{{*/
+  (void)this;
+  (void)a_second;
+
+  cassert(0);
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void crypto_encrypt_s_to_string(const crypto_encrypt_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"crypto_encrypt_s{%p}",this);
+}/*}}}*/
+#endif
+
+static inline int crypto_encrypt_s_update(crypto_encrypt_s *this,
+    const char *a_data,unsigned a_size,bc_array_s *a_trg)
+{/*{{{*/
+  unsigned block_size = EVP_CIPHER_CTX_block_size(this->context);
+  bc_array_s_reserve(a_trg,a_size + (block_size - a_size % block_size));
+
+  // - ERROR -
+  int result_length;
+  if (EVP_EncryptUpdate(this->context,
+      (unsigned char *)a_trg->data + a_trg->used,&result_length,
+      (unsigned char *)a_data,a_size) != 1)
+  {
+    throw_error(CRYPTO_CIPHER_UPDATE_ERROR);
+  }
+
+  a_trg->used += result_length;
+
+  return 0;
+}/*}}}*/
+
+// === inline methods of structure crypto_decrypt_s ============================
+
+static inline void crypto_decrypt_s_init(crypto_decrypt_s *this)
+{/*{{{*/
+  this->context = NULL;
+}/*}}}*/
+
+static inline void crypto_decrypt_s_clear(crypto_decrypt_s *this)
+{/*{{{*/
+  if (this->context != NULL)
+  {
+    EVP_CIPHER_CTX_free(this->context);
+  }
+
+  crypto_decrypt_s_init(this);
+}/*}}}*/
+
+static inline void crypto_decrypt_s_flush_all(crypto_decrypt_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void crypto_decrypt_s_swap(crypto_decrypt_s *this,crypto_decrypt_s *a_second)
+{/*{{{*/
+  crypto_decrypt_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void crypto_decrypt_s_copy(const crypto_decrypt_s *this,const crypto_decrypt_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int crypto_decrypt_s_compare(const crypto_decrypt_s *this,const crypto_decrypt_s *a_second)
+{/*{{{*/
+  (void)this;
+  (void)a_second;
+
+  cassert(0);
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void crypto_decrypt_s_to_string(const crypto_decrypt_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"crypto_decrypt_s{%p}",this);
+}/*}}}*/
+#endif
+
+static inline int crypto_decrypt_s_update(crypto_decrypt_s *this,
+    const char *a_data,unsigned a_size,bc_array_s *a_trg)
+{/*{{{*/
+  unsigned block_size = EVP_CIPHER_CTX_block_size(this->context);
+  bc_array_s_reserve(a_trg,a_size + (block_size - a_size % block_size));
+
+  // - ERROR -
+  int result_length;
+  if (EVP_DecryptUpdate(this->context,
+      (unsigned char *)a_trg->data + a_trg->used,&result_length,
+      (unsigned char *)a_data,a_size) != 1)
+  {
+    throw_error(CRYPTO_CIPHER_UPDATE_ERROR);
+  }
+
+  a_trg->used += result_length;
+
+  return 0;
 }/*}}}*/
 
 #endif

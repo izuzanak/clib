@@ -9,6 +9,8 @@ const char c_base16_map[] = "0123456789abcdef";
 
 int crypto_pkey_s_password_cb(char *buf,int size,int rwflag,void *userdata)
 {/*{{{*/
+  (void)rwflag;
+
   const char *password = (const char *)userdata;
   int password_length = strlen(password);
 
@@ -140,6 +142,172 @@ int crypto_digest_s_value(crypto_digest_s *this,bc_array_s *a_trg)
 }/*}}}*/
 
 // === methods of structure crypto_cipher_info_s ===============================
+
+// === methods of structure crypto_encrypt_s ===================================
+
+int crypto_encrypt_s_create(crypto_encrypt_s *this,
+    crypto_cipher_info_s *a_cipher_info,
+    const char *a_key,unsigned a_key_length,
+    const char *a_iv,unsigned a_iv_length)
+{/*{{{*/
+  crypto_encrypt_s_clear(this);
+
+  // - ERROR -
+  if (a_key_length != (unsigned)EVP_CIPHER_key_length(*a_cipher_info))
+  {
+    throw_error(CRYPTO_CIPHER_INVALID_KEY_LENGTH);
+  }
+
+  // - ERROR -
+  if (a_iv_length != (unsigned)EVP_CIPHER_iv_length(*a_cipher_info))
+  {
+    throw_error(CRYPTO_CIPHER_INVALID_INIT_VECTOR_LENGTH);
+  }
+
+  // - ERROR -
+  if ((this->context = EVP_CIPHER_CTX_new()) == NULL)
+  {
+    throw_error(CRYPTO_CIPHER_NEW_INIT_ERROR);
+  }
+
+  // - ERROR -
+  if (EVP_EncryptInit_ex(this->context,*a_cipher_info,NULL,
+        (unsigned char *)a_key,(unsigned char *)a_iv) != 1)
+  {
+    crypto_encrypt_s_clear(this);
+
+    throw_error(CRYPTO_CIPHER_NEW_INIT_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+int crypto_encrypt_s_finalize(crypto_encrypt_s *this,bc_array_s *a_trg)
+{/*{{{*/
+
+  // - ERROR -
+  EVP_CIPHER_CTX *context_copy;
+  if ((context_copy = EVP_CIPHER_CTX_new()) == NULL)
+  {
+    throw_error(CRYPTO_CIPHER_FINALIZE_ERROR);
+  }
+
+  // - ERROR -
+  if (EVP_EncryptInit_ex(context_copy,EVP_CIPHER_CTX_cipher(this->context),NULL,NULL,NULL) != 1)
+  {
+    EVP_CIPHER_CTX_free(context_copy);
+
+    throw_error(CRYPTO_CIPHER_FINALIZE_ERROR);
+  }
+
+  // - ERROR -
+  if (EVP_CIPHER_CTX_copy(context_copy,this->context) != 1)
+  {
+    EVP_CIPHER_CTX_free(context_copy);
+
+    throw_error(CRYPTO_CIPHER_FINALIZE_ERROR);
+  }
+
+  bc_array_s_reserve(a_trg,EVP_CIPHER_CTX_block_size(context_copy));
+
+  // - ERROR -
+  int result_length;
+  if (EVP_EncryptFinal_ex(context_copy,(unsigned char *)a_trg->data + a_trg->used,&result_length) != 1)
+  {
+    EVP_CIPHER_CTX_free(context_copy);
+
+    throw_error(CRYPTO_CIPHER_FINALIZE_ERROR);
+  }
+
+  EVP_CIPHER_CTX_free(context_copy);
+
+  a_trg->used += result_length;
+
+  return 0;
+}/*}}}*/
+
+// === methods of structure crypto_decrypt_s ===================================
+
+int crypto_decrypt_s_create(crypto_decrypt_s *this,
+    crypto_cipher_info_s *a_cipher_info,
+    const char *a_key,unsigned a_key_length,
+    const char *a_iv,unsigned a_iv_length)
+{/*{{{*/
+  crypto_decrypt_s_clear(this);
+
+  // - ERROR -
+  if (a_key_length != (unsigned)EVP_CIPHER_key_length(*a_cipher_info))
+  {
+    throw_error(CRYPTO_CIPHER_INVALID_KEY_LENGTH);
+  }
+
+  // - ERROR -
+  if (a_iv_length != (unsigned)EVP_CIPHER_iv_length(*a_cipher_info))
+  {
+    throw_error(CRYPTO_CIPHER_INVALID_INIT_VECTOR_LENGTH);
+  }
+
+  // - ERROR -
+  if ((this->context = EVP_CIPHER_CTX_new()) == NULL)
+  {
+    throw_error(CRYPTO_CIPHER_NEW_INIT_ERROR);
+  }
+
+  // - ERROR -
+  if (EVP_DecryptInit_ex(this->context,*a_cipher_info,NULL,
+        (unsigned char *)a_key,(unsigned char *)a_iv) != 1)
+  {
+    crypto_decrypt_s_clear(this);
+
+    throw_error(CRYPTO_CIPHER_NEW_INIT_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+int crypto_decrypt_s_finalize(crypto_decrypt_s *this,bc_array_s *a_trg)
+{/*{{{*/
+
+  // - ERROR -
+  EVP_CIPHER_CTX *context_copy;
+  if ((context_copy = EVP_CIPHER_CTX_new()) == NULL)
+  {
+    throw_error(CRYPTO_CIPHER_FINALIZE_ERROR);
+  }
+
+  // - ERROR -
+  if (EVP_DecryptInit_ex(context_copy,EVP_CIPHER_CTX_cipher(this->context),NULL,NULL,NULL) != 1)
+  {
+    EVP_CIPHER_CTX_free(context_copy);
+
+    throw_error(CRYPTO_CIPHER_FINALIZE_ERROR);
+  }
+
+  // - ERROR -
+  if (EVP_CIPHER_CTX_copy(context_copy,this->context) != 1)
+  {
+    EVP_CIPHER_CTX_free(context_copy);
+
+    throw_error(CRYPTO_CIPHER_FINALIZE_ERROR);
+  }
+
+  bc_array_s_reserve(a_trg,EVP_CIPHER_CTX_block_size(context_copy));
+
+  // - ERROR -
+  int result_length;
+  if (EVP_DecryptFinal_ex(context_copy,(unsigned char *)a_trg->data + a_trg->used,&result_length) != 1)
+  {
+    EVP_CIPHER_CTX_free(context_copy);
+
+    throw_error(CRYPTO_CIPHER_FINALIZE_ERROR);
+  }
+
+  EVP_CIPHER_CTX_free(context_copy);
+
+  a_trg->used += result_length;
+
+  return 0;
+}/*}}}*/
 
 // === global functions ========================================================
 

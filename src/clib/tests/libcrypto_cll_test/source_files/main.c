@@ -77,13 +77,15 @@ void test_pkey()
 void test_digest()
 {/*{{{*/
   CONT_INIT_CLEAR(file_s,file);
-  cassert(file_s_open(&file,"tests/libsnappy_cll_test/resources/file.xml","r") == 0);
+  cassert(file_s_open(&file,"tests/libcrypto_cll_test/resources/file.xml","r") == 0);
 
   CONT_INIT_CLEAR(bc_array_s,data);
   cassert(file_s_read_close(&file,&data) == 0);
 
   CONT_INIT_CLEAR(crypto_digest_info_s,digest_info);
   cassert(crypto_digest_info_s_get_by_name(&digest_info,"SHA256") == 0);
+
+  printf("digest name: %s\n",crypto_digest_info_s_name(&digest_info));
 
   CONT_INIT_CLEAR(crypto_digest_s,digest);
   cassert(crypto_digest_s_create(&digest,&digest_info) == 0);
@@ -101,6 +103,12 @@ void test_digest()
 
 void test_cipher()
 {/*{{{*/
+  CONT_INIT_CLEAR(file_s,file);
+  cassert(file_s_open(&file,"tests/libcrypto_cll_test/resources/file.xml","r") == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,data);
+  cassert(file_s_read_close(&file,&data) == 0);
+
   CONT_INIT_CLEAR(crypto_cipher_info_s,cipher_info);
   cassert(crypto_cipher_info_s_get_by_name(&cipher_info,"AES-256-CBC") == 0);
 
@@ -109,8 +117,27 @@ void test_cipher()
   printf("cipher key_length: %u\n",crypto_cipher_info_s_key_length(&cipher_info));
   printf("cipher iv_length: %u\n",crypto_cipher_info_s_iv_length(&cipher_info));
 
-  // FIXME TODO continue ...
+  CONT_INIT_CLEAR(bc_array_s,key);
+  crypto_random(32,&key);
 
+  CONT_INIT_CLEAR(bc_array_s,iv);
+  crypto_random(16,&iv);
+
+  CONT_INIT_CLEAR(crypto_encrypt_s,encrypt);
+  cassert(crypto_encrypt_s_create(&encrypt,&cipher_info,key.data,key.used,iv.data,iv.used) == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,encrypted_data);
+  cassert(crypto_encrypt_s_update(&encrypt,data.data,data.used,&encrypted_data) == 0);
+  cassert(crypto_encrypt_s_finalize(&encrypt,&encrypted_data) == 0);
+
+  CONT_INIT_CLEAR(crypto_decrypt_s,decrypt);
+  cassert(crypto_decrypt_s_create(&decrypt,&cipher_info,key.data,key.used,iv.data,iv.used) == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,decrypted_data);
+  cassert(crypto_decrypt_s_update(&decrypt,encrypted_data.data,encrypted_data.used,&decrypted_data) == 0);
+  cassert(crypto_decrypt_s_finalize(&decrypt,&decrypted_data) == 0);
+
+  cassert(bc_array_s_compare(&data,&decrypted_data));
 }/*}}}*/
 
 // === program entry function ==================================================
