@@ -226,7 +226,7 @@ int image_s_read_png_data(image_s *this,unsigned a_size,const char *a_data)
 
   // - create png data object -
   png_data_s png_data;
-  png_data.data = (const char *)a_data;
+  png_data.data = a_data;
   png_data.size = a_size;
   png_data.read = 8;
 
@@ -471,7 +471,7 @@ int image_s_read_jpeg_data(image_s *this,unsigned a_size,const char *a_data)
   }
 
   jpeg_create_decompress(&cinfo);
-  jpeg_source_mgr_s_set_source(&cinfo,(const char *)a_data,a_size);
+  jpeg_source_mgr_s_set_source(&cinfo,a_data,a_size);
 
   IMAGE_READ_JPEG_DATA();
 

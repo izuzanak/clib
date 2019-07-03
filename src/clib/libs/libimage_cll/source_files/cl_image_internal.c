@@ -534,7 +534,7 @@ boolean jpeg_source_mgr_s_fill_buffer(j_decompress_ptr cinfo)
 {/*{{{*/
   jpeg_source_mgr_s *src = (jpeg_source_mgr_s *)cinfo->src;
 
-  src->pub.next_input_byte = (JOCTET *)&EOI_BYTE;
+  src->pub.next_input_byte = &EOI_BYTE;
   src->pub.bytes_in_buffer = 1;
 
   return TRUE;
@@ -546,7 +546,7 @@ void jpeg_source_mgr_s_skip_data(j_decompress_ptr cinfo,long num_bytes)
 
   if (src->pub.bytes_in_buffer < (size_t)num_bytes)
   {
-    src->pub.next_input_byte = (JOCTET *)&EOI_BYTE;
+    src->pub.next_input_byte = &EOI_BYTE;
     src->pub.bytes_in_buffer = 1;
   }
   else
