@@ -3,13 +3,14 @@
 #define __CL_LINUX_H
 
 @begin
-include "cl_struct.h"
+include "cl_time.h"
 @end
 
 #include <aio.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/fs.h>
+#include <linux/rtc.h>
 #include <netdb.h>
 #include <signal.h>
 #include <sys/epoll.h>
@@ -74,6 +75,10 @@ include "cl_struct.h"
 #define ERROR_EPOLL_TIMER_CREATE_ERROR 8
 #define ERROR_EPOLL_TIMER_SETTIME_ERROR 9
 #define ERROR_EPOLL_FD_CALLBACK_ERROR 10
+
+#define ERROR_RTC_DEVICE_OPEN_ERROR 1
+#define ERROR_RTC_READ_TIME_ERROR 2
+#define ERROR_RTC_WRITE_TIME_ERROR 3
 
 // === constants and definitions ===============================================
 
@@ -307,6 +312,27 @@ static inline int epoll_timer_s_compare(const epoll_timer_s *this,const epoll_ti
 #if OPTION_TO_STRING == ENABLED
 static inline void epoll_timer_s_to_string(const epoll_timer_s *this,bc_array_s *a_trg);
 #endif
+
+// === definition of structure rtc_s ===========================================
+
+typedef int rtc_s;
+@begin
+define rtc_s dynamic
+@end
+
+static inline void rtc_s_init(rtc_s *this);
+static inline void rtc_s_clear(rtc_s *this);
+static inline void rtc_s_flush_all(rtc_s *this);
+static inline void rtc_s_swap(rtc_s *this,rtc_s *a_second);
+static inline void rtc_s_copy(const rtc_s *this,const rtc_s *a_src);
+static inline int rtc_s_compare(const rtc_s *this,const rtc_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void rtc_s_to_string(const rtc_s *this,bc_array_s *a_trg);
+#endif
+
+WUR static inline int rtc_s_open(rtc_s *this,const char *a_path);
+WUR static inline int rtc_s_read_time(rtc_s *this,time_s *a_trg);
+WUR static inline int rtc_s_write_time(rtc_s *this,time_s a_time);
 
 // === inline methods of structure socket_address_s ============================
 
@@ -944,6 +970,130 @@ static inline void epoll_timer_s_to_string(const epoll_timer_s *this,bc_array_s 
   bc_array_s_append_format(a_trg,"}");
 }/*}}}*/
 #endif
+
+// === definition of structure rtc_s ===========================================
+
+static inline void rtc_s_init(rtc_s *this)
+{/*{{{*/
+  *this = -1;
+}/*}}}*/
+
+static inline void rtc_s_clear(rtc_s *this)
+{/*{{{*/
+  if (*this != -1)
+  {
+    close(*this);
+  }
+
+  rtc_s_init(this);
+}/*}}}*/
+
+static inline void rtc_s_flush_all(rtc_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void rtc_s_swap(rtc_s *this,rtc_s *a_second)
+{/*{{{*/
+  rtc_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void rtc_s_copy(const rtc_s *this,const rtc_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int rtc_s_compare(const rtc_s *this,const rtc_s *a_second)
+{/*{{{*/
+  return *this == *a_second;
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void rtc_s_to_string(const rtc_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"rtc_s{%d}",*this);
+}/*}}}*/
+#endif
+
+static inline int rtc_s_open(rtc_s *this,const char *a_path)
+{/*{{{*/
+  rtc_s_clear(this);
+
+  // - open rtc device -
+  *this = open(a_path,O_RDWR);
+
+  // - ERROR -
+  if (*this == -1)
+  {
+    throw_error(RTC_DEVICE_OPEN_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int rtc_s_read_time(rtc_s *this,time_s *a_trg)
+{/*{{{*/
+  struct rtc_time rtc_time;
+
+  // - ERROR -
+  if (ioctl(*this,RTC_RD_TIME,&rtc_time))
+  {
+    throw_error(RTC_READ_TIME_ERROR);
+  }
+
+  datetime_s datetime =
+  {
+    rtc_time.tm_year <= 70 ? 1970 : 1900 + rtc_time.tm_year,
+    rtc_time.tm_mon,
+    rtc_time.tm_mday,
+    0,
+    rtc_time.tm_hour,
+    rtc_time.tm_min,
+    rtc_time.tm_sec,
+    0,
+    0,
+    0
+  };
+
+  // - ERROR -
+  if (datetime_s_to_nanosec(&datetime,a_trg))
+  {
+    throw_error(RTC_READ_TIME_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int rtc_s_write_time(rtc_s *this,time_s a_time)
+{/*{{{*/
+  datetime_s datetime;
+  datetime_s_from_nanosec(&datetime,a_time);  
+
+  struct rtc_time rtc_time =
+  {
+    datetime.sec,
+    datetime.min,
+    datetime.hour,
+    datetime.day,
+    datetime.month,
+    datetime.year - 1900,
+    0,
+    0,
+    0
+  };
+
+  // - ERROR -
+  if (ioctl(*this,RTC_SET_TIME,&rtc_time))
+  {
+    throw_error(RTC_WRITE_TIME_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
 
 #endif
 

@@ -1,6 +1,6 @@
 
 set(CONF_COMPONENTS
-  "src/clib/libs/libbase_cll")
+  "src/clib/libs/libtime_cll")
 set(CONF_HEADER_DIRS)
 
 if(OS_LINUX)

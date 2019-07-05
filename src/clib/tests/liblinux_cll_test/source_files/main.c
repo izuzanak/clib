@@ -17,6 +17,7 @@ const char *test_names[] =
   "aio",
   "pid",
   "epoll",
+  "rtc",
 };/*}}}*/
 
 test_function_t test_functions[] =
@@ -29,6 +30,7 @@ test_function_t test_functions[] =
   test_aio,
   test_pid,
   test_epoll,
+  test_rtc,
 };/*}}}*/
 
 // === methods of generated structures =========================================
@@ -368,6 +370,29 @@ void test_epoll()
   //epoll_s_clear(&epoll);
   regex_s_clear(&regex);
   bc_array_s_clear(&buffer);
+#endif
+}/*}}}*/
+
+void test_rtc()
+{/*{{{*/
+#if 0
+  CONT_INIT_CLEAR(rtc_s,rtc);
+  cassert(rtc_s_open(&rtc,"/dev/rtc0") == 0);
+
+  time_s time;
+  cassert(rtc_s_read_time(&rtc,&time) == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+  time_s_to_string(&time,&buffer);
+#endif
+
+#if 0
+  time_s time;
+  cassert(clock_s_gettime(CLOCK_REALTIME,&time) == 0);
+
+  CONT_INIT_CLEAR(rtc_s,rtc);
+  cassert(rtc_s_open(&rtc,"/dev/rtc0") == 0);
+  cassert(rtc_s_write_time(&rtc,time) == 0);
 #endif
 }/*}}}*/
 
