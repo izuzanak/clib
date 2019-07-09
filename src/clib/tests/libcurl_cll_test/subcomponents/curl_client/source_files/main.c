@@ -50,6 +50,7 @@ int curl_response_cb(curl_result_s *a_curl_result)
 
   return 0;
 }/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -71,8 +72,9 @@ int main(int argc,char **argv)
 
     unsigned idx = 0;
     do {
-      cassert(curl_multi_s_GET(&curl_multi,"http://127.0.0.1",(void *)(uintptr_t)idx) == 0);
-    } while(++idx < 100);
+      unsigned req_index;
+      cassert(curl_multi_s_GET(&curl_multi,"http://127.0.0.1",(void *)(uintptr_t)idx,&req_index) == 0);
+    } while(++idx < 1);
 
     int running;
     cassert(curl_multi_s_socket_action(&curl_multi,CURL_SOCKET_TIMEOUT,0,&running) == 0);

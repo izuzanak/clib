@@ -331,8 +331,8 @@ static inline void rtc_s_to_string(const rtc_s *this,bc_array_s *a_trg);
 #endif
 
 WUR static inline int rtc_s_open(rtc_s *this,const char *a_path);
-WUR static inline int rtc_s_read_time(rtc_s *this,time_s *a_trg);
-WUR static inline int rtc_s_write_time(rtc_s *this,time_s a_time);
+WUR static inline int rtc_s_read_time(const rtc_s *this,time_s *a_trg);
+WUR static inline int rtc_s_write_time(const rtc_s *this,time_s a_time);
 
 // === inline methods of structure socket_address_s ============================
 
@@ -1035,7 +1035,7 @@ static inline int rtc_s_open(rtc_s *this,const char *a_path)
   return 0;
 }/*}}}*/
 
-static inline int rtc_s_read_time(rtc_s *this,time_s *a_trg)
+static inline int rtc_s_read_time(const rtc_s *this,time_s *a_trg)
 {/*{{{*/
   struct rtc_time rtc_time;
 
@@ -1068,7 +1068,7 @@ static inline int rtc_s_read_time(rtc_s *this,time_s *a_trg)
   return 0;
 }/*}}}*/
 
-static inline int rtc_s_write_time(rtc_s *this,time_s a_time)
+static inline int rtc_s_write_time(const rtc_s *this,time_s a_time)
 {/*{{{*/
   datetime_s datetime;
   datetime_s_from_nanosec(&datetime,a_time);  

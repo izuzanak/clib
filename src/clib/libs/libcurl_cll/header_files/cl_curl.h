@@ -29,6 +29,7 @@ include "cl_struct.h"
 #define ERROR_CURL_MULTI_CANNOT_CREATE_SESSION 1
 #define ERROR_CURL_MULTI_CANNOT_ADD_HANDLER 2
 #define ERROR_CURL_MULTI_SOCKET_ACTION_ERROR 3
+#define ERROR_CURL_MULTI_INVALID_REQUEST_INDEX 4
 
 typedef struct curl_multi_s curl_multi_s;
 typedef struct curl_result_s curl_result_s;
@@ -67,7 +68,11 @@ size_t curl_multi_s_write_buffer_func(void *ptr,size_t size,size_t nmemb,void *s
 
 WUR libcurl_cll_EXPORT int curl_multi_s_create(curl_multi_s *this,
     curl_socket_cb_t a_curl_socket_cb,curl_response_cb_t a_curl_response_cb,void *a_user_data);
-WUR libcurl_cll_EXPORT int curl_multi_s_GET(curl_multi_s *this,const char *a_address,void *a_user_data);
+
+WUR libcurl_cll_EXPORT int curl_multi_s_GET(curl_multi_s *this,
+    const char *a_address,void *a_user_data,unsigned *a_index);
+WUR static inline int curl_multi_s_at(curl_multi_s *this,unsigned a_index,CURL **a_curl);
+
 WUR static inline int curl_multi_s_socket_action(curl_multi_s *this,
     curl_socket_t a_sockfd,int a_events,int *a_running);
 WUR libcurl_cll_EXPORT int curl_multi_s_response_actions(curl_multi_s *this);
@@ -208,12 +213,36 @@ static inline void curl_multi_s_to_string(const curl_multi_s *this,bc_array_s *a
 }/*}}}*/
 #endif
 
+static inline int curl_multi_s_at(curl_multi_s *this,unsigned a_index,CURL **a_curl)
+{/*{{{*/
+
+  // - ERROR -
+  if (a_index < 0 || a_index >= this->curl_list.used || !this->curl_list.data[a_index].valid)
+  {
+    throw_error(CURL_MULTI_INVALID_REQUEST_INDEX);
+  }
+
+  *a_curl = (CURL *)pointer_list_s_at(&this->curl_list,a_index);
+
+  return 0;
+}/*}}}*/
+
 static inline int curl_multi_s_socket_action(curl_multi_s *this,
     curl_socket_t a_sockfd,int a_events,int *a_running)
 {/*{{{*/
-  
+  int events = 0;
+
+  if (a_events & (POLLIN | POLLPRI))
+    events |= CURL_CSELECT_IN;
+
+  if (a_events & POLLOUT)
+    events |= CURL_CSELECT_OUT;
+
+  if (a_events & (POLLERR | POLLHUP | POLLNVAL))
+    events |= CURL_CSELECT_ERR;
+
   // - ERROR -
-  if (curl_multi_socket_action(this->curlm_ptr,a_sockfd,a_events,a_running) != CURLM_OK ||
+  if (curl_multi_socket_action(this->curlm_ptr,a_sockfd,events,a_running) != CURLM_OK ||
       curl_multi_s_response_actions(this))
   {
     throw_error(CURL_MULTI_SOCKET_ACTION_ERROR);

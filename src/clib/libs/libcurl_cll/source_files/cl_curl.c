@@ -75,7 +75,8 @@ int curl_multi_s_create(curl_multi_s *this,
   return 0;
 }/*}}}*/
 
-int curl_multi_s_GET(curl_multi_s *this,const char *a_address,void *a_user_data)
+int curl_multi_s_GET(curl_multi_s *this,
+    const char *a_address,void *a_user_data,unsigned *a_index)
 {/*{{{*/
 
   // - create curl session -
@@ -101,8 +102,8 @@ int curl_multi_s_GET(curl_multi_s *this,const char *a_address,void *a_user_data)
   curl_props->curl_ptr = curl_ptr;
 
   // - append curl to list -
-  unsigned index = pointer_list_s_append(&this->curl_list,curl_ptr);
-  curl_props->index = index;
+  *a_index = pointer_list_s_append(&this->curl_list,curl_ptr);
+  curl_props->index = *a_index;
   curl_props->unique_id = this->unique_counter++;
   curl_props->user_data = a_user_data;
 
