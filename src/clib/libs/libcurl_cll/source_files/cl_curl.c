@@ -155,7 +155,7 @@ int curl_multi_s_response_actions(curl_multi_s *this)
       cfree(curl_props);
 
       // - call response callback -
-      if (this->curl_response_cb(&result))
+      if (this->curl_response_cb(this,&result))
       {
         return 1;
       }
