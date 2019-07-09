@@ -32,6 +32,7 @@ include "cl_struct.h"
 #define ERROR_CURL_MULTI_INVALID_REQUEST_INDEX 4
 
 typedef struct curl_multi_s curl_multi_s;
+typedef struct curl_props_s curl_props_s;
 typedef struct curl_result_s curl_result_s;
 
 // === definition of structure curl_multi_s ====================================
@@ -69,6 +70,8 @@ size_t curl_multi_s_write_buffer_func(void *ptr,size_t size,size_t nmemb,void *s
 WUR libcurl_cll_EXPORT int curl_multi_s_create(curl_multi_s *this,
     curl_socket_cb_t a_curl_socket_cb,curl_response_cb_t a_curl_response_cb,void *a_user_data);
 
+WUR libcurl_cll_EXPORT int curl_multi_s_STUB(curl_multi_s *this,
+    void *a_user_data,unsigned *a_index,curl_props_s **a_curl_props);
 WUR libcurl_cll_EXPORT int curl_multi_s_GET(curl_multi_s *this,
     const char *a_address,void *a_user_data,unsigned *a_index);
 WUR static inline int curl_multi_s_at(curl_multi_s *this,unsigned a_index,CURL **a_curl);
@@ -82,6 +85,7 @@ WUR libcurl_cll_EXPORT int curl_multi_s_response_actions(curl_multi_s *this);
 typedef struct curl_props_s
 {
   CURL *curl_ptr;
+  struct curl_httppost *form_ptr;
   struct curl_slist *headers;
   unsigned index;
   long long int unique_id;
@@ -109,6 +113,7 @@ static inline void curl_props_s_to_string(const curl_props_s *this,bc_array_s *a
 typedef struct curl_result_s
 {
   CURL *curl_ptr;
+  struct curl_httppost *form_ptr;
   bc_array_s data;
   void *user_data;
 } curl_result_s;
@@ -256,6 +261,7 @@ static inline int curl_multi_s_socket_action(curl_multi_s *this,
 static inline void curl_props_s_init(curl_props_s *this)
 {/*{{{*/
   this->curl_ptr = NULL;
+  this->form_ptr = NULL;
   this->headers = NULL;
   bc_array_s_init(&this->write_buffer);
   bc_array_s_init(&this->read_buffer);
@@ -267,6 +273,11 @@ static inline void curl_props_s_clear(curl_props_s *this)
   if (this->curl_ptr != NULL)
   {
     curl_easy_cleanup(this->curl_ptr);
+  }
+
+  if (this->form_ptr != NULL)
+  {
+    curl_formfree(this->form_ptr);
   }
 
   if (this->headers != NULL)
@@ -319,6 +330,7 @@ static inline void curl_props_s_to_string(const curl_props_s *this,bc_array_s *a
 static inline void curl_result_s_init(curl_result_s *this)
 {/*{{{*/
   this->curl_ptr = NULL;
+  this->form_ptr = NULL;
   bc_array_s_init(&this->data);
   this->user_data = NULL;
 }/*}}}*/
@@ -328,6 +340,11 @@ static inline void curl_result_s_clear(curl_result_s *this)
   if (this->curl_ptr != NULL)
   {
     curl_easy_cleanup(this->curl_ptr);
+  }
+
+  if (this->form_ptr != NULL)
+  {
+    curl_formfree(this->form_ptr);
   }
 
   bc_array_s_clear(&this->data);

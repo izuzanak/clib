@@ -75,6 +75,47 @@ int curl_multi_s_create(curl_multi_s *this,
   return 0;
 }/*}}}*/
 
+int curl_multi_s_STUB(curl_multi_s *this,
+    void *a_user_data,unsigned *a_index,curl_props_s **a_curl_props)
+{/*{{{*/
+
+  // - create curl session -
+  CURL *curl_ptr = curl_easy_init();
+
+  // - ERROR -
+  if (curl_ptr == NULL)
+  {
+    throw_error(CURL_CANNOT_CREATE_SESSION);
+  }
+
+  // - ERROR -
+  if (curl_multi_add_handle(this->curlm_ptr,curl_ptr) != CURLM_OK)
+  {
+    curl_easy_cleanup(curl_ptr);
+
+    throw_error(CURL_MULTI_CANNOT_ADD_HANDLER);
+  }
+
+  curl_props_s *curl_props = (curl_props_s *)cmalloc(sizeof(curl_props_s));
+  curl_props_s_init(curl_props);
+
+  curl_props->curl_ptr = curl_ptr;
+
+  // - append curl to list -
+  *a_index = pointer_list_s_append(&this->curl_list,curl_ptr);
+  curl_props->index = *a_index;
+  curl_props->unique_id = this->unique_counter++;
+  curl_props->user_data = a_user_data;
+
+  // - setup curl easy -
+  curl_easy_setopt(curl_ptr,CURLOPT_PRIVATE,curl_props);
+
+  // - return curl props -
+  *a_curl_props = curl_props;
+
+  return 0;
+}/*}}}*/
+
 int curl_multi_s_GET(curl_multi_s *this,
     const char *a_address,void *a_user_data,unsigned *a_index)
 {/*{{{*/
@@ -139,6 +180,10 @@ int curl_multi_s_response_actions(curl_multi_s *this)
       // - set result curl pointer -
       result.curl_ptr = curl_ptr;
       curl_props->curl_ptr = NULL;
+
+      // - set result form pointer -
+      result.form_ptr = curl_props->form_ptr;
+      curl_props->form_ptr = NULL;
 
       // - set result data -
       bc_array_s_swap(&result.data,&curl_props->write_buffer);
