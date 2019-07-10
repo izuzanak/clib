@@ -238,13 +238,19 @@ static inline int curl_multi_s_socket_action(curl_multi_s *this,
   int events = 0;
 
   if (a_events & (POLLIN | POLLPRI))
+  {
     events |= CURL_CSELECT_IN;
+  }
 
   if (a_events & POLLOUT)
+  {
     events |= CURL_CSELECT_OUT;
+  }
 
   if (a_events & (POLLERR | POLLHUP | POLLNVAL))
+  {
     events |= CURL_CSELECT_ERR;
+  }
 
   // - ERROR -
   if (curl_multi_socket_action(this->curlm_ptr,a_sockfd,events,a_running) != CURLM_OK ||

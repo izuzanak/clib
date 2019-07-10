@@ -7,8 +7,8 @@ include "cl_struct.h"
 include "cl_atomic.h"
 @end
 
-#include "png.h"
 #include "jpeglib.h"
+#include "png.h"
 
 // - pixel formats -
 #define c_pixel_format_cnt  5
