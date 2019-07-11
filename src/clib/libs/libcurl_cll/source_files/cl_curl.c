@@ -157,6 +157,34 @@ int curl_multi_s_GET(curl_multi_s *this,
   return 0;
 }/*}}}*/
 
+int curl_multi_s_cancel(curl_multi_s *this,unsigned a_index)
+{/*{{{*/
+
+  // - ERROR -
+  if (a_index < 0 || a_index >= this->curl_list.used || !this->curl_list.data[a_index].valid)
+  {
+    throw_error(CURL_MULTI_INVALID_REQUEST_INDEX);
+  }
+
+  CURL *curl_ptr = (CURL *)this->curl_list.data[a_index].object;
+
+  // - retrieve curl properties -
+  curl_props_s *curl_props;
+  curl_easy_getinfo(curl_ptr,CURLINFO_PRIVATE,(char **)&curl_props);
+
+  // - remove curl easy from multi -
+  curl_multi_remove_handle(this->curlm_ptr,curl_ptr);
+
+  // - release curl properties -
+  curl_props_s_clear(curl_props);
+  cfree(curl_props);
+
+  // - remove curl from list -
+  pointer_list_s_remove(&this->curl_list,a_index);
+
+  return 0;
+}/*}}}*/
+
 int curl_multi_s_response_actions(curl_multi_s *this)
 {/*{{{*/
   int msg_cnt;
