@@ -48,7 +48,7 @@ int http_connection(http_conn_s *a_conn)
         cassert(http_resp_s_create_from_buffer(&resp,
               strlen("GET Response\n"),"GET Response\n",MHD_RESPMEM_PERSISTENT) == 0);
       }
-      
+
       cassert(http_conn_s_queue_response(a_conn,MHD_HTTP_OK,&resp) == 0);
     }
     break;
@@ -96,7 +96,7 @@ int http_completed(http_conn_s *a_conn)
   if (a_conn->user_data != NULL)
   {
     bc_array_s *buffer = a_conn->user_data;
-    
+
     // - release user buffer -
     bc_array_s_clear(buffer);
     cfree(buffer);
@@ -125,7 +125,7 @@ int main(int argc,char **argv)
     while (!g_terminate)
     {
       cassert(http_server_s_fds(&server,&pollfd_array) == 0);
-      
+
       int res = poll(pollfd_array.data,pollfd_array.used,100);
       if (res > 0)
       {

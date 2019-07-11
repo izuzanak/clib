@@ -24,7 +24,7 @@ int cl_snappy_compress(const char *a_data,size_t a_length,bc_array_s *a_trg)
 int cl_snappy_uncompress(const char *a_data,size_t a_length,bc_array_s *a_trg)
 {/*{{{*/
   size_t length;
-  
+
   // - ERROR -
   if (snappy_uncompressed_length(a_data,a_length,&length) != SNAPPY_OK)
   {

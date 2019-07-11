@@ -225,7 +225,7 @@ static inline void http_server_s_clear(http_server_s *this)
 
       // - retrieve suspended connection -
       http_conn_s *conn_ptr = (http_conn_s *)pointer_list_s_at(&this->suspended_conns,sc_idx);
-      
+
       // - resume suspended connection -
       MHD_resume_connection(conn_ptr->connection);
       conn_ptr->suspend_idx = c_idx_not_exist;

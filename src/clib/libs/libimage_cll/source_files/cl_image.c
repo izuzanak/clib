@@ -25,7 +25,6 @@ int image_s_create(image_s *this,unsigned a_width,unsigned a_height,unsigned a_f
 
   // - ERROR -
   default:
-    
     throw_error(IMAGE_WRONG_PROPERTIES);
   }
 
