@@ -66,6 +66,7 @@ queue<var_s> var_queue_s;
 struct
 <
 epoll_fd_s:epoll_fd
+bi:connecting
 
 pointer:conn_message_callback
 pointer:cb_object

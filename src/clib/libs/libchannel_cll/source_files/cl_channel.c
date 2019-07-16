@@ -31,6 +31,10 @@ void channel_conn_s_create(channel_conn_s *this,epoll_fd_s *a_epoll_fd,
   this->cb_index = a_cb_index;
   this->in_msg_length = 0;
   this->out_msg_offset = 0;
+
+  // - reset client connecting flag -
+  this->connecting = 0;
+
 }/*}}}*/
 
 int channel_conn_s_create_client(channel_conn_s *this,
@@ -48,14 +52,28 @@ int channel_conn_s_create_client(channel_conn_s *this,
   this->in_msg_length = 0;
   this->out_msg_offset = 0;
 
+  int nonblock_io = 1;
+
   // - connect to server -
   socket_address_s address;
   if (socket_address_s_create(&address,a_server_ip,a_server_port) ||
       socket_s_create(&this->epoll_fd.fd,AF_INET,SOCK_STREAM) ||
-      socket_s_connect(&this->epoll_fd.fd,&address))
+      ioctl(this->epoll_fd.fd,FIONBIO,&nonblock_io))
   {
     throw_error(CHANNEL_CONN_CONNECT_ERROR);
   }
+
+  // - connect to server -
+  if (connect(this->epoll_fd.fd,(struct sockaddr *)&address,sizeof(struct sockaddr_in)) != 0)
+  {
+    if (errno != EINPROGRESS)
+    {
+      throw_error(CHANNEL_CONN_CONNECT_ERROR);
+    }
+  }
+
+  // - set client connecting flag -
+  this->connecting = 1;
 
   return 0;
 }/*}}}*/
@@ -177,19 +195,42 @@ int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s 
     throw_error(CHANNEL_CONN_INVALID_FD);
   }
 
-  if (a_epoll_event->events & EPOLLOUT)
+  if (this->connecting)
   {
-    if (channel_conn_s_send_msg(this))
-    {
-      throw_error(CHANNEL_CONN_SEND_ERROR);
-    }
-  }
+    int nonblock_io = 0;
+    int error;
+    socklen_t length = sizeof(error);
 
-  if (a_epoll_event->events & EPOLLIN)
-  {
-    if (channel_conn_s_recv_msg(this))
+    // - check connect result -
+    // - disable nonblocking io -
+    // - modify fd epoll events: only input -
+    if (getsockopt(this->epoll_fd.fd,SOL_SOCKET,SO_ERROR,&error,&length) ||
+        error != 0 ||
+        ioctl(this->epoll_fd.fd,FIONBIO,&nonblock_io) ||
+        epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLPRI))
     {
-      throw_error(CHANNEL_CONN_RECEIVE_ERROR);
+      throw_error(CHANNEL_CONN_CONNECT_ERROR);
+    }
+
+    // - reset client connecting flag -
+    this->connecting = 0;
+  }
+  else
+  {
+    if (a_epoll_event->events & EPOLLOUT)
+    {
+      if (channel_conn_s_send_msg(this))
+      {
+        throw_error(CHANNEL_CONN_SEND_ERROR);
+      }
+    }
+
+    if (a_epoll_event->events & EPOLLIN)
+    {
+      if (channel_conn_s_recv_msg(this))
+      {
+        throw_error(CHANNEL_CONN_RECEIVE_ERROR);
+      }
     }
   }
 

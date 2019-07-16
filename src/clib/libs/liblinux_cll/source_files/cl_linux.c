@@ -535,7 +535,17 @@ int epoll_s_fd_update(epoll_s *this,
       // - ERROR -
       if (epoll_ctl(this->fd,EPOLL_CTL_MOD,a_epoll_fd->fd,&epoll_event) == -1)
       {
-        throw_error(EPOLL_CONTROL_MODIFY_ERROR);
+        // - reopened fd, not problem -
+        if (errno != ENOENT)
+        {
+          throw_error(EPOLL_CONTROL_MODIFY_ERROR);
+        }
+
+        // - ERROR -
+        if (epoll_ctl(this->fd,EPOLL_CTL_ADD,a_epoll_fd->fd,&epoll_event) == -1)
+        {
+          throw_error(EPOLL_CONTROL_ADD_ERROR);
+        }
       }
     }
 

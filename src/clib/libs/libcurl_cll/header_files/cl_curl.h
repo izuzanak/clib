@@ -74,6 +74,7 @@ WUR libcurl_cll_EXPORT int curl_multi_s_STUB(curl_multi_s *this,
     void *a_user_data,unsigned *a_index,curl_props_s **a_curl_props);
 WUR libcurl_cll_EXPORT int curl_multi_s_GET(curl_multi_s *this,
     const char *a_address,void *a_user_data,unsigned *a_index);
+WUR static inline int curl_multi_s_at(curl_multi_s *this,unsigned a_index,CURL **a_curl_ptr);
 WUR libcurl_cll_EXPORT int curl_multi_s_cancel(curl_multi_s *this,unsigned a_index);
 
 WUR static inline int curl_multi_s_socket_action(curl_multi_s *this,
@@ -217,6 +218,20 @@ static inline void curl_multi_s_to_string(const curl_multi_s *this,bc_array_s *a
   bc_array_s_append_format(a_trg,"curl_multi_s{%p}",this);
 }/*}}}*/
 #endif
+
+static inline int curl_multi_s_at(curl_multi_s *this,unsigned a_index,CURL **a_curl_ptr)
+{/*{{{*/
+
+  // - ERROR -
+  if (a_index < 0 || a_index >= this->curl_list.used || !this->curl_list.data[a_index].valid)
+  {
+    throw_error(CURL_MULTI_INVALID_REQUEST_INDEX);
+  }
+
+  *a_curl_ptr = (CURL *)this->curl_list.data[a_index].object;
+
+  return 0;
+}/*}}}*/
 
 static inline int curl_multi_s_socket_action(curl_multi_s *this,
     curl_socket_t a_sockfd,int a_events,int *a_running)
