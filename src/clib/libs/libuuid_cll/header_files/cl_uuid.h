@@ -1,5 +1,5 @@
 
-#ifndef __CL_UUID_H
+#ifndef __CL_UUID_H // NOLINT
 #define __CL_UUID_H
 
 @begin
