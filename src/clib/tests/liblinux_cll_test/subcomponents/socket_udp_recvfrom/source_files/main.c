@@ -25,6 +25,7 @@ int main(int argc,char **argv)
   do {
 
     // - receive message -
+    message.used = 0;
     cassert(socket_s_recvfrom(&socket,&message,&src_addr) == 0);
     bc_array_s_push(&message,'\0');
 

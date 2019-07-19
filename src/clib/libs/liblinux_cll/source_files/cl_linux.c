@@ -322,7 +322,6 @@ int socket_s_recvfrom(const socket_s *this,bc_array_s *a_trg,socket_address_s *a
   const ssize_t c_udp_max_cnt = 4096;
 
   // - prepare target buffer -
-  a_trg->used = 0;
   bc_array_s_reserve(a_trg,c_udp_max_cnt);
 
   // - source address length -
