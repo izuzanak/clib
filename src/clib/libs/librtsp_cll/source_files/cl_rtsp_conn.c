@@ -601,8 +601,6 @@ int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epo
     socket_address_s address;
 
     int udp_fd = a_epoll_event->data.fd;
-
-    this->buffer.used = 0;
     if (socket_s_recvfrom(&udp_fd,&this->buffer,&address))
     {
       throw_error(RTSP_CONN_RECEIVE_ERROR);
