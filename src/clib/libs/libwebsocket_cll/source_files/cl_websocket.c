@@ -22,7 +22,7 @@ int ws_context_s_http_func(struct lws *wsi,enum lws_callback_reasons reason,void
   (void)user;
   (void)len;
 
-  debug_message_6(fprintf(stderr,"ws_context_s_http_func\n"));
+  debug_message_7(fprintf(stderr,"ws_context_s_http_func\n"));
 
   switch (reason)
   {
@@ -66,7 +66,7 @@ int ws_context_s_http_func(struct lws *wsi,enum lws_callback_reasons reason,void
 
 int ws_context_s_protocol_func(struct lws *wsi,enum lws_callback_reasons reason,void *user,void *in,size_t len)
 {/*{{{*/
-  debug_message_6(fprintf(stderr,"ws_context_s_protocol_func\n"));
+  debug_message_7(fprintf(stderr,"ws_context_s_protocol_func\n"));
 
   ws_context_s *wsc_ptr = (ws_context_s *)lws_context_user(lws_get_context(wsi));
   ws_conn_s *wscn_ptr = NULL;
