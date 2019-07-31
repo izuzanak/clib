@@ -41,7 +41,7 @@ typedef int (*channel_conn_message_callback_t)(void *a_object,unsigned a_index,c
 
 extern unsigned g_type_channel_message;
 
-static inline var_s loc_s_channel_message_buffer_length(bc_array_s *a_src);
+static inline var_s loc_s_channel_message_buffer_length(const bc_array_s *a_src);
 static inline var_s loc_s_channel_message_buffer_swap(bc_array_s *a_src);
 static inline void loc_s_channel_message_clear(var_s this);
 static inline int loc_s_channel_message_order(var_s a_first,var_s a_second);
@@ -135,7 +135,7 @@ void libchannel_cll_clear();
 
 // === inline methods of var type channel_message  =============================
 
-static inline var_s loc_s_channel_message_buffer_length(bc_array_s *a_src)
+static inline var_s loc_s_channel_message_buffer_length(const bc_array_s *a_src)
 {/*{{{*/
   bc_array_s *buffer = (bc_array_s *)cmalloc(sizeof(bc_array_s));
   bc_array_s_init(buffer);
