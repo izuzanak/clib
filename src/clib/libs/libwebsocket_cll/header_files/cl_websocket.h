@@ -29,6 +29,8 @@ include "cl_struct.h"
 #define ERROR_WS_CONTEXT_CREATE_ERROR 3
 #define ERROR_WS_CONTEXT_SERVICE_FD_ERROR 4
 
+#define ERROR_WS_CONN_WRITE_ERROR 1
+
 #define ERROR_WS_CLIENT_CREATE_ERROR 1
 
 typedef struct ws_context_s ws_context_s;
@@ -111,6 +113,8 @@ static inline void **ws_conn_s_ctx_user_data(ws_conn_s *this);
 static inline const char *ws_conn_s_protocol_name(ws_conn_s *this);
 static inline void ws_conn_s_callback_on_writable(ws_conn_s *this);
 static inline void ws_conn_s_set_timeout(ws_conn_s *this,enum pending_timeout a_reason,int a_seconds);
+WUR static inline int ws_conn_s_write(ws_conn_s *this,
+    const char *a_data,size_t a_size,enum lws_write_protocol);
 
 // === definition of structure ws_client_s =====================================
 
@@ -315,6 +319,36 @@ static inline void ws_conn_s_callback_on_writable(ws_conn_s *this)
 static inline void ws_conn_s_set_timeout(ws_conn_s *this,enum pending_timeout a_reason,int a_seconds)
 {/*{{{*/
   lws_set_timeout(this->ws_ptr,a_reason,a_seconds);
+}/*}}}*/
+
+static inline int ws_conn_s_write(ws_conn_s *this,
+    const char *a_data,size_t a_size,enum lws_write_protocol a_protocol)
+{/*{{{*/
+
+  // - allocate data buffer -
+  unsigned char *buffer = (unsigned char *)cmalloc(
+      LWS_SEND_BUFFER_PRE_PADDING + a_size +
+      LWS_SEND_BUFFER_POST_PADDING);
+
+  // - pointer to data in buffer -
+  unsigned char *buff_ptr = buffer + LWS_SEND_BUFFER_PRE_PADDING;
+
+  // - fill data to buffer -
+  memcpy(buff_ptr,a_data,a_size);
+
+  // - ERROR -
+  if (lws_write(this->ws_ptr,buff_ptr,a_size,a_protocol) != a_size)
+  {
+    // - release data buffer -
+    cfree(buffer);
+
+    throw_error(WS_CONN_WRITE_ERROR);
+  }
+
+  // - release data buffer -
+  cfree(buffer);
+
+  return 0;
 }/*}}}*/
 
 // === inline methods of structure ws_client_s =================================

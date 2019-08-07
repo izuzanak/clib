@@ -78,14 +78,14 @@ int ws_prot_conn_cb(ws_conn_s *a_conn)
 
           CONT_INIT_CLEAR(bc_array_s,buffer);
           cassert(file_s_read_close(&file,&buffer) == 0);
-          cassert(lws_write(a_conn->ws_ptr,(uc *)buffer.data,buffer.used,LWS_WRITE_TEXT) == buffer.used);
+          cassert(ws_conn_s_write(a_conn,buffer.data,buffer.used,LWS_WRITE_TEXT) == 0);
           ws_conn_s_callback_on_writable(a_conn);
 
           ++send;
         }
         else
         {
-          cassert(lws_write(a_conn->ws_ptr,(uc *)"",0,LWS_WRITE_TEXT) == 0);
+          cassert(ws_conn_s_write(a_conn,"",0,LWS_WRITE_TEXT) == 0);
         }
       }
       break;
