@@ -114,7 +114,7 @@ static inline const char *ws_conn_s_protocol_name(ws_conn_s *this);
 static inline void ws_conn_s_callback_on_writable(ws_conn_s *this);
 static inline void ws_conn_s_set_timeout(ws_conn_s *this,enum pending_timeout a_reason,int a_seconds);
 WUR static inline int ws_conn_s_write(ws_conn_s *this,
-    const char *a_data,size_t a_size,enum lws_write_protocol);
+    const char *a_data,size_t a_size,enum lws_write_protocol a_protocol);
 
 // === definition of structure ws_client_s =====================================
 
