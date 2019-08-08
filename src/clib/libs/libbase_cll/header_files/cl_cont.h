@@ -91,9 +91,9 @@ safe_rb_tree<mc_block_s> mc_block_tree_s;
 struct
 <
 mc_block_tree_s:mc_block_set
-ui:alloc_size
-ui:total_alloc_size
-ui:max_alloc_size
+ulli:alloc_size
+ulli:total_alloc_size
+ulli:max_alloc_size
 >
 additions
 {

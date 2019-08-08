@@ -121,9 +121,9 @@ void memcheck_s_print(memcheck_s *this)
 
   fprintf(stderr,
 "memcheck (%u):\n"
-"         allocated: %u\n"
-"   total allocated: %u\n"
-" maximal allocated: %u\n"
+"         allocated: %" HOST_LL_FORMAT "u\n"
+"   total allocated: %" HOST_LL_FORMAT "u\n"
+" maximal allocated: %" HOST_LL_FORMAT "u\n"
   ,this->mc_block_set.size
   ,this->alloc_size
   ,this->total_alloc_size
