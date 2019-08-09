@@ -78,7 +78,7 @@ int main(int argc,char **argv)
     }
 
     // - print payload to standard output -
-    printf("%.*s\n",buffer.used,buffer.data);
+    printf("%.*s",buffer.used,buffer.data);
   }
 
   memcheck_release_assert();
