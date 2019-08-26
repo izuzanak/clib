@@ -48,6 +48,12 @@ int process_jpeg_file(const char *a_path,bc_array_s *a_trg)
         break;
       }
     } while(++idx < count);
+
+    // - no qr code was decoded -
+    if (idx >= count)
+    {
+      bc_array_s_append_ptr(a_trg,"detected");
+    }
   }
 
   return 0;
