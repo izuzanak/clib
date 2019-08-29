@@ -6,6 +6,7 @@ find_package(PkgConfig)
 project(clib)
 #set(CMAKE_C_CPPCHECK "cppcheck")
 
+set(EXT_LIBS "${CMAKE_CURRENT_SOURCE_DIR}/ext_libs")
 set(PROC_DIR "${CMAKE_CURRENT_BINARY_DIR}/proc_files")
 set(TESTS_DIR "${CMAKE_CURRENT_BINARY_DIR}/tests")
 file(MAKE_DIRECTORY "${PROC_DIR}" "${TESTS_DIR}")
@@ -23,6 +24,11 @@ define_property(GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS
 
 set_property(GLOBAL PROPERTY GP_INCLUDE_COMP_REL_DIRS)
 set_property(GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS)
+
+# - update compilation flags -
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wfatal-errors -DLINUX")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 
 # - process target source file -
 function(process_source TARGET)
@@ -172,12 +178,9 @@ endforeach()
 endfunction()
 
 # - set global variables -
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
   set(OS_LINUX TRUE)
   set(OS_WINDOWS FALSE)
-  #add_definitions(-g -Wall -Wfatal-errors -DLINUX)
-  add_definitions(-g -fsanitize=address -fsanitize=undefined -Wall -Wfatal-errors -DLINUX)
-  #add_definitions(-O3 -DNDEBUG -Wall -Wfatal-errors -DLINUX)
 else()
   set(OS_LINUX FALSE)
   set(OS_WINDOWS TRUE)

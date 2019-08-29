@@ -111,11 +111,15 @@ typedef long double ld;
 #endif
 
 // - basic configuration -
+#ifndef NDEBUG
 #define OPTION_DEBUG_ASSERT ENABLED
 #define OPTION_BRUTAL_ASSERT ENABLED
 #define OPTION_MEMCHECK ENABLED
 #define OPTION_DEBUG_LEVEL 6
 #define OPTION_TO_STRING ENABLED
+#else
+#define OPTION_DEBUG_LEVEL 0
+#endif
 #define OPTION_TO_JSON ENABLED
 
 // - error macros -
