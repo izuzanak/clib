@@ -77,8 +77,6 @@ ui:in_msg_length
 
 var_queue_s:out_msg_queue
 ui:out_msg_offset
-
-bc_array_s:buffer
 >
 channel_conn_s;
 @end

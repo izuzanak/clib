@@ -199,12 +199,12 @@ static inline int log_file_tree_s___compare_value(const log_file_tree_s *this,co
 {/*{{{*/
   (void)this;
 
-  const string_s *f_name = &a_first->path;
-  const string_s *s_name = &a_second->path;
+  const string_s *f_path = &a_first->path;
+  const string_s *s_path = &a_second->path;
 
-  if (f_name->size < s_name->size) { return -1; }
-  if (f_name->size > s_name->size) { return 1; }
-  return memcmp(f_name->data,s_name->data,f_name->size - 1);
+  if (f_path->size < s_path->size) { return -1; }
+  if (f_path->size > s_path->size) { return 1; }
+  return memcmp(f_path->data,s_path->data,f_path->size - 1);
 }/*}}}*/
 
 // -- logger_s --
