@@ -213,7 +213,7 @@ int rtsp_client_s_recv_sdp(rtsp_client_s *this)
 {/*{{{*/
   bc_array_s *msg = &this->in_msg;
 
-  // - sdp data not recevived yet -
+  // - sdp data not received yet -
   if (msg->used == 0)
   {
     unsigned msg_old_used = msg->used;

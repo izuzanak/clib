@@ -98,7 +98,7 @@ int channel_conn_s_recv_msg(channel_conn_s *this)
         break;
       }
 
-      debug_message_6(fprintf(stderr,"message length: %.*s\n",11,msg->data + msg_offset));
+      debug_message_7(fprintf(stderr,"message length: %.*s\n",11,msg->data + msg_offset));
 
       // - retrieve length of message -
       char *ptr = msg->data + msg_offset;
@@ -120,7 +120,7 @@ int channel_conn_s_recv_msg(channel_conn_s *this)
         break;
       }
 
-      debug_message_6(fprintf(stderr,"recevived message: %.*s\n",this->in_msg_length,msg->data + msg_offset));
+      debug_message_7(fprintf(stderr,"received message: %.*s\n",this->in_msg_length,msg->data + msg_offset));
 
       bc_array_s message = {this->in_msg_length,this->in_msg_length,msg->data + msg_offset};
 
