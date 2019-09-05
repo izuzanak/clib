@@ -15,6 +15,7 @@ include "cl_time.h"
 #include <signal.h>
 #include <sys/epoll.h>
 #include <sys/ioctl.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/timerfd.h>
 #include <sys/types.h>
@@ -53,6 +54,8 @@ include "cl_time.h"
 
 #define ERROR_FD_WRITE_ERROR 1
 #define ERROR_FD_READ_ERROR 2
+
+#define ERROR_MMAP_CREATE_ERROR 1
 
 #define ERROR_AIO_WRITE_ERROR 1
 #define ERROR_AIO_READ_ERROR 2
@@ -109,6 +112,32 @@ WUR liblinux_cll_EXPORT int fd_s_write(const fd_s *this,const void *a_src,size_t
 WUR liblinux_cll_EXPORT int fd_s_writev(const fd_s *this,struct iovec *a_iov,int a_iovcnt,size_t a_size);
 WUR liblinux_cll_EXPORT int fd_s_read(const fd_s *this,bc_array_s *a_trg);
 WUR liblinux_cll_EXPORT int fd_s_read_cnt(const fd_s *this,size_t a_count,bc_array_s *a_trg);
+
+// === definition of structure mmap_s ==========================================
+
+typedef struct mmap_s
+{
+  void *address;
+  size_t length;
+}
+mmap_s;
+
+@begin
+define mmap_s dynamic
+@end
+
+static inline void mmap_s_init(mmap_s *this);
+static inline void mmap_s_clear(mmap_s *this);
+static inline void mmap_s_flush_all(mmap_s *this);
+static inline void mmap_s_swap(mmap_s *this,mmap_s *a_second);
+static inline void mmap_s_copy(const mmap_s *this,const mmap_s *a_src);
+static inline int mmap_s_compare(const mmap_s *this,const mmap_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void mmap_s_to_string(const mmap_s *this,bc_array_s *a_trg);
+#endif
+
+WUR static inline int mmap_s_create(mmap_s *this,
+  void *a_addr,size_t a_length,int a_prot,int a_flags,int a_fd,off_t a_offset);
 
 // === definition of structure socket_address_s ================================
 
@@ -442,6 +471,74 @@ static inline void fd_s_to_string(const fd_s *this,bc_array_s *a_trg)
   bc_array_s_append_format(a_trg,"fd_s{%d}",*this);
 }/*}}}*/
 #endif
+
+// === inline methods of structure mmap_s ======================================
+
+static inline void mmap_s_init(mmap_s *this)
+{/*{{{*/
+  this->address = NULL;
+  this->length = 0;
+}/*}}}*/
+
+static inline void mmap_s_clear(mmap_s *this)
+{/*{{{*/
+  if (this->address != NULL)
+  {
+    munmap(this->address,this->length);
+  }
+
+  mmap_s_init(this);
+}/*}}}*/
+
+static inline void mmap_s_flush_all(mmap_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void mmap_s_swap(mmap_s *this,mmap_s *a_second)
+{/*{{{*/
+  mmap_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void mmap_s_copy(const mmap_s *this,const mmap_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int mmap_s_compare(const mmap_s *this,const mmap_s *a_second)
+{/*{{{*/
+  return this->address == a_second->address && this->length == a_second->length;
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void mmap_s_to_string(const mmap_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"mmap_s{%p,%zu}",this->address,this->length);
+}/*}}}*/
+#endif
+
+static inline int mmap_s_create(mmap_s *this,
+  void *a_addr,size_t a_length,int a_prot,int a_flags,int a_fd,off_t a_offset)
+{/*{{{*/
+  mmap_s_clear(this); 
+
+  void *address = mmap(a_addr,a_length,a_prot,a_flags,a_fd,a_offset);
+
+  // - ERROR -
+  if (address == MAP_FAILED)
+  {
+    throw_error(MMAP_CREATE_ERROR);
+  }
+
+  this->address = address;
+  this->length = a_length;
+
+  return 0; 
+}/*}}}*/
 
 // === inline methods of structure socket_s ====================================
 

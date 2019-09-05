@@ -10,6 +10,7 @@ const char *test_name = "liblinux_cll_test";
 const char *test_names[] =
 {/*{{{*/
   "fd",
+  "mmap",
   "socket_address",
   "socket",
   "socket_udp",
@@ -23,6 +24,7 @@ const char *test_names[] =
 test_function_t test_functions[] =
 {/*{{{*/
   test_fd,
+  test_mmap,
   test_socket_address,
   test_socket,
   test_socket_udp,
@@ -80,6 +82,39 @@ void test_fd()
   fd_s_clear(&fd);
   regex_s_clear(&regex);
   fd_array_s_clear(&fd_array);
+  bc_array_s_clear(&buffer);
+#endif
+}/*}}}*/
+
+void test_mmap()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT(bc_array_s,buffer);
+
+#define MMAP_S_TO_BUFFER(NAME) \
+{/*{{{*/\
+  buffer.used = 0;\
+  mmap_s_to_string(NAME,&buffer);\
+  bc_array_s_push(&buffer,'\0');\
+}/*}}}*/
+
+  CONT_INIT_CLEAR(fd_s,fd);
+  fd = open("tests/liblinux_cll_test/mmap/test.file",O_CREAT | O_RDWR,0666);
+
+  bc_array_s_push_blanks(&buffer,1024);
+  memset(buffer.data,'0',buffer.used);
+  cassert(fd_s_write(&fd,buffer.data,buffer.used) == 0);
+
+  CONT_INIT_CLEAR(mmap_s,mmap);
+  cassert(mmap_s_create(&mmap,NULL,1024,PROT_READ | PROT_WRITE,MAP_SHARED,fd,0) == 0);
+  fd_s_clear(&fd);
+
+  char *ptr = (char *)mmap.address;
+  char *ptr_end = ptr + mmap.length;
+  do {
+    *ptr = '0' + ((ptr - (char *)mmap.address) % 10);
+  } while(++ptr < ptr_end);
+
   bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
