@@ -25,8 +25,9 @@ include "cl_crc.h"
 
 #define ERROR_TRACE_HEADER_QUEUE_SIZE_ERROR 1
 #define ERROR_TRACE_TRACE_QUEUE_SIZE_ERROR 2
-#define ERROR_TRACE_TRACE_QUEUE_INVALID_LAST_RECORD_CRC 3
-#define ERROR_TRACE_WRITE_HEADER_ERROR 4
+#define ERROR_TRACE_WRITE_HEADER_ERROR 3
+#define ERROR_TRACE_INVALID_RECORD_ID 4
+#define ERROR_TRACE_INVALID_RECORD_CRC 5
 
 // === constants and definitions ===============================================
 
@@ -42,7 +43,7 @@ struct
 <
 crc16_s:crc
 lli:id
-ulli:time
+time_s:time
 >
 trace_record_header_s;
 @end
@@ -154,8 +155,14 @@ trace_s;
 WUR int trace_s_create(trace_s *this,
     void *header_data,ulli header_size,
     void *trace_data,ulli trace_size,unsigned a_data_size);
-WUR libtrace_cll_EXPORT int trace_s_write_header(trace_s *this,ulli a_time);
-WUR libtrace_cll_EXPORT int trace_s_write_record(trace_s *this,ulli a_time,const char *a_data);
+WUR libtrace_cll_EXPORT int trace_s_write_header(trace_s *this,time_s a_time);
+
+static inline lli trace_s_head(trace_s *this);
+static inline lli trace_s_tail(trace_s *this);
+WUR libtrace_cll_EXPORT int trace_s_write_record(trace_s *this,
+    time_s a_time,const char *a_data);
+WUR libtrace_cll_EXPORT int trace_s_read_record(trace_s *this,
+    lli a_id,time_s *a_time,bc_array_s *a_trg);
 
 // === definition of global functions ==========================================
 
@@ -225,7 +232,7 @@ static inline void trace_record_s___to_string(const trace_record_s *this,bc_arra
 {/*{{{*/
   bc_array_s_append_ptr(a_trg,"{header:");
   trace_record_header_s_to_string(&this->header,a_trg);
-  bc_array_s_append_ptr(a_trg,",data:{}");
+  bc_array_s_append_ptr(a_trg,",data:{...}");
   bc_array_s_push(a_trg,'}');
 }/*}}}*/
 #endif
@@ -236,7 +243,7 @@ static inline void trace_record_s_to_string_separator(const trace_record_s *this
   bc_array_s_append_ptr(a_trg,"header:");
   trace_record_header_s_to_string(&this->header,a_trg);
   bc_array_s_append(a_trg,a_count,a_data);
-  bc_array_s_append_ptr(a_trg,"data:{}");
+  bc_array_s_append_ptr(a_trg,"data:{...}");
 }/*}}}*/
 #endif
 
@@ -394,6 +401,26 @@ inlines trace_queue_header_s
 @begin
 inlines trace_s
 @end
+
+static inline lli trace_s_head(trace_s *this)
+{/*{{{*/
+  if (this->trace_queue.used != 0)
+  {
+    return this->trace_last_id;
+  }
+
+  return -1;
+}/*}}}*/
+
+static inline lli trace_s_tail(trace_s *this)
+{/*{{{*/
+  if (this->trace_queue.used != 0)
+  {
+    return this->trace_last_id - this->trace_queue.used + 1;
+  }
+
+  return -1;
+}/*}}}*/
 
 #endif
 

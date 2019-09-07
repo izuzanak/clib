@@ -318,7 +318,7 @@ int trace_s_create(trace_s *this,
     // - ERROR -
     if (trace_record_s_compute_crc(trace_record,this->trace_queue.rec_size) != trace_record->header.crc)
     {
-      throw_error(TRACE_TRACE_QUEUE_INVALID_LAST_RECORD_CRC);
+      throw_error(TRACE_INVALID_RECORD_CRC);
     }
 
     // - store last trace id -
@@ -328,7 +328,7 @@ int trace_s_create(trace_s *this,
   return 0;
 }/*}}}*/
 
-int trace_s_write_header(trace_s *this,ulli a_time)
+int trace_s_write_header(trace_s *this,time_s a_time)
 {/*{{{*/
   if (this->header_queue.used >= this->header_queue.size)
   {
@@ -361,7 +361,7 @@ int trace_s_write_header(trace_s *this,ulli a_time)
   return 0;
 }/*}}}*/
 
-int trace_s_write_record(trace_s *this,ulli a_time,const char *a_data)
+int trace_s_write_record(trace_s *this,time_s a_time,const char *a_data)
 {/*{{{*/
   if (this->trace_queue.used >= this->trace_queue.size)
   {
@@ -400,6 +400,30 @@ int trace_s_write_record(trace_s *this,ulli a_time,const char *a_data)
   {
     throw_error(TRACE_WRITE_HEADER_ERROR);
   }
+
+  return 0;
+}/*}}}*/
+
+int trace_s_read_record(trace_s *this,lli a_id,time_s *a_time,bc_array_s *a_trg)
+{/*{{{*/
+
+  // - ERROR -
+  if (a_id > this->trace_last_id || a_id <= (this->trace_last_id - this->trace_queue.used))
+  {
+    throw_error(TRACE_INVALID_RECORD_ID);
+  }
+
+  unsigned record_idx = (this->trace_queue.used - 1) - (this->trace_last_id - a_id);
+  trace_record_s *trace_record = trace_queue_s_at(&this->trace_queue,record_idx);
+
+  // - ERROR -
+  if (trace_record_s_compute_crc(trace_record,this->trace_queue.rec_size) != trace_record->header.crc)
+  {
+    throw_error(TRACE_INVALID_RECORD_CRC);
+  }
+
+  *a_time = trace_record->header.time;
+  bc_array_s_append(a_trg,this->trace_queue.rec_size,trace_record->data);
 
   return 0;
 }/*}}}*/
