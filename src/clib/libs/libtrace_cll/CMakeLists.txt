@@ -1,6 +1,7 @@
 
 set(CONF_COMPONENTS
-  "src/clib/libs/liblinux_cll")
+  "src/clib/libs/liblinux_cll"
+  "src/clib/libs/libcrc_cll")
 set(CONF_HEADER_DIRS)
 
 if(OS_LINUX)

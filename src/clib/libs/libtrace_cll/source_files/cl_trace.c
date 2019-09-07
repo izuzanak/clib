@@ -5,6 +5,8 @@ include "cl_trace.h"
 
 // === constants and definitions ===============================================
 
+unsigned g_page_size;
+
 // === methods of generated structures =========================================
 
 // -- trace_record_header_s --
@@ -17,13 +19,13 @@ methods trace_record_header_s
 methods trace_record_header_tree_s
 @end
 
-// === methods of structure trace_record_queue_s ===============================
+// === methods of structure trace_queue_s ======================================
 
-void trace_record_queue_s_copy(trace_record_queue_s *this,const trace_record_queue_s *a_src)
+void trace_queue_s_copy(trace_queue_s *this,const trace_queue_s *a_src)
 {/*{{{*/
   debug_assert(a_src->used <= this->size && this->rec_size == a_src->rec_size);
 
-  trace_record_queue_s_clear(this);
+  trace_queue_s_clear(this);
 
   if (a_src->used == 0)
   {
@@ -63,7 +65,7 @@ void trace_record_queue_s_copy(trace_record_queue_s *this,const trace_record_que
   this->used = a_src->used;
 }/*}}}*/
 
-int trace_record_queue_s_compare(const trace_record_queue_s *this,const trace_record_queue_s *a_second)
+int trace_queue_s_compare(const trace_queue_s *this,const trace_queue_s *a_second)
 {/*{{{*/
   debug_assert(this->rec_size == a_second->rec_size);
 
@@ -114,7 +116,7 @@ int trace_record_queue_s_compare(const trace_record_queue_s *this,const trace_re
 }/*}}}*/
 
 #if OPTION_TO_STRING == ENABLED
-void trace_record_queue_s___to_string(const trace_record_queue_s *this,bc_array_s *a_trg)
+void trace_queue_s___to_string(const trace_queue_s *this,bc_array_s *a_trg)
 {/*{{{*/
   bc_array_s_push(a_trg,'[');
 
@@ -163,7 +165,7 @@ void trace_record_queue_s___to_string(const trace_record_queue_s *this,bc_array_
 #endif
 
 #if OPTION_TO_STRING == ENABLED
-void trace_record_queue_s_to_string_separator(const trace_record_queue_s *this,bc_array_s *a_trg,unsigned a_count,const char *a_data)
+void trace_queue_s_to_string_separator(const trace_queue_s *this,bc_array_s *a_trg,unsigned a_count,const char *a_data)
 {/*{{{*/
   if (this->used != 0)
   {
@@ -207,6 +209,35 @@ void trace_record_queue_s_to_string_separator(const trace_record_queue_s *this,b
 }/*}}}*/
 #endif
 
+unsigned trace_queue_s_scan_for_last(const trace_queue_s *this)
+{/*{{{*/
+  lli max_id = -1;
+  unsigned last_id_idx = c_idx_not_exist;
+
+  // - scan queue for latest record identifier -
+  unsigned idx = 0;
+  do {
+    const trace_record_s *record = trace_queue_s_at(this,idx);
+
+    // - record crc is valid -
+    if (trace_record_s_compute_crc(record,this->rec_size) == record->header.crc)
+    {
+      if (record->header.id > max_id)
+      {
+        max_id = record->header.id;
+        last_id_idx = idx;
+      }
+    }
+  } while(++idx < this->used);
+
+  return last_id_idx;
+}/*}}}*/
+
+// -- trace_queue_header_s --
+@begin
+methods trace_queue_header_s
+@end
+
 // -- trace_s --
 @begin
 methods trace_s
@@ -214,24 +245,176 @@ methods trace_s
 
 int trace_s_create(trace_s *this,
     void *header_data,ulli header_size,
-    void *trace_data,ulli trace_size,unsigned a_rec_size)
+    void *trace_data,ulli trace_size,unsigned a_data_size)
 {/*{{{*/
   trace_s_clear(this);
 
-  //unsigned header_rec_size = sizeof(trace_record_s) + sizeof(trace_record_queue_header_s);
-  //unsigned header_rec_cnt = header_size/header_rec_size;
-  //trace_record_queue_s_set_buffer(&this->header_queue,header_rec_cnt,header_data);
+  // - store data size -
+  this->data_size = a_data_size;
 
-  // FIXME TODO:
-  //  - scan header queue for largest rec id
-  //  - set header queue header:
-  //    - used = max
-  //    - begin = after rec. with largest id
-  //    - ...
-  //  - update trace queue header from header queue rec.
-  //    - if not header queue rec found:
-  //      - reset storage header
+  unsigned header_rec_size = sizeof(trace_record_s) + sizeof(trace_queue_header_s);
+  
+  // - ERROR -
+  if (header_size < (header_rec_size << 1))
+  {
+    throw_error(TRACE_HEADER_QUEUE_SIZE_ERROR);
+  }
+
+  unsigned header_rec_cnt = header_size/header_rec_size;
+  trace_queue_s_set_buffer(&this->header_queue,header_rec_cnt,header_rec_size,header_data);
+  this->header_queue.used = this->header_queue.size;
+
+  // - scan queue for latest record index -
+  unsigned last_header_idx = trace_queue_s_scan_for_last(&this->header_queue);
+
+  trace_queue_header_s trqh = {
+    .used = 0,
+    .begin = 0
+  };
+
+  // - trace header record was found -
+  if (last_header_idx != c_idx_not_exist)
+  {
+    // - retrieve record pointer before change of queue begin -
+    trace_record_s *header_record = trace_queue_s_at(&this->header_queue,last_header_idx);
+
+    // - update begin of header queue -
+    this->header_queue.begin = (last_header_idx + 1) % this->header_queue.size;
+
+    // - store last header id -
+    this->header_last_id = header_record->header.id;
+
+    // - retrieve trace queue header -
+    trqh = *((trace_queue_header_s *)header_record->data);
+  }
+  else
+  {
+    // - reset last header id -
+    this->header_last_id = -1;
+
+    // - reset last trace id -
+    this->trace_last_id = -1;
+  }
+
+  unsigned trace_rec_size = sizeof(trace_record_s) + this->data_size;
+
+  // - ERROR -
+  if (trace_size < (trace_rec_size << 1))
+  {
+    throw_error(TRACE_TRACE_QUEUE_SIZE_ERROR);
+  }
+
+  unsigned trace_rec_cnt = trace_size/trace_rec_size;
+  trace_queue_s_set_buffer(&this->trace_queue,trace_rec_cnt,trace_rec_size,trace_data);
+
+  this->trace_queue.used = trqh.used;
+  this->trace_queue.begin = trqh.begin;
+
+  // - retrieve last trace id -
+  if (this->trace_queue.used != 0)
+  {
+    trace_record_s *trace_record = trace_queue_s_last(&this->trace_queue);
+
+    // - ERROR -
+    if (trace_record_s_compute_crc(trace_record,this->trace_queue.rec_size) != trace_record->header.crc)
+    {
+      throw_error(TRACE_TRACE_QUEUE_INVALID_LAST_RECORD_CRC);
+    }
+
+    // - store last trace id -
+    this->trace_last_id = trace_record->header.id;
+  }
 
   return 0;
+}/*}}}*/
+
+int trace_s_write_header(trace_s *this,ulli a_time)
+{/*{{{*/
+  if (this->header_queue.used >= this->header_queue.size)
+  {
+    // - drop tail record -
+    trace_queue_s_next(&this->header_queue);
+  }
+
+  // - insert record -
+  trace_queue_s_insert_blank(&this->header_queue);
+  trace_record_s *header_record = trace_queue_s_last(&this->header_queue);
+  trace_queue_header_s *trqh = (trace_queue_header_s *)header_record->data;
+
+  // - fill record header (except crc) -
+  header_record->header.id = ++this->header_last_id;
+  header_record->header.time = a_time;
+
+  // - fill record data -
+  trqh->used = this->trace_queue.used;
+  trqh->begin = this->trace_queue.begin;
+
+  // - compute record crc -
+  header_record->header.crc = trace_record_s_compute_crc(header_record,this->header_queue.rec_size);
+
+  // - sync data to storage -
+  if (trace_record_s_msync(header_record,this->header_queue.rec_size))
+  {
+    throw_error(TRACE_RECORD_MSYNC_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+int trace_s_write_record(trace_s *this,ulli a_time,const char *a_data)
+{/*{{{*/
+  if (this->trace_queue.used >= this->trace_queue.size)
+  {
+    // - drop tail record -
+    trace_queue_s_next(&this->trace_queue);
+
+    // - write trace header to storage -
+    if (trace_s_write_header(this,a_time))
+    {
+      throw_error(TRACE_WRITE_HEADER_ERROR);
+    }
+  }
+
+  // - insert record -
+  trace_queue_s_insert_blank(&this->trace_queue);
+  trace_record_s *trace_record = trace_queue_s_last(&this->trace_queue);
+
+  // - fill record header (except crc) -
+  trace_record->header.id = ++this->trace_last_id;
+  trace_record->header.time = a_time;
+
+  // - fill record data -
+  memcpy(trace_record->data,a_data,this->data_size);
+
+  // - compute record crc -
+  trace_record->header.crc = trace_record_s_compute_crc(trace_record,this->trace_queue.rec_size);
+
+  // - sync data to storage -
+  if (trace_record_s_msync(trace_record,this->trace_queue.rec_size))
+  {
+    throw_error(TRACE_RECORD_MSYNC_ERROR);
+  }
+
+  // - write trace header to storage -
+  if (trace_s_write_header(this,a_time))
+  {
+    throw_error(TRACE_WRITE_HEADER_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+// === global functions ========================================================
+
+void libtrace_cll_init()
+{/*{{{*/
+
+  // - retrieve system page size -
+  g_page_size = sysconf(_SC_PAGE_SIZE);
+
+}/*}}}*/
+
+void libtrace_cll_clear()
+{/*{{{*/
 }/*}}}*/
 

@@ -33,49 +33,31 @@ void test_trace()
   CONT_INIT_CLEAR(mmap_s,mmap);
   cassert(mmap_s_create(&mmap,NULL,storage_size,PROT_READ | PROT_WRITE,MAP_SHARED,fd,0) == 0);
 
-  unsigned rec_size = sizeof(trace_record_s) + 512;
-  unsigned rec_cnt = storage_size/rec_size;
+  unsigned header_size = 128;
 
-  fprintf(stderr,"rec_size: %u, rec_cnt: %u\n",rec_size,rec_cnt);
+  CONT_INIT_CLEAR(trace_s,trace);
+  cassert(trace_s_create(&trace,
+    mmap.address,header_size,
+    mmap.address + header_size,mmap.length - header_size,512) == 0);
 
-  CONT_INIT_CLEAR(trace_record_queue_s,queue);
-  trace_record_queue_s_set_buffer(&queue,rec_cnt,rec_size,mmap.address);
+  time_s time;
+  cassert(clock_s_gettime(CLOCK_REALTIME,&time) == 0);
 
-#if 1
-  {
-    queue.used = rec_cnt;
-    queue.begin = 100;
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+  bc_array_s_copy_resize(&buffer,512);
+  bc_array_s_append_format(&buffer,"Hello world!!!");
 
-    unsigned idx = 0;
-    while(idx < queue.used)
-    {
-      trace_record_s *record = trace_record_queue_s_at(&queue,idx);
-      fprintf(stderr,"%s\n",record->data);
+  //unsigned idx = 0;
+  //do {
+  //  cassert(trace_s_write_record(&trace,time,buffer.data) == 0);
+  //} while(++idx < 4000);
 
-      ++idx;
-    }
-
-    //DEBUG_PRINT_LINES(trace_record_queue_s,&queue);
-  }
-#else
-  unsigned idx = 0;
-  do {
-    // - remove tail record -
-    if (queue.used >= rec_cnt)
-    {
-      trace_record_queue_s_next(&queue);
-    }
-
-    trace_record_queue_s_insert_blank(&queue);
-    trace_record_s *record = trace_record_queue_s_last(&queue);
-
-    trace_record_header_s header = {idx,0,123};
-
-    record->header = header;
-    snprintf(record->data,512,"{\"record_id\":%u}",idx);
-
-  } while(++idx < (rec_cnt + 100));
-#endif
+  // FIXME
+  //fprintf(stderr,"used: %u, size: %u\n",trace.trace_queue.used,trace.trace_queue.size);
+  //fputc('\n',stderr);
+  //DEBUG_PRINT_LINES(trace_queue_s,&trace.header_queue);
+  //fputc('\n',stderr);
+  //DEBUG_PRINT_LINES(trace_queue_s,&trace.trace_queue);
 }/*}}}*/
 
 // === program entry function ==================================================
@@ -85,7 +67,7 @@ int main(int argc,char **argv)
   (void)argc;
   (void)argv;
 
-  EXECUTE_TESTS(,);
+  EXECUTE_TESTS(libtrace_cll_init(),libtrace_cll_clear());
 
   return 0;
 }/*}}}*/
