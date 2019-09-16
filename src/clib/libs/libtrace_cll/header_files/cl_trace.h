@@ -25,9 +25,10 @@ include "cl_crc.h"
 
 #define ERROR_TRACE_HEADER_QUEUE_SIZE_ERROR 1
 #define ERROR_TRACE_TRACE_QUEUE_SIZE_ERROR 2
-#define ERROR_TRACE_WRITE_HEADER_ERROR 3
-#define ERROR_TRACE_INVALID_RECORD_ID 4
-#define ERROR_TRACE_INVALID_RECORD_CRC 5
+#define ERROR_TRACE_TIMESTAMP_TRACE_QUEUE_SIZE_ERROR 3
+#define ERROR_TRACE_WRITE_HEADER_ERROR 4
+#define ERROR_TRACE_INVALID_RECORD_ID 5
+#define ERROR_TRACE_INVALID_RECORD_CRC 6
 
 // === constants and definitions ===============================================
 
@@ -48,11 +49,31 @@ time_s:time
 trace_record_header_s;
 @end
 
-// -- trace_record_header_tree_s --
+// -- trace_record_timestamp_s --
 @begin
-rb_tree<trace_record_header_s>
-options ( safe fixed_buffer )
-trace_record_header_tree_s;
+struct
+<
+lli:id
+time_s:time
+>
+trace_record_timestamp_s;
+@end
+
+// -- trace_record_timestamp_array_s --
+@begin
+array<trace_record_timestamp_s> trace_record_timestamp_array_s;
+@end
+
+// -- trace_record_timestamp_queue_s --
+@begin
+queue<trace_record_timestamp_s>
+options ( fixed_buffer )
+trace_record_timestamp_queue_s;
+@end
+
+// -- trace_record_timestamp_tree_s --
+@begin
+safe_rb_tree<trace_record_timestamp_s> trace_record_timestamp_tree_s;
 @end
 
 // === definition of structure trace_record_s ==================================
@@ -144,16 +165,24 @@ struct
 ui:data_size
 
 lli:header_last_id
-trace_queue_s:header_queue
-
 lli:trace_last_id
+
+trace_queue_s:header_queue
 trace_queue_s:trace_queue
+trace_queue_s:ts_trace_queue
+
+trace_record_timestamp_array_s:timestamp_buffer
+trace_record_timestamp_queue_s:timestamp_queue
+
+ui:first_timestamp_tree_idx
+trace_record_timestamp_tree_s:timestamp_tree
 >
 trace_s;
 @end
 
 WUR int trace_s_create(trace_s *this,
     void *header_data,ulli header_size,
+    void *ts_trace_data,ulli ts_trace_size,
     void *trace_data,ulli trace_size,unsigned a_data_size);
 WUR libtrace_cll_EXPORT int trace_s_write_header(trace_s *this,time_s a_time);
 
@@ -176,12 +205,27 @@ void libtrace_cll_clear();
 inlines trace_record_header_s
 @end
 
-// -- trace_record_header_tree_s --
+// -- trace_record_timestamp_s --
 @begin
-inlines trace_record_header_tree_s
+inlines trace_record_timestamp_s
 @end
 
-static inline int trace_record_header_tree_s___compare_value(const trace_record_header_tree_s *this,const trace_record_header_s *a_first,const trace_record_header_s *a_second)
+// -- trace_record_timestamp_array_s --
+@begin
+inlines trace_record_timestamp_array_s
+@end
+
+// -- trace_record_timestamp_queue_s --
+@begin
+inlines trace_record_timestamp_queue_s
+@end
+
+// -- trace_record_timestamp_tree_s --
+@begin
+inlines trace_record_timestamp_tree_s
+@end
+
+static inline int trace_record_timestamp_tree_s___compare_value(const trace_record_timestamp_tree_s *this,const trace_record_timestamp_s *a_first,const trace_record_timestamp_s *a_second)
 {/*{{{*/
   (void)this;
 

@@ -14,9 +14,24 @@ unsigned g_page_size;
 methods trace_record_header_s
 @end
 
-// -- trace_record_header_tree_s --
+// -- trace_record_timestamp_s --
 @begin
-methods trace_record_header_tree_s
+methods trace_record_timestamp_s
+@end
+
+// -- trace_record_timestamp_array_s --
+@begin
+methods trace_record_timestamp_array_s
+@end
+
+// -- trace_record_timestamp_queue_s --
+@begin
+methods trace_record_timestamp_queue_s
+@end
+
+// -- trace_record_timestamp_tree_s --
+@begin
+methods trace_record_timestamp_tree_s
 @end
 
 // === methods of structure trace_queue_s ======================================
@@ -245,6 +260,7 @@ methods trace_s
 
 int trace_s_create(trace_s *this,
     void *header_data,ulli header_size,
+    void *ts_trace_data,ulli ts_trace_size,
     void *trace_data,ulli trace_size,unsigned a_data_size)
 {/*{{{*/
   trace_s_clear(this);
@@ -325,6 +341,136 @@ int trace_s_create(trace_s *this,
     this->trace_last_id = trace_record->header.id;
   }
 
+  unsigned ts_trace_rec_size = sizeof(trace_record_s) + trace_rec_cnt*sizeof(trace_record_timestamp_s);
+
+  // - ERROR -
+  if (ts_trace_size < (ts_trace_rec_size << 1))
+  {
+    throw_error(TRACE_TIMESTAMP_TRACE_QUEUE_SIZE_ERROR);
+  }
+
+  unsigned ts_trace_rec_cnt = ts_trace_size/ts_trace_rec_size;
+  trace_queue_s_set_buffer(&this->ts_trace_queue,ts_trace_rec_cnt,ts_trace_rec_size,ts_trace_data);
+  this->ts_trace_queue.used = this->ts_trace_queue.size;
+
+  // - scan queue for latest record index -
+  unsigned last_ts_trace_idx = trace_queue_s_scan_for_last(&this->ts_trace_queue);
+
+  // - valid timestamp queue was found -
+  if (last_ts_trace_idx != c_idx_not_exist)
+  {
+    trace_record_timestamp_array_s_set(&this->timestamp_buffer,trace_rec_cnt,
+      (trace_record_timestamp_s *)trace_queue_s_at(&this->ts_trace_queue,last_ts_trace_idx)->data);
+  }
+  else
+  {
+    // - reset timestamp queue -
+    trace_record_timestamp_array_s_copy_resize(&this->timestamp_buffer,trace_rec_cnt);
+
+    trace_record_timestamp_s *ts_ptr = this->timestamp_buffer.data;
+    trace_record_timestamp_s *ts_ptr_end = ts_ptr + this->timestamp_buffer.size;
+    do {
+      ts_ptr->id = -1;
+      ts_ptr->time = 0;
+    } while(++ts_ptr < ts_ptr_end);
+  }
+
+  // - resize timestamp tree -
+  trace_record_timestamp_tree_s_copy_resize(&this->timestamp_tree,this->timestamp_buffer.size + 1);
+
+  // - find timestamp last id -
+  lli timestamp_last_id = -1;
+  unsigned timestamp_last_idx = c_idx_not_exist;
+  
+  trace_record_timestamp_s *ts_ptr = this->timestamp_buffer.data;
+  trace_record_timestamp_s *ts_ptr_end = ts_ptr + this->timestamp_buffer.size;
+  do {
+    if (ts_ptr->id > -1)
+    {
+      // - insert timestamp to timestamp tree -
+      trace_record_timestamp_tree_s_insert(&this->timestamp_tree,ts_ptr);
+
+      if (ts_ptr->id > timestamp_last_id)
+      {
+        // - store last id and its position -
+        timestamp_last_id = ts_ptr->id;
+        timestamp_last_idx = (ts_ptr - this->timestamp_buffer.data);
+      }
+    }
+  } while(++ts_ptr < ts_ptr_end);
+
+  // - set timestamp queue buffer -
+  trace_record_timestamp_queue_s_set_buffer(&this->timestamp_queue,
+      this->timestamp_buffer.size,this->timestamp_buffer.data);
+
+  this->timestamp_queue.used = this->timestamp_buffer.size;
+
+  // - update timestamp queue begin -
+  if (timestamp_last_idx != c_idx_not_exist)
+  {
+    this->timestamp_queue.begin = (timestamp_last_idx + 1) % this->timestamp_queue.size;
+  }
+
+  // - initialize first timestamp tree index -
+  this->first_timestamp_tree_idx = 1;
+
+  // - update timestamp queue from trace queue -
+  if (timestamp_last_id < this->trace_last_id)
+  {
+    unsigned record_idx = 0;
+
+    // - process tail of trace queue -
+    if (this->trace_last_id - timestamp_last_id < this->trace_queue.used)
+    {
+      record_idx = (this->trace_queue.used - 1) - (this->trace_last_id - timestamp_last_id);
+    }
+
+    do {
+      trace_record_s *trace_record = trace_queue_s_at(&this->trace_queue,record_idx);
+      trace_record_timestamp_s timestamp;
+
+      // - crc is valid -
+      if (trace_record_s_compute_crc(trace_record,this->trace_queue.rec_size) == trace_record->header.crc)
+      {
+        timestamp.id = trace_record->header.id;
+        timestamp.time = trace_record->header.time;
+      }
+
+      // - crc is invalid -
+      else
+      {
+        timestamp.id = timestamp_last_id - ((this->trace_queue.used - 1) - record_idx);
+        timestamp.time = 0;
+      }
+
+      // - insert timestamp to timestamp queue -
+      trace_record_timestamp_queue_s_next(&this->timestamp_queue);
+      trace_record_timestamp_queue_s_insert(&this->timestamp_queue,&timestamp);
+
+      // - remove first timestamp from timestamp tree -
+      if (this->timestamp_tree.count >= this->timestamp_queue.used)
+      {
+        trace_record_timestamp_tree_s_remove(&this->timestamp_tree,this->first_timestamp_tree_idx);
+
+        // - update first timestamp tree index -
+        if (++this->first_timestamp_tree_idx > this->timestamp_queue.used)
+        {
+          this->first_timestamp_tree_idx = 1;
+        }
+      }
+
+      // - insert timestamp to timestamp tree -
+      trace_record_timestamp_tree_s_insert(&this->timestamp_tree,&timestamp);
+
+    } while(++record_idx < this->trace_queue.used);
+  }
+
+  //fprintf(stderr,"TIMESTAMP QUEUE:\n");
+  //DEBUG_PRINT_LINES(trace_record_timestamp_queue_s,&this->timestamp_queue);
+
+  //fprintf(stderr,"TIMESTAMP TREE:\n");
+  //DEBUG_PRINT_LINES(trace_record_timestamp_tree_s,&this->timestamp_tree);
+
   return 0;
 }/*}}}*/
 
@@ -400,6 +546,34 @@ int trace_s_write_record(trace_s *this,time_s a_time,const char *a_data)
   {
     throw_error(TRACE_WRITE_HEADER_ERROR);
   }
+
+  // - update timestamp structures -
+  trace_record_timestamp_s timestamp = {this->trace_last_id,a_time};
+
+  // - insert timestamp to timestamp queue -
+  trace_record_timestamp_queue_s_next(&this->timestamp_queue);
+  trace_record_timestamp_queue_s_insert(&this->timestamp_queue,&timestamp);
+
+  // - remove first timestamp from timestamp tree -
+  if (this->timestamp_tree.count >= this->timestamp_queue.used)
+  {
+    trace_record_timestamp_tree_s_remove(&this->timestamp_tree,this->first_timestamp_tree_idx);
+
+    // - update first timestamp tree index -
+    if (++this->first_timestamp_tree_idx > this->timestamp_queue.used)
+    {
+      this->first_timestamp_tree_idx = 1;
+    }
+  }
+
+  // - insert timestamp to timestamp tree -
+  trace_record_timestamp_tree_s_insert(&this->timestamp_tree,&timestamp);
+
+  // FIXME
+  //fprintf(stderr,"TIMESTAMP_QUEUE:\n");
+  //DEBUG_PRINT_LINES(trace_record_timestamp_queue_s,&this->timestamp_queue);
+  //fprintf(stderr,"TIMESTAMP_TREE:\n");
+  //DEBUG_PRINT_LINES(trace_record_timestamp_tree_s,&this->timestamp_tree);
 
   return 0;
 }/*}}}*/
