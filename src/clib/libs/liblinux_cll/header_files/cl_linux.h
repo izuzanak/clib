@@ -524,7 +524,7 @@ static inline void mmap_s_to_string(const mmap_s *this,bc_array_s *a_trg)
 static inline int mmap_s_create(mmap_s *this,
   void *a_addr,size_t a_length,int a_prot,int a_flags,int a_fd,off_t a_offset)
 {/*{{{*/
-  mmap_s_clear(this); 
+  mmap_s_clear(this);
 
   void *address = mmap(a_addr,a_length,a_prot,a_flags,a_fd,a_offset);
 
@@ -537,7 +537,7 @@ static inline int mmap_s_create(mmap_s *this,
   this->address = address;
   this->length = a_length;
 
-  return 0; 
+  return 0;
 }/*}}}*/
 
 // === inline methods of structure socket_s ====================================
@@ -1168,7 +1168,7 @@ static inline int rtc_s_read_time(const rtc_s *this,time_s *a_trg)
 static inline int rtc_s_write_time(const rtc_s *this,time_s a_time)
 {/*{{{*/
   datetime_s datetime;
-  datetime_s_from_nanosec(&datetime,a_time);  
+  datetime_s_from_nanosec(&datetime,a_time);
 
   struct rtc_time rtc_time =
   {

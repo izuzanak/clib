@@ -62,7 +62,9 @@ void test_trace()
     cassert(trace_s_read_record(&trace,tail,&time,&buffer) == 0);
   } while(++tail < head);
 
+  fprintf(stderr,"HEADER QUEUE:\n");
   DEBUG_PRINT_LINES(trace_queue_s,&trace.header_queue);
+  fprintf(stderr,"TRACE QUEUE:\n");
   DEBUG_PRINT_LINES(trace_queue_s,&trace.trace_queue);
 }/*}}}*/
 

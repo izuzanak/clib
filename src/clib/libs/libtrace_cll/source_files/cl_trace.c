@@ -49,7 +49,7 @@ void trace_queue_s_copy(trace_queue_s *this,const trace_queue_s *a_src)
   }
 
   do {
-    trace_record_s_copy((trace_record_s *)ptr,(trace_record_s *)s_ptr,this->rec_size); 
+    trace_record_s_copy((trace_record_s *)ptr,(trace_record_s *)s_ptr,this->rec_size);
   } while(ptr += this->rec_size,(s_ptr += this->rec_size) < s_ptr_end);
 
   if (sec_cnt != 0)
@@ -253,7 +253,7 @@ int trace_s_create(trace_s *this,
   this->data_size = a_data_size;
 
   unsigned header_rec_size = sizeof(trace_record_s) + sizeof(trace_queue_header_s);
-  
+
   // - ERROR -
   if (header_size < (header_rec_size << 1))
   {

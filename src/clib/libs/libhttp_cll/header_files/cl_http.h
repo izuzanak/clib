@@ -13,7 +13,7 @@ include "cl_sys.h"
 #include <fcntl.h>
 #include <io.h>
 #include <sys/stat.h>
-#endif 
+#endif
 
 #include <microhttpd.h>
 
