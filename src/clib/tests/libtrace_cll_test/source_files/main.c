@@ -23,10 +23,10 @@ test_function_t test_functions[] =
 
 void test_trace()
 {/*{{{*/
-  //cassert(system("dd if=/dev/zero of=/dev/shm/trace.img bs=30K count=1") == 0);
+  cassert(system("dd if=/dev/zero of=/dev/shm/trace.img bs=30K count=1") == 0);
 
   CONT_INIT_CLEAR(fd_s,fd);
-  fd = open("/dev/shm/trace.img",O_RDWR,0);
+  cassert((fd = open("/dev/shm/trace.img",O_RDWR,0)) != -1);
 
   struct stat stat;
   cassert(fstat(fd,&stat) == 0 && stat.st_size > 0);
@@ -89,6 +89,8 @@ void test_trace()
   //DEBUG_PRINT_LINES(trace_queue_s,&trace.header_queue);
   //fprintf(stderr,"TRACE QUEUE:\n");
   //DEBUG_PRINT_LINES(trace_queue_s,&trace.trace_queue);
+  //fprintf(stderr,"TIMESTAMP_QUEUE:\n");
+  //DEBUG_PRINT_LINES(trace_record_timestamp_queue_s,&trace.timestamp_queue);
   //fprintf(stderr,"TIMESTAMP_TREE:\n");
   //DEBUG_PRINT_LINES(trace_record_timestamp_tree_s,&trace.timestamp_tree);
 }/*}}}*/
