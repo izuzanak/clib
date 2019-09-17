@@ -27,8 +27,9 @@ include "cl_crc.h"
 #define ERROR_TRACE_TRACE_QUEUE_SIZE_ERROR 2
 #define ERROR_TRACE_TIMESTAMP_TRACE_QUEUE_SIZE_ERROR 3
 #define ERROR_TRACE_WRITE_HEADER_ERROR 4
-#define ERROR_TRACE_INVALID_RECORD_ID 5
-#define ERROR_TRACE_INVALID_RECORD_CRC 6
+#define ERROR_TRACE_WRITE_TIMESTAMP_QUEUE_ERROR 5
+#define ERROR_TRACE_INVALID_RECORD_ID 6
+#define ERROR_TRACE_INVALID_RECORD_CRC 7
 
 // === constants and definitions ===============================================
 
@@ -163,6 +164,7 @@ trace_queue_header_s;
 struct
 <
 ui:data_size
+lli:timestamp_div
 
 lli:header_last_id
 lli:trace_last_id
@@ -183,11 +185,17 @@ trace_s;
 WUR int trace_s_create(trace_s *this,
     void *header_data,ulli header_size,
     void *ts_trace_data,ulli ts_trace_size,
-    void *trace_data,ulli trace_size,unsigned a_data_size);
+    void *trace_data,ulli trace_size,
+    unsigned a_data_size,
+    lli a_timestamp_div);
+void trace_s_update_timestamp_structures(trace_s *this,trace_record_timestamp_s *a_timestamp);
 WUR libtrace_cll_EXPORT int trace_s_write_header(trace_s *this,time_s a_time);
+WUR libtrace_cll_EXPORT int trace_s_write_timestamp_queue(trace_s *this,time_s a_time);
 
 static inline lli trace_s_head(trace_s *this);
 static inline lli trace_s_tail(trace_s *this);
+static inline lli trace_s_lee_time(trace_s *this,time_s a_time);
+static inline lli trace_s_gre_time(trace_s *this,time_s a_time);
 WUR libtrace_cll_EXPORT int trace_s_write_record(trace_s *this,
     time_s a_time,const char *a_data);
 WUR libtrace_cll_EXPORT int trace_s_read_record(trace_s *this,
@@ -464,6 +472,32 @@ static inline lli trace_s_tail(trace_s *this)
   }
 
   return -1;
+}/*}}}*/
+
+static inline lli trace_s_lee_time(trace_s *this,time_s a_time)
+{/*{{{*/
+  trace_record_timestamp_s search_timestamp = {-1,a_time};
+
+  unsigned timestamp_idx = trace_record_timestamp_tree_s_get_lee_idx(&this->timestamp_tree,&search_timestamp);
+  if (timestamp_idx == c_idx_not_exist)
+  {
+    return -1;
+  }
+
+  return trace_record_timestamp_tree_s_at(&this->timestamp_tree,timestamp_idx)->id;
+}/*}}}*/
+
+static inline lli trace_s_gre_time(trace_s *this,time_s a_time)
+{/*{{{*/
+  trace_record_timestamp_s search_timestamp = {-1,a_time};
+
+  unsigned timestamp_idx = trace_record_timestamp_tree_s_get_gre_idx(&this->timestamp_tree,&search_timestamp);
+  if (timestamp_idx == c_idx_not_exist)
+  {
+    return -1;
+  }
+
+  return trace_record_timestamp_tree_s_at(&this->timestamp_tree,timestamp_idx)->id;
 }/*}}}*/
 
 #endif

@@ -42,9 +42,9 @@ void test_trace()
   CONT_INIT_CLEAR(trace_s,trace);
   cassert(trace_s_create(&trace,
     mmap.address,header_size,
-    mmap.address + header_size,mmap.length - header_size,
-    mmap.address + header_size + ts_trace_size,mmap.length - header_size - ts_trace_size,
-    rec_size) == 0);
+    mmap.address + header_size,ts_trace_size,
+    mmap.address + header_size + ts_trace_size,mmap.length - (header_size + ts_trace_size),
+    rec_size,10) == 0);
 
   CONT_INIT_CLEAR(bc_array_s,buffer);
   bc_array_s_copy_resize(&buffer,rec_size);
@@ -56,19 +56,41 @@ void test_trace()
   do {
     cassert(clock_s_gettime(CLOCK_REALTIME,&time) == 0);
     cassert(trace_s_write_record(&trace,time,buffer.data) == 0);
-  } while(++idx < 5);
+  } while(++idx < 256);
 
   lli tail = trace_s_tail(&trace);
   lli head = trace_s_head(&trace);
-  do {
-    buffer.used = 0;
-    cassert(trace_s_read_record(&trace,tail,&time,&buffer) == 0);
-  } while(++tail < head);
+
+  cassert(clock_s_gettime(CLOCK_REALTIME,&time) == 0);
+
+  lli lee_id = trace_s_lee_time(&trace,time);
+  lli gre_id = trace_s_gre_time(&trace,time);
+
+  lli lee_id_ms = trace_s_lee_time(&trace,time - 1000000000ULL);
+  lli gre_id_ms = trace_s_gre_time(&trace,time - 1000000000ULL);
+
+  // FIXME
+  fprintf(stderr,"tail: %lld\n",tail);
+  fprintf(stderr,"head: %lld\n",head);
+  fprintf(stderr,"lee_id: %lld\n",lee_id);
+  fprintf(stderr,"gre_id: %lld\n",gre_id);
+  fprintf(stderr,"lee_id_ms: %lld\n",lee_id_ms);
+  fprintf(stderr,"gre_id_ms: %lld\n",gre_id_ms);
+
+  if (tail != -1 && head != -1)
+  {
+    do {
+      buffer.used = 0;
+      cassert(trace_s_read_record(&trace,tail,&time,&buffer) == 0);
+    } while(++tail < head);
+  }
 
   //fprintf(stderr,"HEADER QUEUE:\n");
   //DEBUG_PRINT_LINES(trace_queue_s,&trace.header_queue);
   //fprintf(stderr,"TRACE QUEUE:\n");
   //DEBUG_PRINT_LINES(trace_queue_s,&trace.trace_queue);
+  //fprintf(stderr,"TIMESTAMP_TREE:\n");
+  //DEBUG_PRINT_LINES(trace_record_timestamp_tree_s,&trace.timestamp_tree);
 }/*}}}*/
 
 // === program entry function ==================================================
