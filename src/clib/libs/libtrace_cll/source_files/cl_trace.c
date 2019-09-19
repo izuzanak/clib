@@ -260,8 +260,8 @@ methods trace_s
 
 int trace_s_create(trace_s *this,
     void *header_data,ulli header_size,
-    void *ts_trace_data,ulli ts_trace_size,
     void *trace_data,ulli trace_size,
+    void *ts_trace_data,ulli ts_trace_size,
     unsigned a_data_size,
     lli a_timestamp_div)
 {/*{{{*/

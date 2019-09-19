@@ -42,8 +42,8 @@ void test_trace()
   CONT_INIT_CLEAR(trace_s,trace);
   cassert(trace_s_create(&trace,
     mmap.address,header_size,
-    mmap.address + header_size,ts_trace_size,
     mmap.address + header_size + ts_trace_size,mmap.length - (header_size + ts_trace_size),
+    mmap.address + header_size,ts_trace_size,
     rec_size,10) == 0);
 
   CONT_INIT_CLEAR(bc_array_s,buffer);
