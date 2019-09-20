@@ -253,6 +253,11 @@ unsigned trace_queue_s_scan_for_last(const trace_queue_s *this)
 methods trace_queue_header_s
 @end
 
+// -- trace_mmap_s --
+@begin
+methods trace_mmap_s
+@end
+
 // -- trace_s --
 @begin
 methods trace_s

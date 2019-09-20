@@ -24,8 +24,9 @@ include "cl_validator.h"
 #define ERROR_TRACED_CONF_READ_ERROR 2
 #define ERROR_TRACED_CONF_PARSE_ERROR 3
 #define ERROR_TRACED_CONF_INVALID_CONFIGURATION 4
-#define ERROR_TRACED_CONF_NON_UNIQUE_RECORD_ID 5
-#define ERROR_TRACED_CONF_NON_UNIQUE_TRACE_ID 6
+#define ERROR_TRACED_CONF_INVALID_TRACES_CONFIGURATION 5
+#define ERROR_TRACED_CONF_NON_UNIQUE_RECORD_ID 6
+#define ERROR_TRACED_CONF_NON_UNIQUE_TRACE_ID 7
 
 // === constants and definitions ===============================================
 
@@ -37,7 +38,6 @@ include "cl_validator.h"
 @begin
 struct
 <
-string_s:record_id
 string_s:type
 ui:size
 >
@@ -45,13 +45,6 @@ td_conf_record_s;
 @end
 
 static inline void td_conf_record_s_from_var(td_conf_record_s *this,var_s a_var);
-
-// -- td_conf_record_tree_s --
-@begin
-rb_tree<td_conf_record_s> td_conf_record_tree_s;
-@end
-
-WUR libconf_tdl_EXPORT int td_conf_record_tree_s_from_var(td_conf_record_tree_s *this,var_s a_var);
 
 // -- td_conf_trace_data_s --
 @begin
@@ -71,7 +64,7 @@ static inline void td_conf_trace_data_s_from_var(td_conf_trace_data_s *this,var_
 struct
 <
 string_s:trace_id
-string_s:record_id
+td_conf_record_s:record
 td_conf_trace_data_s:header
 td_conf_trace_data_s:trace
 ui:timestamp_div
@@ -84,7 +77,7 @@ static inline void td_conf_trace_s_from_var(td_conf_trace_s *this,var_s a_var);
 
 // -- td_conf_trace_tree_s --
 @begin
-rb_tree<td_conf_trace_s> td_conf_trace_tree_s;
+safe_rb_tree<td_conf_trace_s> td_conf_trace_tree_s;
 @end
 
 WUR libconf_tdl_EXPORT int td_conf_trace_tree_s_from_var(td_conf_trace_tree_s *this,var_s a_var);
@@ -93,7 +86,6 @@ WUR libconf_tdl_EXPORT int td_conf_trace_tree_s_from_var(td_conf_trace_tree_s *t
 @begin
 struct
 <
-td_conf_record_tree_s:records
 td_conf_trace_tree_s:traces
 >
 td_config_s;
@@ -116,27 +108,8 @@ inlines td_conf_record_s
 
 static inline void td_conf_record_s_from_var(td_conf_record_s *this,var_s a_var)
 {/*{{{*/
-  string_s_copy(&this->record_id,loc_s_string_value(loc_s_dict_str_get(a_var,"record_id")));
   string_s_copy(&this->type,loc_s_string_value(loc_s_dict_str_get(a_var,"type")));
   this->size = loc_s_int_value(loc_s_dict_str_get(a_var,"size"));
-}/*}}}*/
-
-// -- td_conf_record_tree_s --
-@begin
-inlines td_conf_record_tree_s
-@end
-
-static inline int td_conf_record_tree_s___compare_value(const td_conf_record_tree_s *this,const td_conf_record_s *a_first,const td_conf_record_s *a_second)
-{/*{{{*/
-  (void)this;
-
-  const string_s *first = &a_first->record_id;
-  const string_s *second = &a_second->record_id;
-
-  if (first->size < second->size) { return -1; }
-  if (first->size > second->size) { return 1; }
-
-  return memcmp(first->data,second->data,first->size - 1);
 }/*}}}*/
 
 // -- td_conf_trace_data_s --
@@ -159,7 +132,7 @@ inlines td_conf_trace_s
 static inline void td_conf_trace_s_from_var(td_conf_trace_s *this,var_s a_var)
 {/*{{{*/
   string_s_copy(&this->trace_id,loc_s_string_value(loc_s_dict_str_get(a_var,"trace_id")));
-  string_s_copy(&this->record_id,loc_s_string_value(loc_s_dict_str_get(a_var,"record_id")));
+  td_conf_record_s_from_var(&this->record,loc_s_dict_str_get(a_var,"record"));
   td_conf_trace_data_s_from_var(&this->header,loc_s_dict_str_get(a_var,"header"));
   td_conf_trace_data_s_from_var(&this->trace,loc_s_dict_str_get(a_var,"trace"));
   this->timestamp_div = loc_s_int_value(loc_s_dict_str_get(a_var,"timestamp_div"));

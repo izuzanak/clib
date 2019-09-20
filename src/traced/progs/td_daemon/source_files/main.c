@@ -7,6 +7,16 @@ volatile int g_terminate = 0;
 
 // === methods of generated structures =========================================
 
+// -- td_trace_s --
+@begin
+methods td_trace_s
+@end
+
+// -- td_trace_tree_s --
+@begin
+methods td_trace_tree_s
+@end
+
 // -- td_daemon_s --
 @begin
 methods td_daemon_s
@@ -30,8 +40,120 @@ int td_daemon_s_process_config(td_daemon_s *this)
   // - log message -
   log_info_2("process configuration");
 
+  if (!td_conf_trace_tree_s_compare(&this->config.traces,&this->last_config.traces))
+  {
+    if (td_daemon_s_update_traces(this))
+    {
+      throw_error(TD_DAEMON_CONFIG_DATA_ERROR);
+    }
+  }
+
   // - update last configuration -
   td_config_s_copy(&this->last_config,&this->config);
+
+  return 0;
+}/*}}}*/
+
+int td_daemon_s_update_traces(td_daemon_s *this)
+{/*{{{*/
+  
+  // - log message -
+  log_info_2("td_daemon_s_update_traces");
+
+  // - remove traces not present in configuration -
+  if (this->traces.root_idx != c_idx_not_exist)
+  {
+    td_trace_tree_s_node *tttn_ptr = this->traces.data;
+    td_trace_tree_s_node *tttn_ptr_end = tttn_ptr + this->traces.used;
+    do {
+      if (tttn_ptr->valid)
+      {
+        td_trace_s *trace = &tttn_ptr->object;
+
+        // - retrieve trace configuration index -
+        unsigned trace_conf_idx = td_conf_trace_tree_s_get_idx(&this->config.traces,&trace->config);
+
+        // - remove trace not present in configuration -
+        if (trace_conf_idx == c_idx_not_exist)
+        {
+          // - log message -
+          log_info_2("remove trace %s",trace->config.trace_id.data);
+
+          td_trace_s_clear(trace);
+          td_trace_tree_s_remove(&this->traces,tttn_ptr - this->traces.data);
+        }
+      }
+    } while(++tttn_ptr < tttn_ptr_end);
+  }
+
+  // - add or update traces according to configuration -
+  if (this->config.traces.root_idx != c_idx_not_exist)
+  {
+    td_conf_trace_tree_s_node *tcttn_ptr = this->config.traces.data;
+    td_conf_trace_tree_s_node *tcttn_ptr_end = tcttn_ptr + this->config.traces.used;
+    do {
+      if (tcttn_ptr->valid)
+      {
+        td_conf_trace_s *trace_config = &tcttn_ptr->object;
+
+        // - trace to create or update -
+        td_trace_s *trace = NULL;
+
+        td_trace_s search_trace = {*trace_config,};
+        unsigned trace_idx = td_trace_tree_s_get_idx(&this->traces,&search_trace);
+
+        if (trace_idx == c_idx_not_exist)
+        {
+          CONT_INIT_CLEAR(td_trace_s,insert_trace);
+          td_conf_trace_s_copy(&insert_trace.config,trace_config);
+
+          trace_idx = td_trace_tree_s_swap_insert(&this->traces,&insert_trace);
+          trace = td_trace_tree_s_at(&this->traces,trace_idx);
+        }
+        else
+        {
+          trace = td_trace_tree_s_at(&this->traces,trace_idx);
+
+          // - trace configuration without change -
+          if (td_conf_trace_s_compare(&trace->config,trace_config))
+          {
+            trace = NULL;
+          }
+          else
+          {
+            td_trace_s_clear(trace);
+            td_conf_trace_s_copy(&trace->config,trace_config);
+          }
+        }
+
+        // - create or update trace -
+        if (trace != NULL)
+        {
+          // - log message -
+          log_info_2("create trace %s",trace->config.trace_id.data);
+
+          // - create trace memory maps -
+          if (td_trace_s_mmap_file(&trace->mmap_header,&trace->config.header) ||
+              td_trace_s_mmap_file(&trace->mmap_trace,&trace->config.trace) ||
+              (trace->config.timestamp_div > 0 ? td_trace_s_mmap_file(&trace->mmap_timestamp,&trace->config.timestamp) : 0))
+          {
+            throw_error(TD_DAEMON_TRACE_FILE_MMAP_ERROR);
+          }
+
+          // - create trace -
+          if (trace_s_create(&trace->trace,
+                trace->mmap_header.address,trace->config.header.size,
+                trace->mmap_trace.address,trace->config.trace.size,
+                trace->mmap_timestamp.address,trace->config.timestamp.size,
+                trace->config.record.size,
+                trace->config.timestamp_div))
+          {
+            throw_error(TD_DAEMON_TRACE_CREATE_ERROR);
+          }
+        }
+      }
+    } while(++tcttn_ptr < tcttn_ptr_end);
+  }
 
   return 0;
 }/*}}}*/

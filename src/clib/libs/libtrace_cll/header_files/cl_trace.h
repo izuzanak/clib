@@ -30,6 +30,7 @@ include "cl_crc.h"
 #define ERROR_TRACE_WRITE_TIMESTAMP_QUEUE_ERROR 5
 #define ERROR_TRACE_INVALID_RECORD_ID 6
 #define ERROR_TRACE_INVALID_RECORD_CRC 7
+#define ERROR_TRACE_MMAP_CREATE_ERROR 8
 
 // === constants and definitions ===============================================
 
@@ -158,6 +159,19 @@ ui:begin
 >
 trace_queue_header_s;
 @end
+
+// -- trace_mmap_s --
+@begin
+struct
+<
+mmap_s:mmap
+pointer:address
+>
+trace_mmap_s;
+@end
+
+WUR static inline int trace_mmap_s_create(trace_mmap_s *this,
+  void *a_addr,size_t a_length,int a_prot,int a_flags,int a_fd,off_t a_offset);
 
 // -- trace_s --
 @begin
@@ -448,6 +462,28 @@ static inline trace_record_s *trace_queue_s_last(const trace_queue_s *this)
 @begin
 inlines trace_queue_header_s
 @end
+
+// -- trace_mmap_s --
+@begin
+inlines trace_mmap_s
+@end
+
+WUR static inline int trace_mmap_s_create(trace_mmap_s *this,
+  void *a_addr,size_t a_length,int a_prot,int a_flags,int a_fd,off_t a_offset)
+{/*{{{*/
+  off_t off_diff = a_offset % g_page_size;
+  off_t off_aligned = a_offset - off_diff;
+
+  if (mmap_s_create(&this->mmap,a_addr,a_length + off_diff,
+        a_prot,a_flags,a_fd,off_aligned))
+  {
+    throw_error(TRACE_MMAP_CREATE_ERROR);
+  }
+
+  this->address = this->mmap.address + off_diff;
+
+  return 0;
+}/*}}}*/
 
 // -- trace_s --
 @begin
