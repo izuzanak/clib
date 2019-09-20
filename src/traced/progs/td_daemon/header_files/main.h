@@ -7,6 +7,7 @@ include "cl_process.h"
 include "cl_channel.h"
 include "cl_trace.h"
 include "td_conf.h"
+include "td_channel.h"
 @end
 
 // - error codes -

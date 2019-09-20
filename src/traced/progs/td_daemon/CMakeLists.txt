@@ -3,7 +3,8 @@ set(CONF_COMPONENTS
   "src/clib/libs/libprocess_cll"
   "src/clib/libs/libchannel_cll"
   "src/clib/libs/libtrace_cll"
-  "src/traced/libs/libconf_tdl")
+  "src/traced/libs/libconf_tdl"
+  "src/traced/libs/libchannel_tdl")
 set(CONF_HEADER_DIRS)
 
 set(CONF_DO_BUILD TRUE)
