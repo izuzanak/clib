@@ -525,6 +525,7 @@ int trace_s_write_header(trace_s *this,time_s a_time)
   // - fill record header (except crc) -
   header_record->header.id = ++this->header_last_id;
   header_record->header.time = a_time;
+  header_record->header.data_size = sizeof(trace_queue_header_s);
 
   // - fill record data -
   trqh->used = this->trace_queue.used;
@@ -559,10 +560,10 @@ int trace_s_write_timestamp_queue(trace_s *this,time_s a_time)
   // - fill record header (except crc) -
   ts_trace_record->header.id = this->trace_last_id;
   ts_trace_record->header.time = a_time;
+  ts_trace_record->header.data_size = this->timestamp_buffer.size*sizeof(trace_record_timestamp_s);
 
   // - fill record data -
-  memcpy(ts_trace_record->data,this->timestamp_buffer.data,
-      this->timestamp_buffer.size*sizeof(trace_record_timestamp_s));
+  memcpy(ts_trace_record->data,this->timestamp_buffer.data,ts_trace_record->header.data_size);
 
   // - compute record crc -
   ts_trace_record->header.crc = trace_record_s_compute_crc(ts_trace_record,this->ts_trace_queue.rec_size);
@@ -576,8 +577,10 @@ int trace_s_write_timestamp_queue(trace_s *this,time_s a_time)
   return 0;
 }/*}}}*/
 
-int trace_s_write_record(trace_s *this,time_s a_time,const char *a_data)
+int trace_s_write_record(trace_s *this,time_s a_time,unsigned a_size,const char *a_data)
 {/*{{{*/
+  debug_assert(a_size <= this->data_size);
+
   if (this->trace_queue.used >= this->trace_queue.size)
   {
     // - drop tail record -
@@ -597,9 +600,16 @@ int trace_s_write_record(trace_s *this,time_s a_time,const char *a_data)
   // - fill record header (except crc) -
   trace_record->header.id = ++this->trace_last_id;
   trace_record->header.time = a_time;
+  trace_record->header.data_size = a_size;
 
   // - fill record data -
-  memcpy(trace_record->data,a_data,this->data_size);
+  memcpy(trace_record->data,a_data,a_size);
+
+  // - fill rest of record data -
+  if (a_size < this->data_size)
+  {
+    memset(trace_record->data + a_size,0,this->data_size - a_size);
+  }
 
   // - compute record crc -
   trace_record->header.crc = trace_record_s_compute_crc(trace_record,this->trace_queue.rec_size);
@@ -655,7 +665,7 @@ int trace_s_read_record(trace_s *this,lli a_id,time_s *a_time,bc_array_s *a_trg)
   }
 
   *a_time = trace_record->header.time;
-  bc_array_s_append(a_trg,this->trace_queue.rec_size,trace_record->data);
+  bc_array_s_append(a_trg,trace_record->header.data_size,trace_record->data);
 
   return 0;
 }/*}}}*/

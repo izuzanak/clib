@@ -34,6 +34,18 @@ include "cl_validator.h"
 
 // === definition of generated structures ======================================
 
+// -- td_conf_ip_port_s --
+@begin
+struct
+<
+string_s:ip
+usi:port
+>
+td_conf_ip_port_s;
+@end
+
+static inline void td_conf_ip_port_s_from_var(td_conf_ip_port_s *this,var_s a_var);
+
 // -- td_conf_record_s --
 @begin
 struct
@@ -86,6 +98,7 @@ WUR libconf_tdl_EXPORT int td_conf_trace_tree_s_from_var(td_conf_trace_tree_s *t
 @begin
 struct
 <
+td_conf_ip_port_s:channel
 td_conf_trace_tree_s:traces
 >
 td_config_s;
@@ -100,6 +113,17 @@ void libconf_tdl_init();
 void libconf_tdl_clear();
 
 // === inline methods of generated structures ==================================
+
+// -- td_conf_ip_port_s --
+@begin
+inlines td_conf_ip_port_s
+@end
+
+static inline void td_conf_ip_port_s_from_var(td_conf_ip_port_s *this,var_s a_var)
+{/*{{{*/
+  string_s_copy(&this->ip,loc_s_string_value(loc_s_dict_str_get(a_var,"ip")));
+  this->port = loc_s_int_value(loc_s_dict_str_get(a_var,"port"));
+}/*}}}*/
 
 // -- td_conf_record_s --
 @begin

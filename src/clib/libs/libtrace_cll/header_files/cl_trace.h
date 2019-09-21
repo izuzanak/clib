@@ -47,6 +47,7 @@ struct
 crc16_s:crc
 lli:id
 time_s:time
+ui:data_size
 >
 trace_record_header_s;
 @end
@@ -211,7 +212,7 @@ static inline lli trace_s_tail(trace_s *this);
 static inline lli trace_s_lee_time(trace_s *this,time_s a_time);
 static inline lli trace_s_gre_time(trace_s *this,time_s a_time);
 WUR libtrace_cll_EXPORT int trace_s_write_record(trace_s *this,
-    time_s a_time,const char *a_data);
+    time_s a_time,unsigned a_size,const char *a_data);
 WUR libtrace_cll_EXPORT int trace_s_read_record(trace_s *this,
     lli a_id,time_s *a_time,bc_array_s *a_trg);
 

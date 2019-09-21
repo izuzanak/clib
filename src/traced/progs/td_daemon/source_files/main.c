@@ -12,6 +12,32 @@ volatile int g_terminate = 0;
 methods td_trace_s
 @end
 
+void td_trace_s_read_to_message(td_trace_s *this,lli a_record_id,bc_array_s *a_trg)
+{/*{{{*/
+  unsigned record_id_used = a_trg->used;
+  bc_array_s_push_blanks(a_trg,sizeof(lli) + sizeof(ulli));
+
+  // - read record from trace -
+  time_s time;
+  if (trace_s_read_record(&this->trace,a_record_id,&time,a_trg))
+  {
+    // - read error -
+    a_trg->used = record_id_used;
+    bc_array_s_append_be_lli(a_trg,-1);
+    bc_array_s_append_be_ulli(a_trg,0);
+  }
+  else
+  {
+    unsigned buffer_used = a_trg->used;
+
+    a_trg->used = record_id_used;
+    bc_array_s_append_be_lli(a_trg,a_record_id);
+    bc_array_s_append_be_ulli(a_trg,time);
+
+    a_trg->used = buffer_used;
+  }
+}/*}}}*/
+
 // -- td_trace_tree_s --
 @begin
 methods td_trace_tree_s
@@ -40,11 +66,27 @@ int td_daemon_s_process_config(td_daemon_s *this)
   // - log message -
   log_info_2("process configuration");
 
+  // - if traces configuration changed -
   if (!td_conf_trace_tree_s_compare(&this->config.traces,&this->last_config.traces))
   {
+    // - update traces -
     if (td_daemon_s_update_traces(this))
     {
       throw_error(TD_DAEMON_CONFIG_DATA_ERROR);
+    }
+  }
+
+  // - if communication channel configuration changed -
+  if (!td_conf_ip_port_s_compare(&this->config.channel,&this->last_config.channel))
+  {
+    td_conf_ip_port_s *channel_cfg = &this->config.channel;
+
+    // - create communication channel -
+    if (td_channel_s_create(&this->channel,channel_cfg->ip.data,channel_cfg->port,&this->epoll,
+          td_daemon_s_channel_callback,
+          this))
+    {
+      throw_error(TD_DAEMON_CHANNEL_CREATE_ERROR);
     }
   }
 
@@ -191,6 +233,187 @@ int td_daemon_s_run(td_daemon_s *this)
         throw_error(TD_DAEMON_EPOLL_WAIT_ERROR);
       }
     }
+  }
+
+  return 0;
+}/*}}}*/
+
+int td_daemon_s_channel_callback(void *a_td_daemon,unsigned a_index,unsigned a_type,va_list a_ap)
+{/*{{{*/
+  td_daemon_s *this = (td_daemon_s *)a_td_daemon;
+
+  switch (a_type)
+  {
+  case td_channel_cbreq_NEW:
+    {/*{{{*/
+    }/*}}}*/
+    break;
+  case td_channel_cbreq_DROP:
+    {/*{{{*/
+    }/*}}}*/
+    break;
+  case td_channel_cbreq_TRACE_INFO:
+    {/*{{{*/
+      ulli id = va_arg(a_ap,ulli);
+      const string_s *trace_id = va_arg(a_ap,const string_s *);
+
+      td_trace_s search_trace = {{*trace_id,},};
+      unsigned trace_idx = td_trace_tree_s_get_idx(&this->traces,&search_trace);
+
+      // - check if trace exists -
+      if (trace_idx == c_idx_not_exist)
+      {
+        throw_error(TD_DAEMON_TRACE_NOT_EXIST);
+      }
+
+      td_trace_s *trace = td_trace_tree_s_at(&this->traces,trace_idx);
+
+      this->buffer.used = 0;
+      bc_array_s_append_td_traced_msg_header(&this->buffer,id,td_channel_msg_type_RESPONSE,a_type,trace_id);
+
+      bc_array_s_append_be_lli(&this->buffer,trace_s_head(&trace->trace));
+      bc_array_s_append_be_lli(&this->buffer,trace_s_tail(&trace->trace));
+
+      if (td_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(TD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case td_channel_cbreq_TRACE_WRITE:
+    {/*{{{*/
+      ulli id = va_arg(a_ap,ulli);
+      const string_s *trace_id = va_arg(a_ap,const string_s *);
+      time_s time = va_arg(a_ap,time_s);
+      const bc_array_s *data = va_arg(a_ap,const bc_array_s *);
+
+      td_trace_s search_trace = {{*trace_id,},};
+      unsigned trace_idx = td_trace_tree_s_get_idx(&this->traces,&search_trace);
+
+      // - check if trace exists -
+      if (trace_idx == c_idx_not_exist)
+      {
+        throw_error(TD_DAEMON_TRACE_NOT_EXIST);
+      }
+
+      td_trace_s *trace = td_trace_tree_s_at(&this->traces,trace_idx);
+
+      // - check write data size -
+      if (data->used >= trace->trace.data_size)
+      {
+        throw_error(TD_DAEMON_TRACE_INVALID_WRITE_SIZE);
+      }
+
+      // - write record to trace -
+      if (trace_s_write_record(&trace->trace,time,data->used,data->data))
+      {
+        throw_error(TD_DAEMON_TRACE_WRITE_ERROR);
+      }
+
+      this->buffer.used = 0;
+      bc_array_s_append_td_traced_msg_header(&this->buffer,id,td_channel_msg_type_RESPONSE,a_type,trace_id);
+
+      bc_array_s_append_be_lli(&this->buffer,trace_s_head(&trace->trace));
+
+      if (td_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(TD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case td_channel_cbreq_TRACE_READ:
+    {/*{{{*/
+      ulli id = va_arg(a_ap,ulli);
+      const string_s *trace_id = va_arg(a_ap,const string_s *);
+      lli record_id = va_arg(a_ap,lli);
+
+      td_trace_s search_trace = {{*trace_id,},};
+      unsigned trace_idx = td_trace_tree_s_get_idx(&this->traces,&search_trace);
+
+      // - check if trace exists -
+      if (trace_idx == c_idx_not_exist)
+      {
+        throw_error(TD_DAEMON_TRACE_NOT_EXIST);
+      }
+
+      td_trace_s *trace = td_trace_tree_s_at(&this->traces,trace_idx);
+
+      this->buffer.used = 0;
+      bc_array_s_append_td_traced_msg_header(&this->buffer,id,td_channel_msg_type_RESPONSE,a_type,trace_id);
+
+      // - read trace record to message -
+      td_trace_s_read_to_message(trace,record_id,&this->buffer);
+
+      if (td_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(TD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case td_channel_cbreq_TRACE_HEAD:
+    {/*{{{*/
+      ulli id = va_arg(a_ap,ulli);
+      const string_s *trace_id = va_arg(a_ap,const string_s *);
+
+      td_trace_s search_trace = {{*trace_id,},};
+      unsigned trace_idx = td_trace_tree_s_get_idx(&this->traces,&search_trace);
+
+      // - check if trace exists -
+      if (trace_idx == c_idx_not_exist)
+      {
+        throw_error(TD_DAEMON_TRACE_NOT_EXIST);
+      }
+
+      td_trace_s *trace = td_trace_tree_s_at(&this->traces,trace_idx);
+      lli record_id = trace_s_head(&trace->trace);
+
+      this->buffer.used = 0;
+      bc_array_s_append_td_traced_msg_header(&this->buffer,id,td_channel_msg_type_RESPONSE,a_type,trace_id);
+
+      // - read trace record to message -
+      td_trace_s_read_to_message(trace,record_id,&this->buffer);
+
+      if (td_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(TD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case td_channel_cbreq_TRACE_TAIL:
+    {/*{{{*/
+      ulli id = va_arg(a_ap,ulli);
+      const string_s *trace_id = va_arg(a_ap,const string_s *);
+
+      td_trace_s search_trace = {{*trace_id,},};
+      unsigned trace_idx = td_trace_tree_s_get_idx(&this->traces,&search_trace);
+
+      // - check if trace exists -
+      if (trace_idx == c_idx_not_exist)
+      {
+        throw_error(TD_DAEMON_TRACE_NOT_EXIST);
+      }
+
+      td_trace_s *trace = td_trace_tree_s_at(&this->traces,trace_idx);
+      lli record_id = trace_s_tail(&trace->trace);
+
+      this->buffer.used = 0;
+      bc_array_s_append_td_traced_msg_header(&this->buffer,id,td_channel_msg_type_RESPONSE,a_type,trace_id);
+
+      // - read trace record to message -
+      td_trace_s_read_to_message(trace,record_id,&this->buffer);
+
+      if (td_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(TD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  default:
+    {/*{{{*/
+
+      // - log message -
+      log_info_2("channel server %u, unknown request",a_index);
+    }/*}}}*/
   }
 
   return 0;

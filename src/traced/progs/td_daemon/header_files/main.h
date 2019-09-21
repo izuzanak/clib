@@ -17,6 +17,11 @@ include "td_channel.h"
 #define ERROR_TD_DAEMON_TRACE_FILE_OPEN_ERROR 4
 #define ERROR_TD_DAEMON_TRACE_FILE_MMAP_ERROR 5
 #define ERROR_TD_DAEMON_TRACE_CREATE_ERROR 6
+#define ERROR_TD_DAEMON_TRACE_NOT_EXIST 7
+#define ERROR_TD_DAEMON_TRACE_INVALID_WRITE_SIZE 8
+#define ERROR_TD_DAEMON_TRACE_WRITE_ERROR 9
+#define ERROR_TD_DAEMON_CHANNEL_CREATE_ERROR 10
+#define ERROR_TD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR 11
 
 #define ERROR_TD_TRACE_MMAP_FILE_ERROR 1
 
@@ -36,6 +41,7 @@ td_trace_s;
 @end
 
 WUR static inline int td_trace_s_mmap_file(trace_mmap_s *a_trace_mmap,td_conf_trace_data_s *a_trace_data);
+void td_trace_s_read_to_message(td_trace_s *this,lli a_record_id,bc_array_s *a_trg);
 
 // -- td_trace_tree_s --
 @begin
@@ -52,6 +58,9 @@ td_config_s:last_config
 
 td_trace_tree_s:traces
 
+td_channel_s:channel
+
+bc_array_s:buffer
 epoll_s:epoll
 >
 td_daemon_s;
@@ -63,6 +72,8 @@ WUR int td_daemon_s_process_config(td_daemon_s *this);
 WUR int td_daemon_s_update_traces(td_daemon_s *this);
 
 WUR int td_daemon_s_run(td_daemon_s *this);
+
+WUR int td_daemon_s_channel_callback(void *a_td_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
 
 // === inline methods of generated structures ==================================
 

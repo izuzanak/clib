@@ -8,10 +8,15 @@ include "td_conf.h"
 validator_s g_config_validator;
 const char g_config_schema[] =
 /*{{{*/
-"{\"ip_address\":[\"type\",3],\"path\":[\"regex\",\"^[a-zA-Z0-9/\\\\._-]\\\\+$\"],\"int\":[\"type\",1],\"uint\":[\"type\",1,\">=\",0],\"uint16\":[\"ref\",\"uint\",\"<=\",65535],\"uint32\":[\"ref\",\"uint\",\"<=\",4294967295],\"string_not_empty\":[\"type\",3,\"length >\",0],\"data\":[\"type\",5,\"items\",[\"path\",\"path\",\"offset\",\"uint\",\"size\",\"uint\"]],\"record\":[\"type\",5,\"items\",[\"type\",[\"==\",\"raw\"],\"size\",\"uint\"]],\"trace\":[\"type\",5,\"items\",[\"trace_id\",\"string_not_empty\",\"record\",\"record\",\"header\",\"data\",\"trace\",\"data\",\"timestamp_div\",\"int\",\"timestamp\",\"data\"]],\"config\":[\"type\",5,\"items\",[\"traces\",[\"type\",4,\"all-items\",\"trace\"]]]}";
+"{\"ip_address\":[\"type\",3],\"ip_port_pair\":[\"type\",5,\"items\",[\"ip\",\"ip_address\",\"port\",\"uint16\"]],\"path\":[\"regex\",\"^[a-zA-Z0-9/\\\\._-]\\\\+$\"],\"int\":[\"type\",1],\"uint\":[\"type\",1,\">=\",0],\"uint16\":[\"ref\",\"uint\",\"<=\",65535],\"uint32\":[\"ref\",\"uint\",\"<=\",4294967295],\"string_not_empty\":[\"type\",3,\"length >\",0],\"data\":[\"type\",5,\"items\",[\"path\",\"path\",\"offset\",\"uint\",\"size\",\"uint\"]],\"record\":[\"type\",5,\"items\",[\"type\",[\"==\",\"raw\"],\"size\",\"uint\"]],\"trace\":[\"type\",5,\"items\",[\"trace_id\",\"string_not_empty\",\"record\",\"record\",\"header\",\"data\",\"trace\",\"data\",\"timestamp_div\",\"int\",\"timestamp\",\"data\"]],\"config\":[\"type\",5,\"items\",[\"traces\",[\"type\",4,\"all-items\",\"trace\"]]]}";
 /*}}}*/
 
 // === methods of generated structures =========================================
+
+// -- td_conf_ip_port_s --
+@begin
+methods td_conf_ip_port_s
+@end
 
 // -- td_conf_record_s --
 @begin
@@ -68,6 +73,8 @@ methods td_config_s
 
 int td_config_s_from_var(td_config_s *this,var_s a_var)
 {/*{{{*/
+  td_conf_ip_port_s_from_var(&this->channel,loc_s_dict_str_get(a_var,"channel"));
+
   if (td_conf_trace_tree_s_from_var(&this->traces,loc_s_dict_str_get(a_var,"traces")))
   {
     throw_error(TRACED_CONF_INVALID_TRACES_CONFIGURATION);

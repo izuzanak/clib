@@ -23,7 +23,7 @@ test_function_t test_functions[] =
 
 void test_trace()
 {/*{{{*/
-  cassert(system("dd if=/dev/zero of=/dev/shm/trace.img bs=30K count=1") == 0);
+  //cassert(system("dd if=/dev/zero of=/dev/shm/trace.img bs=30K count=1") == 0);
 
   CONT_INIT_CLEAR(fd_s,fd);
   cassert((fd = open("/dev/shm/trace.img",O_RDWR,0)) != -1);
@@ -47,7 +47,6 @@ void test_trace()
     rec_size,10) == 0);
 
   CONT_INIT_CLEAR(bc_array_s,buffer);
-  bc_array_s_copy_resize(&buffer,rec_size);
   bc_array_s_append_format(&buffer,"Hello trace world!!!");
 
   time_s time;
@@ -55,7 +54,7 @@ void test_trace()
   unsigned idx = 0;
   do {
     cassert(clock_s_gettime(CLOCK_REALTIME,&time) == 0);
-    cassert(trace_s_write_record(&trace,time,buffer.data) == 0);
+    cassert(trace_s_write_record(&trace,time,buffer.used,buffer.data) == 0);
   } while(++idx < 256);
 
   lli tail = trace_s_tail(&trace);
