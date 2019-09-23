@@ -91,9 +91,8 @@ int td_channel_s_send_multi_message_var(td_channel_s *this,const ui_array_s *a_i
     do
     {
       // - log message -
-      const bc_array_s *msg_buffer = loc_s_channel_message_value(a_data_var); // NOLINT
-      log_info_2("channel server %u, --> " LOG_MSG_FORMAT,
-          *i_ptr,LOG_MSG_PARAMETERS(msg_buffer->used,msg_buffer->data));
+      log_info_2("channel server %u, --> %u bytes",*i_ptr,
+          loc_s_channel_message_value(a_data_var)->used);
 
       // - schedule message to send -
       if (channel_conn_s_schedule_message_var(&this->server.conn_list.data[*i_ptr].object,length_var,a_data_var))

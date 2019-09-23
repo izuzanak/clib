@@ -54,45 +54,27 @@ enum
   log_lvl_verbose = 8,
 };/*}}}*/
 
-#define VA_OPT_SUPPORTED_II(a,b,c,...) c
-#define VA_OPT_SUPPORTED_I(...) VA_OPT_SUPPORTED_II(__VA_OPT__(,),1,0,)
-#define VA_OPT_SUPPORTED VA_OPT_SUPPORTED_I(?)
+// - define log macros -
+#define log_fatal(...) \
+  if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_fatal,__VA_ARGS__) == 0); }
 
-#if VA_OPT_SUPPORTED
+#define log_error(...) \
+  if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_error,__VA_ARGS__) == 0); }
 
-  // - define log macros -
-  #define log_fatal(FORMAT, ...) \
-    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_fatal,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
+#define log_warning(...) \
+  if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_warning,__VA_ARGS__) == 0); }
 
-  #define log_error(FORMAT, ...) \
-    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_error,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
+#define log_info_0(...) \
+  if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_info_0,__VA_ARGS__) == 0); }
 
-  #define log_warning(FORMAT, ...) \
-    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_warning,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
+#define log_info_1(...) \
+  if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_info_1,__VA_ARGS__) == 0); }
 
-  #define log_info_0(FORMAT, ...) \
-    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_info_0,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
+#define log_info_2(...) \
+  if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_info_2,__VA_ARGS__) == 0); }
 
-  #define log_info_1(FORMAT, ...) \
-    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_info_1,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
-
-  #define log_info_2(FORMAT, ...) \
-    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_info_2,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
-
-  #define log_verbose(FORMAT, ...) \
-    if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_verbose,FORMAT __VA_OPT__(,) __VA_ARGS__) == 0); }
-
-#else
-
-  // - empty log macros -
-  #define log_fatal(FORMAT, ...)
-  #define log_error(FORMAT, ...)
-  #define log_warning(FORMAT, ...)
-  #define log_info_0(FORMAT, ...)
-  #define log_info_1(FORMAT, ...)
-  #define log_info_2(FORMAT, ...)
-  #define log_verbose(FORMAT, ...)
-#endif
+#define log_verbose(...) \
+  if (g_logger) { cassert(logger_s_write(g_logger,log_lvl_verbose,__VA_ARGS__) == 0); }
 
 // === definition of generated structures ======================================
 

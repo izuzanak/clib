@@ -115,8 +115,8 @@ int td_config_s_read_file(td_config_s *this,const char *a_file_name)
   VAR_CLEAR(str_config_var,loc_s_string_ptr("config"));
   if (validator_s_validate(&g_config_validator,str_config_var,config_var))
   {
-    DEBUG_PRINT(var_array_s,&g_config_validator.value_stack);
-    DEBUG_PRINT(var_array_s,&g_config_validator.props_stack);
+    //DEBUG_PRINT(var_array_s,&g_config_validator.value_stack);
+    //DEBUG_PRINT(var_array_s,&g_config_validator.props_stack);
 
     throw_error(TRACED_CONF_INVALID_CONFIGURATION);
   }
