@@ -197,7 +197,10 @@ endif()
 
 # - process libs -
 include_component_dir("src/clib/libs")
+include_component_dir("src/segmentd/libs")
 
 # - process tests -
 include_component_dir("src/clib/tests")
+include_component_dir("src/segmentd/tests")
+include_component_dir("src/segmentd/progs")
 

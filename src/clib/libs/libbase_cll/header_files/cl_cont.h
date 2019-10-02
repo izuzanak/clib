@@ -6,6 +6,8 @@
 include "cl_basic.h"
 @end
 
+#include <ctype.h>
+
 #if OPTION_MEMCHECK == ENABLED
 #define cmalloc(SIZE) check_malloc(SIZE)
 #define crealloc(LOCATION,SIZE) check_realloc(LOCATION,SIZE)
@@ -373,24 +375,24 @@ static inline void check_free(pointer a_location)
 
 // === inline basic data types to_string methods ===============================
 
+static inline void bc_to_string(const bc *this,bc_array_s *a_trg)
+{/*{{{*/
+  if (isprint(*this))
+  {
+    bc_array_s_push(a_trg,*this);
+  }
+  else
+  {
+    bc_array_s_append_format(a_trg,"0x%hhx",*this);
+  }
+}/*}}}*/
+
 #define BASIC_TYPE_TO_STRING_INLINE(TYPE,FORMAT) \
 static inline void TYPE ## _to_string(const TYPE *this,bc_array_s *a_trg)\
 {/*{{{*/\
-  int space = a_trg->size - a_trg->used;\
-  int length = snprintf(a_trg->data + a_trg->used,space,FORMAT,*this);\
-\
-  if (length >= space)\
-  {\
-    bc_array_s_reserve(a_trg,length + 1);\
-\
-    space = a_trg->size - a_trg->used;\
-    length = snprintf(a_trg->data + a_trg->used,space,FORMAT,*this);\
-  }\
-\
-  a_trg->used += length;\
+  bc_array_s_append_format(a_trg,FORMAT,*this);\
 }/*}}}*/
 
-BASIC_TYPE_TO_STRING_INLINE(bc,"%c");
 BASIC_TYPE_TO_STRING_INLINE(uc,"%hhu");
 BASIC_TYPE_TO_STRING_INLINE(si,"%hd");
 BASIC_TYPE_TO_STRING_INLINE(usi,"%hu");

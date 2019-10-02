@@ -1,0 +1,14 @@
+{
+  "channel": {
+    "ip": "0.0.0.0",
+    "port": 9001
+  },
+  "segments": [
+    {
+      "segment_id": "gps",
+      "size": 512,
+      "type": "file",
+      "path": "/dev/shm/segment_gps.img"
+    }
+  ]
+}

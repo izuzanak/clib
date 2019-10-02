@@ -4,14 +4,12 @@
 
 @begin
 include "cl_test.h"
-include "cl_linux.h"
-include "cl_fuse.h"
+include "sd_conf.h"
 @end
 
 // === test execution functions ================================================
 
-void test_ino_size();
-void test_create();
+void test_conf_parse();
 
 // === program entry function ==================================================
 
