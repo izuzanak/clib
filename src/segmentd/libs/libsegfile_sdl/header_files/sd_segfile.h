@@ -3,8 +3,6 @@
 #define __SD_SEGFILE_H
 
 @begin
-include "cl_logger.h"
-include "cl_linux.h"
 include "sd_record.h"
 @end
 
@@ -53,8 +51,8 @@ WUR libsegfile_sdl_EXPORT int sd_segment_file_s_create(sd_segment_file_s *this,
     const char *a_path,unsigned a_data_size);
 WUR libsegfile_sdl_EXPORT int sd_segment_file_s_write_record(sd_segment_file_s *this,
     time_s a_time,unsigned a_size,const char *a_data);
-WUR libsegfile_sdl_EXPORT int sd_segment_file_s_read_record(sd_segment_file_s *this,
-    time_s *a_time,bc_array_s *a_trg);
+WUR libsegfile_sdl_EXPORT int sd_segment_file_s_get_record(sd_segment_file_s *this,
+    time_s *a_time,bc_array_s *a_record);
 
 // === inline methods of generated structures ==================================
 

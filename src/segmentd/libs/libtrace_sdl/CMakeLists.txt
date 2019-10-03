@@ -1,6 +1,6 @@
 
 set(CONF_COMPONENTS
-  "src/segmentd/libs/librecord_sdl")
+  "src/segmentd/libs/libsegment_sdl")
 set(CONF_HEADER_DIRS)
 
 if(OS_LINUX)

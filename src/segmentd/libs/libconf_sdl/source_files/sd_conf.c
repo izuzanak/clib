@@ -8,7 +8,7 @@ include "sd_conf.h"
 validator_s g_config_validator;
 const char g_config_schema[] =
 /*{{{*/
-"{\"ip_address\":[\"type\",3],\"ip_port_pair\":[\"type\",5,\"items\",[\"ip\",\"ip_address\",\"port\",\"uint16\"]],\"path\":[\"regex\",\"^[a-zA-Z0-9/\\\\._-]\\\\+$\"],\"int\":[\"type\",1],\"uint\":[\"type\",1,\">=\",0],\"uint16\":[\"ref\",\"uint\",\"<=\",65535],\"uint32\":[\"ref\",\"uint\",\"<=\",4294967295],\"string_not_empty\":[\"type\",3,\"length >\",0],\"segment\":[\"type\",5,\"items\",[\"segment_id\",\"string_not_empty\",\"size\",\"uint\",\"type\",[\"==\",\"file\"],\"path\",\"path\"]],\"data\":[\"type\",5,\"items\",[\"path\",\"path\",\"offset\",\"uint\",\"size\",\"uint\"]],\"record\":[\"type\",5,\"items\",[\"type\",[\"==\",\"raw\"],\"size\",\"uint\"]],\"trace\":[\"type\",5,\"items\",[\"trace_id\",\"string_not_empty\",\"record\",\"record\",\"header\",\"data\",\"trace\",\"data\",\"timestamp_div\",\"int\",\"timestamp\",\"data\"]],\"config\":[\"type\",5,\"items\",[\"segments\",[\"type\",4,\"all-items\",\"segment\"],\"traces\",[\"type\",4,\"all-items\",\"trace\"]]]}";
+"{\"ip_address\":[\"type\",3],\"ip_port_pair\":[\"type\",5,\"items\",[\"ip\",\"ip_address\",\"port\",\"uint16\"]],\"path\":[\"regex\",\"^[a-zA-Z0-9/\\\\._-]\\\\+$\"],\"int\":[\"type\",1],\"uint\":[\"type\",1,\">=\",0],\"uint16\":[\"ref\",\"uint\",\"<=\",65535],\"uint32\":[\"ref\",\"uint\",\"<=\",4294967295],\"string_not_empty\":[\"type\",3,\"length >\",0],\"segment\":[\"type\",5,\"items\",[\"segment_id\",\"string_not_empty\",\"size\",\"uint\",\"type\",[\"==\",\"file\"],\"path\",\"path\"]],\"mmap\":[\"type\",5,\"items\",[\"path\",\"path\",\"offset\",\"uint\",\"size\",\"uint\"]],\"record\":[\"type\",5,\"items\",[\"type\",[\"==\",\"raw\"],\"size\",\"uint\"]],\"trace_data\":[\"type\",5,\"items\",[\"type\",\"string_not_empty\"]],\"trace\":[\"type\",5,\"items\",[\"trace_id\",\"string_not_empty\",\"record\",\"record\",\"header\",\"trace_data\",\"trace\",\"mmap\",\"timestamp_div\",\"int\",\"timestamp\",\"mmap\"]],\"config\":[\"type\",5,\"items\",[\"segments\",[\"type\",4,\"all-items\",\"segment\"],\"traces\",[\"type\",4,\"all-items\",\"trace\"]]]}";
 /*}}}*/
 
 // === methods of generated structures =========================================
@@ -40,7 +40,10 @@ int sd_conf_segment_tree_s_from_var(sd_conf_segment_tree_s *this,var_s a_var)
     var_s *ct_ptr_end = ct_ptr + conf_segments_arr->used;
     do {
       CONT_INIT_CLEAR(sd_conf_segment_s,conf_segment);
-      sd_conf_segment_s_from_var(&conf_segment,*ct_ptr);
+      if (sd_conf_segment_s_from_var(&conf_segment,*ct_ptr))
+      {
+        throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
+      }
 
       // - check uniqueness of segment id -
       unsigned ct_index = sd_conf_segment_tree_s_get_idx(this,&conf_segment);
@@ -59,6 +62,11 @@ int sd_conf_segment_tree_s_from_var(sd_conf_segment_tree_s *this,var_s a_var)
 // -- sd_conf_record_s --
 @begin
 methods sd_conf_record_s
+@end
+
+// -- sd_conf_mmap_s --
+@begin
+methods sd_conf_mmap_s
 @end
 
 // -- sd_conf_trace_data_s --
@@ -88,7 +96,10 @@ int sd_conf_trace_tree_s_from_var(sd_conf_trace_tree_s *this,var_s a_var)
     var_s *ct_ptr_end = ct_ptr + conf_traces_arr->used;
     do {
       CONT_INIT_CLEAR(sd_conf_trace_s,conf_trace);
-      sd_conf_trace_s_from_var(&conf_trace,*ct_ptr);
+      if (sd_conf_trace_s_from_var(&conf_trace,*ct_ptr))
+      {
+        throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
+      }
 
       // - check uniqueness of trace id -
       unsigned ct_index = sd_conf_trace_tree_s_get_idx(this,&conf_trace);
@@ -111,16 +122,11 @@ methods sd_config_s
 
 int sd_config_s_from_var(sd_config_s *this,var_s a_var)
 {/*{{{*/
-  sd_conf_ip_port_s_from_var(&this->channel,loc_s_dict_str_get(a_var,"channel"));
-
-  if (sd_conf_segment_tree_s_from_var(&this->segments,loc_s_dict_str_get(a_var,"segments")))
+  if (sd_conf_ip_port_s_from_var(&this->channel,loc_s_dict_str_get(a_var,"channel")) ||
+      sd_conf_segment_tree_s_from_var(&this->segments,loc_s_dict_str_get(a_var,"segments")) ||
+      sd_conf_trace_tree_s_from_var(&this->traces,loc_s_dict_str_get(a_var,"traces")))
   {
-    throw_error(SEGMENTD_CONF_INVALID_SEGMENTS_CONFIGURATION);
-  }
-
-  if (sd_conf_trace_tree_s_from_var(&this->traces,loc_s_dict_str_get(a_var,"traces")))
-  {
-    throw_error(SEGMENTD_CONF_INVALID_TRACES_CONFIGURATION);
+    throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
   }
 
   return 0;

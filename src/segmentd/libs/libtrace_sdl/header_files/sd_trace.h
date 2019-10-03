@@ -3,7 +3,7 @@
 #define __SD_TRACE_H
 
 @begin
-include "sd_record.h"
+include "sd_segment.h"
 @end
 
 // - function export definitions -
@@ -28,6 +28,14 @@ include "sd_record.h"
 #define ERROR_SD_TRACE_INVALID_RECORD_ID 6
 #define ERROR_SD_TRACE_INVALID_RECORD_CRC 7
 #define ERROR_SD_TRACE_MMAP_CREATE_ERROR 8
+#define ERROR_SD_TRACE_SEGMENT_INVALID_SIZE 9
+#define ERROR_SD_TRACE_SEGMENT_CREATE_ERROR 10
+#define ERROR_SD_TRACE_SEGMENT_WRITE_ERROR 11
+
+#define ERROR_SD_TRACE_DESCR_FILE_OPEN_ERROR 1
+#define ERROR_SD_TRACE_DESCR_MMAP_CREATE_ERROR 2
+#define ERROR_SD_TRACE_DESCR_FILES_MMAP_ERROR 3
+#define ERROR_SD_TRACE_DESCR_TRACE_CREATE_ERROR 4
 
 // === constants and definitions ===============================================
 
@@ -125,10 +133,12 @@ struct
 ui:data_size
 lli:timestamp_div
 
+ui:header_type
 lli:header_last_id
-lli:trace_last_id
-
 sd_trace_queue_s:header_queue
+sd_segment_descr_s:header_segment
+
+lli:trace_last_id
 sd_trace_queue_s:trace_queue
 sd_trace_queue_s:ts_trace_queue
 
@@ -142,7 +152,9 @@ sd_trace_s;
 @end
 
 WUR int sd_trace_s_create(sd_trace_s *this,
+    unsigned a_header_type,
     void *header_data,ulli header_size,
+    sd_conf_segment_s *a_header_segment,
     void *trace_data,ulli sd_trace_size,
     void *ts_trace_data,ulli ts_trace_size,
     unsigned a_data_size,
@@ -159,6 +171,24 @@ WUR libtrace_sdl_EXPORT int sd_trace_s_write_record(sd_trace_s *this,
     time_s a_time,unsigned a_size,const char *a_data);
 WUR libtrace_sdl_EXPORT int sd_trace_s_read_record(sd_trace_s *this,
     lli a_id,time_s *a_time,bc_array_s *a_trg);
+
+// -- sd_trace_descr_s --
+@begin
+struct
+<
+sd_conf_trace_s:config
+sd_trace_mmap_s:mmap_header
+sd_trace_mmap_s:mmap_trace
+sd_trace_mmap_s:mmap_timestamp
+sd_trace_s:trace
+>
+sd_trace_descr_s;
+@end
+
+WUR libtrace_sdl_EXPORT int sd_trace_descr_s_create(sd_trace_descr_s *this,
+    sd_conf_trace_s *a_config);
+WUR static inline int sd_trace_descr_s_mmap_file(sd_trace_mmap_s *a_trace_mmap,sd_conf_mmap_s *a_trace_data);
+void sd_trace_descr_s_read_to_message(sd_trace_descr_s *this,lli a_record_id,bc_array_s *a_trg);
 
 // === inline methods of generated structures ==================================
 
@@ -379,6 +409,29 @@ static inline lli sd_trace_s_gre_time(sd_trace_s *this,time_s a_time)
   }
 
   return sd_record_timestamp_tree_s_at(&this->timestamp_tree,timestamp_idx)->id;
+}/*}}}*/
+
+// -- sd_trace_descr_s --
+@begin
+inlines sd_trace_descr_s
+@end
+
+static inline int sd_trace_descr_s_mmap_file(sd_trace_mmap_s *a_trace_mmap,sd_conf_mmap_s *a_trace_data)
+{/*{{{*/
+  CONT_INIT_CLEAR(fd_s,fd);
+  fd = open(a_trace_data->path.data,O_RDWR,0);
+
+  if (fd == -1)
+  {
+    throw_error(SD_TRACE_DESCR_FILE_OPEN_ERROR);
+  }
+
+  if (sd_trace_mmap_s_create(a_trace_mmap,NULL,a_trace_data->size,PROT_READ | PROT_WRITE,MAP_SHARED,fd,a_trace_data->offset))
+  {
+    throw_error(SD_TRACE_DESCR_MMAP_CREATE_ERROR);
+  }
+
+  return 0;
 }/*}}}*/
 
 #endif

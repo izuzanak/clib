@@ -1,8 +1,10 @@
 
 set(CONF_COMPONENTS
   "src/clib/libs/libtime_cll"
+  "src/clib/libs/libcrc_cll"
   "src/clib/libs/liblinux_cll"
-  "src/clib/libs/libcrc_cll")
+  "src/clib/libs/liblogger_cll"
+  "src/segmentd/libs/libconf_sdl")
 set(CONF_HEADER_DIRS)
 
 set(CONF_DO_BUILD TRUE)

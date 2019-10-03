@@ -147,8 +147,8 @@ int sd_segment_file_s_write_record(sd_segment_file_s *this,
   return 0;
 }/*}}}*/
 
-int sd_segment_file_s_read_record(sd_segment_file_s *this,
-    time_s *a_time,bc_array_s *a_trg)
+int sd_segment_file_s_get_record(sd_segment_file_s *this,
+    time_s *a_time,bc_array_s *a_record)
 {/*{{{*/
   if (this->last_id < 0)
   {
@@ -158,7 +158,10 @@ int sd_segment_file_s_read_record(sd_segment_file_s *this,
   sd_record_s *record = (sd_record_s *)this->rec_data.data;
 
   *a_time = record->header.time;
-  bc_array_s_append(a_trg,record->header.data_size,record->data);
+
+  a_record->size = record->header.data_size;
+  a_record->used = a_record->size;
+  a_record->data = record->data;
 
   return 0;
 }/*}}}*/

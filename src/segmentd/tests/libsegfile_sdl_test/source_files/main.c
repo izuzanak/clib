@@ -27,15 +27,15 @@ void test_segfile()
   CONT_INIT_CLEAR(bc_array_s,buffer);
   time_s time;
 
-  // - sd_segment_file_s_read_record -
-  buffer.used = 0;
-  if (sd_segment_file_s_read_record(&segfile,&time,&buffer))
+  // - sd_segment_file_s_get_record -
+  bc_array_s record;
+  if (sd_segment_file_s_get_record(&segfile,&time,&record))
   {
     fprintf(stderr,"No record created yet\n");
   }
   else
   {
-    fprintf(stderr,"Record: %.*s\n",buffer.used,buffer.data);
+    fprintf(stderr,"Record: %.*s\n",record.used,record.data);
   }
 
   //fprintf(stderr,"BEFORE: ");
@@ -51,10 +51,9 @@ void test_segfile()
   cassert(sd_segment_file_s_write_record(&segfile,
         time,buffer.used,buffer.data) == 0);
 
-  // - sd_segment_file_s_read_record -
-  buffer.used = 0;
-  cassert(sd_segment_file_s_read_record(&segfile,&time,&buffer) == 0);
-  fprintf(stderr,"Record: %.*s\n",buffer.used,buffer.data);
+  // - sd_segment_file_s_get_record -
+  cassert(sd_segment_file_s_get_record(&segfile,&time,&record) == 0);
+  fprintf(stderr,"Record: %.*s\n",record.used,record.data);
 
   //fprintf(stderr,"AFTER: ");
   //DEBUG_PRINT(sd_record_s,(sd_record_s *)segfile.rec_data.data);

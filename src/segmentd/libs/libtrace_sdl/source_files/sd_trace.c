@@ -252,7 +252,9 @@ methods sd_trace_s
 @end
 
 int sd_trace_s_create(sd_trace_s *this,
+    unsigned a_header_type,
     void *header_data,ulli header_size,
+    sd_conf_segment_s *a_header_segment,
     void *trace_data,ulli sd_trace_size,
     void *ts_trace_data,ulli ts_trace_size,
     unsigned a_data_size,
@@ -266,48 +268,88 @@ int sd_trace_s_create(sd_trace_s *this,
   // - store timestamp divisor -
   this->timestamp_div = a_timestamp_div;
 
-  unsigned header_rec_size = sizeof(sd_record_s) + sizeof(sd_trace_queue_header_s);
+  // - store header type -
+  this->header_type = a_header_type;
 
-  // - ERROR -
-  if (header_size < (header_rec_size << 1))
-  {
-    throw_error(SD_TRACE_HEADER_QUEUE_SIZE_ERROR);
-  }
-
-  unsigned header_rec_cnt = header_size/header_rec_size;
-  sd_trace_queue_s_set_buffer(&this->header_queue,header_rec_cnt,header_rec_size,header_data);
-  this->header_queue.used = this->header_queue.size;
-
-  // - scan queue for latest record index -
-  unsigned last_header_idx = sd_trace_queue_s_scan_for_last(&this->header_queue);
-
+  // - initialize trace queue header -
   sd_trace_queue_header_s trqh = {
     .used = 0,
     .begin = 0
   };
 
-  // - trace header record was found -
-  if (last_header_idx != c_idx_not_exist)
+  switch (this->header_type)
   {
-    // - retrieve record pointer before change of queue begin -
-    sd_record_s *header_record = sd_trace_queue_s_at(&this->header_queue,last_header_idx);
+  case c_sd_trace_data_type_MMAP:
+    {/*{{{*/
+      unsigned header_rec_size = sizeof(sd_record_s) + sizeof(sd_trace_queue_header_s);
 
-    // - update begin of header queue -
-    this->header_queue.begin = (last_header_idx + 1) % this->header_queue.size;
+      // - ERROR -
+      if (header_size < (header_rec_size << 1))
+      {
+        throw_error(SD_TRACE_HEADER_QUEUE_SIZE_ERROR);
+      }
 
-    // - store last header id -
-    this->header_last_id = header_record->header.id;
+      unsigned header_rec_cnt = header_size/header_rec_size;
+      sd_trace_queue_s_set_buffer(&this->header_queue,header_rec_cnt,header_rec_size,header_data);
+      this->header_queue.used = this->header_queue.size;
 
-    // - retrieve trace queue header -
-    trqh = *((sd_trace_queue_header_s *)header_record->data);
-  }
-  else
-  {
-    // - reset last header id -
-    this->header_last_id = -1;
+      // - scan queue for latest record index -
+      unsigned last_header_idx = sd_trace_queue_s_scan_for_last(&this->header_queue);
 
-    // - reset last trace id -
-    this->trace_last_id = -1;
+      // - trace header record was found -
+      if (last_header_idx != c_idx_not_exist)
+      {
+        // - retrieve record pointer before change of queue begin -
+        sd_record_s *header_record = sd_trace_queue_s_at(&this->header_queue,last_header_idx);
+
+        // - update begin of header queue -
+        this->header_queue.begin = (last_header_idx + 1) % this->header_queue.size;
+
+        // - store last header id -
+        this->header_last_id = header_record->header.id;
+
+        // - retrieve trace queue header -
+        trqh = *((sd_trace_queue_header_s *)header_record->data);
+      }
+      else
+      {
+        // - reset last header id -
+        this->header_last_id = -1;
+
+        // - reset last trace id -
+        this->trace_last_id = -1;
+      }
+    }/*}}}*/
+    break;
+  case c_sd_trace_data_type_SEGMENT:
+    {/*{{{*/
+      if (a_header_segment->size < sizeof(sd_trace_queue_header_s))
+      {
+        throw_error(SD_TRACE_SEGMENT_INVALID_SIZE);
+      }
+
+      if (sd_segment_descr_s_create(&this->header_segment,a_header_segment))
+      {
+        throw_error(SD_TRACE_SEGMENT_CREATE_ERROR);
+      }
+
+      // - read record from segment -
+      time_s time;
+      bc_array_s record;
+      if (sd_segment_handle_s_get_record(&this->header_segment.handle,&time,&record))
+      {
+        // - reset last trace id -
+        this->trace_last_id = -1;
+      }
+      else
+      {
+        // - retrieve trace queue header -
+        trqh = *((sd_trace_queue_header_s *)record.data);
+      }
+    }/*}}}*/
+    break;
+  default:
+    cassert(0);
   }
 
   unsigned trace_rec_size = sizeof(sd_record_s) + this->data_size;
@@ -347,7 +389,7 @@ int sd_trace_s_create(sd_trace_s *this,
     // - timestamp last id and index -
     lli timestamp_last_id = -1;
     unsigned timestamp_last_idx = c_idx_not_exist;
-    
+
     // - timestamp queue on storage -
     if (this->timestamp_div > 0)
     {
@@ -499,33 +541,57 @@ void sd_trace_s_update_timestamp_structures(sd_trace_s *this,sd_record_timestamp
 
 int sd_trace_s_write_header(sd_trace_s *this,time_s a_time)
 {/*{{{*/
-  if (this->header_queue.used >= this->header_queue.size)
+  switch (this->header_type)
   {
-    // - drop tail record -
-    sd_trace_queue_s_next(&this->header_queue);
-  }
+  case c_sd_trace_data_type_MMAP:
+    {/*{{{*/
+      if (this->header_queue.used >= this->header_queue.size)
+      {
+        // - drop tail record -
+        sd_trace_queue_s_next(&this->header_queue);
+      }
 
-  // - insert record -
-  sd_trace_queue_s_insert_blank(&this->header_queue);
-  sd_record_s *header_record = sd_trace_queue_s_last(&this->header_queue);
-  sd_trace_queue_header_s *trqh = (sd_trace_queue_header_s *)header_record->data;
+      // - insert record -
+      sd_trace_queue_s_insert_blank(&this->header_queue);
+      sd_record_s *header_record = sd_trace_queue_s_last(&this->header_queue);
+      sd_trace_queue_header_s *trqh = (sd_trace_queue_header_s *)header_record->data;
 
-  // - fill record header (except crc) -
-  header_record->header.id = ++this->header_last_id;
-  header_record->header.time = a_time;
-  header_record->header.data_size = sizeof(sd_trace_queue_header_s);
+      // - fill record header (except crc) -
+      header_record->header.id = ++this->header_last_id;
+      header_record->header.time = a_time;
+      header_record->header.data_size = sizeof(sd_trace_queue_header_s);
 
-  // - fill record data -
-  trqh->used = this->trace_queue.used;
-  trqh->begin = this->trace_queue.begin;
+      // - fill record data -
+      trqh->used = this->trace_queue.used;
+      trqh->begin = this->trace_queue.begin;
 
-  // - compute record crc -
-  header_record->header.crc = sd_record_s_compute_crc(header_record,this->header_queue.rec_size);
+      // - compute record crc -
+      header_record->header.crc = sd_record_s_compute_crc(header_record,this->header_queue.rec_size);
 
-  // - sync data to storage -
-  if (sd_record_s_msync(header_record,this->header_queue.rec_size))
-  {
-    throw_error(SD_TRACE_RECORD_MSYNC_ERROR);
+      // - sync data to storage -
+      if (sd_record_s_msync(header_record,this->header_queue.rec_size))
+      {
+        throw_error(SD_TRACE_RECORD_MSYNC_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case c_sd_trace_data_type_SEGMENT:
+    {/*{{{*/
+      sd_trace_queue_header_s trqh = {
+        this->trace_queue.used,
+        this->trace_queue.begin
+      };
+
+      // - write record to segment -
+      if (sd_segment_handle_s_write_record(&this->header_segment.handle,a_time,
+            sizeof(sd_trace_queue_header_s),(const char *)&trqh))
+      {
+        throw_error(SD_TRACE_SEGMENT_WRITE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  default:
+    cassert(0);
   }
 
   return 0;
@@ -656,5 +722,77 @@ int sd_trace_s_read_record(sd_trace_s *this,lli a_id,time_s *a_time,bc_array_s *
   bc_array_s_append(a_trg,trace_record->header.data_size,trace_record->data);
 
   return 0;
+}/*}}}*/
+
+// -- sd_trace_descr_s --
+@begin
+methods sd_trace_descr_s
+@end
+
+int sd_trace_descr_s_create(sd_trace_descr_s *this,sd_conf_trace_s *a_config)
+{/*{{{*/
+  sd_trace_descr_s_clear(this);
+
+  // - log message -
+  log_info_2("create trace, id: %s",a_config->trace_id.data);
+
+  sd_conf_trace_s_copy(&this->config,a_config);
+
+  if (this->config.header.type == c_sd_trace_data_type_MMAP)
+  {
+    // - create trace header memory map -
+    if (sd_trace_descr_s_mmap_file(&this->mmap_header,&this->config.header.mmap))
+    {
+      throw_error(SD_TRACE_DESCR_FILES_MMAP_ERROR);
+    }
+  }
+
+  // - create trace memory maps -
+  if (sd_trace_descr_s_mmap_file(&this->mmap_trace,&this->config.trace) ||
+      (this->config.timestamp_div > 0 ? sd_trace_descr_s_mmap_file(&this->mmap_timestamp,&this->config.timestamp) : 0))
+  {
+    throw_error(SD_TRACE_DESCR_FILES_MMAP_ERROR);
+  }
+
+  // - create trace -
+  if (sd_trace_s_create(&this->trace,
+        this->config.header.type,
+        this->mmap_header.address,this->config.header.mmap.size,
+        &this->config.header.segment,
+        this->mmap_trace.address,this->config.trace.size,
+        this->mmap_timestamp.address,this->config.timestamp.size,
+        this->config.record.size,
+        this->config.timestamp_div))
+  {
+    throw_error(SD_TRACE_DESCR_TRACE_CREATE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+void sd_trace_descr_s_read_to_message(sd_trace_descr_s *this,lli a_record_id,bc_array_s *a_trg)
+{/*{{{*/
+  unsigned record_id_used = a_trg->used;
+  bc_array_s_push_blanks(a_trg,sizeof(lli) + sizeof(ulli));
+
+  // - read record from trace -
+  time_s time;
+  if (sd_trace_s_read_record(&this->trace,a_record_id,&time,a_trg))
+  {
+    // - read error -
+    a_trg->used = record_id_used;
+    bc_array_s_append_be_lli(a_trg,-1);
+    bc_array_s_append_be_ulli(a_trg,0);
+  }
+  else
+  {
+    unsigned buffer_used = a_trg->used;
+
+    a_trg->used = record_id_used;
+    bc_array_s_append_be_lli(a_trg,a_record_id);
+    bc_array_s_append_be_ulli(a_trg,time);
+
+    a_trg->used = buffer_used;
+  }
 }/*}}}*/
 

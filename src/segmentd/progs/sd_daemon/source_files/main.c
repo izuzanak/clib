@@ -7,46 +7,10 @@ volatile int g_terminate = 0;
 
 // === methods of generated structures =========================================
 
-// -- sd_segment_descr_s --
-@begin
-methods sd_segment_descr_s
-@end
-
 // -- sd_segment_tree_s --
 @begin
 methods sd_segment_tree_s
 @end
-
-// -- sd_trace_descr_s --
-@begin
-methods sd_trace_descr_s
-@end
-
-void sd_trace_descr_s_read_to_message(sd_trace_descr_s *this,lli a_record_id,bc_array_s *a_trg)
-{/*{{{*/
-  unsigned record_id_used = a_trg->used;
-  bc_array_s_push_blanks(a_trg,sizeof(lli) + sizeof(ulli));
-
-  // - read record from trace -
-  time_s time;
-  if (sd_trace_s_read_record(&this->trace,a_record_id,&time,a_trg))
-  {
-    // - read error -
-    a_trg->used = record_id_used;
-    bc_array_s_append_be_lli(a_trg,-1);
-    bc_array_s_append_be_ulli(a_trg,0);
-  }
-  else
-  {
-    unsigned buffer_used = a_trg->used;
-
-    a_trg->used = record_id_used;
-    bc_array_s_append_be_lli(a_trg,a_record_id);
-    bc_array_s_append_be_ulli(a_trg,time);
-
-    a_trg->used = buffer_used;
-  }
-}/*}}}*/
 
 // -- sd_trace_tree_s --
 @begin
@@ -166,8 +130,12 @@ int sd_daemon_s_update_segments(sd_daemon_s *this)
 
         if (segment_idx == c_idx_not_exist)
         {
+          // - create new segment -
           CONT_INIT_CLEAR(sd_segment_descr_s,insert_segment);
-          sd_conf_segment_s_copy(&insert_segment.config,segment_config);
+          if (sd_segment_descr_s_create(&insert_segment,segment_config))
+          {
+            throw_error(SD_DAEMON_SEGMENT_CREATE_ERROR);
+          }
 
           segment_idx = sd_segment_tree_s_swap_insert(&this->segments,&insert_segment);
           segment = sd_segment_tree_s_at(&this->segments,segment_idx);
@@ -183,37 +151,11 @@ int sd_daemon_s_update_segments(sd_daemon_s *this)
           }
           else
           {
-            sd_segment_descr_s_clear(segment);
-            sd_conf_segment_s_copy(&segment->config,segment_config);
-          }
-        }
-
-        // - create or update segment -
-        if (segment != NULL)
-        {
-          // - log message -
-          log_info_2("create segment %s",segment->config.segment_id.data);
-
-          if (strcmp(segment->config.type.data,"file") == 0)
-          {
-            sd_segment_file_s *segfile = (sd_segment_file_s *)cmalloc(sizeof(sd_segment_file_s));
-            sd_segment_file_s_init(segfile);
-
-            // - create segment handle -
-            sd_segment_handle_s_create(&segment->handle,segfile,
-                (sd_segment_clear_cb_t)sd_segment_file_s_clear,
-                (sd_segment_write_record_cb_t)sd_segment_file_s_write_record,
-                (sd_segment_read_record_cb_t)sd_segment_file_s_read_record);
-
-            // - create segment file -
-            if (sd_segment_file_s_create(segfile,segment->config.path.data,segment->config.size))
+            // - update old segment -
+            if (sd_segment_descr_s_create(segment,segment_config))
             {
-              throw_error(SD_DAEMON_SEGMENT_FILE_CREATE_ERROR);
+              throw_error(SD_DAEMON_SEGMENT_CREATE_ERROR);
             }
-          }
-          else
-          {
-            throw_error(SD_DAEMON_INVALID_SEGMENT_TYPE);
           }
         }
       }
@@ -274,6 +216,13 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
         if (trace_idx == c_idx_not_exist)
         {
           CONT_INIT_CLEAR(sd_trace_descr_s,insert_trace);
+
+          // - create new trace -
+          if (sd_trace_descr_s_create(&insert_trace,trace_config))
+          {
+            throw_error(SD_DAEMON_TRACE_CREATE_ERROR);
+          }
+
           sd_conf_trace_s_copy(&insert_trace.config,trace_config);
 
           trace_idx = sd_trace_tree_s_swap_insert(&this->traces,&insert_trace);
@@ -290,34 +239,11 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
           }
           else
           {
-            sd_trace_descr_s_clear(trace);
-            sd_conf_trace_s_copy(&trace->config,trace_config);
-          }
-        }
-
-        // - create or update trace -
-        if (trace != NULL)
-        {
-          // - log message -
-          log_info_2("create trace %s",trace->config.trace_id.data);
-
-          // - create trace memory maps -
-          if (sd_trace_descr_s_mmap_file(&trace->mmap_header,&trace->config.header) ||
-              sd_trace_descr_s_mmap_file(&trace->mmap_trace,&trace->config.trace) ||
-              (trace->config.timestamp_div > 0 ? sd_trace_descr_s_mmap_file(&trace->mmap_timestamp,&trace->config.timestamp) : 0))
-          {
-            throw_error(SD_DAEMON_TRACE_FILES_MMAP_ERROR);
-          }
-
-          // - create trace -
-          if (sd_trace_s_create(&trace->trace,
-                trace->mmap_header.address,trace->config.header.size,
-                trace->mmap_trace.address,trace->config.trace.size,
-                trace->mmap_timestamp.address,trace->config.timestamp.size,
-                trace->config.record.size,
-                trace->config.timestamp_div))
-          {
-            throw_error(SD_DAEMON_TRACE_CREATE_ERROR);
+            // - update old trace -
+            if (sd_trace_descr_s_create(trace,trace_config))
+            {
+              throw_error(SD_DAEMON_TRACE_CREATE_ERROR);
+            }
           }
         }
       }
@@ -460,26 +386,18 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       this->buffer.used = 0;
       bc_array_s_append_sd_segmentd_msg_header(&this->buffer,id,sd_channel_msg_type_RESPONSE,a_type,segment_id);
 
-      // - read segment record to message -
-      unsigned time_used = this->buffer.used;
-      bc_array_s_push_blanks(&this->buffer,sizeof(lli) + sizeof(ulli));
-
-      // - read record from trace -
+      // - get record from trace -
       time_s time;
-      if (sd_segment_handle_s_read_record(&segment->handle,&time,&this->buffer))
+      bc_array_s record;
+      if (sd_segment_handle_s_get_record(&segment->handle,&time,&record))
       {
         // - read error -
-        this->buffer.used = time_used;
         bc_array_s_append_be_ulli(&this->buffer,0);
       }
       else
       {
-        unsigned buffer_used = this->buffer.used;
-
-        this->buffer.used = time_used;
         bc_array_s_append_be_ulli(&this->buffer,time);
-
-        this->buffer.used = buffer_used;
+        bc_array_s_append(&this->buffer,record.used,record.data);
       }
 
       if (sd_channel_s_send_message(&this->channel,a_index,&this->buffer))

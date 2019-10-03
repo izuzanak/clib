@@ -6,6 +6,8 @@
 include "cl_time.h"
 include "cl_crc.h"
 include "cl_linux.h"
+include "cl_logger.h"
+include "sd_conf.h"
 @end
 
 // - function export definitions -
@@ -29,6 +31,15 @@ include "cl_linux.h"
 extern unsigned g_sd_page_size;
 
 // === definition of generated structures ======================================
+
+// -- bc_array_s --
+
+static inline void bc_array_s_append_be_usi(bc_array_s *this,usi a_value);
+static inline void bc_array_s_append_be_ui(bc_array_s *this,ui a_value);
+static inline void bc_array_s_append_be_lli(bc_array_s *this,lli a_value);
+static inline void bc_array_s_append_be_ulli(bc_array_s *this,ulli a_value);
+static inline void bc_array_s_append_sd_segmentd_msg_header(bc_array_s *this,
+    ulli a_id,usi a_type,usi a_req_id,const string_s *a_segment_id);
 
 // -- sd_record_header_s --
 @begin
@@ -85,6 +96,41 @@ void librecord_sdl_init();
 void librecord_sdl_clear();
 
 // === inline methods of generated structures ==================================
+
+// -- bc_array_s --
+
+static inline void bc_array_s_append_be_usi(bc_array_s *this,usi a_value)
+{/*{{{*/
+  a_value = htobe16(a_value);
+  bc_array_s_append(this,sizeof(usi),(char *)&a_value);
+}/*}}}*/
+
+static inline void bc_array_s_append_be_ui(bc_array_s *this,ui a_value)
+{/*{{{*/
+  a_value = htobe32(a_value);
+  bc_array_s_append(this,sizeof(ui),(char *)&a_value);
+}/*}}}*/
+
+static inline void bc_array_s_append_be_lli(bc_array_s *this,lli a_value)
+{/*{{{*/
+  a_value = htobe64(a_value);
+  bc_array_s_append(this,sizeof(lli),(char *)&a_value);
+}/*}}}*/
+
+static inline void bc_array_s_append_be_ulli(bc_array_s *this,ulli a_value)
+{/*{{{*/
+  a_value = htobe64(a_value);
+  bc_array_s_append(this,sizeof(ulli),(char *)&a_value);
+}/*}}}*/
+
+static inline void bc_array_s_append_sd_segmentd_msg_header(bc_array_s *this,
+    ulli a_id,usi a_type,usi a_req_id,const string_s *a_segment_id)
+{/*{{{*/
+  bc_array_s_append_be_ulli(this,a_id);
+  bc_array_s_append_be_usi(this,a_type);
+  bc_array_s_append_be_usi(this,a_req_id);
+  bc_array_s_append(this,a_segment_id->size,a_segment_id->data);
+}/*}}}*/
 
 // -- sd_record_timestamp_s --
 @begin

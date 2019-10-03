@@ -45,7 +45,9 @@ void test_trace()
 
   CONT_INIT_CLEAR(sd_trace_s,trace);
   cassert(sd_trace_s_create(&trace,
+    c_sd_trace_data_type_MMAP,
     mmap.address,header_size,
+    NULL,
     mmap.address + header_size + ts_trace_size,mmap.length - (header_size + ts_trace_size),
     mmap.address + header_size,ts_trace_size,
     rec_size,10) == 0);
