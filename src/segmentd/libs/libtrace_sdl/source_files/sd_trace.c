@@ -256,7 +256,9 @@ int sd_trace_s_create(sd_trace_s *this,
     void *header_data,ulli header_size,
     sd_conf_segment_s *a_header_segment,
     void *trace_data,ulli sd_trace_size,
+    unsigned a_ts_type,
     void *ts_trace_data,ulli ts_trace_size,
+    sd_conf_segment_s *a_ts_segment,
     unsigned a_data_size,
     lli a_timestamp_div)
 {/*{{{*/
@@ -265,11 +267,14 @@ int sd_trace_s_create(sd_trace_s *this,
   // - store data size -
   this->data_size = a_data_size;
 
-  // - store timestamp divisor -
-  this->timestamp_div = a_timestamp_div;
-
   // - store header type -
   this->header_type = a_header_type;
+
+  // - store timestamp type -
+  this->ts_type = a_ts_type;
+
+  // - store timestamp divisor -
+  this->timestamp_div = a_timestamp_div;
 
   // - initialize trace queue header -
   sd_trace_queue_header_s trqh = {
@@ -349,7 +354,7 @@ int sd_trace_s_create(sd_trace_s *this,
     }/*}}}*/
     break;
   default:
-    cassert(0);
+    throw_error(SD_TRACE_INVALID_TRACE_DATA_TYPE);
   }
 
   unsigned trace_rec_size = sizeof(sd_record_s) + this->data_size;
@@ -393,64 +398,97 @@ int sd_trace_s_create(sd_trace_s *this,
     // - timestamp queue on storage -
     if (this->timestamp_div > 0)
     {
-      unsigned ts_trace_rec_size = sizeof(sd_record_s) + trace_rec_cnt*sizeof(sd_record_timestamp_s);
-
-      // - ERROR -
-      if (ts_trace_size < (ts_trace_rec_size << 1))
+      switch (this->ts_type)
       {
-        throw_error(SD_TRACE_TIMESTAMP_TRACE_QUEUE_SIZE_ERROR);
-      }
+      case c_sd_trace_data_type_MMAP:
+        {/*{{{*/
+          unsigned ts_trace_rec_size = sizeof(sd_record_s) + trace_rec_cnt*sizeof(sd_record_timestamp_s);
 
-      unsigned ts_trace_rec_cnt = ts_trace_size/ts_trace_rec_size;
-      sd_trace_queue_s_set_buffer(&this->ts_trace_queue,ts_trace_rec_cnt,ts_trace_rec_size,ts_trace_data);
-      this->ts_trace_queue.used = this->ts_trace_queue.size;
-
-      // - scan queue for latest record index -
-      last_ts_trace_idx = sd_trace_queue_s_scan_for_last(&this->ts_trace_queue);
-
-      if (last_ts_trace_idx != c_idx_not_exist)
-      {
-        sd_record_timestamp_array_s_set(&this->timestamp_buffer,trace_rec_cnt,
-          (sd_record_timestamp_s *)sd_trace_queue_s_at(&this->ts_trace_queue,last_ts_trace_idx)->data);
-
-        // - update begin of timestamp trace queue -
-        this->ts_trace_queue.begin = (last_ts_trace_idx + 1) % this->ts_trace_queue.size;
-
-        // - resize timestamp tree -
-        sd_record_timestamp_tree_s_copy_resize(&this->timestamp_tree,this->timestamp_buffer.size + 1);
-
-        // - find timestamp last id and index -
-        sd_record_timestamp_s *ts_ptr = this->timestamp_buffer.data;
-        sd_record_timestamp_s *ts_ptr_end = ts_ptr + this->timestamp_buffer.size;
-        do {
-          if (ts_ptr->id > -1)
+          // - ERROR -
+          if (ts_trace_size < (ts_trace_rec_size << 1))
           {
-            // - insert timestamp to timestamp tree -
-            sd_record_timestamp_tree_s_insert(&this->timestamp_tree,ts_ptr);
-
-            if (ts_ptr->id > timestamp_last_id)
-            {
-              // - store last id and its position -
-              timestamp_last_id = ts_ptr->id;
-              timestamp_last_idx = (ts_ptr - this->timestamp_buffer.data);
-            }
+            throw_error(SD_TRACE_TIMESTAMP_TRACE_QUEUE_SIZE_ERROR);
           }
-        } while(++ts_ptr < ts_ptr_end);
+
+          unsigned ts_trace_rec_cnt = ts_trace_size/ts_trace_rec_size;
+          sd_trace_queue_s_set_buffer(&this->ts_trace_queue,ts_trace_rec_cnt,ts_trace_rec_size,ts_trace_data);
+          this->ts_trace_queue.used = this->ts_trace_queue.size;
+
+          // - scan queue for latest record index -
+          last_ts_trace_idx = sd_trace_queue_s_scan_for_last(&this->ts_trace_queue);
+
+          if (last_ts_trace_idx != c_idx_not_exist)
+          {
+            sd_record_timestamp_array_s_set(&this->timestamp_buffer,trace_rec_cnt,
+              (sd_record_timestamp_s *)sd_trace_queue_s_at(&this->ts_trace_queue,last_ts_trace_idx)->data);
+
+            // - update begin of timestamp trace queue -
+            this->ts_trace_queue.begin = (last_ts_trace_idx + 1) % this->ts_trace_queue.size;
+          }
+        }/*}}}*/
+        break;
+      case c_sd_trace_data_type_SEGMENT:
+        {/*{{{*/
+          if (a_ts_segment->size < trace_rec_cnt*sizeof(sd_record_timestamp_s))
+          {
+            throw_error(SD_TRACE_SEGMENT_INVALID_SIZE);
+          }
+
+          if (sd_segment_descr_s_create(&this->ts_segment,a_ts_segment))
+          {
+            throw_error(SD_TRACE_SEGMENT_CREATE_ERROR);
+          }
+
+          // - read record from segment -
+          time_s time;
+          bc_array_s record;
+          if (sd_segment_handle_s_get_record(&this->ts_segment.handle,&time,&record) == 0)
+          {
+            debug_assert(record.used == trace_rec_cnt*sizeof(sd_record_timestamp_s));
+
+            sd_record_timestamp_array_s_set(&this->timestamp_buffer,trace_rec_cnt,
+              (sd_record_timestamp_s *)record.data);
+          }
+        }/*}}}*/
+        break;
+      default:
+        throw_error(SD_TRACE_INVALID_TRACE_DATA_TYPE);
       }
     }
 
-    // - valid timestamp queue was not found -
-    if (last_ts_trace_idx == c_idx_not_exist)
+    // - resize timestamp tree -
+    sd_record_timestamp_tree_s_copy_resize(&this->timestamp_tree,trace_rec_cnt + 1);
+
+    // - timestamp buffer was retrieved -
+    if (this->timestamp_buffer.used != 0)
+    {
+      // - find timestamp last id and index -
+      sd_record_timestamp_s *ts_ptr = this->timestamp_buffer.data;
+      sd_record_timestamp_s *ts_ptr_end = ts_ptr + this->timestamp_buffer.used;
+      do {
+        if (ts_ptr->id > -1)
+        {
+          // - insert timestamp to timestamp tree -
+          sd_record_timestamp_tree_s_insert(&this->timestamp_tree,ts_ptr);
+
+          if (ts_ptr->id > timestamp_last_id)
+          {
+            // - store last id and its position -
+            timestamp_last_id = ts_ptr->id;
+            timestamp_last_idx = (ts_ptr - this->timestamp_buffer.data);
+          }
+        }
+      } while(++ts_ptr < ts_ptr_end);
+    }
+    else
     {
       // - create timestamp buffer -
       sd_record_timestamp_array_s_copy_resize(&this->timestamp_buffer,trace_rec_cnt);
-
-      // - resize timestamp tree -
-      sd_record_timestamp_tree_s_copy_resize(&this->timestamp_tree,this->timestamp_buffer.size + 1);
+      this->timestamp_buffer.used = trace_rec_cnt;
 
       // - reset timestamp values -
       sd_record_timestamp_s *ts_ptr = this->timestamp_buffer.data;
-      sd_record_timestamp_s *ts_ptr_end = ts_ptr + this->timestamp_buffer.size;
+      sd_record_timestamp_s *ts_ptr_end = ts_ptr + this->timestamp_buffer.used;
       do {
         ts_ptr->id = -1;
         ts_ptr->time = 0;
@@ -459,9 +497,9 @@ int sd_trace_s_create(sd_trace_s *this,
 
     // - set timestamp queue buffer -
     sd_record_timestamp_queue_s_set_buffer(&this->timestamp_queue,
-        this->timestamp_buffer.size,this->timestamp_buffer.data);
+        this->timestamp_buffer.used,this->timestamp_buffer.data);
 
-    this->timestamp_queue.used = this->timestamp_buffer.size;
+    this->timestamp_queue.used = this->timestamp_buffer.used;
 
     // - update timestamp queue begin -
     if (timestamp_last_idx != c_idx_not_exist)
@@ -591,7 +629,7 @@ int sd_trace_s_write_header(sd_trace_s *this,time_s a_time)
     }/*}}}*/
     break;
   default:
-    cassert(0);
+    throw_error(SD_TRACE_INVALID_TRACE_DATA_TYPE);
   }
 
   return 0;
@@ -601,31 +639,52 @@ int sd_trace_s_write_timestamp_queue(sd_trace_s *this,time_s a_time)
 {/*{{{*/
   debug_assert(this->timestamp_div > 0);
 
-  if (this->ts_trace_queue.used >= this->ts_trace_queue.size)
+  switch (this->ts_type)
   {
-    // - drop tail record -
-    sd_trace_queue_s_next(&this->ts_trace_queue);
-  }
+  case c_sd_trace_data_type_MMAP:
+    {/*{{{*/
+      if (this->ts_trace_queue.used >= this->ts_trace_queue.size)
+      {
+        // - drop tail record -
+        sd_trace_queue_s_next(&this->ts_trace_queue);
+      }
 
-  // - insert record -
-  sd_trace_queue_s_insert_blank(&this->ts_trace_queue);
-  sd_record_s *ts_trace_record = sd_trace_queue_s_last(&this->ts_trace_queue);
+      // - insert record -
+      sd_trace_queue_s_insert_blank(&this->ts_trace_queue);
+      sd_record_s *ts_trace_record = sd_trace_queue_s_last(&this->ts_trace_queue);
 
-  // - fill record header (except crc) -
-  ts_trace_record->header.id = this->trace_last_id;
-  ts_trace_record->header.time = a_time;
-  ts_trace_record->header.data_size = this->timestamp_buffer.size*sizeof(sd_record_timestamp_s);
+      // - fill record header (except crc) -
+      ts_trace_record->header.id = this->trace_last_id;
+      ts_trace_record->header.time = a_time;
+      ts_trace_record->header.data_size = this->timestamp_buffer.used*sizeof(sd_record_timestamp_s);
 
-  // - fill record data -
-  memcpy(ts_trace_record->data,this->timestamp_buffer.data,ts_trace_record->header.data_size);
+      // - fill record data -
+      memcpy(ts_trace_record->data,this->timestamp_buffer.data,ts_trace_record->header.data_size);
 
-  // - compute record crc -
-  ts_trace_record->header.crc = sd_record_s_compute_crc(ts_trace_record,this->ts_trace_queue.rec_size);
+      // - compute record crc -
+      ts_trace_record->header.crc = sd_record_s_compute_crc(ts_trace_record,this->ts_trace_queue.rec_size);
 
-  // - sync data to storage -
-  if (sd_record_s_msync(ts_trace_record,this->ts_trace_queue.rec_size))
-  {
-    throw_error(SD_TRACE_RECORD_MSYNC_ERROR);
+      // - sync data to storage -
+      if (sd_record_s_msync(ts_trace_record,this->ts_trace_queue.rec_size))
+      {
+        throw_error(SD_TRACE_RECORD_MSYNC_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case c_sd_trace_data_type_SEGMENT:
+    {/*{{{*/
+
+      // - write record to segment -
+      if (sd_segment_handle_s_write_record(&this->ts_segment.handle,a_time,
+            this->timestamp_buffer.used*sizeof(sd_record_timestamp_s),
+            (const char *)this->timestamp_buffer.data))
+      {
+        throw_error(SD_TRACE_SEGMENT_WRITE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  default:
+    throw_error(SD_TRACE_INVALID_TRACE_DATA_TYPE);
   }
 
   return 0;
@@ -747,9 +806,17 @@ int sd_trace_descr_s_create(sd_trace_descr_s *this,sd_conf_trace_s *a_config)
     }
   }
 
-  // - create trace memory maps -
-  if (sd_trace_descr_s_mmap_file(&this->mmap_trace,&this->config.trace) ||
-      (this->config.timestamp_div > 0 ? sd_trace_descr_s_mmap_file(&this->mmap_timestamp,&this->config.timestamp) : 0))
+  if (this->config.timestamp.type == c_sd_trace_data_type_MMAP)
+  {
+    // - create trace timestamp memory map -
+    if (sd_trace_descr_s_mmap_file(&this->mmap_timestamp,&this->config.timestamp.mmap))
+    {
+      throw_error(SD_TRACE_DESCR_FILES_MMAP_ERROR);
+    }
+  }
+
+  // - create trace memory map -
+  if (sd_trace_descr_s_mmap_file(&this->mmap_trace,&this->config.trace))
   {
     throw_error(SD_TRACE_DESCR_FILES_MMAP_ERROR);
   }
@@ -760,7 +827,9 @@ int sd_trace_descr_s_create(sd_trace_descr_s *this,sd_conf_trace_s *a_config)
         this->mmap_header.address,this->config.header.mmap.size,
         &this->config.header.segment,
         this->mmap_trace.address,this->config.trace.size,
-        this->mmap_timestamp.address,this->config.timestamp.size,
+        this->config.timestamp.type,
+        this->mmap_timestamp.address,this->config.timestamp.mmap.size,
+        &this->config.timestamp.segment,
         this->config.record.size,
         this->config.timestamp_div))
   {

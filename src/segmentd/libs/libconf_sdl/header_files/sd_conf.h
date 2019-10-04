@@ -43,7 +43,8 @@ enum
 // - trace data type identifiers -
 enum
 {
-  c_sd_trace_data_type_MMAP = 0,
+  c_sd_trace_data_type_NONE = 0,
+  c_sd_trace_data_type_MMAP,
   c_sd_trace_data_type_SEGMENT,
 };
 
@@ -129,7 +130,7 @@ sd_conf_record_s:record
 sd_conf_trace_data_s:header
 sd_conf_mmap_s:trace
 ui:timestamp_div
-sd_conf_mmap_s:timestamp
+sd_conf_trace_data_s:timestamp
 >
 sd_conf_trace_s;
 @end
@@ -256,35 +257,41 @@ inlines sd_conf_trace_data_s
 static inline int sd_conf_trace_data_s_from_var(sd_conf_trace_data_s *this,var_s a_var)
 {/*{{{*/
   var_s type_var = loc_s_dict_str_get(a_var,"type");
-  var_s data_var = loc_s_dict_get(a_var,type_var);
-
-  // - validate trace data configuration -
-  if (validator_s_validate(&g_config_validator,type_var,data_var))
-  {
-    throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
-  }
-
   const string_s *type = loc_s_string_value(type_var);
 
-  if (strcmp(type->data,"mmap") == 0)
+  if (strcmp(type->data,"none") == 0)
   {
-    this->type = c_sd_trace_data_type_MMAP;
-    if (sd_conf_mmap_s_from_var(&this->mmap,data_var))
+    this->type = c_sd_trace_data_type_NONE;
+  }
+  else {
+
+    // - validate trace data configuration -
+    var_s data_var = loc_s_dict_get(a_var,type_var);
+    if (validator_s_validate(&g_config_validator,type_var,data_var))
     {
       throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
     }
-  }
-  else if (strcmp(type->data,"segment") == 0)
-  {
-    this->type = c_sd_trace_data_type_SEGMENT;
-    if (sd_conf_segment_s_from_var(&this->segment,data_var))
+
+    if (strcmp(type->data,"mmap") == 0)
+    {
+      this->type = c_sd_trace_data_type_MMAP;
+      if (sd_conf_mmap_s_from_var(&this->mmap,data_var))
+      {
+        throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
+      }
+    }
+    else if (strcmp(type->data,"segment") == 0)
+    {
+      this->type = c_sd_trace_data_type_SEGMENT;
+      if (sd_conf_segment_s_from_var(&this->segment,data_var))
+      {
+        throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
+      }
+    }
+    else
     {
       throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
     }
-  }
-  else
-  {
-    debug_assert(0);
   }
 
   return 0;
@@ -303,7 +310,7 @@ static inline int sd_conf_trace_s_from_var(sd_conf_trace_s *this,var_s a_var)
   if (sd_conf_record_s_from_var(&this->record,loc_s_dict_str_get(a_var,"record")) ||
       sd_conf_trace_data_s_from_var(&this->header,loc_s_dict_str_get(a_var,"header")) ||
       sd_conf_mmap_s_from_var(&this->trace,loc_s_dict_str_get(a_var,"trace")) ||
-      sd_conf_mmap_s_from_var(&this->timestamp,loc_s_dict_str_get(a_var,"timestamp")))
+      sd_conf_trace_data_s_from_var(&this->timestamp,loc_s_dict_str_get(a_var,"timestamp")))
   {
     throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
   }

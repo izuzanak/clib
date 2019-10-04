@@ -49,7 +49,9 @@ void test_trace()
     mmap.address,header_size,
     NULL,
     mmap.address + header_size + ts_trace_size,mmap.length - (header_size + ts_trace_size),
+    c_sd_trace_data_type_MMAP,
     mmap.address + header_size,ts_trace_size,
+    NULL,
     rec_size,10) == 0);
 
   CONT_INIT_CLEAR(bc_array_s,buffer);

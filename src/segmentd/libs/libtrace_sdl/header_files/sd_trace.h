@@ -31,6 +31,7 @@ include "sd_segment.h"
 #define ERROR_SD_TRACE_SEGMENT_INVALID_SIZE 9
 #define ERROR_SD_TRACE_SEGMENT_CREATE_ERROR 10
 #define ERROR_SD_TRACE_SEGMENT_WRITE_ERROR 11
+#define ERROR_SD_TRACE_INVALID_TRACE_DATA_TYPE 12
 
 #define ERROR_SD_TRACE_DESCR_FILE_OPEN_ERROR 1
 #define ERROR_SD_TRACE_DESCR_MMAP_CREATE_ERROR 2
@@ -131,7 +132,6 @@ WUR static inline int sd_trace_mmap_s_create(sd_trace_mmap_s *this,
 struct
 <
 ui:data_size
-lli:timestamp_div
 
 ui:header_type
 lli:header_last_id
@@ -140,7 +140,12 @@ sd_segment_descr_s:header_segment
 
 lli:trace_last_id
 sd_trace_queue_s:trace_queue
+
+ui:ts_type
 sd_trace_queue_s:ts_trace_queue
+sd_segment_descr_s:ts_segment
+
+lli:timestamp_div
 
 sd_record_timestamp_array_s:timestamp_buffer
 sd_record_timestamp_queue_s:timestamp_queue
@@ -156,7 +161,9 @@ WUR int sd_trace_s_create(sd_trace_s *this,
     void *header_data,ulli header_size,
     sd_conf_segment_s *a_header_segment,
     void *trace_data,ulli sd_trace_size,
+    unsigned a_ts_type,
     void *ts_trace_data,ulli ts_trace_size,
+    sd_conf_segment_s *a_ts_segment,
     unsigned a_data_size,
     lli a_timestamp_div);
 void sd_trace_s_update_timestamp_structures(sd_trace_s *this,sd_record_timestamp_s *a_timestamp);
