@@ -319,8 +319,12 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
         throw_error(SD_DAEMON_SEGMENT_NOT_EXIST);
       }
 
+      sd_segment_descr_s *segment = sd_segment_tree_s_at(&this->segments,segment_idx);
+
       this->buffer.used = 0;
       bc_array_s_append_sd_segmentd_msg_header(&this->buffer,id,sd_channel_msg_type_RESPONSE,a_type,segment_id);
+
+      bc_array_s_append_be_ui(&this->buffer,segment->config.size);
 
       if (sd_channel_s_send_message(&this->channel,a_index,&this->buffer))
       {
@@ -425,6 +429,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       this->buffer.used = 0;
       bc_array_s_append_sd_segmentd_msg_header(&this->buffer,id,sd_channel_msg_type_RESPONSE,a_type,trace_id);
 
+      bc_array_s_append_be_ui(&this->buffer,trace->config.record.size);
       bc_array_s_append_be_lli(&this->buffer,sd_trace_s_head(&trace->trace));
       bc_array_s_append_be_lli(&this->buffer,sd_trace_s_tail(&trace->trace));
 

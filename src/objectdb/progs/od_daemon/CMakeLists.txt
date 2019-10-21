@@ -1,8 +1,9 @@
 
 set(CONF_COMPONENTS
   "src/clib/libs/libprocess_cll"
-  "src/segmentd/libs/libchannel_sdl"
-  "src/segmentd/libs/libtrace_sdl")
+  "src/objectdb/libs/libconf_odl"
+  "src/objectdb/libs/libchannel_odl"
+  "src/objectdb/libs/libodb_odl")
 set(CONF_HEADER_DIRS)
 
 set(CONF_DO_BUILD TRUE)

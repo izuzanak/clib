@@ -10,5 +10,67 @@
       "type": "file",
       "path": "/dev/shm/segment_gps.img"
     }
+  ],
+  "traces": [
+    {
+      "trace_id": "gps",
+      "record": {
+        "type": "raw",
+        "size": 512
+      },
+      "header": {
+        "type": "mmap",
+        "mmap": {
+          "path": "/dev/shm/trace.img",
+          "offset": 0,
+          "size": 128
+        }
+      },
+      "trace": {
+        "path": "/dev/shm/trace.img",
+        "offset": 4224,
+        "size": 26496
+      },
+      "timestamp_div": 10,
+      "timestamp": {
+        "type": "mmap",
+        "mmap": {
+          "path": "/dev/shm/trace.img",
+          "offset": 128,
+          "size": 4096
+        }
+      }
+    },
+    {
+      "trace_id": "meter",
+      "record": {
+        "type": "raw",
+        "size": 512
+      },
+      "header": {
+        "type": "segment",
+        "segment": {
+          "segment_id": "meter_header",
+          "size": 512,
+          "type": "file",
+          "path": "/dev/shm/segment_meter.img"
+        }
+      },
+      "trace": {
+        "path": "/dev/shm/trace_meter.img",
+        "offset": 4096,
+        "size": 26624
+      },
+      "timestamp_div": 10,
+      "timestamp": {
+        "type": "segment",
+        "segment": {
+          "segment_id": "meter_ts",
+          "size": 784,
+          "type": "file",
+          "path": "/dev/shm/segment_meter_ts.img"
+        }
+      }
+    }
   ]
 }

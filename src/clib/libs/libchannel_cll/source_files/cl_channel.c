@@ -3,6 +3,10 @@
 include "cl_channel.h"
 @end
 
+// === var type channel_message  ===============================================
+
+unsigned g_type_channel_message = c_idx_not_exist;
+
 // === methods of generated structures =========================================
 
 // -- var_queue_s --
@@ -14,8 +18,6 @@ methods var_queue_s
 @begin
 methods channel_conn_s
 @end
-
-unsigned g_type_channel_message = c_idx_not_exist;
 
 void channel_conn_s_create(channel_conn_s *this,epoll_fd_s *a_epoll_fd,
     channel_conn_message_callback_t a_conn_message_callback,
@@ -339,6 +341,8 @@ int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll
 
   return 0;
 }/*}}}*/
+
+// === global functions ========================================================
 
 void libchannel_cll_init()
 {/*{{{*/

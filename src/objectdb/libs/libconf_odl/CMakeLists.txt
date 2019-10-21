@@ -1,8 +1,8 @@
 
 set(CONF_COMPONENTS
-  "src/clib/libs/libprocess_cll"
-  "src/segmentd/libs/libchannel_sdl"
-  "src/segmentd/libs/libtrace_sdl")
+  "src/clib/libs/libsys_cll"
+  "src/clib/libs/libjson_cll"
+  "src/clib/libs/libvalidator_cll")
 set(CONF_HEADER_DIRS)
 
 set(CONF_DO_BUILD TRUE)
