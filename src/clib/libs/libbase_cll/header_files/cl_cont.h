@@ -22,17 +22,19 @@ include "cl_basic.h"
 
 // -- bc_array_s --
 @begin
-array<bc>
-additions
-{
+array<bc> bc_array_s;
+@end
+
 static inline void bc_array_s_append(bc_array_s *this,unsigned a_count,const char *a_data);
 static inline void bc_array_s_append_ptr(bc_array_s *this,const char *a_data);
 static inline  void bc_array_s_append_format(bc_array_s *this,const char *a_format,...);
 libbase_cll_EXPORT void bc_array_s_append_format_ap(bc_array_s *this,const char *a_format,va_list a_ap);
 static inline void bc_array_s_tail(bc_array_s *this,unsigned a_count);
-}
-bc_array_s;
-@end
+
+static inline void bc_array_s_append_be_usi(bc_array_s *this,usi a_value);
+static inline void bc_array_s_append_be_ui(bc_array_s *this,ui a_value);
+static inline void bc_array_s_append_be_lli(bc_array_s *this,lli a_value);
+static inline void bc_array_s_append_be_ulli(bc_array_s *this,ulli a_value);
 
 // -- json_nice_s --
 @begin
@@ -213,6 +215,30 @@ static inline void bc_array_s_tail(bc_array_s *this,unsigned a_count)
   }
 
   this->used = a_count;
+}/*}}}*/
+
+static inline void bc_array_s_append_be_usi(bc_array_s *this,usi a_value)
+{/*{{{*/
+  a_value = htobe16(a_value);
+  bc_array_s_append(this,sizeof(usi),(char *)&a_value);
+}/*}}}*/
+
+static inline void bc_array_s_append_be_ui(bc_array_s *this,ui a_value)
+{/*{{{*/
+  a_value = htobe32(a_value);
+  bc_array_s_append(this,sizeof(ui),(char *)&a_value);
+}/*}}}*/
+
+static inline void bc_array_s_append_be_lli(bc_array_s *this,lli a_value)
+{/*{{{*/
+  a_value = htobe64(a_value);
+  bc_array_s_append(this,sizeof(lli),(char *)&a_value);
+}/*}}}*/
+
+static inline void bc_array_s_append_be_ulli(bc_array_s *this,ulli a_value)
+{/*{{{*/
+  a_value = htobe64(a_value);
+  bc_array_s_append(this,sizeof(ulli),(char *)&a_value);
 }/*}}}*/
 
 // -- json_nice_s --

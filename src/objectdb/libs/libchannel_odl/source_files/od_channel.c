@@ -13,6 +13,7 @@ const char g_json_parser_init[] =
 "\"id\","
 
 "\"type\","
+"\"resp\","
 "\"path\","
 "\"data\","
 
@@ -20,6 +21,7 @@ const char g_json_parser_init[] =
 "\"get\","
 "\"watch\","
 "\"ignore\","
+"\"update\","
 
 "\"last\","
 
@@ -144,12 +146,12 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
 {/*{{{*/
   debug_message_5(fprintf(stderr,"conn_message: %u - %u bytes\n",a_index,a_message->used));
 
-  od_channel_s *this = (od_channel_s *)a_od_channel;
-  var_array_s *string_vars = &g_od_channel_json_parser.string_vars;
-
   // - log message -
   log_info_2("channel server %u, <-- " LOG_MSG_FORMAT,a_index,
       LOG_MSG_PARAMETERS(a_message->used,a_message->data));
+
+  od_channel_s *this = (od_channel_s *)a_od_channel;
+  var_array_s *string_vars = &g_od_channel_json_parser.string_vars;
 
   CONT_INIT_CLEAR(var_s,msg_var);
   if (json_parser_s_parse(&g_od_channel_json_parser,a_message,&msg_var))
@@ -190,7 +192,7 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
       if (od_channel_s_message_call(this,a_index,od_channel_cbreq_SET,id,
             loc_s_string_value(path_var),data_var))
       {
-        throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        throw_error(OD_CHANNEL_SERVER_CALLBACK_ERROR);
       }
     }/*}}}*/
     break;
@@ -207,7 +209,7 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
       if (od_channel_s_message_call(this,a_index,od_channel_cbreq_GET,id,
             loc_s_string_value(path_var)))
       {
-        throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        throw_error(OD_CHANNEL_SERVER_CALLBACK_ERROR);
       }
     }/*}}}*/
     break;
@@ -224,7 +226,7 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
       if (od_channel_s_message_call(this,a_index,od_channel_cbreq_WATCH,id,
             loc_s_string_value(path_var)))
       {
-        throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        throw_error(OD_CHANNEL_SERVER_CALLBACK_ERROR);
       }
     }/*}}}*/
     break;
@@ -241,7 +243,7 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
       if (od_channel_s_message_call(this,a_index,od_channel_cbreq_IGNORE,id,
             loc_s_string_value(path_var)))
       {
-        throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        throw_error(OD_CHANNEL_SERVER_CALLBACK_ERROR);
       }
     }/*}}}*/
     break;
@@ -309,9 +311,136 @@ int od_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
   log_info_2("channel client, <-- " LOG_MSG_FORMAT,
     LOG_MSG_PARAMETERS(a_message->used,a_message->data));
 
-  //od_channel_client_s *this = (od_channel_client_s *)a_sd_channel_client;
+  od_channel_client_s *this = (od_channel_client_s *)a_sd_channel_client;
+  var_array_s *string_vars = &g_od_channel_json_parser.string_vars;
 
-  // FIXME TODO continue ...
+  CONT_INIT_CLEAR(var_s,msg_var);
+  if (json_parser_s_parse(&g_od_channel_json_parser,a_message,&msg_var))
+  {
+    // - reset parser state after syntax error -
+    g_od_channel_json_parser.string_idxs.used = 0;
+    g_od_channel_json_parser.values.used = 0;
+    g_od_channel_json_parser.arrays.used = 0;
+    g_od_channel_json_parser.objects.used = 0;
+
+    throw_error(OD_CHANNEL_MESSAGE_ERROR);
+  }
+
+  var_s id_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_ID]);
+  if (id_var == NULL || id_var->v_type != c_bi_type_integer)
+  {
+    throw_error(OD_CHANNEL_MESSAGE_ERROR);
+  }
+
+  lli id = loc_s_int_value(id_var);
+  var_s type_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_TYPE]);
+  unsigned type_idx = pointer_tree_s_get_idx(&g_od_channel_json_string_map,type_var);
+
+  switch (type_idx)
+  {
+  case od_channel_UPDATE:
+    {/*{{{*/
+      var_s path_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_PATH]);
+      var_s data_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_DATA]);
+
+      if (path_var == NULL || path_var->v_type != c_bi_type_string ||
+          data_var == NULL)
+      {
+        throw_error(OD_CHANNEL_MESSAGE_ERROR);
+      }
+
+      // - call callback -
+      if (od_channel_client_s_message_call(this,od_channel_cbevt_UPDATE,id,
+            loc_s_string_value(path_var),data_var))
+      {
+        throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+      }
+    }/*}}}*/
+    break;
+  default:
+    {/*{{{*/
+      var_s resp_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_RESP]);
+      unsigned resp_idx = pointer_tree_s_get_idx(&g_od_channel_json_string_map,resp_var);
+
+      switch (resp_idx)
+      {
+      case od_channel_SET:
+        {/*{{{*/
+          var_s path_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_PATH]);
+
+          if (path_var == NULL || path_var->v_type != c_bi_type_string)
+          {
+            throw_error(OD_CHANNEL_MESSAGE_ERROR);
+          }
+
+          // - call callback -
+          if (od_channel_client_s_message_call(this,od_channel_cbresp_SET,id,
+                loc_s_string_value(path_var)))
+          {
+            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+          }
+        }/*}}}*/
+        break;
+      case od_channel_GET:
+        {/*{{{*/
+          var_s path_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_PATH]);
+          var_s data_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_DATA]);
+
+          if (path_var == NULL || path_var->v_type != c_bi_type_string ||
+              data_var == NULL)
+          {
+            throw_error(OD_CHANNEL_MESSAGE_ERROR);
+          }
+
+          // - call callback -
+          if (od_channel_client_s_message_call(this,od_channel_cbresp_GET,id,
+                loc_s_string_value(path_var),data_var))
+          {
+            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+          }
+        }/*}}}*/
+        break;
+      case od_channel_WATCH:
+        {/*{{{*/
+          var_s path_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_PATH]);
+
+          if (path_var == NULL || path_var->v_type != c_bi_type_string)
+          {
+            throw_error(OD_CHANNEL_MESSAGE_ERROR);
+          }
+
+          // - call callback -
+          if (od_channel_client_s_message_call(this,od_channel_cbresp_WATCH,id,
+                loc_s_string_value(path_var)))
+          {
+            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+          }
+        }/*}}}*/
+        break;
+      case od_channel_IGNORE:
+        {/*{{{*/
+          var_s path_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_PATH]);
+
+          if (path_var == NULL || path_var->v_type != c_bi_type_string)
+          {
+            throw_error(OD_CHANNEL_MESSAGE_ERROR);
+          }
+
+          // - call callback -
+          if (od_channel_client_s_message_call(this,od_channel_cbresp_IGNORE,id,
+                loc_s_string_value(path_var)))
+          {
+            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+          }
+        }/*}}}*/
+        break;
+      default:
+        throw_error(OD_CHANNEL_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+  }
+
+  return 0;
 
   return 0;
 }/*}}}*/

@@ -8,8 +8,6 @@ include "cl_logger.h"
 include "cl_channel.h"
 @end
 
-#include "endian.h"
-
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
 #define libchannel_odl_EXPORT
@@ -46,6 +44,7 @@ enum
   od_channel_ID,
 
   od_channel_TYPE,
+  od_channel_RESP,
   od_channel_PATH,
   od_channel_DATA,
 
@@ -53,6 +52,7 @@ enum
   od_channel_GET,
   od_channel_WATCH,
   od_channel_IGNORE,
+  od_channel_UPDATE,
 
   od_channel_LAST,
 };/*}}}*/
@@ -66,6 +66,13 @@ enum
   od_channel_cbreq_GET,
   od_channel_cbreq_WATCH,
   od_channel_cbreq_IGNORE,
+
+  od_channel_cbresp_SET,
+  od_channel_cbresp_GET,
+  od_channel_cbresp_WATCH,
+  od_channel_cbresp_IGNORE,
+
+  od_channel_cbevt_UPDATE,
 };/*}}}*/
 
 // === definition of generated structures ======================================

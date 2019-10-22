@@ -290,6 +290,22 @@ int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       {
         throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
       }
+
+      CONT_INIT_CLEAR(var_s,data_var);
+      odb_database_s_get_value(&this->database,path->data,&data_var);
+
+      // - send response -
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
+      string_s_to_json(path,&this->buffer);
+      bc_array_s_append_ptr(&this->buffer,",\"data\":");
+      var_s_to_json(&data_var,&this->buffer);
+      bc_array_s_push(&this->buffer,'}');
+
+      if (od_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
     }/*}}}*/
     break;
   case od_channel_cbreq_IGNORE:

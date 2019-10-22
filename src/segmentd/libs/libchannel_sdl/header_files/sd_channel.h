@@ -62,6 +62,11 @@ enum
 
 // === definition of generated structures ======================================
 
+// -- bc_array_s --
+
+static inline void bc_array_s_append_sd_segmentd_msg_header(bc_array_s *this,
+    ulli a_id,usi a_type,usi a_req_id,const string_s *a_segment_id);
+
 // -- sd_channel_s --
 @begin
 struct
@@ -115,6 +120,17 @@ WUR libchannel_sdl_EXPORT int sd_channel_client_s_fd_event(void *a_sd_channel_cl
 WUR libchannel_sdl_EXPORT int sd_channel_client_s_connect_time_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // === inline methods of generated structures ==================================
+
+// -- bc_array_s --
+
+static inline void bc_array_s_append_sd_segmentd_msg_header(bc_array_s *this,
+    ulli a_id,usi a_type,usi a_req_id,const string_s *a_segment_id)
+{/*{{{*/
+  bc_array_s_append_be_ulli(this,a_id);
+  bc_array_s_append_be_usi(this,a_type);
+  bc_array_s_append_be_usi(this,a_req_id);
+  bc_array_s_append(this,a_segment_id->size,a_segment_id->data);
+}/*}}}*/
 
 // -- sd_channel_s --
 @begin

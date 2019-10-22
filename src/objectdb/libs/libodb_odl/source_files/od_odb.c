@@ -94,13 +94,13 @@ void odb_database_s_get_value(odb_database_s *this,const char *a_path,var_s *a_v
   do {
     key_end_ptr = strchrnul(key_ptr,'/');
 
-    // FIXME TODO create temporary string var
-    VAR_CLEAR(key_var,loc_s_string(key_end_ptr - key_ptr,key_ptr));
+    string_s key_str = {key_end_ptr - key_ptr + 1,(char *)key_ptr};
+    loc_s key_loc = {c_bi_type_string,{0},{.ptr = &key_str}};
 
     // - data_var is dictionary, and key does exist -
-    if (data_var->v_type == c_bi_type_dict && loc_s_dict_has_key(data_var,key_var))
+    if (data_var->v_type == c_bi_type_dict && loc_s_dict_has_key(data_var,&key_loc))
     {
-      data_var = loc_s_dict_get(data_var,key_var);
+      data_var = loc_s_dict_get(data_var,&key_loc);
     }
     else
     {
@@ -166,7 +166,6 @@ void odb_database_s_find_node(odb_database_s *this,const char *a_path,var_s *a_i
 {/*{{{*/
   var_s_copy_loc(a_info_var,NULL);
 
-  // FIXME TODO create temporary string var
   ODB_DATABASE_S_ADD_FIND_NODE(
     return;
   );

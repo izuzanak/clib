@@ -117,7 +117,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
   char *ptr = a_message->data;
   char *ptr_end = ptr + a_message->used;
 
-  if (ptr_end - ptr >= 10)
+  if (ptr_end - ptr >= sizeof(ulli) + sizeof(usi))
   {
     ulli id;
     memcpy(&id,ptr,sizeof(ulli)); ptr += sizeof(ulli);
@@ -131,7 +131,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
     {
       case sd_channel_msg_type_REQUEST:
         {/*{{{*/
-          if ((ptr_end - ptr) >= 4)
+          if (ptr_end - ptr >= sizeof(usi))
           {
             usi request;
             memcpy(&request,ptr,sizeof(usi)); ptr += sizeof(usi);
@@ -167,7 +167,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                         break;
                       case sd_channel_cbreq_SEGMENT_WRITE:
                         {/*{{{*/
-                          if (ptr_end - ptr >= 4)
+                          if (ptr_end - ptr >= sizeof(ulli))
                           {
                             ulli time;
                             memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
@@ -220,7 +220,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                         break;
                       case sd_channel_cbreq_TRACE_WRITE:
                         {/*{{{*/
-                          if (ptr_end - ptr >= 4)
+                          if (ptr_end - ptr >= sizeof(ulli))
                           {
                             ulli time;
                             memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
@@ -240,7 +240,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                         break;
                       case sd_channel_cbreq_TRACE_READ:
                         {/*{{{*/
-                          if (ptr_end - ptr >= 4)
+                          if (ptr_end - ptr >= sizeof(lli))
                           {
                             lli record_id;
                             memcpy(&record_id,ptr,sizeof(lli));
@@ -330,9 +330,199 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
   // - log message -
   log_info_2("channel client, <-- %u bytes",a_message->used);
 
-  //sd_channel_client_s *this = (sd_channel_client_s *)a_sd_channel_client;
+  sd_channel_client_s *this = (sd_channel_client_s *)a_sd_channel_client;
 
-  // FIXME TODO continue ...
+  char *ptr = a_message->data;
+  char *ptr_end = ptr + a_message->used;
+
+  if (ptr_end - ptr >= sizeof(ulli) + sizeof(usi))
+  {
+    ulli id;
+    memcpy(&id,ptr,sizeof(ulli)); ptr += sizeof(ulli);
+    id = be64toh(id);
+
+    usi type;
+    memcpy(&type,ptr,sizeof(usi)); ptr += sizeof(usi);
+    type = be16toh(type);
+
+    switch (type)
+    {
+      case sd_channel_msg_type_REQUEST:
+        break;
+      case sd_channel_msg_type_RESPONSE:
+        {/*{{{*/
+          if (ptr_end - ptr >= sizeof(usi))
+          {
+            usi request;
+            memcpy(&request,ptr,sizeof(usi)); ptr += sizeof(usi);
+            request = be16toh(request);
+
+            switch (request)
+            {
+              case sd_channel_cbreq_SEGMENT_INFO:
+              case sd_channel_cbreq_SEGMENT_WRITE:
+              case sd_channel_cbreq_SEGMENT_READ:
+                {/*{{{*/
+                  unsigned rest_length = a_message->used + (ptr - a_message->data);
+                  unsigned segment_id_length = strnlen(ptr,rest_length);
+                  if (segment_id_length < rest_length)
+                  {
+                    const string_s segment_id = {segment_id_length + 1,ptr};
+                    ptr += segment_id.size;
+
+                    switch (request)
+                    {
+                      case sd_channel_cbreq_SEGMENT_INFO:
+                        {/*{{{*/
+                          if (ptr_end - ptr >= sizeof(unsigned))
+                          {
+                            unsigned rec_size;
+                            memcpy(&rec_size,ptr,sizeof(unsigned)); ptr += sizeof(unsigned);
+                            rec_size = be32toh(rec_size);
+
+                            // - call callback -
+                            if (sd_channel_client_s_message_call(
+                                  this,request,id,
+                                  &segment_id,rec_size))
+                            {
+                              throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
+                            }
+                          }
+                        }/*}}}*/
+                        break;
+                      case sd_channel_cbreq_SEGMENT_READ:
+                        {/*{{{*/
+                          if (ptr_end - ptr >= sizeof(ulli))
+                          {
+                            ulli time;
+                            memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
+                            time = be64toh(time);
+
+                            const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+
+                            // - call callback -
+                            if (sd_channel_client_s_message_call(
+                                  this,request,id,
+                                  &segment_id,time,&data))
+                            {
+                              throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
+                            }
+                          }
+                        }/*}}}*/
+                        break;
+                      case sd_channel_cbreq_SEGMENT_WRITE:
+                        {/*{{{*/
+
+                          // - call callback -
+                          if (sd_channel_client_s_message_call(
+                                this,request,id,
+                                &segment_id))
+                          {
+                            throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
+                          }
+                        }/*}}}*/
+                        break;
+                    }
+                  }
+                }/*}}}*/
+                break;
+              case sd_channel_cbreq_TRACE_INFO:
+              case sd_channel_cbreq_TRACE_WRITE:
+              case sd_channel_cbreq_TRACE_READ:
+              case sd_channel_cbreq_TRACE_HEAD:
+              case sd_channel_cbreq_TRACE_TAIL:
+                {/*{{{*/
+                  unsigned rest_length = a_message->used + (ptr - a_message->data);
+                  unsigned trace_id_length = strnlen(ptr,rest_length);
+                  if (trace_id_length < rest_length)
+                  {
+                    const string_s trace_id = {trace_id_length + 1,ptr};
+                    ptr += trace_id.size;
+
+                    switch (request)
+                    {
+                      case sd_channel_cbreq_TRACE_INFO:
+                        {/*{{{*/
+                          if (ptr_end - ptr >= sizeof(unsigned) + 2*sizeof(lli))
+                          {
+                            unsigned rec_size;
+                            memcpy(&rec_size,ptr,sizeof(unsigned)); ptr += sizeof(unsigned);
+                            rec_size = be32toh(rec_size);
+
+                            lli head_id;
+                            memcpy(&head_id,ptr,sizeof(lli)); ptr += sizeof(lli);
+                            head_id = be64toh(head_id);
+
+                            lli tail_id;
+                            memcpy(&tail_id,ptr,sizeof(lli)); ptr += sizeof(lli);
+                            tail_id = be64toh(tail_id);
+
+                            // - call callback -
+                            if (sd_channel_client_s_message_call(
+                                  this,request,id,
+                                  &trace_id,rec_size,head_id,tail_id))
+                            {
+                              throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
+                            }
+                          }
+                        }/*}}}*/
+                        break;
+                      case sd_channel_cbreq_TRACE_HEAD:
+                      case sd_channel_cbreq_TRACE_TAIL:
+                      case sd_channel_cbreq_TRACE_READ:
+                        {/*{{{*/
+                          if (ptr_end - ptr >= sizeof(lli) + sizeof(ulli))
+                          {
+                            lli record_id;
+                            memcpy(&record_id,ptr,sizeof(lli)); ptr += sizeof(lli);
+                            record_id = be64toh(record_id);
+
+                            ulli time;
+                            memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
+                            time = be64toh(time);
+
+                            const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+
+                            // - call callback -
+                            if (sd_channel_client_s_message_call(
+                                  this,request,id,
+                                  &trace_id,record_id,time,&data))
+                            {
+                              throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
+                            }
+                          }
+                        }/*}}}*/
+                        break;
+                      case sd_channel_cbreq_TRACE_WRITE:
+                        {/*{{{*/
+                          if (ptr_end - ptr >= sizeof(lli))
+                          {
+                            lli record_id;
+                            memcpy(&record_id,ptr,sizeof(lli)); ptr += sizeof(lli);
+                            record_id = be64toh(record_id);
+
+                            // - call callback -
+                            if (sd_channel_client_s_message_call(
+                                  this,request,id,
+                                  &trace_id,record_id))
+                            {
+                              throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
+                            }
+                          }
+                        }/*}}}*/
+                        break;
+                    }
+                  }
+                }/*}}}*/
+                break;
+            }
+          }
+        }/*}}}*/
+        break;
+      case sd_channel_msg_type_EVENT:
+        break;
+    }
+  }
 
   return 0;
 }/*}}}*/
