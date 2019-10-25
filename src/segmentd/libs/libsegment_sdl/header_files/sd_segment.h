@@ -70,6 +70,7 @@ struct
 <
 sd_conf_segment_s:config
 sd_segment_handle_s:handle
+ui_array_s:channel_idxs
 >
 sd_segment_descr_s;
 @end

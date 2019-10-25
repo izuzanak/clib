@@ -7,6 +7,8 @@ include "cl_linux.h"
 include "cl_var.h"
 @end
 
+#include <netinet/tcp.h>
+
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
 #define libchannel_cll_EXPORT
@@ -20,17 +22,19 @@ include "cl_var.h"
 
 // - error codes -
 #define ERROR_CHANNEL_SERVER_LISTEN_ERROR 1
-#define ERROR_CHANNEL_SERVER_INVALID_FD 2
-#define ERROR_CHANNEL_SERVER_ACCEPT_ERROR 3
+#define ERROR_CHANNEL_SERVER_SOCKOPT_ERROR 2
+#define ERROR_CHANNEL_SERVER_INVALID_FD 3
+#define ERROR_CHANNEL_SERVER_ACCEPT_ERROR 4
 
 #define ERROR_CHANNEL_CONN_INVALID_FD 1
 #define ERROR_CHANNEL_CONN_CONNECT_ERROR 2
-#define ERROR_CHANNEL_CONN_SEND_ERROR 3
-#define ERROR_CHANNEL_CONN_WRITE_ERROR 4
-#define ERROR_CHANNEL_CONN_RECEIVE_ERROR 5
-#define ERROR_CHANNEL_CONN_READ_ERROR 6
-#define ERROR_CHANNEL_CONN_CALLBACK_ERROR 7
-#define ERROR_CHANNEL_CONN_EPOLL_ERROR 8
+#define ERROR_CHANNEL_CONN_SOCKOPT_ERROR 3
+#define ERROR_CHANNEL_CONN_SEND_ERROR 4
+#define ERROR_CHANNEL_CONN_WRITE_ERROR 5
+#define ERROR_CHANNEL_CONN_RECEIVE_ERROR 6
+#define ERROR_CHANNEL_CONN_READ_ERROR 7
+#define ERROR_CHANNEL_CONN_CALLBACK_ERROR 8
+#define ERROR_CHANNEL_CONN_EPOLL_ERROR 9
 
 typedef struct channel_server_s channel_server_s;
 typedef int (*channel_conn_new_callback_t)(void *a_object,unsigned a_index);

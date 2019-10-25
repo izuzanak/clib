@@ -65,6 +65,12 @@ int channel_conn_s_create_client(channel_conn_s *this,
     throw_error(CHANNEL_CONN_CONNECT_ERROR);
   }
 
+  int yes = 1;
+  if (setsockopt(this->epoll_fd.fd,SOL_TCP,TCP_NODELAY,&yes,sizeof(int)))
+  {
+    throw_error(CHANNEL_CONN_SOCKOPT_ERROR);
+  }
+
   // - connect to server -
   if (connect(this->epoll_fd.fd,(struct sockaddr *)&address,sizeof(struct sockaddr_in)) != 0)
   {
@@ -275,6 +281,12 @@ int channel_server_s_create(channel_server_s *this,
       socket_s_listen(&this->epoll_fd.fd,&address,256))
   {
     throw_error(CHANNEL_SERVER_LISTEN_ERROR);
+  }
+
+  int yes = 1;
+  if (setsockopt(this->epoll_fd.fd,SOL_TCP,TCP_NODELAY,&yes,sizeof(int)))
+  {
+    throw_error(CHANNEL_SERVER_SOCKOPT_ERROR);
   }
 
   return 0;

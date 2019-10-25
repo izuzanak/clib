@@ -35,6 +35,26 @@ safe_rb_tree<sd_segment_descr_s> sd_segment_tree_s;
 safe_rb_tree<sd_trace_descr_s> sd_trace_tree_s;
 @end
 
+// -- ui_tree_s --
+@begin
+safe_rb_tree<ui> ui_tree_s;
+@end
+
+// -- sd_channel_watch_s --
+@begin
+struct
+<
+ui_tree_s:segment_idxs
+ui_tree_s:trace_idxs
+>
+sd_channel_watch_s;
+@end
+
+// -- sd_channel_watches_s --
+@begin
+array<sd_channel_watch_s> sd_channel_watches_s;
+@end
+
 // -- sd_daemon_s --
 @begin
 struct
@@ -47,6 +67,8 @@ sd_segment_tree_s:segments
 sd_trace_tree_s:traces
 
 sd_channel_s:channel
+sd_channel_watches_s:channel_watches
+bi:update_watches
 
 bc_array_s:buffer
 epoll_s:epoll
@@ -59,6 +81,9 @@ WUR int sd_daemon_s_create(sd_daemon_s *this);
 WUR int sd_daemon_s_process_config(sd_daemon_s *this);
 WUR int sd_daemon_s_update_segments(sd_daemon_s *this);
 WUR int sd_daemon_s_update_traces(sd_daemon_s *this);
+
+void sd_daemon_s_do_update_watches(sd_daemon_s *this);
+static inline void sd_daemon_s_update_watches(sd_daemon_s *this);
 
 WUR int sd_daemon_s_run(sd_daemon_s *this);
 
@@ -102,10 +127,40 @@ static inline int sd_trace_tree_s___compare_value(const sd_trace_tree_s *this,co
   return memcmp(first->data,second->data,first->size - 1);
 }/*}}}*/
 
+// -- ui_tree_s --
+@begin
+inlines ui_tree_s
+@end
+
+static inline int ui_tree_s___compare_value(const ui_tree_s *this,const ui *a_first,const ui *a_second)
+{/*{{{*/
+  (void)this;
+
+  return *a_first < *a_second ? -1 : *a_first > *a_second ? 1 : 0;
+}/*}}}*/
+
+// -- sd_channel_watch_s --
+@begin
+inlines sd_channel_watch_s
+@end
+
+// -- sd_channel_watches_s --
+@begin
+inlines sd_channel_watches_s
+@end
+
 // -- sd_daemon_s --
 @begin
 inlines sd_daemon_s
 @end
+
+static inline void sd_daemon_s_update_watches(sd_daemon_s *this)
+{/*{{{*/
+  if (this->update_watches)
+  {
+    sd_daemon_s_do_update_watches(this);
+  }
+}/*}}}*/
 
 // === definition of global functions ==========================================
 

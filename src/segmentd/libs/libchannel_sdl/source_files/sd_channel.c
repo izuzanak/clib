@@ -142,6 +142,8 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
               case sd_channel_cbreq_SEGMENT_INFO:
               case sd_channel_cbreq_SEGMENT_WRITE:
               case sd_channel_cbreq_SEGMENT_READ:
+              case sd_channel_cbreq_SEGMENT_WATCH:
+              case sd_channel_cbreq_SEGMENT_IGNORE:
                 {/*{{{*/
                   unsigned rest_length = a_message->used + (ptr - a_message->data);
                   unsigned segment_id_length = strnlen(ptr,rest_length);
@@ -154,6 +156,8 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                     {
                       case sd_channel_cbreq_SEGMENT_INFO:
                       case sd_channel_cbreq_SEGMENT_READ:
+                      case sd_channel_cbreq_SEGMENT_WATCH:
+                      case sd_channel_cbreq_SEGMENT_IGNORE:
                         {/*{{{*/
 
                           // - call callback -
@@ -194,6 +198,8 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
               case sd_channel_cbreq_TRACE_READ:
               case sd_channel_cbreq_TRACE_HEAD:
               case sd_channel_cbreq_TRACE_TAIL:
+              case sd_channel_cbreq_TRACE_WATCH:
+              case sd_channel_cbreq_TRACE_IGNORE:
                 {/*{{{*/
                   unsigned rest_length = a_message->used + (ptr - a_message->data);
                   unsigned trace_id_length = strnlen(ptr,rest_length);
@@ -207,6 +213,8 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                       case sd_channel_cbreq_TRACE_INFO:
                       case sd_channel_cbreq_TRACE_HEAD:
                       case sd_channel_cbreq_TRACE_TAIL:
+                      case sd_channel_cbreq_TRACE_WATCH:
+                      case sd_channel_cbreq_TRACE_IGNORE:
                         {/*{{{*/
 
                           // - call callback -
@@ -362,6 +370,8 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
               case sd_channel_cbreq_SEGMENT_INFO:
               case sd_channel_cbreq_SEGMENT_WRITE:
               case sd_channel_cbreq_SEGMENT_READ:
+              case sd_channel_cbreq_SEGMENT_WATCH:
+              case sd_channel_cbreq_SEGMENT_IGNORE:
                 {/*{{{*/
                   unsigned rest_length = a_message->used + (ptr - a_message->data);
                   unsigned segment_id_length = strnlen(ptr,rest_length);
@@ -411,6 +421,8 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                         }/*}}}*/
                         break;
                       case sd_channel_cbreq_SEGMENT_WRITE:
+                      case sd_channel_cbreq_SEGMENT_WATCH:
+                      case sd_channel_cbreq_SEGMENT_IGNORE:
                         {/*{{{*/
 
                           // - call callback -
@@ -431,6 +443,8 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
               case sd_channel_cbreq_TRACE_READ:
               case sd_channel_cbreq_TRACE_HEAD:
               case sd_channel_cbreq_TRACE_TAIL:
+              case sd_channel_cbreq_TRACE_WATCH:
+              case sd_channel_cbreq_TRACE_IGNORE:
                 {/*{{{*/
                   unsigned rest_length = a_message->used + (ptr - a_message->data);
                   unsigned trace_id_length = strnlen(ptr,rest_length);
@@ -511,6 +525,19 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                           }
                         }/*}}}*/
                         break;
+                      case sd_channel_cbreq_TRACE_WATCH:
+                      case sd_channel_cbreq_TRACE_IGNORE:
+                        {/*{{{*/
+
+                          // - call callback -
+                          if (sd_channel_client_s_message_call(
+                                this,request,id,
+                                &trace_id))
+                          {
+                            throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
+                          }
+                        }/*}}}*/
+                        break;
                     }
                   }
                 }/*}}}*/
@@ -520,6 +547,78 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
         }/*}}}*/
         break;
       case sd_channel_msg_type_EVENT:
+        {/*{{{*/
+          if (ptr_end - ptr >= sizeof(usi))
+          {
+            usi request;
+            memcpy(&request,ptr,sizeof(usi)); ptr += sizeof(usi);
+            request = be16toh(request);
+
+            switch (request)
+            {
+              case sd_channel_cbreq_SEGMENT_UPDATE:
+                {/*{{{*/
+                  unsigned rest_length = a_message->used + (ptr - a_message->data);
+                  unsigned segment_id_length = strnlen(ptr,rest_length);
+                  if (segment_id_length < rest_length)
+                  {
+                    const string_s segment_id = {segment_id_length + 1,ptr};
+                    ptr += segment_id.size;
+
+                    if (ptr_end - ptr >= sizeof(ulli))
+                    {
+                      ulli time;
+                      memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
+                      time = be64toh(time);
+
+                      const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+
+                      // - call callback -
+                      if (sd_channel_client_s_message_call(
+                            this,request,id,
+                            &segment_id,time,&data))
+                      {
+                        throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
+                      }
+                    }
+                  }
+                }/*}}}*/
+                break;
+              case sd_channel_cbreq_TRACE_UPDATE:
+                {/*{{{*/
+                  unsigned rest_length = a_message->used + (ptr - a_message->data);
+                  unsigned trace_id_length = strnlen(ptr,rest_length);
+                  if (trace_id_length < rest_length)
+                  {
+                    const string_s trace_id = {trace_id_length + 1,ptr};
+                    ptr += trace_id.size;
+
+                    if (ptr_end - ptr >= sizeof(lli) + sizeof(ulli))
+                    {
+                      lli record_id;
+                      memcpy(&record_id,ptr,sizeof(lli)); ptr += sizeof(lli);
+                      record_id = be64toh(record_id);
+
+                      ulli time;
+                      memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
+                      time = be64toh(time);
+
+                      const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+
+                      // - call callback -
+                      if (sd_channel_client_s_message_call(
+                            this,request,id,
+                            &trace_id,record_id,time,&data))
+                      {
+                        throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
+                      }
+                    }
+                  }
+                }/*}}}*/
+                break;
+            }
+          }
+        }/*}}}*/
         break;
     }
   }

@@ -32,6 +32,16 @@ extern unsigned g_sd_page_size;
 
 // === definition of generated structures ======================================
 
+// -- sd_record_timestamp_s --
+@begin
+struct
+<
+lli:id
+time_s:time
+>
+sd_record_timestamp_s;
+@end
+
 // -- sd_record_header_s --
 @begin
 struct
@@ -42,16 +52,6 @@ time_s:time
 ui:data_size
 >
 sd_record_header_s;
-@end
-
-// -- sd_record_timestamp_s --
-@begin
-struct
-<
-lli:id
-time_s:time
->
-sd_record_timestamp_s;
 @end
 
 // === definition of structure sd_record_s ==================================

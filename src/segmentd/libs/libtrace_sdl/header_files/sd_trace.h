@@ -188,6 +188,7 @@ sd_trace_mmap_s:mmap_header
 sd_trace_mmap_s:mmap_trace
 sd_trace_mmap_s:mmap_timestamp
 sd_trace_s:trace
+ui_array_s:channel_idxs
 >
 sd_trace_descr_s;
 @end

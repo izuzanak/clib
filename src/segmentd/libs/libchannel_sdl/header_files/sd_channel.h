@@ -52,12 +52,18 @@ enum
   sd_channel_cbreq_SEGMENT_INFO = 1,
   sd_channel_cbreq_SEGMENT_WRITE,
   sd_channel_cbreq_SEGMENT_READ,
+  sd_channel_cbreq_SEGMENT_WATCH,
+  sd_channel_cbreq_SEGMENT_IGNORE,
+  sd_channel_cbreq_SEGMENT_UPDATE,
 
-  sd_channel_cbreq_TRACE_INFO,
+  sd_channel_cbreq_TRACE_INFO = 11,
   sd_channel_cbreq_TRACE_WRITE,
   sd_channel_cbreq_TRACE_READ,
   sd_channel_cbreq_TRACE_HEAD,
   sd_channel_cbreq_TRACE_TAIL,
+  sd_channel_cbreq_TRACE_WATCH,
+  sd_channel_cbreq_TRACE_IGNORE,
+  sd_channel_cbreq_TRACE_UPDATE,
 };/*}}}*/
 
 // === definition of generated structures ======================================
