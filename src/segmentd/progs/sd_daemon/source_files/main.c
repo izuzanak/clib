@@ -165,18 +165,14 @@ int sd_daemon_s_update_segments(sd_daemon_s *this)
           }
 
           segment_idx = sd_segment_tree_s_swap_insert(&this->segments,&insert_segment);
-          segment = sd_segment_tree_s_at(&this->segments,segment_idx);
+          sd_segment_tree_s_at(&this->segments,segment_idx);
         }
         else
         {
           segment = sd_segment_tree_s_at(&this->segments,segment_idx);
 
-          // - segment configuration without change -
-          if (sd_conf_segment_s_compare(&segment->config,segment_config))
-          {
-            segment = NULL;
-          }
-          else
+          // - segment configuration changed -
+          if (!sd_conf_segment_s_compare(&segment->config,segment_config))
           {
             // - update old segment -
             if (sd_segment_descr_s_create(segment,segment_config))
@@ -258,18 +254,14 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
           sd_conf_trace_s_copy(&insert_trace.config,trace_config);
 
           trace_idx = sd_trace_tree_s_swap_insert(&this->traces,&insert_trace);
-          trace = sd_trace_tree_s_at(&this->traces,trace_idx);
+          sd_trace_tree_s_at(&this->traces,trace_idx);
         }
         else
         {
           trace = sd_trace_tree_s_at(&this->traces,trace_idx);
 
-          // - trace configuration without change -
-          if (sd_conf_trace_s_compare(&trace->config,trace_config))
-          {
-            trace = NULL;
-          }
-          else
+          // - trace configuration changed -
+          if (!sd_conf_trace_s_compare(&trace->config,trace_config))
           {
             // - update old trace -
             if (sd_trace_descr_s_create(trace,trace_config))
@@ -751,34 +743,6 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
     }/*}}}*/
     break;
   case sd_channel_cbreq_TRACE_HEAD:
-    {/*{{{*/
-      ulli id = va_arg(a_ap,ulli);
-      const string_s *trace_id = va_arg(a_ap,const string_s *);
-
-      sd_trace_descr_s search_trace = {{*trace_id,},};
-      unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
-
-      // - check if trace exists -
-      if (trace_idx == c_idx_not_exist)
-      {
-        throw_error(SD_DAEMON_TRACE_NOT_EXIST);
-      }
-
-      sd_trace_descr_s *trace = sd_trace_tree_s_at(&this->traces,trace_idx);
-      lli record_id = sd_trace_s_head(&trace->trace);
-
-      // - send response -
-      this->buffer.used = 0;
-      bc_array_s_append_sd_segmentd_msg_header(&this->buffer,id,sd_channel_msg_type_RESPONSE,a_type,trace_id);
-
-      sd_trace_descr_s_read_to_message(trace,record_id,&this->buffer);
-
-      if (sd_channel_s_send_message(&this->channel,a_index,&this->buffer))
-      {
-        throw_error(SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
-      }
-    }/*}}}*/
-    break;
   case sd_channel_cbreq_TRACE_TAIL:
     {/*{{{*/
       ulli id = va_arg(a_ap,ulli);
@@ -794,7 +758,8 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       }
 
       sd_trace_descr_s *trace = sd_trace_tree_s_at(&this->traces,trace_idx);
-      lli record_id = sd_trace_s_tail(&trace->trace);
+      lli record_id = a_type == sd_channel_cbreq_TRACE_HEAD ?
+        sd_trace_s_head(&trace->trace) : sd_trace_s_tail(&trace->trace);
 
       // - send response -
       this->buffer.used = 0;
@@ -850,6 +815,38 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       // - send response -
       this->buffer.used = 0;
       bc_array_s_append_sd_segmentd_msg_header(&this->buffer,id,sd_channel_msg_type_RESPONSE,a_type,trace_id);
+
+      if (sd_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case sd_channel_cbreq_TRACE_LEE_TIME:
+  case sd_channel_cbreq_TRACE_GRE_TIME:
+    {/*{{{*/
+      ulli id = va_arg(a_ap,ulli);
+      const string_s *trace_id = va_arg(a_ap,const string_s *);
+      ulli time = va_arg(a_ap,ulli);
+
+      sd_trace_descr_s search_trace = {{*trace_id,},};
+      unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
+
+      // - check if trace exists -
+      if (trace_idx == c_idx_not_exist)
+      {
+        throw_error(SD_DAEMON_TRACE_NOT_EXIST);
+      }
+
+      sd_trace_descr_s *trace = sd_trace_tree_s_at(&this->traces,trace_idx);
+      lli record_id = a_type == sd_channel_cbreq_TRACE_LEE_TIME ?
+        sd_trace_s_lee_time(&trace->trace,time) : sd_trace_s_gre_time(&trace->trace,time);
+
+      // - send response -
+      this->buffer.used = 0;
+      bc_array_s_append_sd_segmentd_msg_header(&this->buffer,id,sd_channel_msg_type_RESPONSE,a_type,trace_id);
+
+      sd_trace_descr_s_read_to_message(trace,record_id,&this->buffer);
 
       if (sd_channel_s_send_message(&this->channel,a_index,&this->buffer))
       {

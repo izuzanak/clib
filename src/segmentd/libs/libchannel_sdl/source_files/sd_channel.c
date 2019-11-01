@@ -198,6 +198,8 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
               case sd_channel_cbreq_TRACE_READ:
               case sd_channel_cbreq_TRACE_HEAD:
               case sd_channel_cbreq_TRACE_TAIL:
+              case sd_channel_cbreq_TRACE_LEE_TIME:
+              case sd_channel_cbreq_TRACE_GRE_TIME:
               case sd_channel_cbreq_TRACE_WATCH:
               case sd_channel_cbreq_TRACE_IGNORE:
                 {/*{{{*/
@@ -258,6 +260,25 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                             if (sd_channel_s_message_call(
                                   this,a_index,request,id,
                                   &trace_id,record_id))
+                            {
+                              throw_error(SD_CHANNEL_SERVER_CALLBACK_ERROR);
+                            }
+                          }
+                        }/*}}}*/
+                        break;
+                      case sd_channel_cbreq_TRACE_LEE_TIME:
+                      case sd_channel_cbreq_TRACE_GRE_TIME:
+                        {/*{{{*/
+                          if (ptr_end - ptr >= sizeof(ulli))
+                          {
+                            ulli time;
+                            memcpy(&time,ptr,sizeof(ulli));
+                            time = be64toh(time);
+
+                            // - call callback -
+                            if (sd_channel_s_message_call(
+                                  this,a_index,request,id,
+                                  &trace_id,time))
                             {
                               throw_error(SD_CHANNEL_SERVER_CALLBACK_ERROR);
                             }
@@ -387,7 +408,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                           if (ptr_end - ptr >= sizeof(unsigned))
                           {
                             unsigned rec_size;
-                            memcpy(&rec_size,ptr,sizeof(unsigned)); ptr += sizeof(unsigned);
+                            memcpy(&rec_size,ptr,sizeof(unsigned));
                             rec_size = be32toh(rec_size);
 
                             // - call callback -
@@ -468,7 +489,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                             head_id = be64toh(head_id);
 
                             lli tail_id;
-                            memcpy(&tail_id,ptr,sizeof(lli)); ptr += sizeof(lli);
+                            memcpy(&tail_id,ptr,sizeof(lli));
                             tail_id = be64toh(tail_id);
 
                             // - call callback -
@@ -512,7 +533,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                           if (ptr_end - ptr >= sizeof(lli))
                           {
                             lli record_id;
-                            memcpy(&record_id,ptr,sizeof(lli)); ptr += sizeof(lli);
+                            memcpy(&record_id,ptr,sizeof(lli));
                             record_id = be64toh(record_id);
 
                             // - call callback -

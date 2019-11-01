@@ -130,6 +130,8 @@ static inline int sd_segment_handle_s_compare(const sd_segment_handle_s *this,co
 #if OPTION_TO_STRING == ENABLED
 static inline void sd_segment_handle_s_to_string(const sd_segment_handle_s *this,bc_array_s *a_trg)
 {/*{{{*/
+  (void)this;
+
   bc_array_s_append_ptr(a_trg,"sd_segment_handle_s{}");
 }/*}}}*/
 #endif

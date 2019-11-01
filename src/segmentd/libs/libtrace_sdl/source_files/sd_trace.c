@@ -469,7 +469,7 @@ int sd_trace_s_create(sd_trace_s *this,
         if (ts_ptr->id > -1)
         {
           // - insert timestamp to timestamp tree -
-          sd_record_timestamp_tree_s_insert(&this->timestamp_tree,ts_ptr);
+          sd_record_timestamp_tree_s_insert(&this->timestamp_tree,ts_ptr); // NOLINT
 
           if (ts_ptr->id > timestamp_last_id)
           {
