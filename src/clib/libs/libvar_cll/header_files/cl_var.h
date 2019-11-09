@@ -18,6 +18,9 @@ include "cl_struct.h"
 #endif
 #endif
 
+// - error codes -
+#define ERROR_FROM_VAR_ERROR 1
+
 // === constants and definitions ===============================================
 
 // - variable types -
@@ -125,6 +128,9 @@ static inline void var_s_to_string(const var_s *this,bc_array_s *a_trg);
 #if OPTION_TO_JSON == ENABLED
 static inline void var_s_to_json(const var_s *this,bc_array_s *a_trg);
 static inline void var_s_to_json_nice(const var_s *this,json_nice_s *a_json_nice,bc_array_s *a_trg);
+#endif
+#if OPTION_FROM_VAR == ENABLED
+WUR static inline int var_s_from_var(var_s *this,var_s a_var);
 #endif
 
 // === definition of generated structures ======================================
@@ -406,6 +412,15 @@ static inline void var_s_to_json_nice(const var_s *this,json_nice_s *a_json_nice
 }/*}}}*/
 #endif
 
+#if OPTION_FROM_VAR == ENABLED
+static inline int var_s_from_var(var_s *this,var_s a_var)
+{/*{{{*/
+  var_s_copy_loc(this,a_var);
+
+  return 0;
+}/*}}}*/
+#endif
+
 #define VAR(NAME,VALUE) \
   CONT_INIT(var_s,NAME);\
   var_s_copy_loc(&NAME,VALUE)
@@ -413,6 +428,28 @@ static inline void var_s_to_json_nice(const var_s *this,json_nice_s *a_json_nice
 #define VAR_CLEAR(NAME,VALUE) \
   CONT_INIT_CLEAR(var_s,NAME);\
   var_s_copy_loc(&NAME,VALUE)
+
+// === definition of from_var methods for basic data types =====================
+
+#if OPTION_FROM_VAR == ENABLED
+
+#define BASIC_TYPE_FROM_VAR_DEFINE(TYPE) \
+WUR static inline int TYPE ## _from_var(TYPE *this,var_s a_var);
+
+BASIC_TYPE_FROM_VAR_DEFINE(bc);
+BASIC_TYPE_FROM_VAR_DEFINE(uc);
+BASIC_TYPE_FROM_VAR_DEFINE(si);
+BASIC_TYPE_FROM_VAR_DEFINE(usi);
+BASIC_TYPE_FROM_VAR_DEFINE(bi);
+BASIC_TYPE_FROM_VAR_DEFINE(ui);
+BASIC_TYPE_FROM_VAR_DEFINE(lli);
+BASIC_TYPE_FROM_VAR_DEFINE(ulli);
+BASIC_TYPE_FROM_VAR_DEFINE(bf);
+BASIC_TYPE_FROM_VAR_DEFINE(bd);
+
+WUR static inline int string_s_from_var(string_s *this,var_s a_var);
+
+#endif
 
 // === inline methods of generated structures ==================================
 
@@ -997,6 +1034,74 @@ static inline var_s loc_s_dict_str_get(var_s this,const char *a_str_key)
 
   return loc_s_dict_get(this,&loc);
 }/*}}}*/
+
+// === inline from_var methods for basic data types ============================
+
+#if OPTION_FROM_VAR == ENABLED
+
+#define INTEGER_FROM_VAR_INLINE(TYPE) \
+static inline int TYPE ## _from_var(TYPE *this,var_s a_var)\
+{/*{{{*/\
+  if (a_var == NULL || a_var->v_type != c_bi_type_integer)\
+  {\
+    throw_error(FROM_VAR_ERROR);\
+  }\
+\
+  *this = loc_s_int_value(a_var);\
+\
+  return 0;\
+}/*}}}*/
+
+INTEGER_FROM_VAR_INLINE(bc);
+INTEGER_FROM_VAR_INLINE(uc);
+INTEGER_FROM_VAR_INLINE(si);
+INTEGER_FROM_VAR_INLINE(usi);
+INTEGER_FROM_VAR_INLINE(bi);
+INTEGER_FROM_VAR_INLINE(ui);
+INTEGER_FROM_VAR_INLINE(lli);
+INTEGER_FROM_VAR_INLINE(ulli);
+
+#define FLOAT_FROM_VAR_INLINE(TYPE) \
+static inline int TYPE ## _from_var(TYPE *this,var_s a_var)\
+{/*{{{*/\
+  if (a_var == NULL)\
+  {\
+    throw_error(FROM_VAR_ERROR);\
+  }\
+\
+  switch (a_var->v_type)\
+  {\
+  case c_bi_type_integer:\
+    *this = loc_s_int_value(a_var);\
+    break;\
+  case c_bi_type_float:\
+    *this = loc_s_float_value(a_var);\
+    break;\
+  default:\
+    throw_error(FROM_VAR_ERROR);\
+  }\
+\
+  return 0;\
+}/*}}}*/
+
+FLOAT_FROM_VAR_INLINE(bf);
+FLOAT_FROM_VAR_INLINE(bd);
+
+static inline int string_s_from_var(string_s *this,var_s a_var)
+{/*{{{*/
+  string_s_clear(this);
+
+  if (a_var == NULL || a_var->v_type != c_bi_type_string)
+  {
+    throw_error(FROM_VAR_ERROR);
+  }
+
+  string_s_copy(this,loc_s_string_value(a_var));
+
+  return 0;
+}/*}}}*/
+
+#endif
 
 #endif
 

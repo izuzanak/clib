@@ -16,6 +16,7 @@ const char *test_names[] =
   "var_array",
   "var_dict",
   "register_type",
+  "from_var",
 };/*}}}*/
 
 test_function_t test_functions[] =
@@ -27,9 +28,60 @@ test_function_t test_functions[] =
   test_var_array,
   test_var_dict,
   test_register_type,
+  test_from_var,
 };/*}}}*/
 
 // === methods of generated structures =========================================
+
+// -- static_s --
+@begin
+methods static_s
+@end
+
+// -- static_array_s --
+@begin
+methods static_array_s
+@end
+
+// -- static_queue_s --
+@begin
+methods static_queue_s
+@end
+
+// -- static_list_s --
+@begin
+methods static_list_s
+@end
+
+// -- static_tree_s --
+@begin
+methods static_tree_s
+@end
+
+// -- dynamic_s --
+@begin
+methods dynamic_s
+@end
+
+// -- dynamic_array_s --
+@begin
+methods dynamic_array_s
+@end
+
+// -- dynamic_queue_s --
+@begin
+methods dynamic_queue_s
+@end
+
+// -- dynamic_list_s --
+@begin
+methods dynamic_list_s
+@end
+
+// -- dynamic_tree_s --
+@begin
+methods dynamic_tree_s
+@end
 
 // -- person_s --
 @begin
@@ -518,6 +570,184 @@ void test_register_type()
   var_array_s_clear(&array_0);
   var_s_clear(&person);
   bc_array_s_clear(&buffer);
+#endif
+}/*}}}*/
+
+void test_from_var()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+#if OPTION_FROM_VAR == ENABLED
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+
+  VAR_CLEAR(integer_var,loc_s_int(125));
+  VAR_CLEAR(float_var,loc_s_float(125.123));
+
+#define TEST_INTEGER_FROM_VAR(TYPE) \
+  TYPE TYPE ## _value;\
+  cassert(TYPE ## _from_var(&TYPE ## _value,integer_var) == 0);\
+  cassert(TYPE ## _value == 125);
+
+  TEST_INTEGER_FROM_VAR(bc);
+  TEST_INTEGER_FROM_VAR(uc);
+  TEST_INTEGER_FROM_VAR(si);
+  TEST_INTEGER_FROM_VAR(usi);
+  TEST_INTEGER_FROM_VAR(bi);
+  TEST_INTEGER_FROM_VAR(ui);
+  TEST_INTEGER_FROM_VAR(lli);
+  TEST_INTEGER_FROM_VAR(ulli);
+
+#define TEST_FLOAT_FROM_VAR(TYPE) \
+  TYPE TYPE ## _value;\
+  cassert(TYPE ## _from_var(&TYPE ## _value,integer_var) == 0);\
+  cassert(TYPE ## _value == 125);\
+  cassert(TYPE ## _from_var(&TYPE ## _value,float_var) == 0);\
+  cassert(TYPE ## _value == (TYPE)125.123);
+
+  TEST_FLOAT_FROM_VAR(bf);
+  TEST_FLOAT_FROM_VAR(bd);
+
+  // - var_s_from_var -
+  CONT_INIT_CLEAR(var_s,var);
+  cassert(var_s_from_var(&var,float_var) == 0);
+
+  buffer.used = 0;
+  var_s_to_string(&var,&buffer);
+  cassert(strncmp(buffer.data,"125.123000",buffer.used) == 0);
+
+  // - string_s_from_var -
+  VAR_CLEAR(string_var,loc_s_string_ptr("Hello world!!!"));
+
+  CONT_INIT_CLEAR(string_s,string);
+  cassert(string_s_from_var(&string,string_var) == 0);
+  cassert(strcmp(string.data,"Hello world!!!") == 0);
+
+  // - static_s_from_var -
+  VAR_CLEAR(static_var,loc_s_dict());
+  loc_s_dict_set(static_var,loc_s_string_ptr("first"),loc_s_int(11));
+  loc_s_dict_set(static_var,loc_s_string_ptr("second"),loc_s_int(12));
+  loc_s_dict_set(static_var,loc_s_string_ptr("third"),loc_s_int(13));
+
+  CONT_INIT_CLEAR(static_s,static_0);
+  cassert(static_s_from_var(&static_0,static_var) == 0);
+
+  buffer.used = 0;
+  static_s_to_string(&static_0,&buffer);
+  cassert(strncmp(buffer.data,"{first:11,second:12,third:13}",buffer.used) == 0);
+
+  // - static_array_s_from_var -
+  VAR_CLEAR(static_array_var,loc_s_array());
+
+  unsigned idx = 0;
+  do {
+    loc_s_array_push(static_array_var,static_var);
+  } while(++idx < 3);
+
+  CONT_INIT_CLEAR(static_array_s,static_array);
+  cassert(static_array_s_from_var(&static_array,static_array_var) == 0);
+
+  buffer.used = 0;
+  static_array_s_to_string(&static_array,&buffer);
+  cassert(strncmp(buffer.data,
+        "[{first:11,second:12,third:13},{first:11,second:12,third:13},{first:11,second:12,third:13}]",buffer.used) == 0);
+
+  // - static_queue_s_from_var -
+  CONT_INIT_CLEAR(static_queue_s,static_queue);
+  cassert(static_queue_s_from_var(&static_queue,static_array_var) == 0);
+
+  buffer.used = 0;
+  static_queue_s_to_string(&static_queue,&buffer);
+  cassert(strncmp(buffer.data,
+        "[{first:11,second:12,third:13},{first:11,second:12,third:13},{first:11,second:12,third:13}]",buffer.used) == 0);
+
+  // - static_list_s_from_var -
+  CONT_INIT_CLEAR(static_list_s,static_list);
+  cassert(static_list_s_from_var(&static_list,static_array_var) == 0);
+
+  buffer.used = 0;
+  static_list_s_to_string(&static_list,&buffer);
+  cassert(strncmp(buffer.data,
+        "[{first:11,second:12,third:13},{first:11,second:12,third:13},{first:11,second:12,third:13}]",buffer.used) == 0);
+
+  // - static_tree_s_from_var -
+  CONT_INIT_CLEAR(static_tree_s,static_tree);
+  cassert(static_tree_s_from_var(&static_tree,static_array_var) == 0);
+
+  buffer.used = 0;
+  static_tree_s_to_string(&static_tree,&buffer);
+  cassert(strncmp(buffer.data,
+        "[{first:11,second:12,third:13},{first:11,second:12,third:13},{first:11,second:12,third:13}]",buffer.used) == 0);
+
+  // - dynamic_s_from_var -
+  loc_s_array_pop(static_array_var);
+  loc_s_array_pop(static_array_var);
+
+  VAR_CLEAR(dynamic_var,loc_s_dict());
+  loc_s_dict_set(dynamic_var,loc_s_string_ptr("first"),loc_s_int(11));
+  loc_s_dict_set(dynamic_var,loc_s_string_ptr("second"),loc_s_int(12));
+  loc_s_dict_set(dynamic_var,loc_s_string_ptr("array"),static_array_var);
+
+  CONT_INIT_CLEAR(dynamic_s,dynamic);
+  cassert(dynamic_s_from_var(&dynamic,dynamic_var) == 0);
+
+  buffer.used = 0;
+  dynamic_s_to_string(&dynamic,&buffer);
+  cassert(strncmp(buffer.data,"{first:11,second:12,array:[{first:11,second:12,third:13}]}",buffer.used) == 0);
+
+  // - dynamic_array_s_from_var -
+  VAR_CLEAR(dynamic_array_var,loc_s_array());
+
+  idx = 0;
+  do {
+    loc_s_array_push(dynamic_array_var,dynamic_var);
+  } while(++idx < 3);
+
+  CONT_INIT_CLEAR(dynamic_array_s,dynamic_array);
+  cassert(dynamic_array_s_from_var(&dynamic_array,dynamic_array_var) == 0);
+
+  buffer.used = 0;
+  dynamic_array_s_to_string(&dynamic_array,&buffer);
+  cassert(strncmp(buffer.data,
+        "[{first:11,second:12,array:[{first:11,second:12,third:13}]},"
+        "{first:11,second:12,array:[{first:11,second:12,third:13}]},"
+        "{first:11,second:12,array:[{first:11,second:12,third:13}]}]",
+        buffer.used) == 0);
+
+  // - dynamic_queue_s_from_var -
+  CONT_INIT_CLEAR(dynamic_queue_s,dynamic_queue);
+  cassert(dynamic_queue_s_from_var(&dynamic_queue,dynamic_array_var) == 0);
+
+  buffer.used = 0;
+  dynamic_queue_s_to_string(&dynamic_queue,&buffer);
+  cassert(strncmp(buffer.data,
+        "[{first:11,second:12,array:[{first:11,second:12,third:13}]},"
+        "{first:11,second:12,array:[{first:11,second:12,third:13}]},"
+        "{first:11,second:12,array:[{first:11,second:12,third:13}]}]",
+        buffer.used) == 0);
+
+  // - dynamic_list_s_from_var -
+  CONT_INIT_CLEAR(dynamic_list_s,dynamic_list);
+  cassert(dynamic_list_s_from_var(&dynamic_list,dynamic_array_var) == 0);
+
+  buffer.used = 0;
+  dynamic_list_s_to_string(&dynamic_list,&buffer);
+  cassert(strncmp(buffer.data,
+        "[{first:11,second:12,array:[{first:11,second:12,third:13}]},"
+        "{first:11,second:12,array:[{first:11,second:12,third:13}]},"
+        "{first:11,second:12,array:[{first:11,second:12,third:13}]}]",
+        buffer.used) == 0);
+
+  // - dynamic_tree_s_from_var -
+  CONT_INIT_CLEAR(dynamic_tree_s,dynamic_tree);
+  cassert(dynamic_tree_s_from_var(&dynamic_tree,dynamic_array_var) == 0);
+
+  buffer.used = 0;
+  dynamic_tree_s_to_string(&dynamic_tree,&buffer);
+  cassert(strncmp(buffer.data,
+        "[{first:11,second:12,array:[{first:11,second:12,third:13}]},"
+        "{first:11,second:12,array:[{first:11,second:12,third:13}]},"
+        "{first:11,second:12,array:[{first:11,second:12,third:13}]}]",
+        buffer.used) == 0);
+#endif
 #endif
 }/*}}}*/
 

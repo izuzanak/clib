@@ -339,7 +339,7 @@ void test_basic_type_array()
   ui_array_s_reserve(&array_0,10);
   cassert(array_0.used == 11 && array_0.size >= 21);
 
-  // - ui ui_array_s_pop -
+  // - ui_array_s_pop -
   array_1.used = 0;
   unsigned cnt = 0;
   do {

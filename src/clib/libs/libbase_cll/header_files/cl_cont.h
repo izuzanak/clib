@@ -140,6 +140,7 @@ BASIC_TYPE_TO_STRING_DEFINE(bi);
 BASIC_TYPE_TO_STRING_DEFINE(ui);
 BASIC_TYPE_TO_STRING_DEFINE(lli);
 BASIC_TYPE_TO_STRING_DEFINE(ulli);
+BASIC_TYPE_TO_STRING_DEFINE(bf);
 BASIC_TYPE_TO_STRING_DEFINE(bd);
 BASIC_TYPE_TO_STRING_DEFINE(pointer);
 BASIC_TYPE_TO_STRING_DEFINE(bc_pointer);
@@ -154,6 +155,7 @@ BASIC_TYPE_TO_STRING_DEFINE(bc_pointer);
 #define   ui_to_json   ui_to_string
 #define  lli_to_json  lli_to_string
 #define ulli_to_json ulli_to_string
+#define   bf_to_json   bf_to_string
 #define   bd_to_json   bd_to_string
 
 #define   si_to_json_nice(VALUE,NICE,TARGET)   si_to_json(VALUE,TARGET)
@@ -162,6 +164,7 @@ BASIC_TYPE_TO_STRING_DEFINE(bc_pointer);
 #define   ui_to_json_nice(VALUE,NICE,TARGET)   ui_to_json(VALUE,TARGET)
 #define  lli_to_json_nice(VALUE,NICE,TARGET)  lli_to_json(VALUE,TARGET)
 #define ulli_to_json_nice(VALUE,NICE,TARGET) ulli_to_json(VALUE,TARGET)
+#define   bf_to_json_nice(VALUE,NICE,TARGET)   bf_to_json(VALUE,TARGET)
 #define   bd_to_json_nice(VALUE,NICE,TARGET)   bd_to_json(VALUE,TARGET)
 
 #endif
@@ -426,6 +429,7 @@ BASIC_TYPE_TO_STRING_INLINE(bi,"%d");
 BASIC_TYPE_TO_STRING_INLINE(ui,"%u");
 BASIC_TYPE_TO_STRING_INLINE(lli,"%" HOST_LL_FORMAT "d");
 BASIC_TYPE_TO_STRING_INLINE(ulli,"%" HOST_LL_FORMAT "u");
+BASIC_TYPE_TO_STRING_INLINE(bf,"%f");
 BASIC_TYPE_TO_STRING_INLINE(bd,"%f");
 BASIC_TYPE_TO_STRING_INLINE(pointer,"%p");
 BASIC_TYPE_TO_STRING_INLINE(bc_pointer,"%p");

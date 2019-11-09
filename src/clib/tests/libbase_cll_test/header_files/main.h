@@ -14,7 +14,7 @@ include "cl_test.h"
 struct
 <
 ui:first
-ui:second
+usi:second
 ui:third
 >
 options ( to_json to_json_nice )

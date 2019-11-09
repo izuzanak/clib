@@ -9,6 +9,86 @@ include "cl_var.h"
 
 // === definition of generated structures ======================================
 
+// -- static_s --
+@begin
+struct
+<
+ui:first
+ui:second
+ui:third
+>
+options ( from_var )
+static_s;
+@end
+
+// -- static_array_s --
+@begin
+array<static_s>
+options ( from_var )
+static_array_s;
+@end
+
+// -- static_queue_s --
+@begin
+queue<static_s>
+options ( from_var )
+static_queue_s;
+@end
+
+// -- static_list_s --
+@begin
+list<static_s>
+options ( from_var )
+static_list_s;
+@end
+
+// -- static_tree_s --
+@begin
+rb_tree<static_s>
+options ( from_var )
+static_tree_s;
+@end
+
+// -- dynamic_s --
+@begin
+struct
+<
+ui:first
+ui:second
+static_array_s:array
+>
+options ( from_var )
+dynamic_s;
+@end
+
+// -- dynamic_array_s --
+@begin
+array<dynamic_s>
+options ( from_var )
+dynamic_array_s;
+@end
+
+// -- dynamic_queue_s --
+@begin
+queue<dynamic_s>
+options ( from_var )
+dynamic_queue_s;
+@end
+
+// -- dynamic_list_s --
+@begin
+list<dynamic_s>
+options ( from_var )
+dynamic_list_s;
+@end
+
+// -- dynamic_tree_s --
+@begin
+rb_tree<dynamic_s>
+options ( from_var )
+dynamic_tree_s;
+@end
+
 // -- person_s --
 @begin
 struct
@@ -33,6 +113,70 @@ static inline void loc_s_person_to_json_nice(var_s this,json_nice_s *a_json_nice
 #endif
 
 // === inline methods of generated structures ==================================
+
+// -- static_s --
+@begin
+inlines static_s
+@end
+
+// -- static_array_s --
+@begin
+inlines static_array_s
+@end
+
+// -- static_queue_s --
+@begin
+inlines static_queue_s
+@end
+
+// -- static_list_s --
+@begin
+inlines static_list_s
+@end
+
+// -- static_tree_s --
+@begin
+inlines static_tree_s
+@end
+
+static inline int static_tree_s___compare_value(const static_tree_s *this,const static_s *a_first,const static_s *a_second)
+{/*{{{*/
+  (void)this;
+
+  return a_first->first < a_second->first ? -1 : a_first->first > a_second->first ? 1 : 0;
+}/*}}}*/
+
+// -- dynamic_s --
+@begin
+inlines dynamic_s
+@end
+
+// -- dynamic_array_s --
+@begin
+inlines dynamic_array_s
+@end
+
+// -- dynamic_queue_s --
+@begin
+inlines dynamic_queue_s
+@end
+
+// -- dynamic_list_s --
+@begin
+inlines dynamic_list_s
+@end
+
+// -- dynamic_tree_s --
+@begin
+inlines dynamic_tree_s
+@end
+
+static inline int dynamic_tree_s___compare_value(const dynamic_tree_s *this,const dynamic_s *a_first,const dynamic_s *a_second)
+{/*{{{*/
+  (void)this;
+
+  return a_first->first < a_second->first ? -1 : a_first->first > a_second->first ? 1 : 0;
+}/*}}}*/
 
 // -- person_s --
 @begin
@@ -117,6 +261,7 @@ void test_var_string();
 void test_var_array();
 void test_var_dict();
 void test_register_type();
+void test_from_var();
 
 // === program entry function ==================================================
 
