@@ -121,6 +121,7 @@ typedef long double ld;
 #define OPTION_DEBUG_LEVEL 0
 #endif
 #define OPTION_TO_JSON ENABLED
+#define OPTION_FROM_JSON ENABLED
 #define OPTION_FROM_VAR ENABLED
 
 // - error macros -

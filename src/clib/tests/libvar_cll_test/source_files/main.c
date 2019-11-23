@@ -33,6 +33,11 @@ test_function_t test_functions[] =
 
 // === methods of generated structures =========================================
 
+// -- basic_tree_s --
+@begin
+methods basic_tree_s
+@end
+
 // -- static_s --
 @begin
 methods static_s
@@ -621,6 +626,21 @@ void test_from_var()
   cassert(string_s_from_var(&string,string_var) == 0);
   cassert(strcmp(string.data,"Hello world!!!") == 0);
 
+  // - basic_tree_s_from_var -
+  VAR_CLEAR(basic_array_var,loc_s_array());
+
+  unsigned idx = 0;
+  do {
+    loc_s_array_push(basic_array_var,loc_s_int(idx));
+  } while(++idx < 10);
+
+  CONT_INIT_CLEAR(basic_tree_s,basic_tree);
+  cassert(basic_tree_s_from_var(&basic_tree,basic_array_var) == 0);
+
+  buffer.used = 0;
+  basic_tree_s_to_string(&basic_tree,&buffer);
+  cassert(strncmp(buffer.data,"[0,1,2,3,4,5,6,7,8,9]",buffer.used) == 0);
+
   // - static_s_from_var -
   VAR_CLEAR(static_var,loc_s_dict());
   loc_s_dict_set(static_var,loc_s_string_ptr("first"),loc_s_int(11));
@@ -637,7 +657,7 @@ void test_from_var()
   // - static_array_s_from_var -
   VAR_CLEAR(static_array_var,loc_s_array());
 
-  unsigned idx = 0;
+  idx = 0;
   do {
     loc_s_array_push(static_array_var,static_var);
   } while(++idx < 3);

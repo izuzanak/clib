@@ -33,12 +33,12 @@ queue<ui> ui_queue_s;
 
 // -- ui_list_s --
 @begin
-list<ui> ui_list_s;
+safe_list<ui> ui_list_s;
 @end
 
 // -- ui_tree_s --
 @begin
-rb_tree<ui> ui_tree_s;
+safe_rb_tree<ui> ui_tree_s;
 @end
 
 // -- static_array_s --
@@ -168,6 +168,7 @@ void test_dynamic_type_list();
 void test_basic_type_tree();
 void test_static_type_tree();
 void test_dynamic_type_tree();
+void test_doc_examples();
 
 // === program entry function ==================================================
 

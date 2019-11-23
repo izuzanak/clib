@@ -25,6 +25,7 @@ const char *test_names[] =
   "basic_type_tree",
   "static_type_tree",
   "dynamic_type_tree",
+  "doc_examples",
 };/*}}}*/
 
 test_function_t test_functions[] =
@@ -45,6 +46,7 @@ test_function_t test_functions[] =
   test_basic_type_tree,
   test_static_type_tree,
   test_dynamic_type_tree,
+  test_doc_examples,
 };/*}}}*/
 
 // === methods of generated structures =========================================
@@ -1047,6 +1049,188 @@ void test_dynamic_type_tree()
   string_tree_s_clear(&tree_0);
   bc_array_s_clear(&buffer);
 #endif
+}/*}}}*/
+
+void test_doc_examples()
+{/*{{{*/
+    
+    // Počet prvků v dynamickém poli.
+    {
+      CONT_INIT_CLEAR(ui_array_s,array);
+
+      unsigned used = array.used;
+      fprintf(stderr,"array used: %u\n",used);
+    }
+
+    // Iterace přes prvky dynamického pole.
+    {
+      CONT_INIT_CLEAR(ui_array_s,array);
+
+      unsigned idx = 0;
+      do {
+        ui_array_s_push(&array,idx);
+      } while(++idx < 10);
+      
+      if (array.used != 0)
+      {
+        ui *a_ptr = array.data;
+        ui *a_ptr_end = a_ptr + array.used;
+        do {
+          fprintf(stderr,"array iter value: %u\n",*a_ptr);
+        } while(++a_ptr < a_ptr_end);
+      }
+    }
+
+    // Počet prvků v dynamické frontě.
+    {
+      CONT_INIT_CLEAR(ui_queue_s,queue);
+
+      unsigned used = queue.used;
+      fprintf(stderr,"queue used: %u\n",used);
+    }
+
+    // Výběr všech prvků z fronty.
+    {
+      CONT_INIT_CLEAR(ui_queue_s,queue);
+
+      unsigned idx = 0;
+      do {
+        ui_queue_s_insert(&queue,idx);
+      } while(++idx < 10);
+
+      while (queue.used > 0)
+      {
+        ui value = ui_queue_s_next(&queue);
+        fprintf(stderr,"queue next value: %u\n",value);
+      }
+    }
+
+    // Iterace přes prvky fronty.
+    {
+      CONT_INIT_CLEAR(ui_queue_s,queue);
+
+      unsigned idx = 0;
+      do {
+        ui_queue_s_insert(&queue,idx);
+      } while(++idx < 10);
+
+      if (queue.used != 0)
+      {
+        unsigned idx = 0;
+        do {
+          ui *value_ptr = ui_queue_s_at(&queue,idx);
+          fprintf(stderr,"queue iter value: %u\n",*value_ptr);
+        } while(++idx < queue.used);
+      }
+    }
+
+    // Počet prvků v lineárním spojovém seznamu (pouze pro safe variantu).
+    {
+      CONT_INIT_CLEAR(ui_list_s,list);
+
+      unsigned count = list.count;
+      fprintf(stderr,"list count: %u\n",count);
+    }
+
+    // Iterace přes prvky lineárního spojového seznamu.
+    {
+      CONT_INIT_CLEAR(ui_list_s,list);
+
+      unsigned idx = 0;
+      do {
+        ui_list_s_append(&list,idx);
+      } while(++idx < 10);
+
+      if (list.first_idx != c_idx_not_exist)
+      {
+        unsigned idx = list.first_idx;
+        do {
+          ui *value_ptr = ui_list_s_at(&list,idx);
+          fprintf(stderr,"list iter value: %u\n",*value_ptr);
+
+          idx = ui_list_s_next_idx(&list,idx);
+        } while(idx != c_idx_not_exist);
+      }
+    }
+
+    // Počet prvků ve vyvažovaném vyhledávacím binárním stromě (pouze pro safe variantu).
+    {
+      CONT_INIT_CLEAR(ui_tree_s,tree);
+      
+      unsigned count = tree.count;
+      fprintf(stderr,"count: %u\n",count);
+    }
+
+    // Iterace přes uzly vyvažovaného vyhledávacího binárního stromu, od
+    // nejmenšího po největší.
+    {
+      CONT_INIT_CLEAR(ui_tree_s,tree);
+      
+      unsigned idx = 0;
+      do {
+        ui_tree_s_insert(&tree,idx);
+      } while(++idx < 10);
+
+      if (tree.root_idx != c_idx_not_exist)
+      {
+        unsigned idx = ui_tree_s_get_min_value_idx(&tree,tree.root_idx);
+        do {
+          ui *value_ptr = ui_tree_s_at(&tree,idx);
+          fprintf(stderr,"tree iter value: %u\n",*value_ptr);
+
+          idx = ui_tree_s_get_next_idx(&tree,idx);
+        } while(idx != c_idx_not_exist);
+      }
+    }
+
+    // Iterace přes uzly vyvažovaného vyhledávacího binárního stromu, od
+    // nejmenšího po největší na zásobníku.
+    {
+      CONT_INIT_CLEAR(ui_tree_s,tree);
+      
+      unsigned idx = 0;
+      do {
+        ui_tree_s_insert(&tree,idx);
+      } while(++idx < 10);
+
+      if (tree.root_idx != c_idx_not_exist)
+      {
+        unsigned stack[RB_TREE_STACK_SIZE(ui_tree_s,&tree)];
+        unsigned *stack_ptr = stack;
+
+        unsigned idx = ui_tree_s_get_stack_min_value_idx(&tree,tree.root_idx,&stack_ptr);
+        do {
+          ui *value_ptr = ui_tree_s_at(&tree,idx);
+          fprintf(stderr,"tree stack iter value: %u\n",*value_ptr);
+
+          idx = ui_tree_s_get_stack_next_idx(&tree,idx,&stack_ptr,stack);
+        } while(idx != c_idx_not_exist);
+      }
+    }
+
+    // Iterace přes uzly vyvažovaného vyhledávacího binárního stromu, v
+    // nedefinovaném pořadí (pouze pro safe variantu).
+    {
+      CONT_INIT_CLEAR(ui_tree_s,tree);
+      
+      unsigned idx = 0;
+      do {
+        ui_tree_s_insert(&tree,idx);
+      } while(++idx < 10);
+
+      if (tree.root_idx != c_idx_not_exist)
+      {
+        ui_tree_s_node *utn_ptr = tree.data;
+        ui_tree_s_node *utn_ptr_end = utn_ptr + tree.used;
+        do {
+          if (utn_ptr->valid)
+          {
+            unsigned value = utn_ptr->object;
+            fprintf(stderr,"tree safe iter value: %u\n",value);
+          }
+        } while(++utn_ptr < utn_ptr_end);
+      }
+    }
 }/*}}}*/
 
 // === program entry function ==================================================

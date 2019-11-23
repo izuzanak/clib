@@ -262,105 +262,10 @@ void pa_json_string(json_parser_s *this)
   bc_array_s char_buffer;
   bc_array_s_init_size(&char_buffer,(ptr_end - ptr) + 1);
 
-  if (ptr < ptr_end)
-  {
-    do
-    {
-      if (*ptr == '\\')
-      {
-        ptr++;
-
-        // - process character represented by unicode number -
-        if (*ptr == 'u')
-        {
-          ptr++;
-
-          unsigned value = 0;
-
-          // - retrieve character value -
-          char *ptr_end = ptr + 4;
-          do {
-            value <<= 4;
-
-            if (*ptr >= '0' && *ptr <= '9')
-            {
-              value += *ptr - '0';
-            }
-            else if (*ptr >= 'a' && *ptr <= 'f')
-            {
-              value += 10 + (*ptr - 'a');
-            }
-            else if (*ptr >= 'A' && *ptr <= 'F')
-            {
-              value += 10 + (*ptr - 'A');
-            }
-            else
-            {
-              debug_assert(0);
-            }
-
-          } while(++ptr < ptr_end);
-
-          // - convert utf16/32 value to utf8 character string -
-          if (value <= 0x7f)
-          {
-            bc_array_s_push(&char_buffer,value);
-          }
-          else if (value <= 0x7ff)
-          {
-            bc_array_s_push(&char_buffer,0xc0 | value >> 6);
-            bc_array_s_push(&char_buffer,0x80 | (value & 0x3f));
-          }
-          else if (value <= 0xffff)
-          {
-            bc_array_s_push(&char_buffer,0xe0 |   value >> 12);
-            bc_array_s_push(&char_buffer,0x80 | ((value >>  6) & 0x3f));
-            bc_array_s_push(&char_buffer,0x80 |  (value        & 0x3f));
-          }
-        }
-        else
-        {
-          switch (*ptr++)
-          {
-          case 'b':
-            bc_array_s_push(&char_buffer,'\b');
-            break;
-          case 'f':
-            bc_array_s_push(&char_buffer,'\f');
-            break;
-          case 'n':
-            bc_array_s_push(&char_buffer,'\n');
-            break;
-          case 'r':
-            bc_array_s_push(&char_buffer,'\r');
-            break;
-          case 't':
-            bc_array_s_push(&char_buffer,'\t');
-            break;
-          case '\\':
-            bc_array_s_push(&char_buffer,'\\');
-            break;
-          case '"':
-            bc_array_s_push(&char_buffer,'"');
-            break;
-          default:
-            debug_assert(0);
-          }
-        }
-      }
-      else
-      {
-        bc_array_s_push(&char_buffer,*ptr++);
-      }
-    }
-    while(ptr < ptr_end);
-  }
-
-  // - modification of character buffer -
-  char_buffer.data[char_buffer.used] = '\0';
+  json_parser_s_process_json_string(ptr,ptr_end,&char_buffer);
 
   string_s const_str;
-  const_str.size = char_buffer.used + 1;
+  const_str.size = char_buffer.used;
   const_str.data = char_buffer.data;
 
   // - get constant position in array -

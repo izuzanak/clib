@@ -300,9 +300,9 @@ int od_channel_client_s_create(od_channel_client_s *this,epoll_s *a_epoll,
   return 0;
 }/*}}}*/
 
-int od_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,const bc_array_s *a_message)
+int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,const bc_array_s *a_message)
 {/*{{{*/
-  (void)a_sd_channel_client;
+  (void)a_od_channel_client;
   (void)a_index;
 
   debug_message_6(fprintf(stderr,"od_channel_client_s_conn_message\n"));
@@ -311,7 +311,7 @@ int od_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
   log_info_2("channel client, <-- " LOG_MSG_FORMAT,
     LOG_MSG_PARAMETERS(a_message->used,a_message->data));
 
-  od_channel_client_s *this = (od_channel_client_s *)a_sd_channel_client;
+  od_channel_client_s *this = (od_channel_client_s *)a_od_channel_client;
   var_array_s *string_vars = &g_od_channel_json_parser.string_vars;
 
   CONT_INIT_CLEAR(var_s,msg_var);
@@ -441,15 +441,13 @@ int od_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
   }
 
   return 0;
-
-  return 0;
 }/*}}}*/
 
-int od_channel_client_s_fd_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_index;
 
-  od_channel_client_s *this = (od_channel_client_s *)a_sd_channel_client;
+  od_channel_client_s *this = (od_channel_client_s *)a_od_channel_client;
 
   // - store connecting state -
   int connecting = this->connection.connecting;
@@ -489,7 +487,7 @@ int od_channel_client_s_fd_event(void *a_sd_channel_client,unsigned a_index,epol
   return 0;
 }/*}}}*/
 
-int od_channel_client_s_connect_time_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int od_channel_client_s_connect_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_index;
 
@@ -500,7 +498,7 @@ int od_channel_client_s_connect_time_event(void *a_sd_channel_client,unsigned a_
     throw_error(OD_CHANNEL_CLIENT_TIMER_READ_ERROR);
   }
 
-  od_channel_client_s *this = (od_channel_client_s *)a_sd_channel_client;
+  od_channel_client_s *this = (od_channel_client_s *)a_od_channel_client;
 
   if (channel_conn_s_create_client(&this->connection,
         this->server_ip.data,this->server_port,od_channel_client_s_conn_message,this,0) ||

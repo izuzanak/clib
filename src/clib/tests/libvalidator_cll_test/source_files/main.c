@@ -25,6 +25,7 @@ const char *test_names[] =
   "prop_reference",
   "prop_regex",
   "prop_items",
+  "prop_opt_items",
   "prop_all_items",
   "prop_all_keys",
 };/*}}}*/
@@ -47,6 +48,7 @@ test_function_t test_functions[] =
   test_prop_reference,
   test_prop_regex,
   test_prop_items,
+  test_prop_opt_items,
   test_prop_all_items,
   test_prop_all_keys,
 };/*}}}*/
@@ -478,6 +480,69 @@ void test_prop_items()
   cassert(strcmp(buffer.data,"[2]") == 0);
   VAR_ARRAY_S_TO_STRING(&validator.props_stack);
   cassert(strcmp(buffer.data,"[test,items,2]") == 0);
+
+  bc_array_s_clear(&buffer);
+#endif
+}/*}}}*/
+
+void test_prop_opt_items()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT(bc_array_s,buffer);
+
+  VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
+
+  VAR_CLEAR(schema,loc_s_dict());
+
+  var_s test = loc_s_array();
+  loc_s_dict_set(schema,str_test_var,test);
+
+  loc_s_array_push(test,loc_s_string_ptr("opt-items"));
+  var_s opt_items = loc_s_array();
+  loc_s_array_push(test,opt_items);
+
+  var_s item_0 = loc_s_array();
+  loc_s_array_push(item_0,loc_s_string_ptr("=="));
+  loc_s_array_push(item_0,loc_s_int(0));
+
+  var_s item_1 = loc_s_array();
+  loc_s_array_push(item_1,loc_s_string_ptr("=="));
+  loc_s_array_push(item_1,loc_s_string_ptr("Hello"));
+
+  loc_s_array_push(opt_items,loc_s_int(0));
+  loc_s_array_push(opt_items,item_0);
+
+  loc_s_array_push(opt_items,loc_s_int(1));
+  loc_s_array_push(opt_items,item_0);
+
+  loc_s_array_push(opt_items,loc_s_int(2));
+  loc_s_array_push(opt_items,item_1);
+
+  VAR_CLEAR(value_1,loc_s_dict());
+  loc_s_dict_set(value_1,loc_s_int(0),loc_s_int(0));
+  loc_s_dict_set(value_1,loc_s_int(1),loc_s_int(0));
+  loc_s_dict_set(value_1,loc_s_int(2),loc_s_string_ptr("Hello"));
+
+  VAR_CLEAR(value_2,loc_s_dict());
+  loc_s_dict_set(value_2,loc_s_int(0),loc_s_int(0));
+  loc_s_dict_set(value_2,loc_s_int(1),loc_s_int(1));
+  loc_s_dict_set(value_2,loc_s_int(2),loc_s_string_ptr("Hello"));
+
+  VAR_CLEAR(value_3,loc_s_dict());
+  loc_s_dict_set(value_3,loc_s_int(0),loc_s_int(0));
+  loc_s_dict_set(value_3,loc_s_int(1),loc_s_int(0));
+
+  CONT_INIT_CLEAR(validator_s,validator);
+  cassert(validator_s_create(&validator,schema) == 0);
+
+  cassert(validator_s_validate(&validator,str_test_var,value_1) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_2));
+  VAR_ARRAY_S_TO_STRING(&validator.value_stack);
+  cassert(strcmp(buffer.data,"[1]") == 0);
+  VAR_ARRAY_S_TO_STRING(&validator.props_stack);
+  cassert(strcmp(buffer.data,"[test,opt-items,1,==]") == 0);
+
+  cassert(validator_s_validate(&validator,str_test_var,value_3) == 0);
 
   bc_array_s_clear(&buffer);
 #endif

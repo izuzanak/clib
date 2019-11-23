@@ -25,6 +25,7 @@ void test_prop_length_greater_equal();
 void test_prop_reference();
 void test_prop_regex();
 void test_prop_items();
+void test_prop_opt_items();
 void test_prop_all_items();
 void test_prop_all_keys();
 

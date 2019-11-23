@@ -62,14 +62,114 @@ methods bd_tree_s
 methods json_parser_s
 @end
 
-unsigned json_parser_s_recognize_terminal(json_parser_s *this)
+void json_parser_s_process_json_string(const char *a_ptr,const char *a_ptr_end,bc_array_s *a_trg)
 {/*{{{*/
-  const bc_array_s *source = (const bc_array_s *)this->source;
+  a_trg->used = 0;
 
+  if (a_ptr < a_ptr_end)
+  {
+    do
+    {
+      if (*a_ptr == '\\')
+      {
+        a_ptr++;
+
+        // - process character represented by unicode number -
+        if (*a_ptr == 'u')
+        {
+          a_ptr++;
+
+          unsigned value = 0;
+
+          // - retrieve character value -
+          const char *a_ptr_end = a_ptr + 4;
+          do {
+            value <<= 4;
+
+            if (*a_ptr >= '0' && *a_ptr <= '9')
+            {
+              value += *a_ptr - '0';
+            }
+            else if (*a_ptr >= 'a' && *a_ptr <= 'f')
+            {
+              value += 10 + (*a_ptr - 'a');
+            }
+            else if (*a_ptr >= 'A' && *a_ptr <= 'F')
+            {
+              value += 10 + (*a_ptr - 'A');
+            }
+            else
+            {
+              debug_assert(0);
+            }
+
+          } while(++a_ptr < a_ptr_end);
+
+          // - convert utf16/32 value to utf8 character string -
+          if (value <= 0x7f)
+          {
+            bc_array_s_push(a_trg,value);
+          }
+          else if (value <= 0x7ff)
+          {
+            bc_array_s_push(a_trg,0xc0 | value >> 6);
+            bc_array_s_push(a_trg,0x80 | (value & 0x3f));
+          }
+          else if (value <= 0xffff)
+          {
+            bc_array_s_push(a_trg,0xe0 |   value >> 12);
+            bc_array_s_push(a_trg,0x80 | ((value >>  6) & 0x3f));
+            bc_array_s_push(a_trg,0x80 |  (value        & 0x3f));
+          }
+        }
+        else
+        {
+          switch (*a_ptr++)
+          {
+          case 'b':
+            bc_array_s_push(a_trg,'\b');
+            break;
+          case 'f':
+            bc_array_s_push(a_trg,'\f');
+            break;
+          case 'n':
+            bc_array_s_push(a_trg,'\n');
+            break;
+          case 'r':
+            bc_array_s_push(a_trg,'\r');
+            break;
+          case 't':
+            bc_array_s_push(a_trg,'\t');
+            break;
+          case '\\':
+            bc_array_s_push(a_trg,'\\');
+            break;
+          case '"':
+            bc_array_s_push(a_trg,'"');
+            break;
+          default:
+            debug_assert(0);
+          }
+        }
+      }
+      else
+      {
+        bc_array_s_push(a_trg,*a_ptr++);
+      }
+    }
+    while(a_ptr < a_ptr_end);
+  }
+
+  // - modification of character buffer -
+  bc_array_s_push(a_trg,'\0');
+}/*}}}*/
+
+unsigned json_parser_s_recognize_terminal(const bc_array_s *a_source,unsigned *a_input_idx)
+{/*{{{*/
 #define JSON_GET_NEXT_CHAR() \
   {\
-    if (this->input_idx < source->used) {\
-      in_char = (unsigned char)source->data[this->input_idx];\
+    if (*a_input_idx < a_source->used) {\
+      in_char = (unsigned char)a_source->data[*a_input_idx];\
     }\
     else {\
       in_char = '\0';\
@@ -82,7 +182,7 @@ unsigned json_parser_s_recognize_terminal(json_parser_s *this)
       return RET_TERM_IDX;\
     }\
     \
-    ++this->input_idx;\
+    ++*a_input_idx;\
   }
 
    unsigned char in_char;
@@ -647,7 +747,7 @@ int json_parser_s_parse(json_parser_s *this,const bc_array_s *a_src,var_s *a_trg
     {
       this->old_input_idx = this->input_idx;
 
-      ret_term = json_parser_s_recognize_terminal(this);
+      ret_term = json_parser_s_recognize_terminal((const bc_array_s *)this->source,&this->input_idx);
 
       // - PARSE ERROR unrecognized terminal -
       if (ret_term == c_idx_not_exist)
@@ -720,6 +820,123 @@ methods json_create_stack_element_s
 @begin
 methods json_create_stack_s
 @end
+
+// -- from_json_s --
+@begin
+methods from_json_s
+@end
+
+int from_json_s_get_integer(from_json_s *this,const bc_array_s *a_src,long long int *a_value)
+{/*{{{*/
+  do {
+    this->old_input_idx = this->input_idx;
+    this->terminal = json_parser_s_recognize_terminal(a_src,&this->input_idx);
+
+    switch (this->terminal)
+    {
+      case c_json_terminal_integer:
+        *a_value = strtoll(a_src->data + this->old_input_idx,NULL,10);
+        break;
+      case c_json_terminal_true:
+        *a_value = 1;
+        break;
+      case c_json_terminal_false:
+        *a_value = 0;
+        break;
+      case c_json_terminal__SKIP_0:
+      case c_json_terminal__SKIP_1:
+      case c_json_terminal__SKIP_2:
+      case c_json_terminal__SKIP_3:
+        continue;
+      default:
+        return 1;
+    }
+
+    return 0;
+  } while(1);
+}/*}}}*/
+
+int from_json_s_get_float(from_json_s *this,const bc_array_s *a_src,double *a_value)
+{/*{{{*/
+  do {
+    this->old_input_idx = this->input_idx;
+    this->terminal = json_parser_s_recognize_terminal(a_src,&this->input_idx);
+
+    switch (this->terminal)
+    {
+      case c_json_terminal_integer:
+        *a_value = strtoll(a_src->data + this->old_input_idx,NULL,10);
+        break;
+      case c_json_terminal_float:
+        *a_value = strtod(a_src->data + this->old_input_idx,NULL);
+        break;
+      case c_json_terminal__SKIP_0:
+      case c_json_terminal__SKIP_1:
+      case c_json_terminal__SKIP_2:
+      case c_json_terminal__SKIP_3:
+        continue;
+      default:
+        return 1;
+    }
+
+    return 0;
+  } while(1);
+}/*}}}*/
+
+int from_json_s_get_string(from_json_s *this,const bc_array_s *a_src)
+{/*{{{*/
+  do {
+    this->old_input_idx = this->input_idx;
+    this->terminal = json_parser_s_recognize_terminal(a_src,&this->input_idx);
+
+    switch (this->terminal)
+    {
+      case c_json_terminal_string:
+        {
+          this->buffer.used = 0;
+
+          json_parser_s_process_json_string(
+            a_src->data + this->old_input_idx + 1,
+            a_src->data + this->input_idx - 1,
+            &this->buffer);
+        }
+        break;
+      case c_json_terminal__SKIP_0:
+      case c_json_terminal__SKIP_1:
+      case c_json_terminal__SKIP_2:
+      case c_json_terminal__SKIP_3:
+        continue;
+      default:
+        return 1;
+    }
+
+    return 0;
+  } while(1);
+}/*}}}*/
+
+int from_json_s_get_terminal(from_json_s *this,const bc_array_s *a_src,unsigned a_terminal)
+{/*{{{*/
+  do {
+    this->old_input_idx = this->input_idx;
+    this->terminal = json_parser_s_recognize_terminal(a_src,&this->input_idx);
+
+    switch (this->terminal)
+    {
+      case c_json_terminal__SKIP_0:
+      case c_json_terminal__SKIP_1:
+      case c_json_terminal__SKIP_2:
+      case c_json_terminal__SKIP_3:
+        continue;
+      default:
+        if (this->terminal != a_terminal)
+        {
+          return 1;
+        }
+    }
+
+    return 0;
+  } while(1);
+}/*}}}*/
 
 // === global functions ========================================================
 

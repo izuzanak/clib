@@ -573,6 +573,70 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
     }/*}}}*/
     break;
   case sd_channel_cbreq_SEGMENT_WATCH:
+    {/*{{{*/
+      ulli id = va_arg(a_ap,ulli);
+      const string_s *segment_id = va_arg(a_ap,const string_s *);
+
+      sd_segment_descr_s search_segment = {{*segment_id,},};
+      unsigned segment_idx = sd_segment_tree_s_get_idx(&this->segments,&search_segment);
+
+      // - check if segment exists -
+      if (segment_idx == c_idx_not_exist)
+      {
+        throw_error(SD_DAEMON_SEGMENT_NOT_EXIST);
+      }
+
+      sd_segment_descr_s *segment = sd_segment_tree_s_at(&this->segments,segment_idx);
+
+      sd_channel_watch_s *channel_watch = sd_channel_watches_s_at(&this->channel_watches,a_index);
+      unsigned watch_idx = ui_tree_s_get_idx(&channel_watch->segment_idxs,segment_idx);
+
+      // - insert watch -
+      if (watch_idx == c_idx_not_exist && a_type == sd_channel_cbreq_SEGMENT_WATCH)
+      {
+        ui_tree_s_insert(&channel_watch->segment_idxs,segment_idx);
+
+        // - set update watches -
+        this->update_watches = 1;
+      }
+      
+      // FIXME
+      //sd_debug_print(this);
+
+      // - send response -
+      this->buffer.used = 0;
+      bc_array_s_append_sd_segmentd_msg_header(&this->buffer,id,sd_channel_msg_type_RESPONSE,a_type,segment_id);
+
+      if (sd_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+
+      // - send update -
+      this->buffer.used = 0;
+      bc_array_s_append_sd_segmentd_msg_header(&this->buffer,0,
+          sd_channel_msg_type_EVENT,sd_channel_cbreq_SEGMENT_UPDATE,segment_id);
+
+      // - get record from segment -
+      time_s time;
+      bc_array_s data;
+      if (sd_segment_handle_s_get_record(&segment->handle,&time,&data))
+      {
+        // - read error -
+        bc_array_s_append_be_ulli(&this->buffer,0);
+      }
+      else
+      {
+        bc_array_s_append_be_ulli(&this->buffer,time);
+        bc_array_s_append(&this->buffer,data.used,data.data);
+      }
+
+      if (sd_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
   case sd_channel_cbreq_SEGMENT_IGNORE:
     {/*{{{*/
       ulli id = va_arg(a_ap,ulli);
@@ -590,15 +654,6 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       sd_channel_watch_s *channel_watch = sd_channel_watches_s_at(&this->channel_watches,a_index);
       unsigned watch_idx = ui_tree_s_get_idx(&channel_watch->segment_idxs,segment_idx);
 
-      // - insert watch -
-      if (watch_idx == c_idx_not_exist && a_type == sd_channel_cbreq_SEGMENT_WATCH)
-      {
-        ui_tree_s_insert(&channel_watch->segment_idxs,segment_idx);
-
-        // - set update watches -
-        this->update_watches = 1;
-      }
-      
       // - remove watch -
       if (watch_idx != c_idx_not_exist && a_type == sd_channel_cbreq_SEGMENT_IGNORE)
       {

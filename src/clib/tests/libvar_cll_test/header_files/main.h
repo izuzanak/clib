@@ -9,6 +9,13 @@ include "cl_var.h"
 
 // === definition of generated structures ======================================
 
+// -- basic_tree_s --
+@begin
+rb_tree<ui>
+options ( from_var )
+basic_tree_s;
+@end
+
 // -- static_s --
 @begin
 struct
@@ -113,6 +120,18 @@ static inline void loc_s_person_to_json_nice(var_s this,json_nice_s *a_json_nice
 #endif
 
 // === inline methods of generated structures ==================================
+
+// -- basic_tree_s --
+@begin
+inlines basic_tree_s
+@end
+
+static inline int basic_tree_s___compare_value(const basic_tree_s *this,const ui *a_first,const ui *a_second)
+{/*{{{*/
+  (void)this;
+
+  return *a_first < *a_second ? -1 : *a_first > *a_second ? 1 : 0;
+}/*}}}*/
 
 // -- static_s --
 @begin

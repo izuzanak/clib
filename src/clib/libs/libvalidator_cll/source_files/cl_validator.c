@@ -58,11 +58,14 @@ unsigned validator_s_recognize_property(const char *a_string)
    if (in_char == 108) {
       goto state_7_label;
    }
-   if (in_char == 114) {
+   if (in_char == 111) {
       goto state_8_label;
    }
-   if (in_char == 116) {
+   if (in_char == 114) {
       goto state_9_label;
+   }
+   if (in_char == 116) {
+      goto state_10_label;
    }
    return c_idx_not_exist;
 
@@ -72,7 +75,7 @@ state_1_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 61) {
-      goto state_10_label;
+      goto state_11_label;
    }
    return c_idx_not_exist;
 
@@ -82,7 +85,7 @@ state_2_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 61) {
-      goto state_11_label;
+      goto state_12_label;
    }
    return 3;
 
@@ -92,7 +95,7 @@ state_3_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 61) {
-      goto state_12_label;
+      goto state_13_label;
    }
    return c_idx_not_exist;
 
@@ -102,7 +105,7 @@ state_4_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 61) {
-      goto state_13_label;
+      goto state_14_label;
    }
    return 4;
 
@@ -112,7 +115,7 @@ state_5_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 108) {
-      goto state_14_label;
+      goto state_15_label;
    }
    return c_idx_not_exist;
 
@@ -122,10 +125,10 @@ state_6_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 110) {
-      goto state_15_label;
+      goto state_16_label;
    }
    if (in_char == 116) {
-      goto state_16_label;
+      goto state_17_label;
    }
    return c_idx_not_exist;
 
@@ -135,7 +138,7 @@ state_7_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 101) {
-      goto state_17_label;
+      goto state_18_label;
    }
    return c_idx_not_exist;
 
@@ -144,8 +147,8 @@ state_8_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 101) {
-      goto state_18_label;
+   if (in_char == 112) {
+      goto state_19_label;
    }
    return c_idx_not_exist;
 
@@ -155,65 +158,65 @@ state_9_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 101) {
-      goto state_19_label;
-   }
-   if (in_char == 121) {
       goto state_20_label;
    }
    return c_idx_not_exist;
 
 // - STATE 10 -
 state_10_label:
-   VALIDATOR_CLOSE_CHAR(2);
-   return 2;
-
-// - STATE 11 -
-state_11_label:
-   VALIDATOR_CLOSE_CHAR(5);
-   return 5;
-
-// - STATE 12 -
-state_12_label:
-   VALIDATOR_CLOSE_CHAR(1);
-   return 1;
-
-// - STATE 13 -
-state_13_label:
-   VALIDATOR_CLOSE_CHAR(6);
-   return 6;
-
-// - STATE 14 -
-state_14_label:
-   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
-   VALIDATOR_GET_NEXT_CHAR();
-
-   if (in_char == 108) {
-      goto state_21_label;
-   }
-   return c_idx_not_exist;
-
-// - STATE 15 -
-state_15_label:
-   VALIDATOR_CLOSE_CHAR(19);
-   return 19;
-
-// - STATE 16 -
-state_16_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 101) {
+      goto state_21_label;
+   }
+   if (in_char == 121) {
       goto state_22_label;
    }
    return c_idx_not_exist;
+
+// - STATE 11 -
+state_11_label:
+   VALIDATOR_CLOSE_CHAR(2);
+   return 2;
+
+// - STATE 12 -
+state_12_label:
+   VALIDATOR_CLOSE_CHAR(5);
+   return 5;
+
+// - STATE 13 -
+state_13_label:
+   VALIDATOR_CLOSE_CHAR(1);
+   return 1;
+
+// - STATE 14 -
+state_14_label:
+   VALIDATOR_CLOSE_CHAR(6);
+   return 6;
+
+// - STATE 15 -
+state_15_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 108) {
+      goto state_23_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 16 -
+state_16_label:
+   VALIDATOR_CLOSE_CHAR(20);
+   return 20;
 
 // - STATE 17 -
 state_17_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 110) {
-      goto state_23_label;
+   if (in_char == 101) {
+      goto state_24_label;
    }
    return c_idx_not_exist;
 
@@ -222,10 +225,7 @@ state_18_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 102) {
-      goto state_24_label;
-   }
-   if (in_char == 103) {
+   if (in_char == 110) {
       goto state_25_label;
    }
    return c_idx_not_exist;
@@ -235,7 +235,7 @@ state_19_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 115) {
+   if (in_char == 116) {
       goto state_26_label;
    }
    return c_idx_not_exist;
@@ -245,8 +245,11 @@ state_20_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 112) {
+   if (in_char == 102) {
       goto state_27_label;
+   }
+   if (in_char == 103) {
+      goto state_28_label;
    }
    return c_idx_not_exist;
 
@@ -255,8 +258,8 @@ state_21_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 45) {
-      goto state_28_label;
+   if (in_char == 115) {
+      goto state_29_label;
    }
    return c_idx_not_exist;
 
@@ -265,8 +268,8 @@ state_22_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 109) {
-      goto state_29_label;
+   if (in_char == 112) {
+      goto state_30_label;
    }
    return c_idx_not_exist;
 
@@ -275,23 +278,28 @@ state_23_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 103) {
-      goto state_30_label;
+   if (in_char == 45) {
+      goto state_31_label;
    }
    return c_idx_not_exist;
 
 // - STATE 24 -
 state_24_label:
-   VALIDATOR_CLOSE_CHAR(13);
-   return 13;
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 109) {
+      goto state_32_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 25 -
 state_25_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 101) {
-      goto state_31_label;
+   if (in_char == 103) {
+      goto state_33_label;
    }
    return c_idx_not_exist;
 
@@ -300,30 +308,22 @@ state_26_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 116) {
-      goto state_32_label;
+   if (in_char == 45) {
+      goto state_34_label;
    }
    return c_idx_not_exist;
 
 // - STATE 27 -
 state_27_label:
-   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
-   VALIDATOR_GET_NEXT_CHAR();
-
-   if (in_char == 101) {
-      goto state_33_label;
-   }
-   return c_idx_not_exist;
+   VALIDATOR_CLOSE_CHAR(13);
+   return 13;
 
 // - STATE 28 -
 state_28_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 105) {
-      goto state_34_label;
-   }
-   if (in_char == 107) {
+   if (in_char == 101) {
       goto state_35_label;
    }
    return c_idx_not_exist;
@@ -333,7 +333,7 @@ state_29_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 115) {
+   if (in_char == 116) {
       goto state_36_label;
    }
    return c_idx_not_exist;
@@ -343,7 +343,7 @@ state_30_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 116) {
+   if (in_char == 101) {
       goto state_37_label;
    }
    return c_idx_not_exist;
@@ -353,28 +353,41 @@ state_31_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 120) {
+   if (in_char == 105) {
       goto state_38_label;
+   }
+   if (in_char == 107) {
+      goto state_39_label;
    }
    return c_idx_not_exist;
 
 // - STATE 32 -
 state_32_label:
-   VALIDATOR_CLOSE_CHAR(15);
-   return 15;
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 115) {
+      goto state_40_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 33 -
 state_33_label:
-   VALIDATOR_CLOSE_CHAR(0);
-   return 0;
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 116) {
+      goto state_41_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 34 -
 state_34_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 116) {
-      goto state_39_label;
+   if (in_char == 105) {
+      goto state_42_label;
    }
    return c_idx_not_exist;
 
@@ -383,30 +396,30 @@ state_35_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 101) {
-      goto state_40_label;
+   if (in_char == 120) {
+      goto state_43_label;
    }
    return c_idx_not_exist;
 
 // - STATE 36 -
 state_36_label:
-   VALIDATOR_CLOSE_CHAR(16);
-   return 16;
+   VALIDATOR_CLOSE_CHAR(15);
+   return 15;
 
 // - STATE 37 -
 state_37_label:
-   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
-   VALIDATOR_GET_NEXT_CHAR();
-
-   if (in_char == 104) {
-      goto state_41_label;
-   }
-   return c_idx_not_exist;
+   VALIDATOR_CLOSE_CHAR(0);
+   return 0;
 
 // - STATE 38 -
 state_38_label:
-   VALIDATOR_CLOSE_CHAR(14);
-   return 14;
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 116) {
+      goto state_44_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 39 -
 state_39_label:
@@ -414,27 +427,22 @@ state_39_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 101) {
-      goto state_42_label;
+      goto state_45_label;
    }
    return c_idx_not_exist;
 
 // - STATE 40 -
 state_40_label:
-   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
-   VALIDATOR_GET_NEXT_CHAR();
-
-   if (in_char == 121) {
-      goto state_43_label;
-   }
-   return c_idx_not_exist;
+   VALIDATOR_CLOSE_CHAR(16);
+   return 16;
 
 // - STATE 41 -
 state_41_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 32) {
-      goto state_44_label;
+   if (in_char == 104) {
+      goto state_46_label;
    }
    return c_idx_not_exist;
 
@@ -443,37 +451,23 @@ state_42_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 109) {
-      goto state_45_label;
+   if (in_char == 116) {
+      goto state_47_label;
    }
    return c_idx_not_exist;
 
 // - STATE 43 -
 state_43_label:
-   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
-   VALIDATOR_GET_NEXT_CHAR();
-
-   if (in_char == 115) {
-      goto state_46_label;
-   }
-   return c_idx_not_exist;
+   VALIDATOR_CLOSE_CHAR(14);
+   return 14;
 
 // - STATE 44 -
 state_44_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 33) {
-      goto state_47_label;
-   }
-   if (in_char == 60) {
+   if (in_char == 101) {
       goto state_48_label;
-   }
-   if (in_char == 61) {
-      goto state_49_label;
-   }
-   if (in_char == 62) {
-      goto state_50_label;
    }
    return c_idx_not_exist;
 
@@ -482,80 +476,174 @@ state_45_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 115) {
-      goto state_51_label;
+   if (in_char == 121) {
+      goto state_49_label;
    }
    return c_idx_not_exist;
 
 // - STATE 46 -
 state_46_label:
-   VALIDATOR_CLOSE_CHAR(18);
-   return 18;
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 32) {
+      goto state_50_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 47 -
 state_47_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 61) {
-      goto state_52_label;
+   if (in_char == 101) {
+      goto state_51_label;
    }
    return c_idx_not_exist;
 
 // - STATE 48 -
 state_48_label:
-   VALIDATOR_CLOSE_CHAR(9);
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 61) {
-      goto state_53_label;
+   if (in_char == 109) {
+      goto state_52_label;
    }
-   return 9;
+   return c_idx_not_exist;
 
 // - STATE 49 -
 state_49_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 61) {
-      goto state_54_label;
+   if (in_char == 115) {
+      goto state_53_label;
    }
    return c_idx_not_exist;
 
 // - STATE 50 -
 state_50_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 33) {
+      goto state_54_label;
+   }
+   if (in_char == 60) {
+      goto state_55_label;
+   }
+   if (in_char == 61) {
+      goto state_56_label;
+   }
+   if (in_char == 62) {
+      goto state_57_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 51 -
+state_51_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 109) {
+      goto state_58_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 52 -
+state_52_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 115) {
+      goto state_59_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 53 -
+state_53_label:
+   VALIDATOR_CLOSE_CHAR(19);
+   return 19;
+
+// - STATE 54 -
+state_54_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 61) {
+      goto state_60_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 55 -
+state_55_label:
+   VALIDATOR_CLOSE_CHAR(9);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 61) {
+      goto state_61_label;
+   }
+   return 9;
+
+// - STATE 56 -
+state_56_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 61) {
+      goto state_62_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 57 -
+state_57_label:
    VALIDATOR_CLOSE_CHAR(10);
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 61) {
-      goto state_55_label;
+      goto state_63_label;
    }
    return 10;
 
-// - STATE 51 -
-state_51_label:
-   VALIDATOR_CLOSE_CHAR(17);
-   return 17;
+// - STATE 58 -
+state_58_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
 
-// - STATE 52 -
-state_52_label:
+   if (in_char == 115) {
+      goto state_64_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 59 -
+state_59_label:
+   VALIDATOR_CLOSE_CHAR(18);
+   return 18;
+
+// - STATE 60 -
+state_60_label:
    VALIDATOR_CLOSE_CHAR(8);
    return 8;
 
-// - STATE 53 -
-state_53_label:
+// - STATE 61 -
+state_61_label:
    VALIDATOR_CLOSE_CHAR(11);
    return 11;
 
-// - STATE 54 -
-state_54_label:
+// - STATE 62 -
+state_62_label:
    VALIDATOR_CLOSE_CHAR(7);
    return 7;
 
-// - STATE 55 -
-state_55_label:
+// - STATE 63 -
+state_63_label:
    VALIDATOR_CLOSE_CHAR(12);
    return 12;
+
+// - STATE 64 -
+state_64_label:
+   VALIDATOR_CLOSE_CHAR(17);
+   return 17;
 
 }/*}}}*/
 
@@ -629,6 +717,14 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
 #define VALIDATE_STACKS_PUSH_PROP_KEY() \
 /*{{{*/\
   var_array_s_push(&this->props_stack,&prop_key);
+/*}}}*/
+
+#define VALIDATE_STACKS_PUSH_ITEMS() \
+/*{{{*/\
+  var_array_s_push(&this->value_stack,&item_key);\
+  var_array_s_push(&this->props_stack,&item_key);\
+\
+  VALIDATE_STACKS_PUSH_PROP_KEY();\
 /*}}}*/
 
       // - ERROR -
@@ -865,14 +961,6 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
           throw_error(VALIDATOR_INVALID_PROPERTIES_ARRAY_SIZE);
         }
 
-#define VALIDATE_STACKS_PUSH_ITEMS() \
-/*{{{*/\
-  var_array_s_push(&this->value_stack,&item_key);\
-  var_array_s_push(&this->props_stack,&item_key);\
-\
-  VALIDATE_STACKS_PUSH_PROP_KEY();\
-/*}}}*/
-
         if (item_array->used != 0)
         {
           switch (a_value->v_type)
@@ -944,6 +1032,55 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
 
             throw_error(VALIDATOR_INVALID_VALUE);
           }
+        }
+      }/*}}}*/
+      break;
+      case c_validator_prop_opt_items:
+      {/*{{{*/
+
+        // - ERROR -
+        if (prop_value->v_type != c_bi_type_array)
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_PROPERTY_TYPE);
+        }
+
+        var_array_s *item_array = loc_s_array_value(prop_value);
+
+        // - ERROR -
+        if (item_array->used & 0x01)
+        {
+          VALIDATE_STACKS_PUSH_PROP_KEY();
+
+          throw_error(VALIDATOR_INVALID_PROPERTIES_ARRAY_SIZE);
+        }
+
+        if (item_array->used != 0)
+        {
+          // - ERROR -
+          if (a_value->v_type != c_bi_type_dict)
+          {
+            VALIDATE_STACKS_PUSH_PROP_KEY();
+
+            throw_error(VALIDATOR_INVALID_VALUE);
+          }
+
+          var_s *i_ptr = item_array->data;
+          var_s *i_ptr_end = i_ptr + item_array->used;
+          do {
+            var_s item_key = i_ptr[0];
+            var_s item_props = i_ptr[1];
+
+            var_s item = loc_s_dict_get(a_value,item_key);
+
+            if (item != NULL)
+            {
+              VALIDATE_PAIR_CALL(item,item_props,
+                VALIDATE_STACKS_PUSH_ITEMS();
+              );
+            }
+          } while((i_ptr += 2) < i_ptr_end);
         }
       }/*}}}*/
       break;
