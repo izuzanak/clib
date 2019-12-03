@@ -9,11 +9,6 @@ unsigned g_type_tcp_message = c_idx_not_exist;
 
 // === methods of generated structures =========================================
 
-// -- var_queue_s --
-@begin
-methods var_queue_s
-@end
-
 // -- tcp_conn_s --
 @begin
 methods tcp_conn_s

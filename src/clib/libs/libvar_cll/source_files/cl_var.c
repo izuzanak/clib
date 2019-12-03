@@ -105,6 +105,11 @@ methods var_array_s
 methods var_arrays_s
 @end
 
+// -- var_queue_s --
+@begin
+methods var_queue_s
+@end
+
 // -- var_map_s --
 @begin
 methods var_map_s

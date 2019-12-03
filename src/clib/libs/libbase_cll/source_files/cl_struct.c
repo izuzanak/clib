@@ -25,3 +25,8 @@ methods pointer_array_s
 methods pointer_list_s
 @end
 
+// -- pointer_tree_s --
+@begin
+methods pointer_tree_s
+@end
+

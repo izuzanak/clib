@@ -65,33 +65,36 @@ int gpsd_client_s_gpsd_callback(void *a_gpsd_client,unsigned a_index,unsigned a_
     break;
   case cl_gpsd_cbreq_DROP:
     {/*{{{*/
-
-      // FIXME
-      fprintf(stderr,"DROP\n");
     }/*}}}*/
     break;
   case cl_gpsd_cbreq_VERSION:
     {/*{{{*/
       //var_s msg = va_arg(a_ap,var_s);
-
-      // FIXME
-      fprintf(stderr,"VERSION\n");
     }/*}}}*/
     break;
   case cl_gpsd_cbreq_DEVICES:
     {/*{{{*/
       //var_s msg = va_arg(a_ap,var_s);
-
-      // FIXME
-      fprintf(stderr,"DEVICES\n");
+    }/*}}}*/
+    break;
+  case cl_gpsd_cbreq_DEVICE:
+    {/*{{{*/
+      //var_s msg = va_arg(a_ap,var_s);
+    }/*}}}*/
+    break;
+  case cl_gpsd_cbreq_SKY:
+    {/*{{{*/
+      //var_s msg = va_arg(a_ap,var_s);
     }/*}}}*/
     break;
   case cl_gpsd_cbreq_WATCH:
     {/*{{{*/
       //var_s msg = va_arg(a_ap,var_s);
-
-      // FIXME
-      fprintf(stderr,"WATCH\n");
+    }/*}}}*/
+    break;
+  case cl_gpsd_cbreq_TPV:
+    {/*{{{*/
+      //var_s msg = va_arg(a_ap,var_s);
     }/*}}}*/
     break;
   default:
@@ -130,7 +133,7 @@ int main(int argc,char **argv)
 
   CONT_INIT(gpsd_client_s,gpsd_client);
 
-  cassert(gpsd_client_s_create(&gpsd_client,"127.0.0.1",2947) == 0);
+  cassert(gpsd_client_s_create(&gpsd_client,"127.0.0.1",2948) == 0);
   cassert(gpsd_client_s_run(&gpsd_client) == 0);
   gpsd_client_s_clear(&gpsd_client);
 

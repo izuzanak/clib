@@ -5,7 +5,7 @@ include "cl_gpsd.h"
 
 // === constants and definitions ===============================================
 
-const char g_json_parser_init[] =
+const char g_gpsd_json_parser_init[] =
 /*{{{*/
 "{"
 "\"first\":["
@@ -14,6 +14,8 @@ const char g_json_parser_init[] =
 
 "\"VERSION\","
 "\"DEVICES\","
+"\"DEVICE\","
+"\"SKY\","
 "\"WATCH\","
 "\"TPV\","
 
@@ -32,11 +34,6 @@ json_parser_s g_gpsd_json_parser;
 pointer_tree_s g_gpsd_json_string_map;
 
 // === methods of generated structures =========================================
-
-// -- pointer_tree_s --
-@begin
-methods pointer_tree_s
-@end
 
 // -- gpsd_conn_s --
 @begin
@@ -197,11 +194,44 @@ int gpsd_conn_s_conn_message(void *a_gpsd_conn,unsigned a_index,bc_array_s *a_me
         }
       }/*}}}*/
       break;
+    case cl_gpsd_DEVICE:
+      {/*{{{*/
+
+        // - call callback -
+        if (gpsd_conn_s_message_call(this,cl_gpsd_cbreq_DEVICE,
+              msg_var))
+        {
+          throw_error(GPSD_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case cl_gpsd_SKY:
+      {/*{{{*/
+
+        // - call callback -
+        if (gpsd_conn_s_message_call(this,cl_gpsd_cbreq_SKY,
+              msg_var))
+        {
+          throw_error(GPSD_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
     case cl_gpsd_WATCH:
       {/*{{{*/
 
         // - call callback -
         if (gpsd_conn_s_message_call(this,cl_gpsd_cbreq_WATCH,
+              msg_var))
+        {
+          throw_error(GPSD_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case cl_gpsd_TPV:
+      {/*{{{*/
+
+        // - call callback -
+        if (gpsd_conn_s_message_call(this,cl_gpsd_cbreq_TPV,
               msg_var))
         {
           throw_error(GPSD_CLIENT_CALLBACK_ERROR);
@@ -298,8 +328,8 @@ void libgpsd_cll_init()
 
   // - initialize json parser strings -
   CONT_INIT_CLEAR(var_s,dummy_var);
-  unsigned jpi_length = strlen(g_json_parser_init);
-  bc_array_s buffer = {jpi_length,jpi_length,(char *)g_json_parser_init};
+  unsigned jpi_length = strlen(g_gpsd_json_parser_init);
+  bc_array_s buffer = {jpi_length,jpi_length,(char *)g_gpsd_json_parser_init};
   cassert(json_parser_s_parse(&g_gpsd_json_parser,&buffer,&dummy_var) == 0);
 
   // - initialize json string map -

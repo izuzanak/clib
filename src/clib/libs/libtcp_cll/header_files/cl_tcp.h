@@ -59,11 +59,6 @@ static inline const bc_array_s *loc_s_tcp_message_value(var_s this);
 
 // === definition of generated structures ======================================
 
-// -- var_queue_s --
-@begin
-queue<var_s> var_queue_s;
-@end
-
 // -- tcp_conn_s --
 @begin
 struct
@@ -206,11 +201,6 @@ static inline const bc_array_s *loc_s_tcp_message_value(var_s this)
 }/*}}}*/
 
 // === inline methods of generated structures ==================================
-
-// -- var_queue_s --
-@begin
-inlines var_queue_s
-@end
 
 // -- tcp_conn_s --
 @begin

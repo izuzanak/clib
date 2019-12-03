@@ -38,6 +38,8 @@ enum
 
   cl_gpsd_VERSION,
   cl_gpsd_DEVICES,
+  cl_gpsd_DEVICE,
+  cl_gpsd_SKY,
   cl_gpsd_WATCH,
   cl_gpsd_TPV,
 
@@ -56,15 +58,13 @@ enum
 
   cl_gpsd_cbreq_VERSION = 0,
   cl_gpsd_cbreq_DEVICES,
+  cl_gpsd_cbreq_DEVICE,
+  cl_gpsd_cbreq_SKY,
   cl_gpsd_cbreq_WATCH,
+  cl_gpsd_cbreq_TPV,
 };/*}}}*/
 
 // === definition of generated structures ======================================
-
-// -- pointer_tree_s --
-@begin
-rb_tree<pointer> pointer_tree_s;
-@end
 
 // -- gpsd_conn_s --
 @begin
@@ -104,18 +104,6 @@ void libgpsd_cll_init();
 void libgpsd_cll_clear();
 
 // === inline methods of generated structures ==================================
-
-// -- pointer_tree_s --
-@begin
-inlines pointer_tree_s
-@end
-
-static inline int pointer_tree_s___compare_value(const pointer_tree_s *this,const pointer *a_first,const pointer *a_second)
-{/*{{{*/
-  (void)this;
-
-  return *a_first < *a_second ? -1 : *a_first > *a_second ? 1 : 0;
-}/*}}}*/
 
 // -- gpsd_conn_s --
 @begin

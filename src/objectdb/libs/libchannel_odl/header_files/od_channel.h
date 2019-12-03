@@ -24,14 +24,27 @@ include "cl_channel.h"
 #define ERROR_OD_CHANNEL_SERVER_EPOLL_ERROR 2
 #define ERROR_OD_CHANNEL_SERVER_FD_EVENT_ERROR 3
 #define ERROR_OD_CHANNEL_SERVER_SCHEDULE_MESSAGE_ERROR 4
-#define ERROR_OD_CHANNEL_SERVER_CALLBACK_ERROR 5
-#define ERROR_OD_CHANNEL_SERVER_SEND_MULTI_MESSAGE_VAR_ERROR 6
-#define ERROR_OD_CHANNEL_MESSAGE_ERROR 7
+#define ERROR_OD_CHANNEL_SERVER_SEND_MESSAGE_ERROR 5
+#define ERROR_OD_CHANNEL_SERVER_CALLBACK_ERROR 6
+#define ERROR_OD_CHANNEL_SERVER_SEND_MULTI_MESSAGE_VAR_ERROR 7
+#define ERROR_OD_CHANNEL_MESSAGE_ERROR 8
 
 #define ERROR_OD_CHANNEL_CLIENT_EPOLL_ERROR 1
-#define ERROR_OD_CHANNEL_CLIENT_TIMER_READ_ERROR 2
-#define ERROR_OD_CHANNEL_CLIENT_SCHEDULE_MESSAGE_ERROR 3
-#define ERROR_OD_CHANNEL_CLIENT_CALLBACK_ERROR 4
+#define ERROR_OD_CHANNEL_CLIENT_TIMER_SETTIME_ERROR 2
+#define ERROR_OD_CHANNEL_CLIENT_TIMER_READ_ERROR 3
+#define ERROR_OD_CHANNEL_CLIENT_SCHEDULE_MESSAGE_ERROR 4
+#define ERROR_OD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR 5
+#define ERROR_OD_CHANNEL_CLIENT_CALLBACK_ERROR 6
+
+// === constants and definitions ===============================================
+
+#define OD_CONFIG_PATH "mod/config"
+#define OD_STATUS_PATH "mod/status"
+#define OD_OUTPUT_PATH "mod/output"
+
+#define OD_CHANNEL_RECONNECT_PERIOD {0,500000000}
+#define OD_CHANNEL_PING_PERIOD {5,0}
+#define OD_CHANNEL_PING_TIMEOUT {30,0}
 
 typedef int (*od_channel_cbreq_t)(void *a_object,unsigned a_index,unsigned a_type,va_list a_ap);
 
@@ -53,6 +66,7 @@ enum
   od_channel_WATCH,
   od_channel_IGNORE,
   od_channel_UPDATE,
+  od_channel_PING,
 
   od_channel_LAST,
 };/*}}}*/
@@ -77,11 +91,6 @@ enum
 
 // === definition of generated structures ======================================
 
-// -- pointer_tree_s --
-@begin
-rb_tree<pointer> pointer_tree_s;
-@end
-
 // -- od_channel_s --
 @begin
 struct
@@ -90,6 +99,8 @@ channel_server_s:server
 
 pointer:channel_callback
 pointer:cb_object
+
+bc_array_s:buffer
 >
 od_channel_s;
 @end
@@ -119,7 +130,10 @@ pointer:channel_callback
 pointer:cb_object
 ui:cb_index
 
-epoll_timer_s:epoll_timer
+bc_array_s:buffer
+
+epoll_timer_s:connect_timer
+epoll_timer_s:ping_timer
 >
 od_channel_client_s;
 @end
@@ -133,6 +147,7 @@ WUR static inline int od_channel_client_s_send_message(od_channel_client_s *this
 WUR libchannel_odl_EXPORT int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,const bc_array_s *a_message);
 WUR libchannel_odl_EXPORT int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR libchannel_odl_EXPORT int od_channel_client_s_connect_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libchannel_odl_EXPORT int od_channel_client_s_ping_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 
 // === definition of global functions ==========================================
 
@@ -143,18 +158,6 @@ void libchannel_odl_init();
 void libchannel_odl_clear();
 
 // === inline methods of generated structures ==================================
-
-// -- pointer_tree_s --
-@begin
-inlines pointer_tree_s
-@end
-
-static inline int pointer_tree_s___compare_value(const pointer_tree_s *this,const pointer *a_first,const pointer *a_second)
-{/*{{{*/
-  (void)this;
-
-  return *a_first < *a_second ? -1 : *a_first > *a_second ? 1 : 0;
-}/*}}}*/
 
 // -- od_channel_s --
 @begin

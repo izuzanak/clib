@@ -123,6 +123,9 @@ function(include_component COMP_REL_DIR)
       foreach(COMP_COMP_REL_DIR ${CONF_COMPONENTS})
         include_component(${COMP_COMP_REL_DIR})
 
+        # FIXME debug output header directories
+        #message("${COMP_NAME} -> ${COMP_COMP_REL_DIR}")
+
         get_property(INCLUDE_COMP_REL_DIRS GLOBAL PROPERTY GP_INCLUDE_COMP_REL_DIRS)
         get_property(INCLUDE_COMP_HEADER_DIRS GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS)
 
@@ -195,12 +198,33 @@ if(NOT PROCESS_BIN)
   return()
 endif()
 
-# - process libs -
-include_component_dir("src/clib/libs")
-include_component_dir("src/segmentd/libs")
+# - process component directories -
+if(NOT DEFINED CS_COMPONENT_DIRS)
+  set(CS_COMPONENT_DIRS
+      "src/clib/tests"
+      "src/segmentd/tests"
+      "src/segmentd/progs"
+      "src/objectdb/tests"
+      "src/objectdb/progs")
+endif()
 
-# - process tests -
-include_component_dir("src/clib/tests")
-include_component_dir("src/segmentd/tests")
-include_component_dir("src/segmentd/progs")
+foreach(COMPONENT_DIR ${CS_COMPONENT_DIRS})
+  include_component_dir("${COMPONENT_DIR}")
+endforeach()
+
+# - process components -
+if(NOT DEFINED CS_COMPONENTS)
+  set(CS_COMPONENTS)
+endif()
+
+foreach(COMPONENT ${CS_COMPONENTS})
+  include_component("${COMPONENT}")
+endforeach()
+
+# - process programs -
+if(NOT DEFINED CS_INSTALL_BINS)
+  set(CS_INSTALL_BINS)
+endif()
+
+install(TARGETS ${CS_INSTALL_BINS} RUNTIME DESTINATION bin)
 

@@ -38,6 +38,11 @@ array<pointer> pointer_array_s;
 safe_list<pointer> pointer_list_s;
 @end
 
+// -- pointer_tree_s --
+@begin
+rb_tree<pointer> pointer_tree_s;
+@end
+
 // === inline methods of generated structures ==================================
 
 // -- lalr_stack_element_s --
@@ -71,6 +76,18 @@ inlines pointer_array_s
 @begin
 inlines pointer_list_s
 @end
+
+// -- pointer_tree_s --
+@begin
+inlines pointer_tree_s
+@end
+
+static inline int pointer_tree_s___compare_value(const pointer_tree_s *this,const pointer *a_first,const pointer *a_second)
+{/*{{{*/
+  (void)this;
+
+  return *a_first < *a_second ? -1 : *a_first > *a_second ? 1 : 0;
+}/*}}}*/
 
 #endif
 

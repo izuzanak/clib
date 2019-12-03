@@ -149,6 +149,11 @@ static inline void var_array_s_push_loc(var_array_s *this,var_s a_value);
 array<var_array_s> var_arrays_s;
 @end
 
+// -- var_queue_s --
+@begin
+queue<var_s> var_queue_s;
+@end
+
 // -- var_map_s --
 @begin
 struct
@@ -466,6 +471,11 @@ static inline void var_array_s_push_loc(var_array_s *this,var_s a_value)
 // -- var_arrays_s --
 @begin
 inlines var_arrays_s
+@end
+
+// -- var_queue_s --
+@begin
+inlines var_queue_s
 @end
 
 // -- var_map_s --

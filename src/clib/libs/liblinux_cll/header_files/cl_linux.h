@@ -342,6 +342,9 @@ static inline int epoll_timer_s_compare(const epoll_timer_s *this,const epoll_ti
 static inline void epoll_timer_s_to_string(const epoll_timer_s *this,bc_array_s *a_trg);
 #endif
 
+WUR static inline int epoll_timer_s_settime(const epoll_timer_s *this,
+    struct itimerspec *a_itimerspec,int a_flags);
+
 // === definition of structure rtc_s ===========================================
 
 typedef int rtc_s;
@@ -1067,6 +1070,19 @@ static inline void epoll_timer_s_to_string(const epoll_timer_s *this,bc_array_s 
   bc_array_s_append_format(a_trg,"}");
 }/*}}}*/
 #endif
+
+static inline int epoll_timer_s_settime(const epoll_timer_s *this,
+    struct itimerspec *a_itimerspec,int a_flags)
+{/*{{{*/
+  
+  // - set timer -
+  if (timerfd_settime(this->fd,a_flags,a_itimerspec,NULL))
+  {
+    throw_error(EPOLL_TIMER_SETTIME_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
 
 // === definition of structure rtc_s ===========================================
 
