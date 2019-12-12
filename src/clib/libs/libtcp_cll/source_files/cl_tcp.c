@@ -30,7 +30,6 @@ void tcp_conn_s_create(tcp_conn_s *this,epoll_fd_s *a_epoll_fd,
 
   // - reset client connecting flag -
   this->connecting = 0;
-
 }/*}}}*/
 
 int tcp_conn_s_create_client(tcp_conn_s *this,

@@ -33,7 +33,8 @@ void test_set_get_value()
   CONT_INIT_CLEAR(odb_database_s,db);
   odb_database_s_create(&db);
 
-  odb_database_s_set_value(&db,"first/second/third/value",loc_s_string_ptr("Hello database"));
+  int updated;
+  odb_database_s_set_value(&db,"first/second/third/value",loc_s_string_ptr("Hello database"),&updated);
 
   CONT_INIT_CLEAR(var_s,value);
   odb_database_s_get_value(&db,"wrong/path",&value);

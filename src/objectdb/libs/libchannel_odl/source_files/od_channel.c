@@ -18,6 +18,7 @@ const char g_od_json_parser_init[] =
 "\"data\","
 
 "\"set\","
+"\"cmd\","
 "\"get\","
 "\"watch\","
 "\"ignore\","
@@ -192,6 +193,25 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
       }
     }/*}}}*/
     break;
+  case od_channel_CMD:
+    {/*{{{*/
+      var_s path_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_PATH]);
+      var_s data_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_DATA]);
+
+      if (path_var == NULL || path_var->v_type != c_bi_type_string ||
+          data_var == NULL)
+      {
+        throw_error(OD_CHANNEL_MESSAGE_ERROR);
+      }
+
+      // - call callback -
+      if (od_channel_s_message_call(this,a_index,od_channel_cbreq_CMD,id,
+            loc_s_string_value(path_var),data_var))
+      {
+        throw_error(OD_CHANNEL_SERVER_CALLBACK_ERROR);
+      }
+    }/*}}}*/
+    break;
   case od_channel_GET:
     {/*{{{*/
       var_s path_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_PATH]);
@@ -292,6 +312,7 @@ int od_channel_client_s_create(od_channel_client_s *this,epoll_s *a_epoll,
 
   string_s_set_ptr(&this->server_ip,a_server_ip);
   this->server_port = a_server_port;
+  this->connected = 0;
   this->message_id = 0;
 
   this->channel_callback = a_channel_callback;
@@ -396,6 +417,23 @@ int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,
           }
         }/*}}}*/
         break;
+      case od_channel_CMD:
+        {/*{{{*/
+          var_s path_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_PATH]);
+
+          if (path_var == NULL || path_var->v_type != c_bi_type_string)
+          {
+            throw_error(OD_CHANNEL_MESSAGE_ERROR);
+          }
+
+          // - call callback -
+          if (od_channel_client_s_message_call(this,od_channel_cbresp_CMD,id,
+                loc_s_string_value(path_var)))
+          {
+            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+          }
+        }/*}}}*/
+        break;
       case od_channel_GET:
         {/*{{{*/
           var_s path_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_PATH]);
@@ -491,6 +529,9 @@ int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epol
 
     if (!connecting)
     {
+      // - reset connected flag -
+      this->connected = 0;
+
       // - call callback -
       if (od_channel_client_s_message_call(this,od_channel_cbreq_DROP))
       {
@@ -502,6 +543,9 @@ int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epol
   {
     if (connecting)
     {
+      // - set connected flag -
+      this->connected = 1;
+
       // - call callback -
       if (od_channel_client_s_message_call(this,od_channel_cbreq_NEW))
       {
@@ -561,7 +605,7 @@ int od_channel_client_s_ping_time_event(void *a_od_channel_client,unsigned a_ind
 
   od_channel_client_s *this = (od_channel_client_s *)a_od_channel_client;
 
-  if (!this->connection.connecting)
+  if (this->connected)
   {
     this->buffer.used = 0;
     bc_array_s_append_format(&this->buffer,"{\"type\":\"ping\",\"id\":%" HOST_LL_FORMAT "d}",this->message_id++);

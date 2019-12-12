@@ -271,6 +271,7 @@ static inline unsigned loc_s_dict_length(var_s this);
 static inline int loc_s_dict_has_key(var_s this,var_s a_key);
 static inline void loc_s_dict_remove_key(var_s this,var_s a_key);
 static inline void loc_s_dict_set(var_s this,var_s a_key,var_s a_value);
+static inline void loc_s_dict_str_set(var_s this,const char *a_str_key,var_s a_value);
 static inline var_s loc_s_dict_get(var_s this,var_s a_key);
 static inline var_s loc_s_dict_str_get(var_s this,const char *a_str_key);
 
@@ -1018,6 +1019,15 @@ static inline void loc_s_dict_set(var_s this,var_s a_key,var_s a_value)
   {
     var_s_copy_loc(&map->value,a_value);
   }
+}/*}}}*/
+
+static inline void loc_s_dict_str_set(var_s this,const char *a_str_key,var_s a_value)
+{/*{{{*/
+  string_s string = {strlen(a_str_key) + 1,(char *)a_str_key};
+  loc_s loc = {c_bi_type_string,{0},{.ptr = &string}};
+
+  loc_s_dict_set(this,&loc,a_value);
+  debug_assert(loc.v_ref_cnt.counter == 0);
 }/*}}}*/
 
 static inline var_s loc_s_dict_get(var_s this,var_s a_key)

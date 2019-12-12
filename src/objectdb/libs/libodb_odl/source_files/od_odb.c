@@ -33,7 +33,7 @@ void odb_database_s_create(odb_database_s *this)
   var_s_copy_loc(&this->data_var,loc_s_dict());
 }/*}}}*/
 
-void odb_database_s_set_value(odb_database_s *this,const char *a_path,var_s a_value_var)
+void odb_database_s_set_value(odb_database_s *this,const char *a_path,var_s a_value_var,int *a_updated)
 {/*{{{*/
   var_s data_var = this->data_var;
 
@@ -77,7 +77,19 @@ void odb_database_s_set_value(odb_database_s *this,const char *a_path,var_s a_va
     // - last key -
     else
     {
-      loc_s_dict_set(data_var,key_var,a_value_var);
+      var_s value_var = loc_s_dict_get(data_var,key_var);
+
+      // - compare actual and new value -
+      if (var_s_compare(&value_var,&a_value_var))
+      {
+        *a_updated = 0;
+      }
+      else
+      {
+        *a_updated = 1;
+        loc_s_dict_set(data_var,key_var,a_value_var);
+      }
+
       break;
     }
 

@@ -31,7 +31,6 @@ void channel_conn_s_create(channel_conn_s *this,epoll_fd_s *a_epoll_fd,
 
   // - reset client connecting flag -
   this->connecting = 0;
-
 }/*}}}*/
 
 int channel_conn_s_create_client(channel_conn_s *this,

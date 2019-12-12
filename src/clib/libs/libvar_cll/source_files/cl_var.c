@@ -236,27 +236,30 @@ int loc_s_dict___order(const var_map_tree_s *a_first,const var_map_tree_s *a_sec
 
   int res;
 
-  unsigned f_stack[RB_TREE_STACK_SIZE(var_map_tree_s,a_first)];
-  unsigned s_stack[RB_TREE_STACK_SIZE(var_map_tree_s,a_second)];
+  if (a_first->count != 0)
+  {
+    unsigned f_stack[RB_TREE_STACK_SIZE(var_map_tree_s,a_first)];
+    unsigned s_stack[RB_TREE_STACK_SIZE(var_map_tree_s,a_second)];
 
-  unsigned *f_stack_ptr = f_stack;
-  unsigned *s_stack_ptr = s_stack;
+    unsigned *f_stack_ptr = f_stack;
+    unsigned *s_stack_ptr = s_stack;
 
-  unsigned ft_idx = var_map_tree_s_get_stack_min_value_idx(a_first,a_first->root_idx,&f_stack_ptr);
-  unsigned st_idx = var_map_tree_s_get_stack_min_value_idx(a_second,a_second->root_idx,&s_stack_ptr);
-  do {
-    res = var_map_s_order(
-      &(a_first->data + ft_idx)->object,
-      &(a_second->data + st_idx)->object);
+    unsigned ft_idx = var_map_tree_s_get_stack_min_value_idx(a_first,a_first->root_idx,&f_stack_ptr);
+    unsigned st_idx = var_map_tree_s_get_stack_min_value_idx(a_second,a_second->root_idx,&s_stack_ptr);
+    do {
+      res = var_map_s_order(
+        &(a_first->data + ft_idx)->object,
+        &(a_second->data + st_idx)->object);
 
-    if (res != 0)
-    {
-      return res;
-    }
+      if (res != 0)
+      {
+        return res;
+      }
 
-    ft_idx = var_map_tree_s_get_stack_next_idx(a_first,ft_idx,&f_stack_ptr,f_stack);
-    st_idx = var_map_tree_s_get_stack_next_idx(a_second,st_idx,&s_stack_ptr,s_stack);
-  } while(ft_idx != c_idx_not_exist);
+      ft_idx = var_map_tree_s_get_stack_next_idx(a_first,ft_idx,&f_stack_ptr,f_stack);
+      st_idx = var_map_tree_s_get_stack_next_idx(a_second,st_idx,&s_stack_ptr,s_stack);
+    } while(ft_idx != c_idx_not_exist);
+  }
 
   return 0;
 }/*}}}*/

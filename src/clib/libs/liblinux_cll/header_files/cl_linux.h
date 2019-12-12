@@ -1161,7 +1161,7 @@ static inline int rtc_s_read_time(const rtc_s *this,time_s *a_trg)
   datetime_s datetime =
   {
     rtc_time.tm_year <= 70 ? 1970 : 1900 + rtc_time.tm_year,
-    rtc_time.tm_mon,
+    rtc_time.tm_mon + 1,
     rtc_time.tm_mday,
     0,
     rtc_time.tm_hour,
@@ -1192,7 +1192,7 @@ static inline int rtc_s_write_time(const rtc_s *this,time_s a_time)
     datetime.min,
     datetime.hour,
     datetime.day,
-    datetime.month,
+    datetime.month - 1,
     datetime.year - 1900,
     0,
     0,

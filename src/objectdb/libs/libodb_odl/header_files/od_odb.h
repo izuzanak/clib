@@ -76,7 +76,7 @@ odb_database_s;
 
 void odb_database_s_create(odb_database_s *this);
 
-void odb_database_s_set_value(odb_database_s *this,const char *a_path,var_s a_value_var);
+void odb_database_s_set_value(odb_database_s *this,const char *a_path,var_s a_value_var,int *a_updated);
 void odb_database_s_get_value(odb_database_s *this,const char *a_path,var_s *a_value_var);
 
 void odb_database_s_add_node(odb_database_s *this,const char *a_path,var_s *a_info_var);
