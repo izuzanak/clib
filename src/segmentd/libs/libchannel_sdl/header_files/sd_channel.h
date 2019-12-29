@@ -61,6 +61,7 @@ enum
   sd_channel_cbreq_TRACE_READ,
   sd_channel_cbreq_TRACE_HEAD,
   sd_channel_cbreq_TRACE_TAIL,
+  sd_channel_cbreq_TRACE_RANGE,
   sd_channel_cbreq_TRACE_LEE_TIME,
   sd_channel_cbreq_TRACE_GRE_TIME,
   sd_channel_cbreq_TRACE_WATCH,

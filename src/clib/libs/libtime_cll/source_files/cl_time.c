@@ -62,6 +62,7 @@ void datetime_s_from_nanosec(datetime_s *this,long long unsigned a_nanosec)
     this->year += 3;
     days -= 3 * 365;
   }
+
   // - calculate month -
   this->month = 1;
   const unsigned *month_days = datetime_s_is_leap_year(this->year) ? c_month_days_leap : c_month_days;

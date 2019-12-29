@@ -197,6 +197,7 @@ WUR libtrace_sdl_EXPORT int sd_trace_descr_s_create(sd_trace_descr_s *this,
     sd_conf_trace_s *a_config);
 WUR static inline int sd_trace_descr_s_mmap_file(sd_trace_mmap_s *a_trace_mmap,sd_conf_mmap_s *a_trace_data);
 void sd_trace_descr_s_read_to_message(sd_trace_descr_s *this,lli a_record_id,bc_array_s *a_trg);
+void sd_trace_descr_s_read_size_to_message(sd_trace_descr_s *this,lli a_record_id,bc_array_s *a_trg);
 
 // === inline methods of generated structures ==================================
 

@@ -865,3 +865,31 @@ void sd_trace_descr_s_read_to_message(sd_trace_descr_s *this,lli a_record_id,bc_
   }
 }/*}}}*/
 
+void sd_trace_descr_s_read_size_to_message(sd_trace_descr_s *this,lli a_record_id,bc_array_s *a_trg)
+{/*{{{*/
+  unsigned record_id_used = a_trg->used;
+  bc_array_s_push_blanks(a_trg,sizeof(lli) + sizeof(ulli) + sizeof(unsigned));
+
+  // - read record from trace -
+  time_s time;
+  if (sd_trace_s_read_record(&this->trace,a_record_id,&time,a_trg))
+  {
+    // - read error -
+    a_trg->used = record_id_used;
+    bc_array_s_append_be_lli(a_trg,-1);
+    bc_array_s_append_be_ulli(a_trg,0);
+    bc_array_s_append_be_ui(a_trg,0);
+  }
+  else
+  {
+    unsigned buffer_used = a_trg->used;
+
+    a_trg->used = record_id_used;
+    bc_array_s_append_be_lli(a_trg,a_record_id);
+    bc_array_s_append_be_ulli(a_trg,time);
+    bc_array_s_append_be_ui(a_trg,buffer_used - (a_trg->used + sizeof(unsigned)));
+
+    a_trg->used = buffer_used;
+  }
+}/*}}}*/
+
