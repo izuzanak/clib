@@ -15,6 +15,7 @@ script:
   - cd ~/build/izuzanak/clib/build
   - cmake ..
   - make
-  - ./libprocess_cll_test all
+
+  - mkdir -p /dev/shm/{run,log}
   - make test
 
