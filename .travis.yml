@@ -5,6 +5,7 @@ os: linux
 
 before_install:
   - >
+    sudo apt-get -y install
     libwebsockets-dev
     libmicrohttpd-dev
     libfuse3-dev
