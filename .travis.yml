@@ -1,0 +1,19 @@
+
+language: cpp
+compiler: gcc
+os: linux
+
+install:
+  - git clone --branch=cont_c https://github.com/izuzanak/cont.git ~/build/izuzanak/cont_c
+
+  - cd ~/build/izuzanak/cont_c/build
+  - cmake ..
+  - make
+  - sudo make install
+
+script:
+  - cd ~/build/izuzanak/clib/build
+  - cmake ..
+  - make
+  - make test
+
