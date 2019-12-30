@@ -3,6 +3,13 @@ language: cpp
 compiler: gcc
 os: linux
 
+before_install:
+  - >
+    libwebsockets-dev
+    libmicrohttpd-dev
+    libfuse3-dev
+    libuuid1
+
 install:
   - git clone --branch=cont_c https://github.com/izuzanak/cont.git ~/build/izuzanak/cont_c
 
