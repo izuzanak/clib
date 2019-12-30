@@ -2,12 +2,15 @@
 language: cpp
 compiler: gcc
 os: linux
+dist: bionic
 
 before_install:
   - >
     sudo apt-get -y install
     libwebsockets-dev
     libmicrohttpd-dev
+    libfuse3-dev
+    libsnappy-dev
     libuuid1
 
 install:
