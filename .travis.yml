@@ -12,6 +12,8 @@ before_install:
     libsnappy-dev
     libuuid1
 
+  - pip install --user cpp-coveralls
+
 install:
   - git clone --branch=cont_c https://github.com/izuzanak/cont.git ~/build/izuzanak/cont_c
 
@@ -22,9 +24,12 @@ install:
 
 script:
   - cd ~/build/izuzanak/clib/build
-  - cmake ..
+  - cmake -DCMAKE_BUILD_TYPE="Debug" ..
   - make
 
   - mkdir -p /dev/shm/{run,log}
   - make test
+
+after_success:
+  - coveralls --gcov-options '\-lp'
 

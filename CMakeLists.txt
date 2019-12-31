@@ -27,7 +27,7 @@ set_property(GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS)
 
 # - update compilation flags -
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wfatal-errors -DLINUX")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined -fprofile-arcs -ftest-coverage")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 
 # - process target source file -
