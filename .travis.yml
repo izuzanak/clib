@@ -4,6 +4,10 @@ compiler: gcc
 os: linux
 dist: bionic
 
+env:
+  global:
+    - CODECOV_TOKEN="4134880c-826c-4460-8664-8261182044c3"
+
 before_install:
   - >
     sudo apt-get -y install
@@ -32,4 +36,5 @@ script:
 
 after_success:
   - coveralls --gcov-options '\-lp'
+  - bash <(curl -s https://codecov.io/bash)
 
