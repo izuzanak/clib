@@ -67,6 +67,7 @@ void test_pollfd()
   } while(++idx < 3);
   POLLFD_ARRAY_S_TO_BUFFER(&pollfd_array);
   cassert(strcmp(buffer.data,"[pollfd_s{0,0,0},pollfd_s{1,0,0},pollfd_s{2,0,0}]") == 0);
+  cassert(pollfd_array_s_compare(&pollfd_array,&pollfd_array));
 
   CONT_INIT(pollfd_tree_s,pollfd_tree);
   idx = 0;

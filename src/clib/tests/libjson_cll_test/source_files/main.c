@@ -127,9 +127,15 @@ void test_json_parse()
   string_s_set_ptr(&indent,"");
 
   // - json_create -
+  cassert(json_create(object,&buffer) == 0);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,
+        "{\"null\":null,\"integer\":123,\"float\":123.400000,\"string\":\"Hello world!\",\"array\":[0,1,2,3,4,5,6,7,8,9],\"object\":{\"first\":0,\"second\":1,\"third\":2}}"
+        ) == 0);
+
+  // - json_create_nice -
   cassert(json_create_nice(object,&tab,&indent,&buffer) == 0);
   bc_array_s_push(&buffer,'\0');
-
   cassert(strcmp(buffer.data,data) == 0);
 
   string_s_clear(&tab);

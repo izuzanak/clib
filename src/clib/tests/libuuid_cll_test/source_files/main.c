@@ -44,6 +44,7 @@ void test_create()
 
   uuid_s uuid_parsed;
   cassert(uuid_s_parse(&uuid_parsed,uuid_str.data) == 0);
+  cassert(uuid_s_compare(&uuid,&uuid_parsed) == 1);
 
   CONT_INIT_CLEAR(bc_array_s,uuid_parsed_str);
   uuid_s_unparse(&uuid_parsed,&uuid_parsed_str);
@@ -51,6 +52,13 @@ void test_create()
   printf("%s\n",uuid_parsed_str.data);
 
   cassert(strcmp(uuid_str.data,uuid_parsed_str.data) == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,uuid_to_string_str);
+  uuid_s_to_string(&uuid_parsed,&uuid_to_string_str);
+  bc_array_s_push(&uuid_to_string_str,'\0');
+  printf("%s\n",uuid_to_string_str.data);
+
+  cassert(strcmp(uuid_str.data,uuid_to_string_str.data) == 0);
 }/*}}}*/
 
 // === program entry function ==================================================

@@ -101,7 +101,7 @@ void test_xml_create()
     unsigned v_idx = 0;
     do {
       CONT_INIT(string_s,descr);
-      string_s_set_format(&descr,"Description of vehicle %u of consist %u",v_idx,c_idx);
+      string_s_set_format(&descr,"Description of vehicle %u of consist %u, <>&'\"",v_idx,c_idx);
 
       xml_node_s_node_text(consist,loc_s_string_ptr("VEHICLE"),loc_s_string_swap(&descr));
     } while(++v_idx < 5);
@@ -116,10 +116,14 @@ void test_xml_create()
   CONT_INIT(bc_array_s,data);
   data.used = 0;
   cassert(file_s_read_close(&file,&data) == 0);
+  cassert(strcmp(buffer.data,data.data) == 0);
 
-  // - replace last '\n' by '\0' -
-  data.data[data.used - 1] = '\0';
-  bc_array_s_push(&data,'\0');
+  xml_create(root,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(file_s_open(&file,"tests/libxml_cll_test/resources/xml_create_1.xml","r") == 0);
+
+  data.used = 0;
+  cassert(file_s_read_close(&file,&data) == 0);
   cassert(strcmp(buffer.data,data.data) == 0);
 
   bc_array_s_clear(&data);

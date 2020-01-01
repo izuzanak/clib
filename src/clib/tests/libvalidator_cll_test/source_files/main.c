@@ -228,6 +228,11 @@ void test_prop_length_equal()
   cassert(validator_s_create(&validator,schema) == 0);
   cassert(validator_s_validate(&validator,str_test_var,value_0) == 0);
   cassert(validator_s_validate(&validator,str_test_var,value_1));
+
+  VAR_CLEAR(value_2,loc_s_array());
+  VAR_CLEAR(value_3,loc_s_dict());
+  cassert(validator_s_validate(&validator,str_test_var,value_2));
+  cassert(validator_s_validate(&validator,str_test_var,value_3));
 }/*}}}*/
 
 void test_prop_length_not_equal()

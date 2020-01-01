@@ -35,6 +35,11 @@ void test_sqlite()
   CONT_INIT(sqlite_s,sqlite_0);
   cassert(sqlite_s_open(&sqlite_0,"tests/libsqlite_cll_test/sqlite/db.sql") == 0);
 
+  cassert(sqlite_s_compare(&sqlite_0,&sqlite_0));
+
+  buffer.used = 0;
+  sqlite_s_to_string(&sqlite_0,&buffer);
+
   // - sqlite_s_open_v2 -
   cassert(sqlite_s_open_v2(&sqlite_0,"tests/libsqlite_cll_test/sqlite/db.sql",
         SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX) == 0);
