@@ -456,9 +456,6 @@ int sd_trace_s_create(sd_trace_s *this,
       }
     }
 
-    // - resize timestamp tree -
-    sd_record_timestamp_tree_s_copy_resize(&this->timestamp_tree,trace_rec_cnt + 1);
-
     // - timestamp buffer was retrieved -
     if (this->timestamp_buffer.used != 0)
     {
@@ -468,9 +465,6 @@ int sd_trace_s_create(sd_trace_s *this,
       do {
         if (ts_ptr->id > -1)
         {
-          // - insert timestamp to timestamp tree -
-          sd_record_timestamp_tree_s_insert(&this->timestamp_tree,ts_ptr); // NOLINT
-
           if (ts_ptr->id > timestamp_last_id)
           {
             // - store last id and its position -
@@ -505,6 +499,22 @@ int sd_trace_s_create(sd_trace_s *this,
     if (timestamp_last_idx != c_idx_not_exist)
     {
       this->timestamp_queue.begin = (timestamp_last_idx + 1) % this->timestamp_queue.size;
+    }
+
+    // - resize timestamp tree -
+    sd_record_timestamp_tree_s_copy_resize(&this->timestamp_tree,trace_rec_cnt + 1);
+
+    // - fill timestamp tree -
+    if (this->timestamp_queue.used != 0)
+    {
+      unsigned tsq_idx = 0;
+      do 
+      {
+        // - insert timestamp to timestamp tree -
+        sd_record_timestamp_tree_s_insert(&this->timestamp_tree,
+          sd_record_timestamp_queue_s_at(&this->timestamp_queue,tsq_idx)); // NOLINT
+
+      } while(++tsq_idx < this->timestamp_queue.used);
     }
 
     // - initialize first timestamp tree index -

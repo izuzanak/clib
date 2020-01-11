@@ -905,6 +905,73 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       }
     }/*}}}*/
     break;
+  case sd_channel_cbreq_TRACE_TIME_RANGE:
+    {/*{{{*/
+      ulli id = va_arg(a_ap,ulli);
+      const string_s *trace_id = va_arg(a_ap,const string_s *);
+      ulli first_time = va_arg(a_ap,ulli);
+      ulli last_time = va_arg(a_ap,ulli);
+      lli count = va_arg(a_ap,lli);
+
+      sd_trace_descr_s search_trace = {{*trace_id,},};
+      unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
+
+      // - check if trace exists -
+      if (trace_idx == c_idx_not_exist)
+      {
+        throw_error(SD_DAEMON_TRACE_NOT_EXIST);
+      }
+
+      sd_trace_descr_s *trace = sd_trace_tree_s_at(&this->traces,trace_idx);
+
+      lli first_id = sd_trace_s_gre_time(&trace->trace,first_time);
+      lli last_id = sd_trace_s_lee_time(&trace->trace,last_time);
+
+      lli range_count = (first_id != -1 && last_id != -1 && first_id <= last_id) ? last_id - first_id + 1 : 0;
+      lli resp_count = (count < 1 || count > range_count) ? range_count : count;
+
+      // - format response -
+      this->buffer.used = 0;
+      bc_array_s_append_sd_segmentd_msg_header(&this->buffer,id,sd_channel_msg_type_RESPONSE,a_type,trace_id);
+      bc_array_s_append_be_ulli(&this->buffer,(ulli)resp_count);
+
+      if (resp_count > 0)
+      {
+        // - format all records in range -
+        if (resp_count == range_count)
+        {
+          do {
+            sd_trace_descr_s_read_size_to_message(trace,first_id,&this->buffer);
+          } while(++first_id <= last_id);
+        }
+
+        // - format just first record -
+        else if (resp_count == 1)
+        {
+          sd_trace_descr_s_read_size_to_message(trace,first_id,&this->buffer);
+        }
+
+        // - format requested count of records -
+        else
+        {
+          lli range_count_m1 = range_count - 1;
+          lli resp_count_m1 = resp_count - 1;
+
+          lli ri_idx = 0;
+          lli ri_idx_end = range_count_m1*resp_count_m1;
+          do {
+            sd_trace_descr_s_read_size_to_message(trace,
+                first_id + ri_idx/resp_count_m1,&this->buffer);
+          } while((ri_idx += range_count_m1) <= ri_idx_end);
+        }
+      }
+
+      if (sd_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
   case sd_channel_cbreq_TRACE_WATCH:
   case sd_channel_cbreq_TRACE_IGNORE:
     {/*{{{*/

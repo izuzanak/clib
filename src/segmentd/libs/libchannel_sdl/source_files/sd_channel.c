@@ -199,6 +199,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
               case sd_channel_cbreq_TRACE_HEAD:
               case sd_channel_cbreq_TRACE_TAIL:
               case sd_channel_cbreq_TRACE_RANGE:
+              case sd_channel_cbreq_TRACE_TIME_RANGE:
               case sd_channel_cbreq_TRACE_LEE_TIME:
               case sd_channel_cbreq_TRACE_GRE_TIME:
               case sd_channel_cbreq_TRACE_WATCH:
@@ -287,6 +288,32 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                             if (sd_channel_s_message_call(
                                   this,a_index,request,id,
                                   &trace_id,first_id,last_id,count))
+                            {
+                              throw_error(SD_CHANNEL_SERVER_CALLBACK_ERROR);
+                            }
+                          }
+                        }/*}}}*/
+                        break;
+                      case sd_channel_cbreq_TRACE_TIME_RANGE:
+                        {/*{{{*/
+                          if (ptr_end - ptr >= 3*sizeof(lli))
+                          {
+                            ulli first_time;
+                            memcpy(&first_time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
+                            first_time = be64toh(first_time);
+
+                            ulli last_time;
+                            memcpy(&last_time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
+                            last_time = be64toh(last_time);
+
+                            lli count;
+                            memcpy(&count,ptr,sizeof(lli));
+                            count = be64toh(count);
+
+                            // - call callback -
+                            if (sd_channel_s_message_call(
+                                  this,a_index,request,id,
+                                  &trace_id,first_time,last_time,count))
                             {
                               throw_error(SD_CHANNEL_SERVER_CALLBACK_ERROR);
                             }
