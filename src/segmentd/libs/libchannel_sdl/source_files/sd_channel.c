@@ -199,6 +199,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
               case sd_channel_cbreq_TRACE_HEAD:
               case sd_channel_cbreq_TRACE_TAIL:
               case sd_channel_cbreq_TRACE_RANGE:
+              case sd_channel_cbreq_TRACE_STEP_RANGE:
               case sd_channel_cbreq_TRACE_TIME_RANGE:
               case sd_channel_cbreq_TRACE_LEE_TIME:
               case sd_channel_cbreq_TRACE_GRE_TIME:
@@ -288,6 +289,32 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                             if (sd_channel_s_message_call(
                                   this,a_index,request,id,
                                   &trace_id,first_id,last_id,count))
+                            {
+                              throw_error(SD_CHANNEL_SERVER_CALLBACK_ERROR);
+                            }
+                          }
+                        }/*}}}*/
+                        break;
+                      case sd_channel_cbreq_TRACE_STEP_RANGE:
+                        {/*{{{*/
+                          if (ptr_end - ptr >= 3*sizeof(lli))
+                          {
+                            lli first_id;
+                            memcpy(&first_id,ptr,sizeof(lli)); ptr += sizeof(lli);
+                            first_id = be64toh(first_id);
+
+                            lli last_id;
+                            memcpy(&last_id,ptr,sizeof(lli)); ptr += sizeof(lli);
+                            last_id = be64toh(last_id);
+
+                            ulli step;
+                            memcpy(&step,ptr,sizeof(ulli));
+                            step = be64toh(step);
+
+                            // - call callback -
+                            if (sd_channel_s_message_call(
+                                  this,a_index,request,id,
+                                  &trace_id,first_id,last_id,step))
                             {
                               throw_error(SD_CHANNEL_SERVER_CALLBACK_ERROR);
                             }

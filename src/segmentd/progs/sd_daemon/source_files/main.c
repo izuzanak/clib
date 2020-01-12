@@ -905,6 +905,67 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       }
     }/*}}}*/
     break;
+  case sd_channel_cbreq_TRACE_STEP_RANGE:
+    {/*{{{*/
+      ulli id = va_arg(a_ap,ulli);
+      const string_s *trace_id = va_arg(a_ap,const string_s *);
+      lli first_id = va_arg(a_ap,lli);
+      lli last_id = va_arg(a_ap,lli);
+      ulli step = va_arg(a_ap,ulli);
+
+      sd_trace_descr_s search_trace = {{*trace_id,},};
+      unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
+
+      // - check if trace exists -
+      if (trace_idx == c_idx_not_exist)
+      {
+        throw_error(SD_DAEMON_TRACE_NOT_EXIST);
+      }
+
+      sd_trace_descr_s *trace = sd_trace_tree_s_at(&this->traces,trace_idx);
+
+      lli trace_head = sd_trace_s_head(&trace->trace);
+      lli trace_tail = sd_trace_s_tail(&trace->trace);
+
+      lli resp_count = 0;
+
+      if (step > 0)
+      {
+        // - adjust first id -
+        if (first_id < trace_tail)
+        {
+          first_id += ((trace_tail - first_id) / step + 1)*step;
+        }
+
+        // - adjust last id -
+        if (last_id < 0 || last_id > trace_head)
+        {
+          last_id = trace_head;
+        }
+
+        lli range_count = (trace_head != -1 && first_id <= last_id) ? last_id - first_id + 1 : 0;
+        resp_count = range_count > 0 ? (range_count - 1) / step + 1 : 0;
+      }
+
+      // - format response -
+      this->buffer.used = 0;
+      bc_array_s_append_sd_segmentd_msg_header(&this->buffer,id,sd_channel_msg_type_RESPONSE,a_type,trace_id);
+      bc_array_s_append_be_ulli(&this->buffer,(ulli)resp_count);
+
+      if (resp_count > 0)
+      {
+        // - format records in range -
+        do {
+          sd_trace_descr_s_read_size_to_message(trace,first_id,&this->buffer);
+        } while((first_id += step) <= last_id);
+      }
+
+      if (sd_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
   case sd_channel_cbreq_TRACE_TIME_RANGE:
     {/*{{{*/
       ulli id = va_arg(a_ap,ulli);
