@@ -4,16 +4,12 @@
 
 @begin
 include "cl_test.h"
-include "cl_channel.h"
+include "cl_openssl.h"
 @end
-
-// === definition of generated structures ======================================
-
-// === inline methods of generated structures ==================================
 
 // === test execution functions ================================================
 
-void test_channel();
+void test_create();
 
 // === program entry function ==================================================
 

@@ -22,6 +22,10 @@ void channel_conn_s_create(channel_conn_s *this,epoll_fd_s *a_epoll_fd,
 
   channel_conn_s_clear(this);
 
+#ifdef CLIB_WITH_OPENSSL
+  this->ssl_action = SSL_ACTION_NONE;
+#endif
+  
   epoll_fd_s_swap(&this->epoll_fd,a_epoll_fd);
   this->conn_message_callback = a_conn_message_callback;
   this->cb_object = a_cb_object;
@@ -42,6 +46,10 @@ int channel_conn_s_create_client(channel_conn_s *this,
 
   channel_conn_s_clear(this);
 
+#ifdef CLIB_WITH_OPENSSL
+  this->ssl_action = SSL_ACTION_NONE;
+#endif
+  
   this->conn_message_callback = a_conn_message_callback;
   this->cb_object = a_cb_object;
   this->cb_index = a_cb_index;
@@ -80,15 +88,104 @@ int channel_conn_s_create_client(channel_conn_s *this,
   return 0;
 }/*}}}*/
 
+#ifdef CLIB_WITH_OPENSSL
+int channel_conn_s_init_ssl(channel_conn_s *this)
+{/*{{{*/
+  CONT_INIT_CLEAR(ssl_context_s,ssl_ctx);
+
+  // - ERROR -
+  if (ssl_context_s_create_client(&ssl_ctx) ||
+      ssl_conn_s_create(&this->ssl,&ssl_ctx,this->epoll_fd.fd))
+  {
+    throw_error(CHANNEL_CONN_CLIENT_SSL_INIT_ERROR);
+  }
+
+  ssl_conn_s_set_connect_state(&this->ssl);
+
+  return 0;
+}/*}}}*/
+#endif
+
 int channel_conn_s_recv_msg(channel_conn_s *this)
 {/*{{{*/
   bc_array_s *msg = &this->in_msg;
 
+  const long int c_buffer_add = 1024;
   unsigned msg_old_used = msg->used;
-  if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
+
+  int inq_cnt;
+  long int read_cnt;
+  do
   {
-    throw_error(CHANNEL_CONN_READ_ERROR);
+    bc_array_s_reserve(msg,c_buffer_add);
+
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl != NULL)
+    {
+      read_cnt = SSL_read(this->ssl,msg->data + msg->used,c_buffer_add);
+
+      if (read_cnt <= 0)
+      {
+        unsigned ssl_events;
+
+        switch (SSL_get_error(this->ssl,read_cnt))
+        {
+          case SSL_ERROR_WANT_READ:
+            this->ssl_action = SSL_ACTION_RECV_MSG;
+            ssl_events = EPOLLIN | EPOLLPRI;
+            break;
+          case SSL_ERROR_WANT_WRITE:
+            this->ssl_action = SSL_ACTION_RECV_MSG;
+            ssl_events = EPOLLOUT;
+            break;
+          default:
+            throw_error(CHANNEL_CONN_READ_ERROR);
+        }
+
+        // - modify fd epoll events -
+        if (epoll_fd_s_modify_events(&this->epoll_fd,ssl_events))
+        {
+          throw_error(CHANNEL_CONN_EPOLL_ERROR);
+        }
+
+        break;
+      }
+    }
+    else
+    {
+#endif
+      read_cnt = read(this->epoll_fd.fd,msg->data + msg->used,c_buffer_add);
+
+      // - ERROR -
+      if (read_cnt == -1)
+      {
+        throw_error(CHANNEL_CONN_READ_ERROR);
+      }
+#ifdef CLIB_WITH_OPENSSL
+    }
+#endif
+
+    msg->used += read_cnt;
+
+    // - ERROR -
+    if (ioctl(this->epoll_fd.fd,TIOCINQ,&inq_cnt) == -1)
+    {
+      throw_error(CHANNEL_CONN_READ_ERROR);
+    }
   }
+  while(inq_cnt > 0);
+
+#ifdef CLIB_WITH_OPENSSL
+  if (this->ssl == NULL)
+  {
+#endif
+    if (msg->used == msg_old_used)
+    {
+      throw_error(CHANNEL_CONN_READ_ERROR);
+    }
+#ifdef CLIB_WITH_OPENSSL
+  }
+#endif
 
   unsigned msg_offset = 0;
   do
@@ -157,13 +254,53 @@ int channel_conn_s_send_msg(channel_conn_s *this)
       write_cnt = 4096;
     }
 
-    ssize_t cnt = write(this->epoll_fd.fd,message->data + this->out_msg_offset,write_cnt);
+    ssize_t cnt;
 
-    // - ERROR -
-    if (cnt == -1)
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl != NULL)
     {
-      throw_error(CHANNEL_CONN_WRITE_ERROR);
+      cnt = SSL_write(this->ssl,message->data + this->out_msg_offset,write_cnt);
+
+      if (cnt <= 0)
+      {
+        unsigned ssl_events;
+
+        switch (SSL_get_error(this->ssl,cnt))
+        {
+          case SSL_ERROR_WANT_READ:
+            this->ssl_action = SSL_ACTION_SEND_MSG;
+            ssl_events = EPOLLIN | EPOLLPRI;
+            break;
+          case SSL_ERROR_WANT_WRITE:
+            this->ssl_action = SSL_ACTION_SEND_MSG;
+            ssl_events = EPOLLOUT;
+            break;
+          default:
+            throw_error(CHANNEL_CONN_WRITE_ERROR);
+        }
+
+        // - modify fd epoll events -
+        if (epoll_fd_s_modify_events(&this->epoll_fd,ssl_events))
+        {
+          throw_error(CHANNEL_CONN_EPOLL_ERROR);
+        }
+
+        cnt = 0;
+      }
     }
+    else
+    {
+#endif
+      cnt = write(this->epoll_fd.fd,message->data + this->out_msg_offset,write_cnt);
+
+      // - ERROR -
+      if (cnt == -1)
+      {
+        throw_error(CHANNEL_CONN_WRITE_ERROR);
+      }
+#ifdef CLIB_WITH_OPENSSL
+    }
+#endif
 
     // - whole message was send -
     if ((this->out_msg_offset += cnt) >= message->used)
@@ -219,21 +356,61 @@ int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s 
   }
   else
   {
-    if (a_epoll_event->events & EPOLLOUT)
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl_action != SSL_ACTION_NONE)
     {
-      if (channel_conn_s_send_msg(this))
-      {
-        throw_error(CHANNEL_CONN_SEND_ERROR);
-      }
-    }
+      // - reset ssl action -
+      unsigned ssl_action = this->ssl_action;
+      this->ssl_action = SSL_ACTION_NONE;
 
-    if (a_epoll_event->events & EPOLLIN)
-    {
-      if (channel_conn_s_recv_msg(this))
+      // - modify fd epoll events -
+      if (epoll_fd_s_modify_events(&this->epoll_fd,
+            EPOLLIN | EPOLLPRI | (this->out_msg_queue.used != 0 ? EPOLLOUT : 0)))
       {
-        throw_error(CHANNEL_CONN_RECEIVE_ERROR);
+        throw_error(CHANNEL_CONN_EPOLL_ERROR);
+      }
+
+      switch (ssl_action)
+      {
+      case SSL_ACTION_SEND_MSG:
+        {
+          if (channel_conn_s_send_msg(this))
+          {
+            throw_error(CHANNEL_CONN_SEND_ERROR);
+          }
+        }
+        break;
+      case SSL_ACTION_RECV_MSG:
+        {
+          if (channel_conn_s_recv_msg(this))
+          {
+            throw_error(CHANNEL_CONN_RECEIVE_ERROR);
+          }
+        }
+        break;
       }
     }
+    else
+    {
+#endif
+      if (a_epoll_event->events & EPOLLOUT)
+      {
+        if (channel_conn_s_send_msg(this))
+        {
+          throw_error(CHANNEL_CONN_SEND_ERROR);
+        }
+      }
+
+      if (a_epoll_event->events & EPOLLIN)
+      {
+        if (channel_conn_s_recv_msg(this))
+        {
+          throw_error(CHANNEL_CONN_RECEIVE_ERROR);
+        }
+      }
+#ifdef CLIB_WITH_OPENSSL
+    }
+#endif
   }
 
   return 0;
@@ -286,6 +463,24 @@ int channel_server_s_create(channel_server_s *this,
   return 0;
 }/*}}}*/
 
+#ifdef CLIB_WITH_OPENSSL
+int channel_server_s_init_ssl(channel_server_s *this,const char *a_cert_file,const char *a_pkey_file)
+{/*{{{*/
+
+  // - ERROR -
+  if (ssl_context_s_create_server(&this->ssl_ctx) ||
+      ssl_context_s_use_certificate_file(&this->ssl_ctx,a_cert_file,SSL_FILETYPE_PEM) ||
+      ssl_context_s_use_private_key_file(&this->ssl_ctx,a_pkey_file,SSL_FILETYPE_PEM))
+  {
+    ssl_context_s_clear(&this->ssl_ctx);
+
+    throw_error(CHANNEL_SERVER_SSL_INIT_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+#endif
+
 int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_index;
@@ -315,6 +510,20 @@ int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_even
   epoll_fd.epoll = a_epoll;
   channel_conn_s_create(&this->conn_list.data[conn_idx].object,
       &epoll_fd,this->conn_message_callback,this->cb_object,conn_idx);
+
+#ifdef CLIB_WITH_OPENSSL
+  if (this->ssl_ctx != NULL)
+  {
+    channel_conn_s *conn = channel_conn_list_s_at(&this->conn_list,conn_idx);
+
+    if (ssl_conn_s_create(&conn->ssl,&this->ssl_ctx,conn->epoll_fd.fd))
+    {
+      throw_error(CHANNEL_SERVER_SSL_ACCEPT_ERROR);
+    }
+
+    ssl_conn_s_set_accept_state(&conn->ssl);
+  }
+#endif
 
   // - call conn_new_callback -
   if (((channel_conn_new_callback_t)this->conn_new_callback)(this->cb_object,conn_idx))
@@ -352,6 +561,9 @@ int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll
 
 void libchannel_cll_init()
 {/*{{{*/
+#ifdef CLIB_WITH_OPENSSL
+  libopenssl_cll_init();
+#endif
 
   // - loc_s_register_type -
   g_type_channel_message = loc_s_register_type(
@@ -375,5 +587,8 @@ void libchannel_cll_init()
 
 void libchannel_cll_clear()
 {/*{{{*/
+#ifdef CLIB_WITH_OPENSSL
+  libopenssl_cll_clear();
+#endif
 }/*}}}*/
 

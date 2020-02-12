@@ -5,6 +5,7 @@
 @begin
 include "cl_linux.h"
 include "cl_var.h"
+include "cl_openssl.h"
 @end
 
 #include <netinet/tcp.h>
@@ -25,6 +26,8 @@ include "cl_var.h"
 #define ERROR_CHANNEL_SERVER_SOCKOPT_ERROR 2
 #define ERROR_CHANNEL_SERVER_INVALID_FD 3
 #define ERROR_CHANNEL_SERVER_ACCEPT_ERROR 4
+#define ERROR_CHANNEL_SERVER_SSL_INIT_ERROR 5
+#define ERROR_CHANNEL_SERVER_SSL_ACCEPT_ERROR 6
 
 #define ERROR_CHANNEL_CONN_INVALID_FD 1
 #define ERROR_CHANNEL_CONN_CONNECT_ERROR 2
@@ -35,6 +38,17 @@ include "cl_var.h"
 #define ERROR_CHANNEL_CONN_READ_ERROR 7
 #define ERROR_CHANNEL_CONN_CALLBACK_ERROR 8
 #define ERROR_CHANNEL_CONN_EPOLL_ERROR 9
+#define ERROR_CHANNEL_CONN_CLIENT_SSL_INIT_ERROR 10
+
+#ifdef CLIB_WITH_OPENSSL
+// - ssl repeated actions -
+enum
+{
+  SSL_ACTION_NONE = 0,
+  SSL_ACTION_SEND_MSG,
+  SSL_ACTION_RECV_MSG
+};
+#endif
 
 typedef struct channel_server_s channel_server_s;
 typedef int (*channel_conn_new_callback_t)(void *a_object,unsigned a_index);
@@ -64,6 +78,9 @@ static inline const bc_array_s *loc_s_channel_message_value(var_s this);
 @begin
 struct
 <
+ssl_conn_s:ssl
+ui:ssl_action
+
 epoll_fd_s:epoll_fd
 bi:connecting
 
@@ -87,6 +104,9 @@ WUR libchannel_cll_EXPORT int channel_conn_s_create_client(channel_conn_s *this,
     const char *a_server_ip,unsigned short a_server_port,
     channel_conn_message_callback_t a_conn_message_callback,
     void *a_cb_object,unsigned a_cb_index);
+#ifdef CLIB_WITH_OPENSSL
+WUR libchannel_cll_EXPORT int channel_conn_s_init_ssl(channel_conn_s *this);
+#endif
 WUR int channel_conn_s_recv_msg(channel_conn_s *this);
 WUR int channel_conn_s_send_msg(channel_conn_s *this);
 WUR libchannel_cll_EXPORT int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
@@ -110,6 +130,7 @@ pointer:conn_drop_callback
 pointer:conn_message_callback
 pointer:cb_object
 
+ssl_context_s:ssl_ctx
 epoll_fd_s:epoll_fd
 channel_conn_list_s:conn_list
 >
@@ -122,6 +143,9 @@ WUR libchannel_cll_EXPORT int channel_server_s_create(channel_server_s *this,
     channel_conn_drop_callback_t a_conn_drop_callback,
     channel_conn_message_callback_t a_conn_message_callback,
     void *a_cb_object);
+#ifdef CLIB_WITH_OPENSSL
+WUR libchannel_cll_EXPORT int channel_server_s_init_ssl(channel_server_s *this,const char *a_cert_file,const char *a_pkey_file);
+#endif
 WUR libchannel_cll_EXPORT int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR libchannel_cll_EXPORT int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 

@@ -25,6 +25,15 @@ int channel_comm_s_create(channel_comm_s *this,const char *a_ip,unsigned short a
     throw_error(CHANNEL_COMM_SERVER_CREATE_ERROR);
   }
 
+#ifdef CLIB_WITH_OPENSSL
+  if (channel_server_s_init_ssl(&this->server,
+    "tests/libchannel_cll_test/resources/mycert.pem",
+    "tests/libchannel_cll_test/resources/mycert.pem"))
+  {
+    throw_error(CHANNEL_COMM_SERVER_INIT_SSL_ERROR);
+  }
+#endif
+
   if(epoll_s_fd_callback(&this->epoll,&this->server.epoll_fd,EPOLLIN | EPOLLPRI,channel_comm_s_fd_event,this,0))
   {
     throw_error(CHANNEL_COMM_SERVER_EPOLL_ERROR);

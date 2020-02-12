@@ -52,6 +52,13 @@ int channel_comm_s_create(channel_comm_s *this,
         throw_error(CHANNEL_COMM_CONN_CREATE_ERROR);
       }
 
+#ifdef CLIB_WITH_OPENSSL
+      if (channel_conn_s_init_ssl(&client->connection))
+      {
+        throw_error(CHANNEL_COMM_CONN_INIT_SSL_ERROR);
+      }
+#endif
+
       // - register epoll fd events -
       if (epoll_s_fd_callback(&this->epoll,&client->connection.epoll_fd,EPOLLIN | EPOLLPRI,channel_comm_s_client_fd_event,this,client_idx))
       {
@@ -61,7 +68,7 @@ int channel_comm_s_create(channel_comm_s *this,
       }
 
       // - register epoll timer -
-      struct itimerspec itimerspec = {{0,100000000},{0,100000000}};
+      struct itimerspec itimerspec = {{0,100000000},{0,1}};
       if (epoll_s_timer_callback(&this->epoll,&client->epoll_timer,&itimerspec,0,channel_comm_s_client_time_event,this,client_idx))
       {
         channel_client_list_s_remove(&this->client_list,client_idx);
@@ -242,7 +249,7 @@ int main(int argc,char **argv)
 
   CONT_INIT(channel_comm_s,comm);
 
-  cassert(channel_comm_s_create(&comm,10,server_ips,server_ports) == 0);
+  cassert(channel_comm_s_create(&comm,1,server_ips,server_ports) == 0);
   cassert(channel_comm_s_run(&comm) == 0);
   channel_comm_s_clear(&comm);
 
