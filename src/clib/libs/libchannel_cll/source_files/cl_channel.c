@@ -336,7 +336,6 @@ int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s 
 
   if (this->connecting)
   {
-    int nonblock_io = 0;
     int error;
     socklen_t length = sizeof(error);
 
@@ -345,11 +344,23 @@ int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s 
     // - modify fd epoll events: only input -
     if (getsockopt(this->epoll_fd.fd,SOL_SOCKET,SO_ERROR,&error,&length) ||
         error != 0 ||
-        ioctl(this->epoll_fd.fd,FIONBIO,&nonblock_io) ||
         epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLPRI))
     {
       throw_error(CHANNEL_CONN_CONNECT_ERROR);
     }
+
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl == NULL)
+    {
+#endif
+      int nonblock_io = 0;
+      if (ioctl(this->epoll_fd.fd,FIONBIO,&nonblock_io))
+      {
+        throw_error(CHANNEL_CONN_CONNECT_ERROR);
+      }
+#ifdef CLIB_WITH_OPENSSL
+    }
+#endif
 
     // - reset client connecting flag -
     this->connecting = 0;
@@ -515,6 +526,12 @@ int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_even
   if (this->ssl_ctx != NULL)
   {
     channel_conn_s *conn = channel_conn_list_s_at(&this->conn_list,conn_idx);
+
+    int nonblock_io = 1;
+    if (ioctl(conn->epoll_fd.fd,FIONBIO,&nonblock_io))
+    {
+      throw_error(CHANNEL_SERVER_ACCEPT_ERROR);
+    }
 
     if (ssl_conn_s_create(&conn->ssl,&this->ssl_ctx,conn->epoll_fd.fd))
     {
