@@ -55,11 +55,40 @@ int rtsp_client_s_create(rtsp_client_s *this,
   return 0;
 }/*}}}*/
 
+#ifdef CLIB_WITH_OPENSSL
+int rtsp_client_s_init_ssl(rtsp_client_s *this)
+{/*{{{*/
+  CONT_INIT_CLEAR(ssl_context_s,ssl_ctx);
+
+  // - ERROR -
+  if (ssl_context_s_create_client(&ssl_ctx) ||
+      ssl_conn_s_create(&this->ssl,&ssl_ctx,this->epoll_fd.fd))
+  {
+    throw_error(RTSP_CLIENT_SSL_INIT_ERROR);
+  }
+
+  ssl_conn_s_set_connect_state(&this->ssl);
+
+  return 0;
+}/*}}}*/
+#endif
+
 int rtsp_client_s_send_cmd(rtsp_client_s *this)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"rtsp_client_s >>>>>\n%.*s",this->out_msg.used,this->out_msg.data));
 
-  return fd_s_write(&this->epoll_fd.fd,this->out_msg.data,this->out_msg.used);
+#ifdef CLIB_WITH_OPENSSL
+  if (this->ssl != NULL)
+  {
+    return ssl_conn_s_write(&this->ssl,this->out_msg.data,this->out_msg.used);
+  }
+  else
+  {
+#endif
+    return fd_s_write(&this->epoll_fd.fd,this->out_msg.data,this->out_msg.used);
+#ifdef CLIB_WITH_OPENSSL
+  }
+#endif
 }/*}}}*/
 
 int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this)
@@ -67,7 +96,11 @@ int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this)
   bc_array_s *msg = &this->in_msg;
 
   unsigned msg_old_used = msg->used;
-  if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
+  if ((
+#ifdef CLIB_WITH_OPENSSL
+      this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
+#endif
+      fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == msg_old_used)
   {
     throw_error(RTSP_CLIENT_READ_ERROR);
   }
@@ -103,7 +136,11 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
   // - read message header -
   if (msg->used < 4)
   {
-    if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
+  if ((
+#ifdef CLIB_WITH_OPENSSL
+      this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
+#endif
+      fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == msg_old_used)
     {
       throw_error(RTSP_CLIENT_READ_ERROR);
     }
@@ -122,7 +159,11 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
     if (msg->used < pkt_size)
     {
       unsigned pkt_msg_old_used = msg->used;
-      if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == pkt_msg_old_used)
+      if ((
+#ifdef CLIB_WITH_OPENSSL
+          this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
+#endif
+          fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == pkt_msg_old_used)
       {
         throw_error(RTSP_CLIENT_READ_ERROR);
       }
@@ -153,7 +194,11 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
   // - read new data if available -
   if (msg_old_used == msg->used)
   {
-    if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
+    if ((
+#ifdef CLIB_WITH_OPENSSL
+        this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
+#endif
+        fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == msg_old_used)
     {
       throw_error(RTSP_CLIENT_READ_ERROR);
     }
@@ -217,7 +262,11 @@ int rtsp_client_s_recv_sdp(rtsp_client_s *this)
   if (msg->used == 0)
   {
     unsigned msg_old_used = msg->used;
-    if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
+    if ((
+#ifdef CLIB_WITH_OPENSSL
+        this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
+#endif
+        fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == msg_old_used)
     {
       throw_error(RTSP_CLIENT_READ_ERROR);
     }
@@ -301,6 +350,39 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 
         // - reset sequence -
         this->sequence = 0;
+
+        time_s time;
+        if (clock_s_gettime(CLOCK_MONOTONIC,&time))
+        {
+          throw_error(RTSP_CLIENT_GET_TIME_ERROR);
+        }
+
+        this->out_msg.used = 0;
+        bc_array_s_append_format(&this->out_msg,
+      "GET %s HTTP/1.0\r\n"
+"x-sessioncookie: %llu\r\n"
+"Proxy-Connection: Keep-Alive\r\n"
+"Pragma: no-cache\r\n"
+
+      "\r\n",this->media_url.data,time);
+
+        if (rtsp_client_s_send_cmd(this))
+        {
+          this->state = c_rtsp_client_state_ERROR;
+          throw_error(RTSP_CLIENT_SEND_ERROR);
+        }
+
+        this->state = c_rtsp_client_state_RECV_HTTP;
+      }/*}}}*/
+      break;
+
+    case c_rtsp_client_state_RECV_HTTP:
+      {/*{{{*/
+        if (rtsp_client_s_recv_cmd_resp(this))
+        {
+          this->state = c_rtsp_client_state_ERROR;
+          throw_error(RTSP_CLIENT_RECEIVE_ERROR);
+        }
 
         this->out_msg.used = 0;
         bc_array_s_append_format(&this->out_msg,

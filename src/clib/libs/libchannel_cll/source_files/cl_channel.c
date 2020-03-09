@@ -25,7 +25,7 @@ void channel_conn_s_create(channel_conn_s *this,epoll_fd_s *a_epoll_fd,
 #ifdef CLIB_WITH_OPENSSL
   this->ssl_action = SSL_ACTION_NONE;
 #endif
-  
+
   epoll_fd_s_swap(&this->epoll_fd,a_epoll_fd);
   this->conn_message_callback = a_conn_message_callback;
   this->cb_object = a_cb_object;
@@ -49,7 +49,7 @@ int channel_conn_s_create_client(channel_conn_s *this,
 #ifdef CLIB_WITH_OPENSSL
   this->ssl_action = SSL_ACTION_NONE;
 #endif
-  
+
   this->conn_message_callback = a_conn_message_callback;
   this->cb_object = a_cb_object;
   this->cb_index = a_cb_index;

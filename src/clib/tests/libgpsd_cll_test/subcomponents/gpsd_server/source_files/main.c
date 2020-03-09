@@ -59,7 +59,7 @@ void gpsd_server_s_schedule_message(gpsd_server_s *this,unsigned a_index,bc_arra
   unsigned offset = 0;
   do {
     unsigned chunk_size = rand() % 10 + 1;
-    
+
     if (chunk_size > a_buffer->used - offset)
     {
       chunk_size = a_buffer->used - offset;
@@ -122,7 +122,7 @@ int gpsd_server_s_message_time_event(void *a_gpsd_server,unsigned a_index,epoll_
       {
         bc_array_s *message = message_queue_s_next(queue);
         tcp_conn_s *conn = &this->server.conn_list.data[index].object;
-        
+
         if (tcp_conn_s_schedule_message(conn,message))
         {
           throw_error(GPSD_CONN_SCHEDULE_MESSAGE_ERROR);

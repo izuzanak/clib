@@ -9,6 +9,8 @@ include "cl_struct.h"
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#include <sys/ioctl.h>
+
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
 #define libopenssl_cll_EXPORT
@@ -26,6 +28,8 @@ include "cl_struct.h"
 #define ERROR_SSL_CONTEXT_PRIVATE_KEY_FILE_ERROR 3
 
 #define ERROR_SSL_CONN_CREATE_ERROR 1
+#define ERROR_SSL_CONN_WRITE_ERROR 2
+#define ERROR_SSL_CONN_READ_ERROR 3
 
 // === definition of structure ssl_context_s ===================================
 
@@ -72,6 +76,8 @@ WUR libopenssl_cll_EXPORT int ssl_conn_s_create(ssl_conn_s *this,
     ssl_context_s *a_ctx,int a_fd);
 static inline void ssl_conn_s_set_accept_state(const ssl_conn_s *this);
 static inline void ssl_conn_s_set_connect_state(const ssl_conn_s *this);
+WUR libopenssl_cll_EXPORT int ssl_conn_s_write(ssl_conn_s *this,const void *a_src,int a_size);
+WUR libopenssl_cll_EXPORT int ssl_conn_s_read(ssl_conn_s *this,int a_fd,bc_array_s *a_trg);
 
 // === definition of global functions ==========================================
 
@@ -170,7 +176,7 @@ static inline int ssl_context_s_create_client(ssl_context_s *this)
 static inline int ssl_context_s_use_certificate_file(ssl_context_s *this,
     const char *a_file_name,int a_file_type)
 {/*{{{*/
-  
+
   // - ERROR -
   if (SSL_CTX_use_certificate_file(*this,a_file_name,a_file_type) != 1)
   {
@@ -183,7 +189,7 @@ static inline int ssl_context_s_use_certificate_file(ssl_context_s *this,
 static inline int ssl_context_s_use_private_key_file(ssl_context_s *this,
     const char *a_file_name,int a_file_type)
 {/*{{{*/
-  
+
   // - ERROR -
   if (SSL_CTX_use_PrivateKey_file(*this,a_file_name,a_file_type) != 1)
   {

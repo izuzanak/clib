@@ -199,7 +199,7 @@ int main(int argc,char **argv)
   cassert(signal_s_simple_handler(signal_handler) == 0);
 
   CONT_INIT(rtsp_player_s,player);
-  cassert(rtsp_player_s_create(&player,"../recordings","127.0.0.1",8000) == 0);
+  cassert(rtsp_player_s_create(&player,"recordings","127.0.0.1",8000) == 0);
   rtsp_player_s_run(&player);
   rtsp_player_s_clear(&player);
 

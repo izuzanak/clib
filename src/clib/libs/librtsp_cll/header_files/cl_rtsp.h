@@ -5,6 +5,7 @@
 @begin
 include "cl_time.h"
 include "cl_linux.h"
+include "cl_openssl.h"
 include "cl_rtsp_parser.h"
 include "cl_rtsp_sdp_parser.h"
 @end
@@ -34,6 +35,8 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CLIENT_RECEIVE_ERROR 9
 #define ERROR_RTSP_CLIENT_SESSION_ERROR 10
 #define ERROR_RTSP_CLIENT_RETRIEVE_SERVER_IP_ERROR 11
+#define ERROR_RTSP_CLIENT_SSL_INIT_ERROR 12
+#define ERROR_RTSP_CLIENT_GET_TIME_ERROR 13
 
 #define ERROR_RTSP_CONN_INVALID_STATE 1
 #define ERROR_RTSP_CONN_INVALID_FD 2
@@ -62,6 +65,8 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_SERVER_ACCEPT_ERROR 4
 #define ERROR_RTSP_SERVER_CONN_CREATE_ERROR 5
 #define ERROR_RTSP_SERVER_TIMER_READ_ERROR 6
+#define ERROR_RTSP_SERVER_SSL_INIT_ERROR 7
+#define ERROR_RTSP_SERVER_SSL_ACCEPT_ERROR 8
 
 // === constants and definitions ===============================================
 
@@ -81,14 +86,17 @@ include "cl_rtsp_sdp_parser.h"
 enum
 {/*{{{*/
   c_rtsp_command_RESPONSE      = 0,
-  c_rtsp_command_OPTIONS       = 1 << 0,
-  c_rtsp_command_DESCRIBE      = 1 << 1,
-  c_rtsp_command_SETUP         = 1 << 2,
-  c_rtsp_command_TEARDOWN      = 1 << 3,
-  c_rtsp_command_PLAY          = 1 << 4,
-  c_rtsp_command_PAUSE         = 1 << 5,
-  c_rtsp_command_SET_PARAMETER = 1 << 6,
-  c_rtsp_command_GET_PARAMETER = 1 << 7,
+  c_rtsp_command_GET           = 1 << 0,
+  c_rtsp_command_OPTIONS       = 1 << 1,
+  c_rtsp_command_DESCRIBE      = 1 << 2,
+  c_rtsp_command_ANNOUNCE      = 1 << 2,
+  c_rtsp_command_RECORD        = 1 << 2,
+  c_rtsp_command_SETUP         = 1 << 3,
+  c_rtsp_command_TEARDOWN      = 1 << 4,
+  c_rtsp_command_PLAY          = 1 << 5,
+  c_rtsp_command_PAUSE         = 1 << 6,
+  c_rtsp_command_SET_PARAMETER = 1 << 7,
+  c_rtsp_command_GET_PARAMETER = 1 << 8,
 };/*}}}*/
 
 typedef unsigned rtsp_pkt_delay_t;
@@ -119,6 +127,7 @@ enum
   c_rtsp_client_state_UNKNOWN = 0,
   c_rtsp_client_state_ERROR,
   c_rtsp_client_state_CONNECTING,
+  c_rtsp_client_state_RECV_HTTP,
   c_rtsp_client_state_RECV_OPTIONS,
   c_rtsp_client_state_RECV_DESCRIBE,
   c_rtsp_client_state_RECV_SDP,
@@ -140,6 +149,7 @@ pointer:recv_packet_callback
 pointer:cb_object
 ui:cb_index
 
+ssl_conn_s:ssl
 epoll_fd_s:epoll_fd
 bc_array_s:in_msg
 bc_array_s:out_msg
@@ -159,6 +169,9 @@ WUR librtsp_cll_EXPORT int rtsp_client_s_create(rtsp_client_s *this,
     rtsp_recv_sdp_callback_t a_recv_sdp_callback,
     rtsp_recv_packet_callback_t a_recv_packet_callback,
     void *a_cb_object,unsigned a_cb_index);
+#ifdef CLIB_WITH_OPENSSL
+WUR int rtsp_client_s_init_ssl(rtsp_client_s *this);
+#endif
 WUR int rtsp_client_s_send_cmd(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this);
@@ -210,6 +223,8 @@ struct
 pointer:server
 socket_address_s:client_addr
 ui:index
+
+ssl_conn_s:ssl
 epoll_fd_s:epoll_fd
 epoll_timer_s:epoll_send_timer
 
@@ -249,6 +264,7 @@ list<rtsp_conn_s> rtsp_conn_list_s;
 @end
 
 // -- rtsp_server_s --
+
 enum
 {/*{{{*/
   c_rtsp_server_state_UNKNOWN = 0,
@@ -270,6 +286,7 @@ pointer:conn_playing_callback
 pointer:conn_get_packet_callback
 pointer:cb_object
 
+ssl_context_s:ssl_ctx
 epoll_fd_s:epoll_fd
 rtsp_conn_list_s:conn_list
 
@@ -287,6 +304,9 @@ WUR librtsp_cll_EXPORT int rtsp_server_s_create(rtsp_server_s *this,
   rtsp_conn_playing_callback_t a_conn_playing_callback,
   rtsp_conn_get_packet_callback_t a_conn_get_packet_callback,
   void *a_cb_object);
+#ifdef CLIB_WITH_OPENSSL
+WUR librtsp_cll_EXPORT int rtsp_server_s_init_ssl(rtsp_server_s *this,const char *a_cert_file,const char *a_pkey_file);
+#endif
 WUR librtsp_cll_EXPORT int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR librtsp_cll_EXPORT int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR librtsp_cll_EXPORT int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);

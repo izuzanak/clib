@@ -1074,7 +1074,7 @@ static inline void epoll_timer_s_to_string(const epoll_timer_s *this,bc_array_s 
 static inline int epoll_timer_s_settime(const epoll_timer_s *this,
     struct itimerspec *a_itimerspec,int a_flags)
 {/*{{{*/
-  
+
   // - set timer -
   if (timerfd_settime(this->fd,a_flags,a_itimerspec,NULL))
   {

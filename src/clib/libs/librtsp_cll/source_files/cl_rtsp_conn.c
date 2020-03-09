@@ -72,7 +72,11 @@ int rtsp_conn_s_send_resp(rtsp_conn_s *this,bc_array_s *a_msg)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"rtsp_conn_s >>>>>\n%.*s",a_msg->used,a_msg->data));
 
-  return fd_s_write(&this->epoll_fd.fd,a_msg->data,a_msg->used);
+  return
+#ifdef CLIB_WITH_OPENSSL
+    this->ssl != NULL ? ssl_conn_s_write(&this->ssl,a_msg->data,a_msg->used) :
+#endif
+    fd_s_write(&this->epoll_fd.fd,a_msg->data,a_msg->used);
 }/*}}}*/
 
 int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
@@ -81,7 +85,11 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
   bc_array_s *msg = &this->in_msg;
 
   unsigned msg_old_used = msg->used;
-  if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
+  if ((
+#ifdef CLIB_WITH_OPENSSL
+      this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
+#endif
+      fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == msg_old_used)
   {
     throw_error(RTSP_CONN_READ_ERROR);
   }
@@ -94,7 +102,11 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
     if (msg->used < pkt_size)
     {
       unsigned msg_old_used = msg->used;
-      if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
+      if ((
+#ifdef CLIB_WITH_OPENSSL
+          this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
+#endif
+          fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == msg_old_used)
       {
         throw_error(RTSP_CLIENT_READ_ERROR);
       }
@@ -131,6 +143,31 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
 
   switch (this->parser.command)
   {
+    case c_rtsp_command_GET:
+      {/*{{{*/
+        this->out_msg.used = 0;
+
+        bc_array_s_append_format(&this->out_msg,
+"HTTP/1.1 200 OK\r\n"
+"Connection: close\r\n"
+"Cache-Control: no-store\r\n"
+"Pragma: no-cache\r\n"
+"Content-Type: application/x-rtsp-tunnelled\r\n"
+"Date: "
+        );
+        rtsp_conn_s_append_time(&this->out_msg);
+        bc_array_s_append_format(&this->out_msg,
+"\r\n"
+"\r\n");
+
+        if (rtsp_conn_s_send_resp(this,&this->out_msg))
+        {
+          this->state = c_rtsp_conn_state_ERROR;
+          throw_error(RTSP_CONN_SEND_ERROR);
+        }
+      }/*}}}*/
+      break;
+
     case c_rtsp_command_OPTIONS:
       {/*{{{*/
         this->out_msg.used = 0;
@@ -508,7 +545,11 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
     // - modify packet sequence and time stamp -
     RTSP_CONN_S_SEND_PACKET_MODIFY_PACKET();
 
-    int result = fd_s_write(&this->epoll_fd.fd,this->packet.data,this->packet.size);
+    int result =
+#ifdef CLIB_WITH_OPENSSL
+      this->ssl != NULL ? ssl_conn_s_write(&this->ssl,this->packet.data,this->packet.size) :
+#endif
+      fd_s_write(&this->epoll_fd.fd,this->packet.data,this->packet.size);
 
     // - reset packet channel and time stamp -
     RTP_PKT_SET_CHANNEL(this->packet.data,this->pkt_channel);

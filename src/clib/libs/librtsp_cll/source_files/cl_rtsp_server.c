@@ -49,6 +49,24 @@ int rtsp_server_s_create(rtsp_server_s *this,
   return 0;
 }/*}}}*/
 
+#ifdef CLIB_WITH_OPENSSL
+int rtsp_server_s_init_ssl(rtsp_server_s *this,const char *a_cert_file,const char *a_pkey_file)
+{/*{{{*/
+
+  // - ERROR -
+  if (ssl_context_s_create_server(&this->ssl_ctx) ||
+      ssl_context_s_use_certificate_file(&this->ssl_ctx,a_cert_file,SSL_FILETYPE_PEM) ||
+      ssl_context_s_use_private_key_file(&this->ssl_ctx,a_pkey_file,SSL_FILETYPE_PEM))
+  {
+    ssl_context_s_clear(&this->ssl_ctx);
+
+    throw_error(RTSP_SERVER_SSL_INIT_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+#endif
+
 int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_index;
@@ -86,6 +104,20 @@ int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a
 
           throw_error(RTSP_SERVER_CONN_CREATE_ERROR);
         }
+
+#ifdef CLIB_WITH_OPENSSL
+        if (this->ssl_ctx != NULL)
+        {
+          rtsp_conn_s *conn = rtsp_conn_list_s_at(&this->conn_list,conn_idx);
+
+          if (ssl_conn_s_create(&conn->ssl,&this->ssl_ctx,conn->epoll_fd.fd))
+          {
+            throw_error(RTSP_SERVER_SSL_ACCEPT_ERROR);
+          }
+
+          ssl_conn_s_set_accept_state(&conn->ssl);
+        }
+#endif
 
         // - call conn_new_callback -
         if (((rtsp_conn_new_callback_t)this->conn_new_callback)(this->cb_object,conn_idx))

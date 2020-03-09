@@ -242,7 +242,7 @@ int main(int argc,char **argv)
 
   const char *server_ips[] = {
     //"10.2.35.6",
-    "10.2.1.18",
+    "192.168.3.29",
   };
 
   const usi server_ports[] = {
@@ -252,15 +252,15 @@ int main(int argc,char **argv)
 
   const char *media[] = {
     //"udpstream_ch1",
-    "11",
+    "axis-media/media.amp",
   };
 
   const char *file_names[] = {
     //"10.2.35.6",
-    "10.2.1.18",
+    "192.168.3.29",
   };
 
-  cassert(rtsp_recorder_s_create(&recorder,"../recordings",1,server_ips,server_ports,media,file_names) == 0);
+  cassert(rtsp_recorder_s_create(&recorder,"recordings",1,server_ips,server_ports,media,file_names) == 0);
   rtsp_recorder_s_run(&recorder);
   rtsp_recorder_s_clear(&recorder);
 
