@@ -110,10 +110,9 @@ int channel_conn_s_recv_msg(channel_conn_s *this)
 {/*{{{*/
   bc_array_s *msg = &this->in_msg;
 
-  const long int c_buffer_add = 1024;
+  const long int c_buffer_add = 4096;
   unsigned msg_old_used = msg->used;
 
-  int inq_cnt;
   long int read_cnt;
   do
   {
@@ -126,26 +125,22 @@ int channel_conn_s_recv_msg(channel_conn_s *this)
 
       if (read_cnt <= 0)
       {
-        unsigned ssl_events;
-
         switch (SSL_get_error(this->ssl,read_cnt))
         {
           case SSL_ERROR_WANT_READ:
-            this->ssl_action = SSL_ACTION_RECV_MSG;
-            ssl_events = EPOLLIN | EPOLLPRI;
             break;
           case SSL_ERROR_WANT_WRITE:
             this->ssl_action = SSL_ACTION_RECV_MSG;
-            ssl_events = EPOLLOUT;
+
+            // - modify fd epoll events -
+            if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLOUT))
+            {
+              throw_error(CHANNEL_CONN_EPOLL_ERROR);
+            }
+
             break;
           default:
             throw_error(CHANNEL_CONN_READ_ERROR);
-        }
-
-        // - modify fd epoll events -
-        if (epoll_fd_s_modify_events(&this->epoll_fd,ssl_events))
-        {
-          throw_error(CHANNEL_CONN_EPOLL_ERROR);
         }
 
         break;
@@ -167,13 +162,33 @@ int channel_conn_s_recv_msg(channel_conn_s *this)
 
     msg->used += read_cnt;
 
-    // - ERROR -
-    if (ioctl(this->epoll_fd.fd,TIOCINQ,&inq_cnt) == -1)
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl == NULL)
     {
-      throw_error(CHANNEL_CONN_READ_ERROR);
+#endif
+
+      // - ERROR -
+      int inq_cnt;
+      if (ioctl(this->epoll_fd.fd,TIOCINQ,&inq_cnt) == -1)
+      {
+        throw_error(CHANNEL_CONN_READ_ERROR);
+      }
+
+      if (inq_cnt <= 0)
+      {
+        break;
+      }
+#ifdef CLIB_WITH_OPENSSL
     }
-  }
-  while(inq_cnt > 0);
+    else
+    {
+      if (read_cnt <= 0)
+      {
+        break;
+      }
+    }
+#endif
+  } while(1);
 
 #ifdef CLIB_WITH_OPENSSL
   if (this->ssl == NULL)
@@ -263,26 +278,22 @@ int channel_conn_s_send_msg(channel_conn_s *this)
 
       if (cnt <= 0)
       {
-        unsigned ssl_events;
-
         switch (SSL_get_error(this->ssl,cnt))
         {
           case SSL_ERROR_WANT_READ:
             this->ssl_action = SSL_ACTION_SEND_MSG;
-            ssl_events = EPOLLIN | EPOLLPRI;
+
+            // - modify fd epoll events -
+            if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLPRI))
+            {
+              throw_error(CHANNEL_CONN_EPOLL_ERROR);
+            }
+
             break;
           case SSL_ERROR_WANT_WRITE:
-            this->ssl_action = SSL_ACTION_SEND_MSG;
-            ssl_events = EPOLLOUT;
             break;
           default:
             throw_error(CHANNEL_CONN_WRITE_ERROR);
-        }
-
-        // - modify fd epoll events -
-        if (epoll_fd_s_modify_events(&this->epoll_fd,ssl_events))
-        {
-          throw_error(CHANNEL_CONN_EPOLL_ERROR);
         }
 
         cnt = 0;
