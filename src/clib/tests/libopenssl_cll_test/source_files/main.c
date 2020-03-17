@@ -21,6 +21,7 @@ test_function_t test_functions[] =
 
 void test_create()
 {/*{{{*/
+#if OPTION_TO_STRING == ENABLED
   CONT_INIT_CLEAR(ssl_context_s,server_ctx);
   cassert(ssl_context_s_create_server(&server_ctx) == 0);
   DEBUG_PRINT(ssl_context_s,&server_ctx);
@@ -33,6 +34,7 @@ void test_create()
   CONT_INIT_CLEAR(ssl_context_s,client_ctx);
   cassert(ssl_context_s_create_client(&client_ctx) == 0);
   DEBUG_PRINT(ssl_context_s,&client_ctx);
+#endif
 }/*}}}*/
 
 // === program entry function ==================================================

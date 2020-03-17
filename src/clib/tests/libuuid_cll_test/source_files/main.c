@@ -28,6 +28,7 @@ methods uuid_array_s
 
 void test_create()
 {/*{{{*/
+#if OPTION_TO_STRING == ENABLED
   uuid_s uuid;
   uuid_s_generate(&uuid);
 
@@ -59,6 +60,7 @@ void test_create()
   printf("%s\n",uuid_to_string_str.data);
 
   cassert(strcmp(uuid_str.data,uuid_to_string_str.data) == 0);
+#endif
 }/*}}}*/
 
 // === program entry function ==================================================
