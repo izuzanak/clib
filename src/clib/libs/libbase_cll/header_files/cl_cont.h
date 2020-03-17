@@ -36,6 +36,11 @@ static inline void bc_array_s_append_be_ui(bc_array_s *this,ui a_value);
 static inline void bc_array_s_append_be_lli(bc_array_s *this,lli a_value);
 static inline void bc_array_s_append_be_ulli(bc_array_s *this,ulli a_value);
 
+// -- bc_arrays_s --
+@begin
+array<bc_array_s> bc_arrays_s;
+@end
+
 // -- json_nice_s --
 @begin
 struct
@@ -243,6 +248,11 @@ static inline void bc_array_s_append_be_ulli(bc_array_s *this,ulli a_value)
   a_value = htobe64(a_value);
   bc_array_s_append(this,sizeof(ulli),(char *)&a_value);
 }/*}}}*/
+
+// -- bc_arrays_s --
+@begin
+inlines bc_arrays_s
+@end
 
 // -- json_nice_s --
 @begin

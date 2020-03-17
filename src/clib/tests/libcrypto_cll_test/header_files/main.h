@@ -16,6 +16,7 @@ void test_base64();
 void test_pkey();
 void test_digest();
 void test_cipher();
+void test_seal();
 
 // === program entry function ==================================================
 

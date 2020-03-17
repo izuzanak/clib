@@ -15,6 +15,7 @@ const char *test_names[] =
   "pkey",
   "digest",
   "cipher",
+  "seal",
 };/*}}}*/
 
 test_function_t test_functions[] =
@@ -25,6 +26,7 @@ test_function_t test_functions[] =
   test_pkey,
   test_digest,
   test_cipher,
+  test_seal,
 };/*}}}*/
 
 // === test execution functions ================================================
@@ -71,7 +73,7 @@ void test_pkey()
   cassert(crypto_pkey_s_load_private(&private,"tests/libcrypto_cll_test/resources/private.pem","password") == 0);
 
   CONT_INIT_CLEAR(crypto_pkey_s,public);
-  cassert(crypto_pkey_s_load_public(&private,"tests/libcrypto_cll_test/resources/public.pem","password") == 0);
+  cassert(crypto_pkey_s_load_public(&public,"tests/libcrypto_cll_test/resources/public.pem","password") == 0);
 }/*}}}*/
 
 void test_digest()
@@ -136,6 +138,48 @@ void test_cipher()
   CONT_INIT_CLEAR(bc_array_s,decrypted_data);
   cassert(crypto_decrypt_s_update(&decrypt,encrypted_data.data,encrypted_data.used,&decrypted_data) == 0);
   cassert(crypto_decrypt_s_finalize(&decrypt,&decrypted_data) == 0);
+
+  cassert(bc_array_s_compare(&data,&decrypted_data));
+}/*}}}*/
+
+void test_seal()
+{/*{{{*/
+  CONT_INIT_CLEAR(file_s,file);
+  cassert(file_s_open(&file,"tests/libcrypto_cll_test/resources/file.xml","r") == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,data);
+  cassert(file_s_read_close(&file,&data) == 0);
+
+  CONT_INIT_CLEAR(crypto_cipher_info_s,cipher_info);
+  cassert(crypto_cipher_info_s_get_by_name(&cipher_info,"AES-256-CBC") == 0);
+
+  printf("cipher name: %s\n",crypto_cipher_info_s_name(&cipher_info));
+  printf("cipher block_size: %u\n",crypto_cipher_info_s_block_size(&cipher_info));
+  printf("cipher key_length: %u\n",crypto_cipher_info_s_key_length(&cipher_info));
+  printf("cipher iv_length: %u\n",crypto_cipher_info_s_iv_length(&cipher_info));
+
+  CONT_INIT_CLEAR(crypto_pkey_s,private);
+  cassert(crypto_pkey_s_load_private(&private,"tests/libcrypto_cll_test/resources/private.pem","password") == 0);
+
+  CONT_INIT_CLEAR(crypto_pkey_s,public);
+  cassert(crypto_pkey_s_load_public(&public,"tests/libcrypto_cll_test/resources/public.pem","password") == 0);
+
+  CONT_INIT_CLEAR(crypto_seal_s,seal);
+  cassert(crypto_seal_s_create(&seal,&cipher_info,&public,1) == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,sealed_data);
+  cassert(crypto_seal_s_update(&seal,data.data,data.used,&sealed_data) == 0);
+  cassert(crypto_seal_s_finalize(&seal,&sealed_data) == 0);
+
+  bc_array_s *key = seal.keys.data;
+  bc_array_s *iv = &seal.iv;
+
+  CONT_INIT_CLEAR(crypto_open_s,open);
+  cassert(crypto_open_s_create(&open,&cipher_info,key->data,key->used,iv->data,iv->used,&private) == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,decrypted_data);
+  cassert(crypto_open_s_update(&open,sealed_data.data,sealed_data.used,&decrypted_data) == 0);
+  cassert(crypto_open_s_finalize(&open,&decrypted_data) == 0);
 
   cassert(bc_array_s_compare(&data,&decrypted_data));
 }/*}}}*/

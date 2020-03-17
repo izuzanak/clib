@@ -37,6 +37,11 @@ void bc_array_s_append_format_ap(bc_array_s *this,const char *a_format,va_list a
   }
 }/*}}}*/
 
+// -- bc_arrays_s --
+@begin
+methods bc_arrays_s
+@end
+
 // -- json_nice_s --
 @begin
 methods json_nice_s
