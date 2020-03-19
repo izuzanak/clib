@@ -631,6 +631,16 @@ int crypto_decode_base64(const char *a_data,unsigned a_size,bc_array_s *a_trg)
       throw_error(CRYPTO_INVALID_BASE_DATA);
     }
 
+    // - adjust target length according to input padding characters -
+    if (a_data[a_size - 2] == '=')
+    {
+      length -= 2;
+    }
+    else if (a_data[a_size - 1] == '=')
+    {
+      length -= 1;
+    }
+
     a_trg->used += length;
   }
 
