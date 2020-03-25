@@ -16,7 +16,7 @@ int tcp_comm_s_create(tcp_comm_s *this,const char *a_ip,unsigned short a_port)
 {/*{{{*/
   epoll_s_create(&this->epoll,0);
 
-  if(tcp_server_s_create(&this->server,a_ip,a_port,
+  if (tcp_server_s_create(&this->server,a_ip,a_port,
         tcp_comm_s_conn_new,
         tcp_comm_s_conn_drop,
         tcp_comm_s_conn_message,
@@ -24,6 +24,15 @@ int tcp_comm_s_create(tcp_comm_s *this,const char *a_ip,unsigned short a_port)
   {
     throw_error(TCP_COMM_SERVER_CREATE_ERROR);
   }
+
+#ifdef CLIB_WITH_OPENSSL
+  if (tcp_server_s_init_ssl(&this->server,
+    "tests/libchannel_cll_test/resources/mycert.pem",
+    "tests/libchannel_cll_test/resources/mycert.pem"))
+  {
+    throw_error(TCP_COMM_SERVER_INIT_SSL_ERROR);
+  }
+#endif
 
   if(epoll_s_fd_callback(&this->epoll,&this->server.epoll_fd,EPOLLIN | EPOLLPRI,tcp_comm_s_fd_event,this,0))
   {

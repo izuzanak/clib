@@ -40,16 +40,6 @@ include "cl_openssl.h"
 #define ERROR_CHANNEL_CONN_EPOLL_ERROR 9
 #define ERROR_CHANNEL_CONN_CLIENT_SSL_INIT_ERROR 10
 
-#ifdef CLIB_WITH_OPENSSL
-// - ssl repeated actions -
-enum
-{
-  SSL_ACTION_NONE = 0,
-  SSL_ACTION_SEND_MSG,
-  SSL_ACTION_RECV_MSG
-};
-#endif
-
 typedef struct channel_server_s channel_server_s;
 typedef int (*channel_conn_new_callback_t)(void *a_object,unsigned a_index);
 typedef int (*channel_conn_drop_callback_t)(void *a_object,unsigned a_index);

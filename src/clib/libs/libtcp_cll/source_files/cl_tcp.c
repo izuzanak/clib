@@ -22,6 +22,10 @@ void tcp_conn_s_create(tcp_conn_s *this,epoll_fd_s *a_epoll_fd,
 
   tcp_conn_s_clear(this);
 
+#ifdef CLIB_WITH_OPENSSL
+  this->ssl_action = SSL_ACTION_NONE;
+#endif
+
   epoll_fd_s_swap(&this->epoll_fd,a_epoll_fd);
   this->conn_message_callback = a_conn_message_callback;
   this->cb_object = a_cb_object;
@@ -40,6 +44,10 @@ int tcp_conn_s_create_client(tcp_conn_s *this,
   debug_message_3(fprintf(stderr,"tcp_conn_s_create_client\n"));
 
   tcp_conn_s_clear(this);
+
+#ifdef CLIB_WITH_OPENSSL
+  this->ssl_action = SSL_ACTION_NONE;
+#endif
 
   this->conn_message_callback = a_conn_message_callback;
   this->cb_object = a_cb_object;
@@ -78,20 +86,129 @@ int tcp_conn_s_create_client(tcp_conn_s *this,
   return 0;
 }/*}}}*/
 
+#ifdef CLIB_WITH_OPENSSL
+int tcp_conn_s_init_ssl(tcp_conn_s *this)
+{/*{{{*/
+  CONT_INIT_CLEAR(ssl_context_s,ssl_ctx);
+
+  // - ERROR -
+  if (ssl_context_s_create_client(&ssl_ctx) ||
+      ssl_conn_s_create(&this->ssl,&ssl_ctx,this->epoll_fd.fd))
+  {
+    throw_error(TCP_CONN_CLIENT_SSL_INIT_ERROR);
+  }
+
+  ssl_conn_s_set_connect_state(&this->ssl);
+
+  return 0;
+}/*}}}*/
+#endif
+
 int tcp_conn_s_recv_msg(tcp_conn_s *this)
 {/*{{{*/
   bc_array_s *msg = &this->in_msg;
 
+  const long int c_buffer_add = 4096;
   unsigned msg_old_used = msg->used;
-  if (fd_s_read(&this->epoll_fd.fd,msg) || msg->used == msg_old_used)
-  {
-    throw_error(TCP_CONN_READ_ERROR);
-  }
 
-  // - call conn_message_callback -
-  if (((tcp_conn_message_callback_t)this->conn_message_callback)(this->cb_object,this->cb_index,msg))
+  long int read_cnt;
+  do
   {
-    throw_error(TCP_CONN_CALLBACK_ERROR);
+    bc_array_s_reserve(msg,c_buffer_add);
+
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl != NULL)
+    {
+      read_cnt = SSL_read(this->ssl,msg->data + msg->used,c_buffer_add);
+
+      if (read_cnt <= 0)
+      {
+        switch (SSL_get_error(this->ssl,read_cnt))
+        {
+          case SSL_ERROR_WANT_READ:
+            break;
+          case SSL_ERROR_WANT_WRITE:
+            this->ssl_action = SSL_ACTION_RECV_MSG;
+
+            // - modify fd epoll events -
+            if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLOUT))
+            {
+              throw_error(TCP_CONN_EPOLL_ERROR);
+            }
+
+            break;
+          default:
+            throw_error(TCP_CONN_READ_ERROR);
+        }
+
+        break;
+      }
+    }
+    else
+    {
+#endif
+      read_cnt = read(this->epoll_fd.fd,msg->data + msg->used,c_buffer_add);
+
+      // - ERROR -
+      if (read_cnt == -1)
+      {
+        throw_error(TCP_CONN_READ_ERROR);
+      }
+#ifdef CLIB_WITH_OPENSSL
+    }
+#endif
+
+    msg->used += read_cnt;
+
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl == NULL)
+    {
+#endif
+
+      // - ERROR -
+      int inq_cnt;
+      if (ioctl(this->epoll_fd.fd,TIOCINQ,&inq_cnt) == -1)
+      {
+        throw_error(TCP_CONN_READ_ERROR);
+      }
+
+      if (inq_cnt <= 0)
+      {
+        break;
+      }
+#ifdef CLIB_WITH_OPENSSL
+    }
+    else
+    {
+      if (read_cnt <= 0)
+      {
+        break;
+      }
+    }
+#endif
+  } while(1);
+
+  if (msg->used > msg_old_used)
+  {
+    // - call conn_message_callback -
+    if (((tcp_conn_message_callback_t)this->conn_message_callback)(this->cb_object,this->cb_index,msg))
+    {
+      throw_error(TCP_CONN_CALLBACK_ERROR);
+    }
+  }
+  else
+  {
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl == NULL)
+    {
+#endif
+      if (msg->used == msg_old_used)
+      {
+        throw_error(TCP_CONN_READ_ERROR);
+      }
+#ifdef CLIB_WITH_OPENSSL
+    }
+#endif
   }
 
   return 0;
@@ -110,13 +227,49 @@ int tcp_conn_s_send_msg(tcp_conn_s *this)
       write_cnt = 4096;
     }
 
-    ssize_t cnt = write(this->epoll_fd.fd,message->data + this->out_msg_offset,write_cnt);
+    ssize_t cnt;
 
-    // - ERROR -
-    if (cnt == -1)
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl != NULL)
     {
-      throw_error(TCP_CONN_WRITE_ERROR);
+      cnt = SSL_write(this->ssl,message->data + this->out_msg_offset,write_cnt);
+
+      if (cnt <= 0)
+      {
+        switch (SSL_get_error(this->ssl,cnt))
+        {
+          case SSL_ERROR_WANT_READ:
+            this->ssl_action = SSL_ACTION_SEND_MSG;
+
+            // - modify fd epoll events -
+            if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLPRI))
+            {
+              throw_error(TCP_CONN_EPOLL_ERROR);
+            }
+
+            break;
+          case SSL_ERROR_WANT_WRITE:
+            break;
+          default:
+            throw_error(TCP_CONN_WRITE_ERROR);
+        }
+
+        cnt = 0;
+      }
     }
+    else
+    {
+#endif
+      cnt = write(this->epoll_fd.fd,message->data + this->out_msg_offset,write_cnt);
+
+      // - ERROR -
+      if (cnt == -1)
+      {
+        throw_error(TCP_CONN_WRITE_ERROR);
+      }
+#ifdef CLIB_WITH_OPENSSL
+    }
+#endif
 
     // - whole message was send -
     if ((this->out_msg_offset += cnt) >= message->used)
@@ -152,41 +305,92 @@ int tcp_conn_s_fd_event(tcp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll
 
   if (this->connecting)
   {
-    int nonblock_io = 0;
     int error;
     socklen_t length = sizeof(error);
 
     // - check connect result -
-    // - disable nonblocking io -
     // - modify fd epoll events: only input -
     if (getsockopt(this->epoll_fd.fd,SOL_SOCKET,SO_ERROR,&error,&length) ||
         error != 0 ||
-        ioctl(this->epoll_fd.fd,FIONBIO,&nonblock_io) ||
         epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLPRI))
     {
       throw_error(TCP_CONN_CONNECT_ERROR);
     }
+
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl == NULL)
+    {
+#endif
+      // - disable nonblocking io -
+      int nonblock_io = 0;
+      if (ioctl(this->epoll_fd.fd,FIONBIO,&nonblock_io))
+      {
+        throw_error(TCP_CONN_CONNECT_ERROR);
+      }
+#ifdef CLIB_WITH_OPENSSL
+    }
+#endif
 
     // - reset client connecting flag -
     this->connecting = 0;
   }
   else
   {
-    if (a_epoll_event->events & EPOLLOUT)
+#ifdef CLIB_WITH_OPENSSL
+    if (this->ssl_action != SSL_ACTION_NONE)
     {
-      if (tcp_conn_s_send_msg(this))
-      {
-        throw_error(TCP_CONN_SEND_ERROR);
-      }
-    }
+      // - reset ssl action -
+      unsigned ssl_action = this->ssl_action;
+      this->ssl_action = SSL_ACTION_NONE;
 
-    if (a_epoll_event->events & EPOLLIN)
-    {
-      if (tcp_conn_s_recv_msg(this))
+      // - modify fd epoll events -
+      if (epoll_fd_s_modify_events(&this->epoll_fd,
+            EPOLLIN | EPOLLPRI | (this->out_msg_queue.used != 0 ? EPOLLOUT : 0)))
       {
-        throw_error(TCP_CONN_RECEIVE_ERROR);
+        throw_error(TCP_CONN_EPOLL_ERROR);
+      }
+
+      switch (ssl_action)
+      {
+      case SSL_ACTION_SEND_MSG:
+        {
+          if (tcp_conn_s_send_msg(this))
+          {
+            throw_error(TCP_CONN_SEND_ERROR);
+          }
+        }
+        break;
+      case SSL_ACTION_RECV_MSG:
+        {
+          if (tcp_conn_s_recv_msg(this))
+          {
+            throw_error(TCP_CONN_RECEIVE_ERROR);
+          }
+        }
+        break;
       }
     }
+    else
+    {
+#endif
+      if (a_epoll_event->events & EPOLLOUT)
+      {
+        if (tcp_conn_s_send_msg(this))
+        {
+          throw_error(TCP_CONN_SEND_ERROR);
+        }
+      }
+
+      if (a_epoll_event->events & EPOLLIN)
+      {
+        if (tcp_conn_s_recv_msg(this))
+        {
+          throw_error(TCP_CONN_RECEIVE_ERROR);
+        }
+      }
+#ifdef CLIB_WITH_OPENSSL
+    }
+#endif
   }
 
   return 0;
@@ -239,6 +443,24 @@ int tcp_server_s_create(tcp_server_s *this,
   return 0;
 }/*}}}*/
 
+#ifdef CLIB_WITH_OPENSSL
+int tcp_server_s_init_ssl(tcp_server_s *this,const char *a_cert_file,const char *a_pkey_file)
+{/*{{{*/
+
+  // - ERROR -
+  if (ssl_context_s_create_server(&this->ssl_ctx) ||
+      ssl_context_s_use_certificate_file(&this->ssl_ctx,a_cert_file,SSL_FILETYPE_PEM) ||
+      ssl_context_s_use_private_key_file(&this->ssl_ctx,a_pkey_file,SSL_FILETYPE_PEM))
+  {
+    ssl_context_s_clear(&this->ssl_ctx);
+
+    throw_error(TCP_SERVER_SSL_INIT_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+#endif
+
 int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_index;
@@ -268,6 +490,26 @@ int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_e
   epoll_fd.epoll = a_epoll;
   tcp_conn_s_create(&this->conn_list.data[conn_idx].object,
       &epoll_fd,this->conn_message_callback,this->cb_object,conn_idx);
+
+#ifdef CLIB_WITH_OPENSSL
+  if (this->ssl_ctx != NULL)
+  {
+    tcp_conn_s *conn = tcp_conn_list_s_at(&this->conn_list,conn_idx);
+
+    int nonblock_io = 1;
+    if (ioctl(conn->epoll_fd.fd,FIONBIO,&nonblock_io))
+    {
+      throw_error(TCP_SERVER_ACCEPT_ERROR);
+    }
+
+    if (ssl_conn_s_create(&conn->ssl,&this->ssl_ctx,conn->epoll_fd.fd))
+    {
+      throw_error(TCP_SERVER_SSL_ACCEPT_ERROR);
+    }
+
+    ssl_conn_s_set_accept_state(&conn->ssl);
+  }
+#endif
 
   // - call conn_new_callback -
   if (((tcp_conn_new_callback_t)this->conn_new_callback)(this->cb_object,conn_idx))

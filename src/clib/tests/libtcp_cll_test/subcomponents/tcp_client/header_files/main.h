@@ -16,6 +16,7 @@ include "cl_tcp.h"
 #define ERROR_TCP_COMM_EPOLL_ERROR 3
 #define ERROR_TCP_COMM_TIMER_READ_ERROR 4
 #define ERROR_TCP_COMM_CONN_SCHEDULE_MESSAGE_ERROR 5
+#define ERROR_TCP_COMM_CONN_INIT_SSL_ERROR 6
 
 // === definition of generated structures ======================================
 

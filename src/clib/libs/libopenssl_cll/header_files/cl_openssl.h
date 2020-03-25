@@ -31,6 +31,14 @@ include "cl_struct.h"
 #define ERROR_SSL_CONN_WRITE_ERROR 2
 #define ERROR_SSL_CONN_READ_ERROR 3
 
+// - ssl repeated actions -
+enum
+{
+  SSL_ACTION_NONE = 0,
+  SSL_ACTION_SEND_MSG,
+  SSL_ACTION_RECV_MSG
+};
+
 // === definition of structure ssl_context_s ===================================
 
 typedef SSL_CTX * ssl_context_s;

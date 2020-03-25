@@ -351,7 +351,6 @@ int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s 
     socklen_t length = sizeof(error);
 
     // - check connect result -
-    // - disable nonblocking io -
     // - modify fd epoll events: only input -
     if (getsockopt(this->epoll_fd.fd,SOL_SOCKET,SO_ERROR,&error,&length) ||
         error != 0 ||
@@ -364,6 +363,7 @@ int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s 
     if (this->ssl == NULL)
     {
 #endif
+      // - disable nonblocking io -
       int nonblock_io = 0;
       if (ioctl(this->epoll_fd.fd,FIONBIO,&nonblock_io))
       {

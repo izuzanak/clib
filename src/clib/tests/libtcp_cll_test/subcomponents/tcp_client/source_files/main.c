@@ -52,6 +52,13 @@ int tcp_comm_s_create(tcp_comm_s *this,
         throw_error(TCP_COMM_CONN_CREATE_ERROR);
       }
 
+#ifdef CLIB_WITH_OPENSSL
+      if (tcp_conn_s_init_ssl(&client->connection))
+      {
+        throw_error(TCP_COMM_CONN_INIT_SSL_ERROR);
+      }
+#endif
+
       // - register epoll fd events -
       if (epoll_s_fd_callback(&this->epoll,&client->connection.epoll_fd,EPOLLIN | EPOLLPRI,tcp_comm_s_client_fd_event,this,client_idx))
       {
@@ -61,7 +68,7 @@ int tcp_comm_s_create(tcp_comm_s *this,
       }
 
       // - register epoll timer -
-      struct itimerspec itimerspec = {{0,100000000},{0,100000000}};
+      struct itimerspec itimerspec = {{0,100000000},{0,1}};
       if (epoll_s_timer_callback(&this->epoll,&client->epoll_timer,&itimerspec,0,tcp_comm_s_client_time_event,this,client_idx))
       {
         tcp_client_list_s_remove(&this->client_list,client_idx);

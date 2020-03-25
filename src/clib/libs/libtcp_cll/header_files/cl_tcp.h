@@ -5,6 +5,7 @@
 @begin
 include "cl_linux.h"
 include "cl_var.h"
+include "cl_openssl.h"
 @end
 
 #include <netinet/tcp.h>
@@ -25,6 +26,8 @@ include "cl_var.h"
 #define ERROR_TCP_SERVER_SOCKOPT_ERROR 2
 #define ERROR_TCP_SERVER_INVALID_FD 3
 #define ERROR_TCP_SERVER_ACCEPT_ERROR 4
+#define ERROR_TCP_SERVER_SSL_INIT_ERROR 5
+#define ERROR_TCP_SERVER_SSL_ACCEPT_ERROR 6
 
 #define ERROR_TCP_CONN_INVALID_FD 1
 #define ERROR_TCP_CONN_CONNECT_ERROR 2
@@ -35,6 +38,7 @@ include "cl_var.h"
 #define ERROR_TCP_CONN_READ_ERROR 7
 #define ERROR_TCP_CONN_CALLBACK_ERROR 8
 #define ERROR_TCP_CONN_EPOLL_ERROR 9
+#define ERROR_TCP_CONN_CLIENT_SSL_INIT_ERROR 10
 
 typedef struct tcp_server_s tcp_server_s;
 typedef int (*tcp_conn_new_callback_t)(void *a_object,unsigned a_index);
@@ -63,6 +67,9 @@ static inline const bc_array_s *loc_s_tcp_message_value(var_s this);
 @begin
 struct
 <
+ssl_conn_s:ssl
+ui:ssl_action
+
 epoll_fd_s:epoll_fd
 bi:connecting
 
@@ -85,6 +92,9 @@ WUR libtcp_cll_EXPORT int tcp_conn_s_create_client(tcp_conn_s *this,
     const char *a_server_ip,unsigned short a_server_port,
     tcp_conn_message_callback_t a_conn_message_callback,
     void *a_cb_object,unsigned a_cb_index);
+#ifdef CLIB_WITH_OPENSSL
+WUR libtcp_cll_EXPORT int tcp_conn_s_init_ssl(tcp_conn_s *this);
+#endif
 WUR int tcp_conn_s_recv_msg(tcp_conn_s *this);
 WUR int tcp_conn_s_send_msg(tcp_conn_s *this);
 WUR libtcp_cll_EXPORT int tcp_conn_s_fd_event(tcp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
@@ -108,6 +118,7 @@ pointer:conn_drop_callback
 pointer:conn_message_callback
 pointer:cb_object
 
+ssl_context_s:ssl_ctx
 epoll_fd_s:epoll_fd
 tcp_conn_list_s:conn_list
 >
@@ -120,6 +131,9 @@ WUR libtcp_cll_EXPORT int tcp_server_s_create(tcp_server_s *this,
     tcp_conn_drop_callback_t a_conn_drop_callback,
     tcp_conn_message_callback_t a_conn_message_callback,
     void *a_cb_object);
+#ifdef CLIB_WITH_OPENSSL
+WUR libtcp_cll_EXPORT int tcp_server_s_init_ssl(tcp_server_s *this,const char *a_cert_file,const char *a_pkey_file);
+#endif
 WUR libtcp_cll_EXPORT int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR libtcp_cll_EXPORT int tcp_server_s_conn_fd_event(void *a_tcp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 

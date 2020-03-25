@@ -35,7 +35,7 @@ void test_tcp()
 
   CONT_INIT(pid_s,client_pid);
   cassert(pid_s_execute(&client_pid,&arguments) == 0);
-  usleep(500000);
+  usleep(1000000);
 
   cassert(pid_s_kill(&server_pid,SIGTERM) == 0);
 
