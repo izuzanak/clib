@@ -175,6 +175,7 @@ int main(int argc,char **argv)
 
   memcheck_init();
   libtcp_cll_init();
+  libopenssl_cll_init();
 
   cassert(signal_s_simple_handler(signal_handler) == 0);
 
@@ -256,6 +257,7 @@ int main(int argc,char **argv)
   cassert(tcp_comm_s_run(&comm) == 0);
   tcp_comm_s_clear(&comm);
 
+  libopenssl_cll_clear();
   libtcp_cll_clear();
   memcheck_release_assert();
 

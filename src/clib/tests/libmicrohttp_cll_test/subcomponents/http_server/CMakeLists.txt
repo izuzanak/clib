@@ -1,6 +1,8 @@
 
 set(CONF_COMPONENTS
-  "src/clib/libs/libhttp_cll")
+  "src/clib/libs/libtest_cll"
+  "src/clib/libs/liblinux_cll"
+  "src/clib/libs/libmicrohttp_cll")
 set(CONF_HEADER_DIRS)
 
 set(CONF_DO_BUILD TRUE)

@@ -4,7 +4,7 @@
 
 @begin
 include "cl_test.h"
-include "cl_http.h"
+include "cl_microhttp.h"
 @end
 
 // === program entry function ==================================================
