@@ -82,13 +82,9 @@ int rtsp_client_s_send_cmd(rtsp_client_s *this)
   {
     return ssl_conn_s_write(&this->ssl,this->out_msg.data,this->out_msg.used);
   }
-  else
-  {
 #endif
-    return fd_s_write(&this->epoll_fd.fd,this->out_msg.data,this->out_msg.used);
-#ifdef CLIB_WITH_OPENSSL
-  }
-#endif
+
+  return fd_s_write(&this->epoll_fd.fd,this->out_msg.data,this->out_msg.used);
 }/*}}}*/
 
 int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this)

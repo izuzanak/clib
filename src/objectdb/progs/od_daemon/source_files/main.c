@@ -176,7 +176,7 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path)
   return 0;
 }/*}}}*/
 
-int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap)
+int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,const va_list a_ap)
 {/*{{{*/
   od_daemon_s *this = (od_daemon_s *)a_sd_daemon;
 

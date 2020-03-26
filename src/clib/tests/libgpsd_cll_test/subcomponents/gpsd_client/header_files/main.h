@@ -27,7 +27,7 @@ gpsd_client_s;
 
 WUR int gpsd_client_s_create(gpsd_client_s *this,const char *a_server_ip,usi a_server_port);
 WUR int gpsd_client_s_run(gpsd_client_s *this);
-WUR int gpsd_client_s_gpsd_callback(void *a_gpsd_client,unsigned a_index,unsigned a_type,va_list a_ap);
+WUR int gpsd_client_s_gpsd_callback(void *a_gpsd_client,unsigned a_index,unsigned a_type,const va_list a_ap);
 
 // === inline methods of generated structures ==================================
 

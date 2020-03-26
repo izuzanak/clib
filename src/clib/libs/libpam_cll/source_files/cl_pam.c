@@ -8,6 +8,9 @@ include "cl_pam.h"
 int pam_conv_fun(int num_msg,const struct pam_message **msg,
     struct pam_response **resp,void *appdata_ptr)
 {/*{{{*/
+  (void)num_msg;
+  (void)msg;
+
   *resp = *((struct pam_response **)appdata_ptr);
 
   return PAM_SUCCESS;
@@ -29,7 +32,7 @@ int pam_user_auth(const char *a_service_name,
   response->resp = strdup(a_pass);
   response->resp_retcode = 0;
 
-  int auth_res = pam_authenticate(handle,0);
+  int auth_res = pam_authenticate(handle,0); // NOLINT
 
   if (pam_end(handle,auth_res) != PAM_SUCCESS)
   {

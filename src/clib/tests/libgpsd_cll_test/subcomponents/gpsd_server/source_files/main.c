@@ -58,7 +58,7 @@ void gpsd_server_s_schedule_message(gpsd_server_s *this,unsigned a_index,bc_arra
 
   unsigned offset = 0;
   do {
-    unsigned chunk_size = rand() % 10 + 1;
+    unsigned chunk_size = rand() % 10 + 1; // NOLINT
 
     if (chunk_size > a_buffer->used - offset)
     {
@@ -170,6 +170,8 @@ int gpsd_server_s_conn_drop(void *a_gpsd_server,unsigned a_index)
 
 int gpsd_server_s_conn_message(void *a_gpsd_server,unsigned a_index,bc_array_s *a_message)
 {/*{{{*/
+  (void)a_gpsd_server;
+
   debug_message_5(fprintf(stderr,"gpsd_server_s_conn_message: %u - %.*s\n",a_index,a_message->used,a_message->data));
 
   // FIXME TODO continue ...

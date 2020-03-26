@@ -46,8 +46,10 @@ int gpsd_client_s_run(gpsd_client_s *this)
   return 0;
 }/*}}}*/
 
-int gpsd_client_s_gpsd_callback(void *a_gpsd_client,unsigned a_index,unsigned a_type,va_list a_ap)
+int gpsd_client_s_gpsd_callback(void *a_gpsd_client,unsigned a_index,unsigned a_type,const va_list a_ap)
 {/*{{{*/
+  (void)a_ap;
+
   gpsd_client_s *this = (gpsd_client_s *)a_gpsd_client;
 
   switch (a_type)

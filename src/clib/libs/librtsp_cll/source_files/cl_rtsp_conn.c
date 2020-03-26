@@ -287,8 +287,8 @@ this->session);
         }
         else
         {
-          socket_address_s data_in_addr;
-          socket_address_s ctrl_in_addr;
+          socket_address_s data_in_addr = {0};
+          socket_address_s ctrl_in_addr = {0};
 
           if (socket_address_s_create(&data_in_addr,server->ip.data,0) ||
               socket_s_create(&setup->udp_data.fd,AF_INET,SOCK_DGRAM) ||

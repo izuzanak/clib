@@ -595,6 +595,7 @@ int od_channel_client_s_connect_time_event(void *a_od_channel_client,unsigned a_
 int od_channel_client_s_ping_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
 {/*{{{*/
   (void)a_index;
+  (void)a_epoll;
 
   // - read timer expiration counter -
   uint64_t timer_exps;

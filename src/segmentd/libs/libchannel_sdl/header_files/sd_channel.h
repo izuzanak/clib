@@ -33,7 +33,7 @@ include "cl_channel.h"
 #define ERROR_SD_CHANNEL_CLIENT_SCHEDULE_MESSAGE_ERROR 3
 #define ERROR_SD_CHANNEL_CLIENT_CALLBACK_ERROR 4
 
-typedef int (*sd_channel_cbreq_t)(void *a_object,unsigned a_index,unsigned a_type,va_list a_ap);
+typedef int (*sd_channel_cbreq_t)(void *a_object,unsigned a_index,unsigned a_type,const va_list a_ap);
 
 // === constants and definitions ===============================================
 

@@ -6,8 +6,8 @@
 include "cl_struct.h"
 @end
 
-#include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/ssl.h>
 
 #include <sys/ioctl.h>
 

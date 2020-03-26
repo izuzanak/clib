@@ -288,7 +288,7 @@ void test_from_json()
 
   target.used = 0;
   string_s_to_string(&string,&target);
-  cassert(strncmp(target.data,"Hello world!!!",target.used) == 0);
+  cassert(strncmp(target.data,"Hello world!!!",target.used) == 0); // NOLINT
 
   // - basic_tree_s_from_json -
   source.used = 0;

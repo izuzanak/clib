@@ -26,7 +26,7 @@ include "cl_tcp.h"
 #define ERROR_GPSD_CLIENT_CALLBACK_ERROR 4
 #define ERROR_GPSD_MESSAGE_ERROR 5
 
-typedef int (*cl_gpsd_cbreq_t)(void *a_object,unsigned a_index,unsigned a_type,va_list a_ap);
+typedef int (*cl_gpsd_cbreq_t)(void *a_object,unsigned a_index,unsigned a_type,const va_list a_ap);
 
 // === constants and definitions ===============================================
 

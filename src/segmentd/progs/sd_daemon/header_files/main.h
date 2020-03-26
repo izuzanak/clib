@@ -87,7 +87,7 @@ static inline void sd_daemon_s_update_watches(sd_daemon_s *this);
 
 WUR int sd_daemon_s_run(sd_daemon_s *this);
 
-WUR int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
+WUR int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,const va_list a_ap);
 
 // === inline methods of generated structures ==================================
 
