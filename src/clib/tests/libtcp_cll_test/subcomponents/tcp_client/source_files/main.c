@@ -47,7 +47,7 @@ int tcp_comm_s_create(tcp_comm_s *this,
       client->message.sequence = 0;
 
       if (tcp_conn_s_create_client(&client->connection,
-            client->server_ip.data,client->server_port,tcp_comm_s_message,this,client_idx))
+            client->server_ip.data,client->server_port,tcp_comm_s_recv,tcp_comm_s_send,this,client_idx))
       {
         throw_error(TCP_COMM_CONN_CREATE_ERROR);
       }
@@ -144,7 +144,7 @@ int tcp_comm_s_client_fd_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *
   return 0;
 }/*}}}*/
 
-int tcp_comm_s_message(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message)
+int tcp_comm_s_recv(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message)
 {/*{{{*/
   (void)a_tcp_comm;
 
@@ -152,6 +152,15 @@ int tcp_comm_s_message(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message)
 
   // - clear message buffer -
   a_message->used = 0;
+
+  return 0;
+}/*}}}*/
+
+int tcp_comm_s_send(void *a_tcp_comm,unsigned a_index)
+{/*{{{*/
+  (void)a_tcp_comm;
+
+  debug_message_5(fprintf(stderr,"conn_send: %u\n",a_index));
 
   return 0;
 }/*}}}*/

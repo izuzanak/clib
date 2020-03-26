@@ -19,7 +19,8 @@ int tcp_comm_s_create(tcp_comm_s *this,const char *a_ip,unsigned short a_port)
   if (tcp_server_s_create(&this->server,a_ip,a_port,
         tcp_comm_s_conn_new,
         tcp_comm_s_conn_drop,
-        tcp_comm_s_conn_message,
+        tcp_comm_s_conn_recv,
+        tcp_comm_s_conn_send,
         this))
   {
     throw_error(TCP_COMM_SERVER_CREATE_ERROR);
@@ -78,9 +79,9 @@ int tcp_comm_s_conn_drop(void *a_tcp_comm,unsigned a_index)
   return 0;
 }/*}}}*/
 
-int tcp_comm_s_conn_message(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message)
+int tcp_comm_s_conn_recv(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message)
 {/*{{{*/
-  debug_message_5(fprintf(stderr,"tcp_comm_s_conn_message: %u - %.*s\n",a_index,a_message->used,a_message->data));
+  debug_message_5(fprintf(stderr,"tcp_comm_s_conn_recv: %u - %.*s\n",a_index,a_message->used,a_message->data));
 
   tcp_comm_s *this = (tcp_comm_s *)a_tcp_comm;
   tcp_conn_s *conn = &this->server.conn_list.data[a_index].object;
@@ -96,6 +97,15 @@ int tcp_comm_s_conn_message(void *a_tcp_comm,unsigned a_index,bc_array_s *a_mess
   {
     throw_error(TCP_COMM_CONN_SCHEDULE_MESSAGE_ERROR);
   }
+
+  return 0;
+}/*}}}*/
+
+int tcp_comm_s_conn_send(void *a_tcp_comm,unsigned a_index)
+{/*{{{*/
+  (void)a_tcp_comm;
+
+  debug_message_5(fprintf(stderr,"tcp_comm_s_conn_send: %u\n",a_index));
 
   return 0;
 }/*}}}*/

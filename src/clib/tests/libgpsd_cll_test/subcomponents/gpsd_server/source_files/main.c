@@ -29,7 +29,8 @@ int gpsd_server_s_create(gpsd_server_s *this,const char *a_ip,unsigned short a_p
   if(tcp_server_s_create(&this->server,a_ip,a_port,
         gpsd_server_s_conn_new,
         gpsd_server_s_conn_drop,
-        gpsd_server_s_conn_message,
+        gpsd_server_s_conn_recv,
+        NULL,
         this))
   {
     throw_error(GPSD_SERVER_CREATE_ERROR);
@@ -168,11 +169,11 @@ int gpsd_server_s_conn_drop(void *a_gpsd_server,unsigned a_index)
   return 0;
 }/*}}}*/
 
-int gpsd_server_s_conn_message(void *a_gpsd_server,unsigned a_index,bc_array_s *a_message)
+int gpsd_server_s_conn_recv(void *a_gpsd_server,unsigned a_index,bc_array_s *a_message)
 {/*{{{*/
   (void)a_gpsd_server;
 
-  debug_message_5(fprintf(stderr,"gpsd_server_s_conn_message: %u - %.*s\n",a_index,a_message->used,a_message->data));
+  debug_message_5(fprintf(stderr,"gpsd_server_s_conn_recv: %u - %.*s\n",a_index,a_message->used,a_message->data));
 
   // FIXME TODO continue ...
 

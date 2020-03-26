@@ -66,7 +66,8 @@ WUR int tcp_comm_s_create(tcp_comm_s *this,
 WUR int tcp_comm_s_run(tcp_comm_s *this);
 WUR int tcp_comm_s_client_time_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
 WUR int tcp_comm_s_client_fd_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR int tcp_comm_s_message(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message);
+WUR int tcp_comm_s_recv(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message);
+WUR int tcp_comm_s_send(void *a_tcp_comm,unsigned a_index);
 
 // === inline methods of generated structures ==================================
 

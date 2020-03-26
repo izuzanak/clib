@@ -128,11 +128,11 @@ state_2_label:
 
 }/*}}}*/
 
-int gpsd_conn_s_conn_message(void *a_gpsd_conn,unsigned a_index,bc_array_s *a_message)
+int gpsd_conn_s_conn_recv(void *a_gpsd_conn,unsigned a_index,bc_array_s *a_message)
 {/*{{{*/
   (void)a_index;
 
-  debug_message_6(fprintf(stderr,"gpsd_conn_s_conn_message\n"));
+  debug_message_6(fprintf(stderr,"gpsd_conn_s_conn_recv\n"));
 
   // - log message -
   log_info_2("gpsd client, <-- " LOG_MSG_FORMAT,
@@ -305,7 +305,7 @@ int gpsd_conn_s_connect_time_event(void *a_gpsd_conn,unsigned a_index,epoll_even
   gpsd_conn_s *this = (gpsd_conn_s *)a_gpsd_conn;
 
   if (tcp_conn_s_create_client(&this->connection,
-        this->server_ip.data,this->server_port,gpsd_conn_s_conn_message,this,0) ||
+        this->server_ip.data,this->server_port,gpsd_conn_s_conn_recv,NULL,this,0) ||
       epoll_s_fd_callback(a_epoll,&this->connection.epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,gpsd_conn_s_fd_event,this,0))
   {
     // - register epoll timer -

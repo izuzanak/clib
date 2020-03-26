@@ -15,7 +15,8 @@ methods tcp_conn_s
 @end
 
 void tcp_conn_s_create(tcp_conn_s *this,epoll_fd_s *a_epoll_fd,
-    tcp_conn_message_callback_t a_conn_message_callback,
+    tcp_conn_recv_callback_t a_conn_recv_callback,
+    tcp_conn_send_callback_t a_conn_send_callback,
     void *a_cb_object,unsigned a_cb_index)
 {/*{{{*/
   debug_message_3(fprintf(stderr,"tcp_conn_s_create\n"));
@@ -27,7 +28,8 @@ void tcp_conn_s_create(tcp_conn_s *this,epoll_fd_s *a_epoll_fd,
 #endif
 
   epoll_fd_s_swap(&this->epoll_fd,a_epoll_fd);
-  this->conn_message_callback = a_conn_message_callback;
+  this->conn_recv_callback = a_conn_recv_callback;
+  this->conn_send_callback = a_conn_send_callback;
   this->cb_object = a_cb_object;
   this->cb_index = a_cb_index;
   this->out_msg_offset = 0;
@@ -38,7 +40,8 @@ void tcp_conn_s_create(tcp_conn_s *this,epoll_fd_s *a_epoll_fd,
 
 int tcp_conn_s_create_client(tcp_conn_s *this,
     const char *a_server_ip,unsigned short a_server_port,
-    tcp_conn_message_callback_t a_conn_message_callback,
+    tcp_conn_recv_callback_t a_conn_recv_callback,
+    tcp_conn_send_callback_t a_conn_send_callback,
     void *a_cb_object,unsigned a_cb_index)
 {/*{{{*/
   debug_message_3(fprintf(stderr,"tcp_conn_s_create_client\n"));
@@ -49,7 +52,8 @@ int tcp_conn_s_create_client(tcp_conn_s *this,
   this->ssl_action = SSL_ACTION_NONE;
 #endif
 
-  this->conn_message_callback = a_conn_message_callback;
+  this->conn_recv_callback = a_conn_recv_callback;
+  this->conn_send_callback = a_conn_send_callback;
   this->cb_object = a_cb_object;
   this->cb_index = a_cb_index;
   this->out_msg_offset = 0;
@@ -190,8 +194,8 @@ int tcp_conn_s_recv_msg(tcp_conn_s *this)
 
   if (msg->used > msg_old_used)
   {
-    // - call conn_message_callback -
-    if (((tcp_conn_message_callback_t)this->conn_message_callback)(this->cb_object,this->cb_index,msg))
+    // - call conn_recv_callback -
+    if (((tcp_conn_recv_callback_t)this->conn_recv_callback)(this->cb_object,this->cb_index,msg))
     {
       throw_error(TCP_CONN_CALLBACK_ERROR);
     }
@@ -279,6 +283,16 @@ int tcp_conn_s_send_msg(tcp_conn_s *this)
 
       // - reset out message offset -
       this->out_msg_offset = 0;
+
+      // - conn send callback is set -
+      if (this->conn_send_callback)
+      {
+        // - call conn_send_callback -
+        if (((tcp_conn_send_callback_t)this->conn_send_callback)(this->cb_object,this->cb_index))
+        {
+          throw_error(TCP_CONN_CALLBACK_ERROR);
+        }
+      }
     }
   }
   else
@@ -410,7 +424,8 @@ int tcp_server_s_create(tcp_server_s *this,
   const char *a_ip,unsigned short a_port,
   tcp_conn_new_callback_t a_conn_new_callback,
   tcp_conn_drop_callback_t a_conn_drop_callback,
-  tcp_conn_message_callback_t a_conn_message_callback,
+  tcp_conn_recv_callback_t a_conn_recv_callback,
+  tcp_conn_send_callback_t a_conn_send_callback,
   void *a_cb_object)
 {/*{{{*/
   debug_message_3(fprintf(stderr,"tcp_server_s_create\n"));
@@ -422,7 +437,8 @@ int tcp_server_s_create(tcp_server_s *this,
 
   this->conn_new_callback = a_conn_new_callback;
   this->conn_drop_callback = a_conn_drop_callback;
-  this->conn_message_callback = a_conn_message_callback;
+  this->conn_recv_callback = a_conn_recv_callback;
+  this->conn_send_callback = a_conn_send_callback;
   this->cb_object = a_cb_object;
 
   // - open server socket -
@@ -489,7 +505,7 @@ int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_e
 
   epoll_fd.epoll = a_epoll;
   tcp_conn_s_create(&this->conn_list.data[conn_idx].object,
-      &epoll_fd,this->conn_message_callback,this->cb_object,conn_idx);
+      &epoll_fd,this->conn_recv_callback,this->conn_send_callback,this->cb_object,conn_idx);
 
 #ifdef CLIB_WITH_OPENSSL
   if (this->ssl_ctx != NULL)

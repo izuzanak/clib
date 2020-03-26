@@ -18,6 +18,7 @@ include "cl_tcp.h"
 #endif
 
 typedef int (*http_conn_request_callback_t)(void *a_object,unsigned a_index,int a_complete);
+typedef int (*http_conn_response_callback_t)(void *a_object,unsigned a_index);
 
 // - error codes -
 #define ERROR_HTTP_SERVER_TCP_SERVER_CREATE_ERROR 1
@@ -123,6 +124,7 @@ struct
 tcp_server_s:server
 
 pointer:conn_request_callback
+pointer:conn_response_callback
 pointer:cb_object
 
 http_conns_s:conns
@@ -130,14 +132,15 @@ http_conns_s:conns
 http_server_s;
 @end
 
-WUR libtcp_cll_EXPORT int http_server_s_create(http_server_s *this,
+WUR libhttp_cll_EXPORT int http_server_s_create(http_server_s *this,
     const char *a_ip,unsigned short a_port,
     http_conn_request_callback_t a_conn_request_callback,
+    http_conn_response_callback_t a_conn_response_callback,
     void *a_cb_object);
-
-WUR libtcp_cll_EXPORT int http_server_s_tcp_conn_new(void *a_http_server,unsigned a_index);
-WUR libtcp_cll_EXPORT int http_server_s_tcp_conn_drop(void *a_http_server,unsigned a_index);
-WUR libtcp_cll_EXPORT int http_server_s_tcp_conn_message(void *a_http_server,unsigned a_index,bc_array_s *a_message);
+WUR libhttp_cll_EXPORT int http_server_s_tcp_conn_new(void *a_http_server,unsigned a_index);
+WUR libhttp_cll_EXPORT int http_server_s_tcp_conn_drop(void *a_http_server,unsigned a_index);
+WUR libhttp_cll_EXPORT int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s *a_message);
+WUR libhttp_cll_EXPORT int http_server_s_tcp_conn_send(void *a_http_server,unsigned a_index);
 
 // === inline methods of generated structures ==================================
 

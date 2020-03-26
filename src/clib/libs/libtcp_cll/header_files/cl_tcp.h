@@ -43,7 +43,8 @@ include "cl_openssl.h"
 typedef struct tcp_server_s tcp_server_s;
 typedef int (*tcp_conn_new_callback_t)(void *a_object,unsigned a_index);
 typedef int (*tcp_conn_drop_callback_t)(void *a_object,unsigned a_index);
-typedef int (*tcp_conn_message_callback_t)(void *a_object,unsigned a_index,bc_array_s *a_message);
+typedef int (*tcp_conn_recv_callback_t)(void *a_object,unsigned a_index,bc_array_s *a_message);
+typedef int (*tcp_conn_send_callback_t)(void *a_object,unsigned a_index);
 
 // === definition of var type tcp_message  =====================================
 
@@ -73,7 +74,8 @@ ui:ssl_action
 epoll_fd_s:epoll_fd
 bi:connecting
 
-pointer:conn_message_callback
+pointer:conn_recv_callback
+pointer:conn_send_callback
 pointer:cb_object
 ui:cb_index
 
@@ -86,11 +88,13 @@ tcp_conn_s;
 @end
 
 libtcp_cll_EXPORT void tcp_conn_s_create(tcp_conn_s *this,epoll_fd_s *a_epoll_fd,
-    tcp_conn_message_callback_t a_conn_message_callback,
+    tcp_conn_recv_callback_t a_conn_recv_callback,
+    tcp_conn_send_callback_t a_conn_send_callback,
     void *a_cb_object,unsigned a_cb_index);
 WUR libtcp_cll_EXPORT int tcp_conn_s_create_client(tcp_conn_s *this,
     const char *a_server_ip,unsigned short a_server_port,
-    tcp_conn_message_callback_t a_conn_message_callback,
+    tcp_conn_recv_callback_t a_conn_recv_callback,
+    tcp_conn_send_callback_t a_conn_send_callback,
     void *a_cb_object,unsigned a_cb_index);
 #ifdef CLIB_WITH_OPENSSL
 WUR libtcp_cll_EXPORT int tcp_conn_s_init_ssl(tcp_conn_s *this);
@@ -115,7 +119,8 @@ usi:port
 
 pointer:conn_new_callback
 pointer:conn_drop_callback
-pointer:conn_message_callback
+pointer:conn_recv_callback
+pointer:conn_send_callback
 pointer:cb_object
 
 ssl_context_s:ssl_ctx
@@ -129,7 +134,8 @@ WUR libtcp_cll_EXPORT int tcp_server_s_create(tcp_server_s *this,
     const char *a_ip,unsigned short a_port,
     tcp_conn_new_callback_t a_conn_new_callback,
     tcp_conn_drop_callback_t a_conn_drop_callback,
-    tcp_conn_message_callback_t a_conn_message_callback,
+    tcp_conn_recv_callback_t a_conn_recv_callback,
+    tcp_conn_send_callback_t a_conn_send_callback,
     void *a_cb_object);
 #ifdef CLIB_WITH_OPENSSL
 WUR libtcp_cll_EXPORT int tcp_server_s_init_ssl(tcp_server_s *this,const char *a_cert_file,const char *a_pkey_file);

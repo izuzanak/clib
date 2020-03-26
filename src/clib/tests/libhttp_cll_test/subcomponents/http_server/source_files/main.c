@@ -18,6 +18,7 @@ int http_comm_s_create(http_comm_s *this,const char *a_ip,unsigned short a_port)
 
   if (http_server_s_create(&this->server,a_ip,a_port,
         http_comm_s_conn_request,
+        http_comm_s_conn_response,
         this))
   {
     throw_error(HTTP_COMM_SERVER_CREATE_ERROR);
@@ -91,6 +92,15 @@ int http_comm_s_conn_request(void *a_http_comm,unsigned a_index,int a_complete)
       throw_error(HTTP_COMM_SCHEDULE_RESPONSE_ERROR);
     }
   }
+
+  return 0;
+}/*}}}*/
+
+int http_comm_s_conn_response(void *a_http_comm,unsigned a_index)
+{/*{{{*/
+  (void)a_http_comm;
+
+  debug_message_5(fprintf(stderr,"http_comm_s_conn_response: %u\n",a_index));
 
   return 0;
 }/*}}}*/

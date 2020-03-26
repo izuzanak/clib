@@ -891,6 +891,7 @@ methods http_server_s
 int http_server_s_create(http_server_s *this,
     const char *a_ip,unsigned short a_port,
     http_conn_request_callback_t a_conn_request_callback,
+    http_conn_response_callback_t a_conn_response_callback,
     void *a_cb_object)
 {/*{{{*/
   debug_message_3(fprintf(stderr,"http_server_s_create\n"));
@@ -898,13 +899,15 @@ int http_server_s_create(http_server_s *this,
   http_server_s_clear(this);
 
   this->conn_request_callback = a_conn_request_callback;
+  this->conn_response_callback = a_conn_response_callback;
   this->cb_object = a_cb_object;
 
   // - create tcp server -
   if (tcp_server_s_create(&this->server,a_ip,a_port,
         http_server_s_tcp_conn_new,
         http_server_s_tcp_conn_drop,
-        http_server_s_tcp_conn_message,
+        http_server_s_tcp_conn_recv,
+        http_server_s_tcp_conn_send,
         this))
   {
     throw_error(HTTP_SERVER_TCP_SERVER_CREATE_ERROR);
@@ -948,7 +951,7 @@ int http_server_s_tcp_conn_drop(void *a_http_server,unsigned a_index)
   return 0;
 }/*}}}*/
 
-int http_server_s_tcp_conn_message(void *a_http_server,unsigned a_index,bc_array_s *a_message)
+int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s *a_message)
 {/*{{{*/
   http_server_s *this = (http_server_s *)a_http_server;
   http_conn_s *conn = http_conns_s_at(&this->conns,a_index);
@@ -1174,6 +1177,29 @@ int http_server_s_tcp_conn_message(void *a_http_server,unsigned a_index,bc_array
       }
     }/*}}}*/
     break;
+  }
+
+  return 0;
+}/*}}}*/
+
+int http_server_s_tcp_conn_send(void *a_http_server,unsigned a_index)
+{/*{{{*/
+  http_server_s *this = (http_server_s *)a_http_server;
+
+  // - conn response callback is set -
+  if (this->conn_response_callback)
+  {
+    tcp_conn_s *tcp_conn = tcp_conn_list_s_at(&this->server.conn_list,a_index);
+
+    // - empty output queue -
+    if (tcp_conn->out_msg_queue.used == 0)
+    {
+      // - call conn_response_callback -
+      if (((http_conn_response_callback_t)this->conn_response_callback)(this->cb_object,a_index))
+      {
+        throw_error(HTTP_CONN_CALLBACK_ERROR);
+      }
+    }
   }
 
   return 0;
