@@ -15,6 +15,16 @@ methods bc_buffer_s
 methods bc_buffers_s
 @end
 
+// -- bc_buffer_pair_s --
+@begin
+methods bc_buffer_pair_s
+@end
+
+// -- bc_buffer_pairs_s --
+@begin
+methods bc_buffer_pairs_s
+@end
+
 // -- http_conn_s --
 @begin
 methods http_conn_s
@@ -47,22 +57,31 @@ unsigned http_conn_s_recognize_request_terminal(http_conn_s *this,const bc_array
    HTTP_REQUEST_GET_NEXT_CHAR();
 
    if (in_char >= 8 && in_char < 14) {
-      goto state_5_label;
+      goto state_7_label;
    }
    if (in_char == 32) {
-      goto state_5_label;
+      goto state_7_label;
+   }
+   if (in_char == 38) {
+      goto state_1_label;
    }
    if (in_char == 47) {
+      goto state_2_label;
+   }
+   if (in_char == 61) {
+      goto state_3_label;
+   }
+   if (in_char == 63) {
       goto state_1_label;
    }
    if (in_char == 71) {
-      goto state_2_label;
+      goto state_4_label;
    }
    if (in_char == 72) {
-      goto state_3_label;
+      goto state_5_label;
    }
    if (in_char == 80) {
-      goto state_4_label;
+      goto state_6_label;
    }
    return c_idx_not_exist;
 
@@ -71,106 +90,145 @@ state_1_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char < 47) {
-      goto state_6_label;
+   if (in_char < 37) {
+      goto state_8_label;
    }
-   if (in_char >= 48) {
-      goto state_6_label;
+   if (in_char == 37) {
+      goto state_9_label;
+   }
+   if (in_char >= 38 && in_char < 61) {
+      goto state_8_label;
+   }
+   if (in_char >= 62) {
+      goto state_8_label;
    }
    return c_idx_not_exist;
 
 // - STATE 2 -
 state_2_label:
-   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_CLOSE_CHAR(4);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 69) {
-      goto state_7_label;
+   if (in_char < 32) {
+      goto state_2_label;
    }
-   return c_idx_not_exist;
+   if (in_char >= 33 && in_char < 37) {
+      goto state_2_label;
+   }
+   if (in_char == 37) {
+      goto state_10_label;
+   }
+   if (in_char >= 38 && in_char < 47) {
+      goto state_2_label;
+   }
+   if (in_char >= 48 && in_char < 63) {
+      goto state_2_label;
+   }
+   if (in_char >= 64) {
+      goto state_2_label;
+   }
+   return 4;
 
 // - STATE 3 -
 state_3_label:
-   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_CLOSE_CHAR(8);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 69) {
-      goto state_8_label;
+   if (in_char < 32) {
+      goto state_3_label;
    }
-   if (in_char == 84) {
-      goto state_9_label;
+   if (in_char >= 33 && in_char < 37) {
+      goto state_3_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 37) {
+      goto state_11_label;
+   }
+   if (in_char >= 39) {
+      goto state_3_label;
+   }
+   return 8;
 
 // - STATE 4 -
 state_4_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 79) {
-      goto state_10_label;
-   }
-   if (in_char == 85) {
-      goto state_11_label;
+   if (in_char == 69) {
+      goto state_12_label;
    }
    return c_idx_not_exist;
 
 // - STATE 5 -
 state_5_label:
-   HTTP_REQUEST_CLOSE_CHAR(6);
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char >= 8 && in_char < 14) {
-      goto state_5_label;
+   if (in_char == 69) {
+      goto state_13_label;
    }
-   if (in_char == 32) {
-      goto state_5_label;
+   if (in_char == 84) {
+      goto state_14_label;
    }
-   return 6;
+   return c_idx_not_exist;
 
 // - STATE 6 -
 state_6_label:
-   HTTP_REQUEST_CLOSE_CHAR(4);
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char < 32) {
-      goto state_6_label;
+   if (in_char == 79) {
+      goto state_15_label;
    }
-   if (in_char >= 33 && in_char < 47) {
-      goto state_6_label;
+   if (in_char == 85) {
+      goto state_16_label;
    }
-   if (in_char >= 48) {
-      goto state_6_label;
-   }
-   return 4;
+   return c_idx_not_exist;
 
 // - STATE 7 -
 state_7_label:
-   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_CLOSE_CHAR(11);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 84) {
-      goto state_12_label;
+   if (in_char >= 8 && in_char < 14) {
+      goto state_7_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 32) {
+      goto state_7_label;
+   }
+   return 11;
 
 // - STATE 8 -
 state_8_label:
-   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_CLOSE_CHAR(6);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 65) {
-      goto state_13_label;
+   if (in_char < 37) {
+      goto state_8_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 37) {
+      goto state_17_label;
+   }
+   if (in_char >= 38 && in_char < 61) {
+      goto state_8_label;
+   }
+   if (in_char >= 62) {
+      goto state_8_label;
+   }
+   return 6;
 
 // - STATE 9 -
 state_9_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 84) {
-      goto state_14_label;
+   if (in_char >= 48 && in_char < 58) {
+      goto state_18_label;
+   }
+   if (in_char >= 65 && in_char < 71) {
+      goto state_18_label;
+   }
+   if (in_char >= 97 && in_char < 103) {
+      goto state_18_label;
    }
    return c_idx_not_exist;
 
@@ -179,8 +237,14 @@ state_10_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 83) {
-      goto state_15_label;
+   if (in_char >= 48 && in_char < 58) {
+      goto state_19_label;
+   }
+   if (in_char >= 65 && in_char < 71) {
+      goto state_19_label;
+   }
+   if (in_char >= 97 && in_char < 103) {
+      goto state_19_label;
    }
    return c_idx_not_exist;
 
@@ -189,23 +253,34 @@ state_11_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 84) {
-      goto state_16_label;
+   if (in_char >= 48 && in_char < 58) {
+      goto state_20_label;
+   }
+   if (in_char >= 65 && in_char < 71) {
+      goto state_20_label;
+   }
+   if (in_char >= 97 && in_char < 103) {
+      goto state_20_label;
    }
    return c_idx_not_exist;
 
 // - STATE 12 -
 state_12_label:
-   HTTP_REQUEST_CLOSE_CHAR(0);
-   return 0;
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char == 84) {
+      goto state_21_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 13 -
 state_13_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 68) {
-      goto state_17_label;
+   if (in_char == 65) {
+      goto state_22_label;
    }
    return c_idx_not_exist;
 
@@ -214,8 +289,8 @@ state_14_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 80) {
-      goto state_18_label;
+   if (in_char == 84) {
+      goto state_23_label;
    }
    return c_idx_not_exist;
 
@@ -224,70 +299,258 @@ state_15_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 84) {
-      goto state_19_label;
+   if (in_char == 83) {
+      goto state_24_label;
    }
    return c_idx_not_exist;
 
 // - STATE 16 -
 state_16_label:
-   HTTP_REQUEST_CLOSE_CHAR(3);
-   return 3;
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char == 84) {
+      goto state_25_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 17 -
 state_17_label:
-   HTTP_REQUEST_CLOSE_CHAR(1);
-   return 1;
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char >= 48 && in_char < 58) {
+      goto state_26_label;
+   }
+   if (in_char >= 65 && in_char < 71) {
+      goto state_26_label;
+   }
+   if (in_char >= 97 && in_char < 103) {
+      goto state_26_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 18 -
 state_18_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 47) {
-      goto state_20_label;
+   if (in_char >= 48 && in_char < 58) {
+      goto state_27_label;
+   }
+   if (in_char >= 65 && in_char < 71) {
+      goto state_27_label;
+   }
+   if (in_char >= 97 && in_char < 103) {
+      goto state_27_label;
    }
    return c_idx_not_exist;
 
 // - STATE 19 -
 state_19_label:
-   HTTP_REQUEST_CLOSE_CHAR(2);
-   return 2;
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char >= 48 && in_char < 58) {
+      goto state_28_label;
+   }
+   if (in_char >= 65 && in_char < 71) {
+      goto state_28_label;
+   }
+   if (in_char >= 97 && in_char < 103) {
+      goto state_28_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 20 -
 state_20_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char == 49) {
-      goto state_21_label;
+   if (in_char >= 48 && in_char < 58) {
+      goto state_29_label;
+   }
+   if (in_char >= 65 && in_char < 71) {
+      goto state_29_label;
+   }
+   if (in_char >= 97 && in_char < 103) {
+      goto state_29_label;
    }
    return c_idx_not_exist;
 
 // - STATE 21 -
 state_21_label:
-   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
-   HTTP_REQUEST_GET_NEXT_CHAR();
-
-   if (in_char == 46) {
-      goto state_22_label;
-   }
-   return c_idx_not_exist;
+   HTTP_REQUEST_CLOSE_CHAR(0);
+   return 0;
 
 // - STATE 22 -
 state_22_label:
    HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
    HTTP_REQUEST_GET_NEXT_CHAR();
 
-   if (in_char >= 48 && in_char < 50) {
-      goto state_23_label;
+   if (in_char == 68) {
+      goto state_30_label;
    }
    return c_idx_not_exist;
 
 // - STATE 23 -
 state_23_label:
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char == 80) {
+      goto state_31_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 24 -
+state_24_label:
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char == 84) {
+      goto state_32_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 25 -
+state_25_label:
+   HTTP_REQUEST_CLOSE_CHAR(3);
+   return 3;
+
+// - STATE 26 -
+state_26_label:
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char >= 48 && in_char < 58) {
+      goto state_27_label;
+   }
+   if (in_char >= 65 && in_char < 71) {
+      goto state_27_label;
+   }
+   if (in_char >= 97 && in_char < 103) {
+      goto state_27_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 27 -
+state_27_label:
+   HTTP_REQUEST_CLOSE_CHAR(7);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char < 37) {
+      goto state_27_label;
+   }
+   if (in_char == 37) {
+      goto state_17_label;
+   }
+   if (in_char >= 38 && in_char < 61) {
+      goto state_27_label;
+   }
+   if (in_char >= 62) {
+      goto state_27_label;
+   }
+   return 7;
+
+// - STATE 28 -
+state_28_label:
    HTTP_REQUEST_CLOSE_CHAR(5);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char < 32) {
+      goto state_28_label;
+   }
+   if (in_char >= 33 && in_char < 37) {
+      goto state_28_label;
+   }
+   if (in_char == 37) {
+      goto state_10_label;
+   }
+   if (in_char >= 38 && in_char < 47) {
+      goto state_28_label;
+   }
+   if (in_char >= 48 && in_char < 63) {
+      goto state_28_label;
+   }
+   if (in_char >= 64) {
+      goto state_28_label;
+   }
    return 5;
+
+// - STATE 29 -
+state_29_label:
+   HTTP_REQUEST_CLOSE_CHAR(9);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char < 32) {
+      goto state_29_label;
+   }
+   if (in_char >= 33 && in_char < 37) {
+      goto state_29_label;
+   }
+   if (in_char == 37) {
+      goto state_11_label;
+   }
+   if (in_char >= 39) {
+      goto state_29_label;
+   }
+   return 9;
+
+// - STATE 30 -
+state_30_label:
+   HTTP_REQUEST_CLOSE_CHAR(1);
+   return 1;
+
+// - STATE 31 -
+state_31_label:
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char == 47) {
+      goto state_33_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 32 -
+state_32_label:
+   HTTP_REQUEST_CLOSE_CHAR(2);
+   return 2;
+
+// - STATE 33 -
+state_33_label:
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char == 49) {
+      goto state_34_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 34 -
+state_34_label:
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char == 46) {
+      goto state_35_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 35 -
+state_35_label:
+   HTTP_REQUEST_CLOSE_CHAR(c_idx_not_exist);
+   HTTP_REQUEST_GET_NEXT_CHAR();
+
+   if (in_char >= 48 && in_char < 50) {
+      goto state_36_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 36 -
+state_36_label:
+   HTTP_REQUEST_CLOSE_CHAR(10);
+   return 10;
 
 }/*}}}*/
 
@@ -878,6 +1141,66 @@ state_22_label:
 
 }/*}}}*/
 
+unsigned http_conn_s_decode_url(char *a_ptr,char *a_ptr_end)
+{/*{{{*/
+  char *i_ptr = a_ptr;
+  char *o_ptr = a_ptr;
+
+  do
+  {
+    // - decode character -
+    if (*i_ptr == '%')
+    {
+      char in;
+      char out;
+
+      // - first code character -
+      in = i_ptr[1];
+
+      if (in <= '9')
+      {
+        out = (in - '0') << 4;
+      }
+      else if (in <= 'F')
+      {
+        out = (in - 'A' + 10) << 4;
+      }
+      else
+      {
+        out = (in - 'a' + 10) << 4;
+      }
+
+      // - second code character -
+      in = i_ptr[2];
+
+      if (in <= '9')
+      {
+        out |= in - '0';
+      }
+      else if (in <= 'F')
+      {
+        out |= in - 'A' + 10;
+      }
+      else
+      {
+        out |= in - 'a' + 10;
+      }
+
+      *o_ptr++ = out;
+      i_ptr += 3;
+    }
+
+    // - copy character -
+    else
+    {
+      *o_ptr++ = *i_ptr++;
+    }
+
+  } while(i_ptr < a_ptr_end);
+
+  return o_ptr - a_ptr;
+}/*}}}*/
+
 // -- http_conns_s --
 @begin
 methods http_conns_s
@@ -981,30 +1304,89 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
         throw_error(HTTP_SERVER_HTTP_REQUEST_ERROR);
       }
 
-      // - retrieve uri components -
-      unsigned uri_input_idx = conn->input_idx;
+      // - retrieve components -
       unsigned old_input_idx = conn->input_idx;
       unsigned term = http_conn_s_recognize_request_terminal(conn,a_message);
 
       do {
-
-        // - next term is not uri component -
-        if (term != c_http_req_term_URI_COMPONENT)
+        switch (term)
         {
+        case c_http_req_term_COMPONENT:
+          {/*{{{*/
+            bc_buffers_s_push_blank(&conn->components);
+            bc_buffer_s_set(bc_buffers_s_last(&conn->components),
+                old_input_idx,conn->input_idx - old_input_idx);
+          }/*}}}*/
+          break;
+        case c_http_req_term_ENC_COMPONENT:
+          {/*{{{*/
+            bc_buffers_s_push_blank(&conn->components);
+            bc_buffer_s_set(bc_buffers_s_last(&conn->components),old_input_idx,
+                http_conn_s_decode_url(a_message->data + old_input_idx,a_message->data + conn->input_idx));
+          }/*}}}*/
+          break;
+        default:
           throw_error(HTTP_SERVER_HTTP_REQUEST_ERROR);
         }
 
-        // - set uri component buffer -
-        bc_buffers_s_push_blank(&conn->uri_components);
-        bc_buffer_s_set(bc_buffers_s_last(&conn->uri_components),
-          old_input_idx,conn->input_idx - old_input_idx);
-
         old_input_idx = conn->input_idx;
         term = http_conn_s_recognize_request_terminal(conn,a_message);
-      } while(term != c_http_req_term_WHITESPACE);
 
-      // - set uri buffer -
-      bc_buffer_s_set(&conn->uri,uri_input_idx,old_input_idx - uri_input_idx);
+        if (term != c_idx_not_exist && (1 << term) & c_http_exit_mask_COMPONENTS)
+        {
+          break;
+        }
+      } while(1);
+
+      if (term != c_http_req_term_WHITESPACE)
+      {
+        do {
+          switch (term)
+          {
+          case c_http_req_term_ID:
+            {/*{{{*/
+              bc_buffer_pairs_s_push_blank(&conn->params);
+              bc_buffer_s_set(&bc_buffer_pairs_s_last(&conn->params)->id,
+                  old_input_idx + 1,conn->input_idx - old_input_idx - 1);
+            }/*}}}*/
+            break;
+          case c_http_req_term_ENC_ID:
+            {/*{{{*/
+              bc_buffer_pairs_s_push_blank(&conn->params);
+              bc_buffer_s_set(&bc_buffer_pairs_s_last(&conn->params)->id,old_input_idx + 1,
+                  http_conn_s_decode_url(a_message->data + old_input_idx + 1,a_message->data + conn->input_idx));
+            }/*}}}*/
+            break;
+          default:
+            throw_error(HTTP_SERVER_HTTP_REQUEST_ERROR);
+          }
+
+          old_input_idx = conn->input_idx;
+          term = http_conn_s_recognize_request_terminal(conn,a_message);
+
+          switch (term)
+          {
+          case c_http_req_term_VALUE:
+            {/*{{{*/
+              bc_buffer_s_set(&bc_buffer_pairs_s_last(&conn->params)->value,
+                  old_input_idx + 1,conn->input_idx - old_input_idx - 1);
+            }/*}}}*/
+            break;
+          case c_http_req_term_ENC_VALUE:
+            {/*{{{*/
+              bc_buffer_s_set(&bc_buffer_pairs_s_last(&conn->params)->value,old_input_idx + 1,
+                  http_conn_s_decode_url(a_message->data + old_input_idx + 1,a_message->data + conn->input_idx));
+            }/*}}}*/
+            break;
+          default:
+            throw_error(HTTP_SERVER_HTTP_REQUEST_ERROR);
+          }
+
+          old_input_idx = conn->input_idx;
+          term = http_conn_s_recognize_request_terminal(conn,a_message);
+
+        } while(term != c_http_req_term_WHITESPACE);
+      }
 
       // - retrieve http version -
       old_input_idx = conn->input_idx;
@@ -1079,11 +1461,11 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
         {
           unsigned value_length = (ptr - a_message->data) - value_idx;
 
-          bc_buffers_s_push_blank(&conn->headers);
-          bc_buffer_s_set(bc_buffers_s_last(&conn->headers),header_idx,header_length);
+          bc_buffer_pairs_s_push_blank(&conn->headers);
+          bc_buffer_pair_s *header = bc_buffer_pairs_s_last(&conn->headers);
 
-          bc_buffers_s_push_blank(&conn->values);
-          bc_buffer_s_set(bc_buffers_s_last(&conn->values),value_idx,value_length);
+          bc_buffer_s_set(&header->id,header_idx,header_length);
+          bc_buffer_s_set(&header->value,value_idx,value_length);
 
           switch (term)
           {
@@ -1122,15 +1504,38 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
   case c_http_conn_state_BODY:
     {/*{{{*/
 
+      //// FIXME debug print components
+      //if (conn->components.used != 0)
+      //{
+      //  bc_buffer_s *ptr = conn->components.data;
+      //  bc_buffer_s *ptr_end = ptr + conn->components.used;
+      //  do {
+      //    fprintf(stderr,"comp '%.*s'\n",ptr->length,a_message->data + ptr->begin);
+      //  } while(++ptr < ptr_end);
+      //}
+
+      //// FIXME debug print parameters
+      //if (conn->params.used != 0)
+      //{
+      //  bc_buffer_pair_s *ptr = conn->params.data;
+      //  bc_buffer_pair_s *ptr_end = ptr + conn->params.used;
+      //  do {
+      //    fprintf(stderr,"parameter: '%.*s' --> '%.*s'\n",
+      //      ptr->id.length,a_message->data + ptr->id.begin,
+      //      ptr->value.length,a_message->data + ptr->value.begin);
+      //  } while(++ptr < ptr_end);
+      //}
+
       //// FIXME debug print headers
       //if (conn->headers.used != 0)
       //{
-      //  bc_buffer_s *h_ptr = conn->headers.data;
-      //  bc_buffer_s *h_ptr_end = h_ptr + conn->headers.used;
-      //  bc_buffer_s *v_ptr = conn->values.data;
+      //  bc_buffer_pair_s *ptr = conn->headers.data;
+      //  bc_buffer_pair_s *ptr_end = ptr + conn->headers.used;
       //  do {
-      //    fprintf(stderr,"%.*s --> %.*s\n",h_ptr->length,a_message->data + h_ptr->begin,v_ptr->length,a_message->data + v_ptr->begin);
-      //  } while(++v_ptr,++h_ptr < h_ptr_end);
+      //    fprintf(stderr,"header: '%.*s' --> '%.*s'\n",
+      //      ptr->id.length,a_message->data + ptr->id.begin,
+      //      ptr->value.length,a_message->data + ptr->value.begin);
+      //  } while(++ptr < ptr_end);
       //}
 
       // - receiving small message or all data are already available -

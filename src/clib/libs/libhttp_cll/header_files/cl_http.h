@@ -26,6 +26,7 @@ typedef int (*http_conn_response_callback_t)(void *a_object,unsigned a_index);
 #define ERROR_HTTP_SERVER_HTTP_HEADERS_ERROR 3
 
 #define ERROR_HTTP_CONN_CALLBACK_ERROR 1
+#define ERROR_HTTP_CONN_URL_DECODING_ERROR 2
 
 // - maximal message chunk size -
 #define HTTP_MAX_CHUNK_SIZE (5*1024*1024)
@@ -54,9 +55,24 @@ enum
   c_http_req_term_HEAD,
   c_http_req_term_POST,
   c_http_req_term_PUT,
-  c_http_req_term_URI_COMPONENT,
+
+  c_http_req_term_COMPONENT,
+  c_http_req_term_ENC_COMPONENT,
+
+  c_http_req_term_ID,
+  c_http_req_term_ENC_ID,
+
+  c_http_req_term_VALUE,
+  c_http_req_term_ENC_VALUE,
+
   c_http_req_term_HTTP,
   c_http_req_term_WHITESPACE,
+
+  // - exit masks -
+  c_http_exit_mask_COMPONENTS =
+    (1 << c_http_req_term_ID) |
+    (1 << c_http_req_term_ENC_ID) |
+    (1 << c_http_req_term_WHITESPACE),
 };
 
 // - http header terminals -
@@ -86,6 +102,21 @@ bc_buffer_s;
 array<bc_buffer_s> bc_buffers_s;
 @end
 
+// -- bc_buffer_pair_s --
+@begin
+struct
+<
+bc_buffer_s:id
+bc_buffer_s:value
+>
+bc_buffer_pair_s;
+@end
+
+// -- bc_buffer_pairs_s --
+@begin
+array<bc_buffer_pair_s> bc_buffer_pairs_s;
+@end
+
 // -- http_conn_s --
 @begin
 struct
@@ -96,12 +127,11 @@ ui:headers_size
 ulli:message_size
 
 ui:method
-bc_buffer_s:uri
-bc_buffers_s:uri_components
+bc_buffers_s:components
+bc_buffer_pairs_s:params
 bc_buffer_s:http
 
-bc_buffers_s:headers
-bc_buffers_s:values
+bc_buffer_pairs_s:headers
 
 bc_array_s:headers_data
 ulli:receive_size
@@ -111,6 +141,7 @@ http_conn_s;
 
 unsigned http_conn_s_recognize_request_terminal(http_conn_s *this,const bc_array_s *a_source);
 unsigned http_conn_s_recognize_header_terminal(http_conn_s *this,const bc_array_s *a_source);
+unsigned http_conn_s_decode_url(char *a_ptr,char *a_ptr_end);
 
 // -- http_conns_s --
 @begin
@@ -152,6 +183,16 @@ inlines bc_buffer_s
 // -- bc_buffers_s --
 @begin
 inlines bc_buffers_s
+@end
+
+// -- bc_buffer_pair_s --
+@begin
+inlines bc_buffer_pair_s
+@end
+
+// -- bc_buffer_pairs_s --
+@begin
+inlines bc_buffer_pairs_s
 @end
 
 // -- http_conn_s --
