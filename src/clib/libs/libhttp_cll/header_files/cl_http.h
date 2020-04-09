@@ -141,7 +141,7 @@ http_conn_s;
 
 unsigned http_conn_s_recognize_request_terminal(http_conn_s *this,const bc_array_s *a_source);
 unsigned http_conn_s_recognize_header_terminal(http_conn_s *this,const bc_array_s *a_source);
-unsigned http_conn_s_decode_url(char *a_ptr,char *a_ptr_end);
+unsigned http_conn_s_decode_url(char *a_ptr,const char *a_ptr_end);
 
 // -- http_conns_s --
 @begin

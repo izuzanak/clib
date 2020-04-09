@@ -46,7 +46,7 @@ WUR int od_daemon_s_process_config(od_daemon_s *this);
 WUR int od_daemon_s_run(od_daemon_s *this);
 
 WUR int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path);
-WUR int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,const va_list a_ap);
+WUR int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
 
 // === inline methods of generated structures ==================================
 

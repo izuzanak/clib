@@ -129,7 +129,7 @@ string_s:trace_id
 sd_conf_record_s:record
 sd_conf_trace_data_s:header
 sd_conf_mmap_s:trace
-ui:timestamp_div
+lli:timestamp_div
 sd_conf_trace_data_s:timestamp
 >
 sd_conf_trace_s;

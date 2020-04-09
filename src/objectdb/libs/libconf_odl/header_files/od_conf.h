@@ -24,9 +24,6 @@ include "cl_validator.h"
 #define ERROR_OBJECTDB_CONF_READ_ERROR 2
 #define ERROR_OBJECTDB_CONF_PARSE_ERROR 3
 #define ERROR_OBJECTDB_CONF_INVALID_CONFIGURATION 4
-#define ERROR_OBJECTDB_CONF_NON_UNIQUE_RECORD_ID 5
-#define ERROR_OBJECTDB_CONF_NON_UNIQUE_SEGMENT_ID 6
-#define ERROR_OBJECTDB_CONF_NON_UNIQUE_TRACE_ID 7
 
 // === constants and definitions ===============================================
 

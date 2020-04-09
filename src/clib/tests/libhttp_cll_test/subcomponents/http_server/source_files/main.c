@@ -24,14 +24,14 @@ int http_comm_s_create(http_comm_s *this,const char *a_ip,unsigned short a_port)
     throw_error(HTTP_COMM_SERVER_CREATE_ERROR);
   }
 
-//#ifdef CLIB_WITH_OPENSSL
-//  if (tcp_server_s_init_ssl(&this->server.server,
-//    "tests/libchannel_cll_test/resources/mycert.pem",
-//    "tests/libchannel_cll_test/resources/mycert.pem"))
-//  {
-//    throw_error(HTTP_COMM_SERVER_INIT_SSL_ERROR);
-//  }
-//#endif
+#ifdef CLIB_WITH_OPENSSL
+  if (tcp_server_s_init_ssl(&this->server.server,
+    "tests/libhttp_cll_test/resources/mycert.pem",
+    "tests/libhttp_cll_test/resources/mycert.pem"))
+  {
+    throw_error(HTTP_COMM_SERVER_INIT_SSL_ERROR);
+  }
+#endif
 
   if(epoll_s_fd_callback(&this->epoll,&this->server.server.epoll_fd,
         EPOLLIN | EPOLLPRI,http_comm_s_fd_event,this,0))
@@ -71,19 +71,19 @@ int http_comm_s_conn_request(void *a_http_comm,unsigned a_index,int a_complete)
     // FIXME debug response
     CONT_INIT(bc_array_s,buffer);
     bc_array_s_append_ptr(&buffer,
-  "HTTP/1.1 200 OK\r\n"
-  "Date: Mon, 27 Jul 2009 12:28:53 GMT\r\n"
-  "Server: Apache/2.2.14 (Win32)\r\n"
-  "Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\r\n"
-  "Content-Length: 55\r\n"
-  "Content-Type: text/html\r\n"
-  "Connection: close\r\n"
-  "\r\n"
-  "<html>\r\n"
-  "<body>\r\n"
-  "<h1>Hello, World!</h1>\r\n"
-  "</body>\r\n"
-  "</html>\r\n");
+"HTTP/1.1 200 OK\r\n"
+"Date: Mon, 27 Jul 2009 12:28:53 GMT\r\n"
+"Server: Apache/2.2.14 (Win32)\r\n"
+"Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\r\n"
+"Content-Length: 55\r\n"
+"Content-Type: text/html\r\n"
+"Connection: close\r\n"
+"\r\n"
+"<html>\r\n"
+"<body>\r\n"
+"<h1>Hello, World!</h1>\r\n"
+"</body>\r\n"
+"</html>\r\n");
 
     tcp_conn_s *tcp_conn = tcp_conn_list_s_at(&this->server.server.conn_list,a_index);
 

@@ -415,7 +415,7 @@ int sd_daemon_s_run(sd_daemon_s *this)
 //  }
 //}/*}}}*/
 
-int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,const va_list a_ap)
+int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap)
 {/*{{{*/
   sd_daemon_s *this = (sd_daemon_s *)a_sd_daemon;
 

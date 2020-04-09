@@ -1141,7 +1141,7 @@ state_22_label:
 
 }/*}}}*/
 
-unsigned http_conn_s_decode_url(char *a_ptr,char *a_ptr_end)
+unsigned http_conn_s_decode_url(char *a_ptr,const char *a_ptr_end)
 {/*{{{*/
   char *i_ptr = a_ptr;
   char *o_ptr = a_ptr;

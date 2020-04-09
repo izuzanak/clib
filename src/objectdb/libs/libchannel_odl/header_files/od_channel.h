@@ -52,7 +52,7 @@ include "cl_channel.h"
 #define OD_CHANNEL_PING_PERIOD {5,0}
 #define OD_CHANNEL_PING_TIMEOUT {30,0}
 
-typedef int (*od_channel_cbreq_t)(void *a_object,unsigned a_index,unsigned a_type,const va_list a_ap);
+typedef int (*od_channel_cbreq_t)(void *a_object,unsigned a_index,unsigned a_type,va_list a_ap);
 
 // === constants and definitions ===============================================
 
