@@ -3,7 +3,7 @@
 include "cl_process.h"
 @end
 
-// === methods of structure process_s =======================================
+// === methods of structure process_s ==========================================
 
 int process_s_check_dir(const char *a_dir)
 {/*{{{*/

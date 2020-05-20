@@ -83,14 +83,6 @@ include "cl_time.h"
 #define ERROR_RTC_READ_TIME_ERROR 2
 #define ERROR_RTC_WRITE_TIME_ERROR 3
 
-// === constants and definitions ===============================================
-
-enum
-{/*{{{*/
-  EPOLL_FD_UNUSED  = -1,
-  EPOLL_FD_REMOVED = -2,
-};/*}}}*/
-
 // === definition of structure fd_s ============================================
 
 typedef int fd_s;

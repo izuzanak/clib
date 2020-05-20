@@ -188,9 +188,9 @@ int http_server_s_fds(http_server_s *this,pollfd_array_s *a_trg)
   a_trg->used = 0;
 
   // - prepare file descriptor sets -
-  fd_set rs; FD_ZERO(&rs);
-  fd_set ws; FD_ZERO(&ws);
-  fd_set es; FD_ZERO(&es);
+  fd_set rs; FD_ZERO(&rs); // NOLINT(readability-isolate-declaration)
+  fd_set ws; FD_ZERO(&ws); // NOLINT(readability-isolate-declaration)
+  fd_set es; FD_ZERO(&es); // NOLINT(readability-isolate-declaration)
 
   // - ERROR -
 #if MHD_VERSION <= 0x00093300

@@ -287,6 +287,13 @@ void test_string()
   cassert(strcmp(buffer.data,"\"Hello\\nthere\\nworld!\\n\"") == 0);
 #endif
 
+  // - string_s_set_format -
+  string_s_set_format(&string_0,
+      "Longer than %d bytes ================================================================================================================================",
+      128);
+  cassert(strcmp(string_0.data,
+        "Longer than 128 bytes ================================================================================================================================") == 0);
+
   // - string_s_clear -
   string_s_clear(&string_1);
   cassert(!string_s_compare(&string_0,&string_1));

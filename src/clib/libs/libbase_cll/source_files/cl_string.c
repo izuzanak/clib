@@ -27,8 +27,7 @@ void string_s_set_format(string_s *this,const char *a_format,...)
 
   if (length >= init_size)
   {
-    cfree(this->data);
-    this->data = (char *)cmalloc(this->size*sizeof(char));
+    this->data = crealloc(this->data,this->size*sizeof(char));
 
     va_start(ap,a_format);
     vsnprintf(this->data,this->size,a_format,ap);

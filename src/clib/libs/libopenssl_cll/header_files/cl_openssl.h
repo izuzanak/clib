@@ -167,9 +167,9 @@ static inline int ssl_context_s_create_client(ssl_context_s *this)
   ssl_context_s_clear(this);
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-    const SSL_METHOD *method = TLS_client_method();
+  const SSL_METHOD *method = TLS_client_method();
 #else
-    const SSL_METHOD *method = TLSv1_2_client_method();
+  const SSL_METHOD *method = TLSv1_2_client_method();
 #endif
 
   // - ERROR -

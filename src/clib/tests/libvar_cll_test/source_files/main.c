@@ -507,7 +507,7 @@ void test_register_type()
   g_type_person = loc_s_register_type(
     loc_s_person_clear,
     loc_s_person_order,
-#if OPTION_TO_STRING == ENABLED
+#if OPTION_TO_STRING == ENABLED // NOLINT(readability-redundant-preprocessor)
     loc_s_person_to_string,
 #else
     NULL,

@@ -287,6 +287,7 @@ static inline int file_s_seek(file_s *this,long a_offset,int a_whence)
 
 static inline int file_s_tell(file_s *this,long *a_offset)
 {/*{{{*/
+  debug_assert(*this != NULL);
 
   // - ERROR -
   if ((*a_offset = ftell(*this)) < 0)

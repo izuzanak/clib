@@ -27,7 +27,7 @@ include "cl_logger.h"
 #define ERROR_PROCESS_RUN_FILE_ALREADY_EXIST 4
 #define ERROR_PROCESS_RUN_FILE_CREATE_ERROR 5
 
-// === definition of structure process_s ====================================
+// === definition of structure process_s =======================================
 
 typedef struct process_s
 {
@@ -53,7 +53,7 @@ static inline void process_s_to_string(const process_s *this,bc_array_s *a_trg);
 WUR libprocess_cll_EXPORT int process_s_check_dir(const char *a_dir);
 WUR libprocess_cll_EXPORT int process_s_create(process_s *this,const char *a_name);
 
-// === inline methods of structure process_s ================================
+// === inline methods of structure process_s ===================================
 
 static inline void process_s_init(process_s *this)
 {/*{{{*/

@@ -85,7 +85,7 @@ void execute_tests(char **a_argv,const char *a_test_name,
         // - test was not found -
         if (n_ptr >= n_ptr_end)
         {
-          fprintf(stderr,"Cannot fount test with name: %s\n",*a_ptr);
+          fprintf(stderr,"Cannot found test with name: %s\n",*a_ptr);
           cassert(0);
         }
       }
