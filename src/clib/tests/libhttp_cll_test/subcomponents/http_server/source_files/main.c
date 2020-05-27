@@ -24,14 +24,14 @@ int http_comm_s_create(http_comm_s *this,const char *a_ip,unsigned short a_port)
     throw_error(HTTP_COMM_SERVER_CREATE_ERROR);
   }
 
-#ifdef CLIB_WITH_OPENSSL
-  if (tcp_server_s_init_ssl(&this->server.server,
-    "tests/libhttp_cll_test/resources/mycert.pem",
-    "tests/libhttp_cll_test/resources/mycert.pem"))
-  {
-    throw_error(HTTP_COMM_SERVER_INIT_SSL_ERROR);
-  }
-#endif
+//#ifdef CLIB_WITH_OPENSSL
+//  if (tcp_server_s_init_ssl(&this->server.server,
+//    "tests/libhttp_cll_test/resources/mycert.pem",
+//    "tests/libhttp_cll_test/resources/mycert.pem"))
+//  {
+//    throw_error(HTTP_COMM_SERVER_INIT_SSL_ERROR);
+//  }
+//#endif
 
   if(epoll_s_fd_callback(&this->epoll,&this->server.server.epoll_fd,
         EPOLLIN | EPOLLPRI,http_comm_s_fd_event,this,0))
@@ -48,7 +48,7 @@ int http_comm_s_run(http_comm_s *this)
   {
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,32,-1)))
+    if ((err = epoll_s_wait(&this->epoll,-1)))
     {
       if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
       {
@@ -139,7 +139,7 @@ int main(int argc,char **argv)
 
   cassert(signal_s_simple_handler(signal_handler) == 0);
 
-  const char *address = "127.0.0.1";
+  const char *address = "192.168.3.6";
   const unsigned short port = 8001;
 
   CONT_INIT(http_comm_s,comm);

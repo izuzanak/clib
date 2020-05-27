@@ -397,7 +397,7 @@ void test_epoll()
   //cassert(epoll_s_fd(&epoll,stream_s_fd(&pipe),EPOLLIN | EPOLLPRI) == 0);
 
   //// - epoll_s_wait -
-  //cassert(epoll_s_wait(&epoll,16,-1) == 0);
+  //cassert(epoll_s_wait(&epoll,-1) == 0);
   //UI_ARRAY_S_TO_BUFFER(&epoll.revents);
   //puts(buffer.data);
 

@@ -79,7 +79,7 @@ int od_daemon_s_run(od_daemon_s *this)
 
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,1,-1)))
+    if ((err = epoll_s_wait(&this->epoll,-1)))
     {
       if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
       {

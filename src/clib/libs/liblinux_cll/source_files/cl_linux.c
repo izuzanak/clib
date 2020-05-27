@@ -556,24 +556,16 @@ int epoll_s_fd_update(epoll_s *this,
   return 0;
 }/*}}}*/
 
-int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout)
+int epoll_s_wait(epoll_s *this,int a_timeout)
 {/*{{{*/
+  struct epoll_event event;
 
   // - call epoll_wait -
-  struct epoll_event stack_events[32];
-  struct epoll_event *events = a_max_events <= 32 ? stack_events :
-    (struct epoll_event *)cmalloc(a_max_events*sizeof(struct epoll_event));
-
-  int count = epoll_wait(this->fd,events,a_max_events,a_timeout);
+  int count = epoll_wait(this->fd,&event,1,a_timeout);
 
   // - ERROR -
   if (count == -1)
   {
-    if (events != stack_events)
-    {
-      cfree(events);
-    }
-
     // - interrupted by signal -
     if (errno == EINTR)
     {
@@ -583,36 +575,22 @@ int epoll_s_wait(epoll_s *this,int a_max_events,int a_timeout)
     throw_error(EPOLL_WAIT_ERROR);
   }
 
-  // - process fd events -
+  // - process fd event -
   if (count > 0)
   {
-    struct epoll_event *e_ptr = events;
-    struct epoll_event *e_ptr_end = e_ptr + count;
-    do {
-      unsigned fd = e_ptr->data.fd;
+    unsigned fd = event.data.fd;
 
-      // - check event callback -
-      epoll_callback_s *callback = &this->fd_events.data[fd].callback;
-      if (callback->function != NULL)
+    // - check event callback -
+    epoll_callback_s *callback = &this->fd_events.data[fd].callback;
+
+    if (callback->function != NULL)
+    {
+      // - call event callback -
+      if (((epoll_fd_callback_t)callback->function)(callback->object,callback->index,&event,this))
       {
-        // - call event callback -
-        if (((epoll_fd_callback_t)callback->function)(callback->object,callback->index,e_ptr,this))
-        {
-          if (events != stack_events)
-          {
-            cfree(events);
-          }
-
-          throw_error(EPOLL_FD_CALLBACK_ERROR);
-        }
+        throw_error(EPOLL_FD_CALLBACK_ERROR);
       }
-
-    } while(++e_ptr < e_ptr_end);
-  }
-
-  if (events != stack_events)
-  {
-    cfree(events);
+    }
   }
 
   return 0;

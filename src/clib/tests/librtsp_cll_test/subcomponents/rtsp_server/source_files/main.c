@@ -133,7 +133,7 @@ int main(int argc,char **argv)
   do {
 
     // - wait on events -
-    cassert(epoll_s_wait(&epoll,32,-1) == 0);
+    cassert(epoll_s_wait(&epoll,-1) == 0);
   } while(
   //server.conn_list.first_idx != c_idx_not_exist
   1

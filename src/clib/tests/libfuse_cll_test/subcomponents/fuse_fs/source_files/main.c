@@ -251,7 +251,7 @@ int main(int argc,char **argv)
 
       // - wait on events -
       int err;
-      if ((err = epoll_s_wait(&epoll,16,500)))
+      if ((err = epoll_s_wait(&epoll,500)))
       {
         cassert(err == ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED);
       }

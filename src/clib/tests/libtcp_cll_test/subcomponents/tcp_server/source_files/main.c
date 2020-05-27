@@ -26,14 +26,14 @@ int tcp_comm_s_create(tcp_comm_s *this,const char *a_ip,unsigned short a_port)
     throw_error(TCP_COMM_SERVER_CREATE_ERROR);
   }
 
-#ifdef CLIB_WITH_OPENSSL
-  if (tcp_server_s_init_ssl(&this->server,
-    "tests/libchannel_cll_test/resources/mycert.pem",
-    "tests/libchannel_cll_test/resources/mycert.pem"))
-  {
-    throw_error(TCP_COMM_SERVER_INIT_SSL_ERROR);
-  }
-#endif
+//#ifdef CLIB_WITH_OPENSSL
+//  if (tcp_server_s_init_ssl(&this->server,
+//    "tests/libchannel_cll_test/resources/mycert.pem",
+//    "tests/libchannel_cll_test/resources/mycert.pem"))
+//  {
+//    throw_error(TCP_COMM_SERVER_INIT_SSL_ERROR);
+//  }
+//#endif
 
   if(epoll_s_fd_callback(&this->epoll,&this->server.epoll_fd,EPOLLIN | EPOLLPRI,tcp_comm_s_fd_event,this,0))
   {
@@ -49,7 +49,7 @@ int tcp_comm_s_run(tcp_comm_s *this)
   {
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,32,-1)))
+    if ((err = epoll_s_wait(&this->epoll,-1)))
     {
       if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
       {

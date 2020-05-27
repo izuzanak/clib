@@ -74,7 +74,7 @@ void rtsp_recorder_s_run(rtsp_recorder_s *this)
 
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,32,-1)))
+    if ((err = epoll_s_wait(&this->epoll,-1)))
     {
       cassert(err == ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED);
     }

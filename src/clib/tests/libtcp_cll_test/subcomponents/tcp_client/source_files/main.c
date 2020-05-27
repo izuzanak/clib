@@ -52,12 +52,12 @@ int tcp_comm_s_create(tcp_comm_s *this,
         throw_error(TCP_COMM_CONN_CREATE_ERROR);
       }
 
-#ifdef CLIB_WITH_OPENSSL
-      if (tcp_conn_s_init_ssl(&client->connection))
-      {
-        throw_error(TCP_COMM_CONN_INIT_SSL_ERROR);
-      }
-#endif
+//#ifdef CLIB_WITH_OPENSSL
+//      if (tcp_conn_s_init_ssl(&client->connection))
+//      {
+//        throw_error(TCP_COMM_CONN_INIT_SSL_ERROR);
+//      }
+//#endif
 
       // - register epoll fd events -
       if (epoll_s_fd_callback(&this->epoll,&client->connection.epoll_fd,EPOLLIN | EPOLLPRI,tcp_comm_s_client_fd_event,this,client_idx))
@@ -88,7 +88,7 @@ int tcp_comm_s_run(tcp_comm_s *this)
   {
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,32,-1)))
+    if ((err = epoll_s_wait(&this->epoll,-1)))
     {
       if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
       {
@@ -262,7 +262,7 @@ int main(int argc,char **argv)
 
   CONT_INIT(tcp_comm_s,comm);
 
-  cassert(tcp_comm_s_create(&comm,10,server_ips,server_ports) == 0);
+  cassert(tcp_comm_s_create(&comm,32,server_ips,server_ports) == 0);
   cassert(tcp_comm_s_run(&comm) == 0);
   tcp_comm_s_clear(&comm);
 
