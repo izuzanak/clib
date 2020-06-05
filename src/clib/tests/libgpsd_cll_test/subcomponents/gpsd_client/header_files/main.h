@@ -20,7 +20,6 @@ struct
 <
 gpsd_conn_s:connection
 bc_array_s:buffer
-epoll_s:epoll
 >
 gpsd_client_s;
 @end

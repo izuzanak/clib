@@ -101,7 +101,7 @@ WUR libtcp_cll_EXPORT int tcp_conn_s_init_ssl(tcp_conn_s *this);
 #endif
 WUR int tcp_conn_s_recv_msg(tcp_conn_s *this);
 WUR int tcp_conn_s_send_msg(tcp_conn_s *this);
-WUR libtcp_cll_EXPORT int tcp_conn_s_fd_event(tcp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libtcp_cll_EXPORT int tcp_conn_s_fd_event(tcp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event);
 WUR static inline int tcp_conn_s_schedule_message_var(tcp_conn_s *this,var_s a_data_var);
 WUR static inline int tcp_conn_s_schedule_message(tcp_conn_s *this,bc_array_s *a_message);
 
@@ -140,8 +140,8 @@ WUR libtcp_cll_EXPORT int tcp_server_s_create(tcp_server_s *this,
 #ifdef CLIB_WITH_OPENSSL
 WUR libtcp_cll_EXPORT int tcp_server_s_init_ssl(tcp_server_s *this,const char *a_cert_file,const char *a_pkey_file);
 #endif
-WUR libtcp_cll_EXPORT int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR libtcp_cll_EXPORT int tcp_server_s_conn_fd_event(void *a_tcp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libtcp_cll_EXPORT int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR libtcp_cll_EXPORT int tcp_server_s_conn_fd_event(void *a_tcp_server,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === definition of global functions ==========================================
 

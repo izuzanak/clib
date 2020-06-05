@@ -56,7 +56,6 @@ struct
 <
 channel_client_list_s:client_list
 bc_array_s:buffer
-epoll_s:epoll
 >
 channel_comm_s;
 @end
@@ -64,8 +63,8 @@ channel_comm_s;
 WUR int channel_comm_s_create(channel_comm_s *this,
   unsigned a_count,const char **a_server_ips,const usi *a_server_ports);
 WUR int channel_comm_s_run(channel_comm_s *this);
-WUR int channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR int channel_comm_s_client_fd_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR int channel_comm_s_client_time_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR int channel_comm_s_client_fd_event(void *a_channel_comm,unsigned a_index,epoll_event_s *a_epoll_event);
 WUR int channel_comm_s_message(void *a_channel_comm,unsigned a_index,const bc_array_s *a_message);
 
 // === inline methods of generated structures ==================================

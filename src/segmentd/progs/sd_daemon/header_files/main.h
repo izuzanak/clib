@@ -71,7 +71,6 @@ sd_channel_watches_s:channel_watches
 bi:update_watches
 
 bc_array_s:buffer
-epoll_s:epoll
 >
 sd_daemon_s;
 @end

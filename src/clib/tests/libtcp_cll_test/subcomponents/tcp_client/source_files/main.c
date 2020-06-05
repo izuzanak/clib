@@ -4,6 +4,7 @@ include "main.h"
 @end
 
 volatile int g_terminate = 0;
+epoll_s *g_epoll;
 
 // === methods of generated structures =========================================
 
@@ -30,7 +31,6 @@ methods tcp_comm_s
 int tcp_comm_s_create(tcp_comm_s *this,
   unsigned a_count,const char **a_server_ips,const usi *a_server_ports)
 {/*{{{*/
-  epoll_s_create(&this->epoll,0);
 
   // - create client objects -
   if (a_count != 0)
@@ -60,7 +60,7 @@ int tcp_comm_s_create(tcp_comm_s *this,
 //#endif
 
       // - register epoll fd events -
-      if (epoll_s_fd_callback(&this->epoll,&client->connection.epoll_fd,EPOLLIN | EPOLLPRI,tcp_comm_s_client_fd_event,this,client_idx))
+      if (epoll_s_fd_callback(&client->connection.epoll_fd,EPOLLIN | EPOLLPRI,tcp_comm_s_client_fd_event,this,client_idx))
       {
         tcp_client_list_s_remove(&this->client_list,client_idx);
 
@@ -69,7 +69,7 @@ int tcp_comm_s_create(tcp_comm_s *this,
 
       // - register epoll timer -
       struct itimerspec itimerspec = {{0,100000000},{0,1}};
-      if (epoll_s_timer_callback(&this->epoll,&client->epoll_timer,&itimerspec,0,tcp_comm_s_client_time_event,this,client_idx))
+      if (epoll_s_timer_callback(&client->epoll_timer,&itimerspec,0,tcp_comm_s_client_time_event,this,client_idx))
       {
         tcp_client_list_s_remove(&this->client_list,client_idx);
 
@@ -88,7 +88,7 @@ int tcp_comm_s_run(tcp_comm_s *this)
   {
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,-1)))
+    if ((err = epoll_s_wait(g_epoll,-1)))
     {
       if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
       {
@@ -100,9 +100,8 @@ int tcp_comm_s_run(tcp_comm_s *this)
   return 0;
 }/*}}}*/
 
-int tcp_comm_s_client_time_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int tcp_comm_s_client_time_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
-  (void)a_epoll;
 
   // - read timer expiration counter -
   uint64_t timer_exps;
@@ -130,12 +129,12 @@ int tcp_comm_s_client_time_event(void *a_tcp_comm,unsigned a_index,epoll_event_s
   return 0;
 }/*}}}*/
 
-int tcp_comm_s_client_fd_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int tcp_comm_s_client_fd_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   tcp_comm_s *this = (tcp_comm_s *)a_tcp_comm;
   tcp_client_s *client = &this->client_list.data[a_index].object;
 
-  if (tcp_conn_s_fd_event(&client->connection,0,a_epoll_event,a_epoll))
+  if (tcp_conn_s_fd_event(&client->connection,0,a_epoll_event))
   {
     tcp_client_s_clear(client);
     tcp_client_list_s_remove(&this->client_list,a_index);
@@ -175,6 +174,11 @@ void signal_handler(int a_signum)
   __sync_add_and_fetch(&g_terminate,1);
 }/*}}}*/
 
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
+}/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -186,85 +190,91 @@ int main(int argc,char **argv)
   libtcp_cll_init();
   libopenssl_cll_init();
 
-  cassert(signal_s_simple_handler(signal_handler) == 0);
+  {
+    cassert(signal_s_simple_handler(signal_handler) == 0);
 
-  const char *server_ips[] =
-  {/*{{{*/
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-    "127.0.0.1",
-  };/*}}}*/
+    const char *server_ips[] =
+    {/*{{{*/
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+      "127.0.0.1",
+    };/*}}}*/
 
-  const usi server_ports[] =
-  {/*{{{*/
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-    8001,
-  };/*}}}*/
+    const usi server_ports[] =
+    {/*{{{*/
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+      8001,
+    };/*}}}*/
 
-  CONT_INIT(tcp_comm_s,comm);
+    CONT_INIT_CLEAR(epoll_s,epoll);
+    epoll_s_create(&epoll,0);
 
-  cassert(tcp_comm_s_create(&comm,32,server_ips,server_ports) == 0);
-  cassert(tcp_comm_s_run(&comm) == 0);
-  tcp_comm_s_clear(&comm);
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
+
+    CONT_INIT_CLEAR(tcp_comm_s,comm);
+    cassert(tcp_comm_s_create(&comm,32,server_ips,server_ports) == 0);
+    cassert(tcp_comm_s_run(&comm) == 0);
+  }
 
   libopenssl_cll_clear();
   libtcp_cll_clear();

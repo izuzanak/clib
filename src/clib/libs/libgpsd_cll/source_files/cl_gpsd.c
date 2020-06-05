@@ -40,7 +40,7 @@ pointer_tree_s g_gpsd_json_string_map;
 methods gpsd_conn_s
 @end
 
-int gpsd_conn_s_create(gpsd_conn_s *this,epoll_s *a_epoll,
+int gpsd_conn_s_create(gpsd_conn_s *this,
   const char *a_server_ip,unsigned short a_server_port,
   cl_gpsd_cbreq_t a_gpsd_callback,
   void *a_cb_object,unsigned a_cb_index)
@@ -61,7 +61,7 @@ int gpsd_conn_s_create(gpsd_conn_s *this,epoll_s *a_epoll,
 
   // - register epoll timer -
   struct itimerspec itimerspec = {{0,0},{0,1}};
-  if (epoll_s_timer_callback(a_epoll,&this->epoll_timer,&itimerspec,0,gpsd_conn_s_connect_time_event,this,0))
+  if (epoll_s_timer_callback(&this->epoll_timer,&itimerspec,0,gpsd_conn_s_connect_time_event,this,0))
   {
     throw_error(GPSD_CLIENT_EPOLL_ERROR);
   }
@@ -247,7 +247,7 @@ int gpsd_conn_s_conn_recv(void *a_gpsd_conn,unsigned a_index,bc_array_s *a_messa
   return 0;
 }/*}}}*/
 
-int gpsd_conn_s_fd_event(void *a_gpsd_conn,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int gpsd_conn_s_fd_event(void *a_gpsd_conn,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
 
@@ -256,13 +256,13 @@ int gpsd_conn_s_fd_event(void *a_gpsd_conn,unsigned a_index,epoll_event_s *a_epo
   // - store connecting state -
   int connecting = this->connection.connecting;
 
-  if (tcp_conn_s_fd_event(&this->connection,0,a_epoll_event,a_epoll))
+  if (tcp_conn_s_fd_event(&this->connection,0,a_epoll_event))
   {
     tcp_conn_s_clear(&this->connection);
 
     // - register epoll timer -
     struct itimerspec itimerspec = {{0,0},{0,500000000}};
-    if (epoll_s_timer_callback(a_epoll,&this->epoll_timer,&itimerspec,0,gpsd_conn_s_connect_time_event,this,0))
+    if (epoll_s_timer_callback(&this->epoll_timer,&itimerspec,0,gpsd_conn_s_connect_time_event,this,0))
     {
       throw_error(GPSD_CLIENT_EPOLL_ERROR);
     }
@@ -291,7 +291,7 @@ int gpsd_conn_s_fd_event(void *a_gpsd_conn,unsigned a_index,epoll_event_s *a_epo
   return 0;
 }/*}}}*/
 
-int gpsd_conn_s_connect_time_event(void *a_gpsd_conn,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int gpsd_conn_s_connect_time_event(void *a_gpsd_conn,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
 
@@ -306,11 +306,11 @@ int gpsd_conn_s_connect_time_event(void *a_gpsd_conn,unsigned a_index,epoll_even
 
   if (tcp_conn_s_create_client(&this->connection,
         this->server_ip.data,this->server_port,gpsd_conn_s_conn_recv,NULL,this,0) ||
-      epoll_s_fd_callback(a_epoll,&this->connection.epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,gpsd_conn_s_fd_event,this,0))
+      epoll_s_fd_callback(&this->connection.epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,gpsd_conn_s_fd_event,this,0))
   {
     // - register epoll timer -
     struct itimerspec itimerspec = {{0,0},{0,500000000}};
-    if (epoll_s_timer_callback(a_epoll,&this->epoll_timer,&itimerspec,0,gpsd_conn_s_connect_time_event,this,0))
+    if (epoll_s_timer_callback(&this->epoll_timer,&itimerspec,0,gpsd_conn_s_connect_time_event,this,0))
     {
       throw_error(GPSD_CLIENT_EPOLL_ERROR);
     }

@@ -1573,7 +1573,7 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
           {
             throw_error(HTTP_CONN_CALLBACK_ERROR);
           }
-          
+
           // - update receive size -
           conn->receive_size += a_message->used;
 

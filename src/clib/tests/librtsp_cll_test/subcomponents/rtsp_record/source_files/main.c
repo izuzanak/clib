@@ -4,6 +4,7 @@ include "main.h"
 @end
 
 volatile int g_terminate = 0;
+epoll_s *g_epoll;
 
 // === methods of generated structures =========================================
 
@@ -31,7 +32,6 @@ int rtsp_recorder_s_create(rtsp_recorder_s *this,const char *a_base_dir,unsigned
   const char **a_server_ips,const usi *a_server_ports,const char **a_media,const char **a_file_names)
 {/*{{{*/
   string_s_set_ptr(&this->base_dir,a_base_dir);
-  epoll_s_create(&this->epoll,0);
 
   if (a_count != 0)
   {
@@ -57,7 +57,7 @@ int rtsp_recorder_s_create(rtsp_recorder_s *this,const char *a_base_dir,unsigned
 
       // - schedule reconnect timer-
       struct itimerspec itimerspec = {{0,0},{0,1}};
-      if (epoll_s_timer_callback(&this->epoll,&record->epoll_timer,&itimerspec,0,rtsp_recorder_s_record_time_event,this,record_idx))
+      if (epoll_s_timer_callback(&record->epoll_timer,&itimerspec,0,rtsp_recorder_s_record_time_event,this,record_idx))
       {
         throw_error(RECORDER_EPOLL_ERROR);
       }
@@ -70,21 +70,21 @@ int rtsp_recorder_s_create(rtsp_recorder_s *this,const char *a_base_dir,unsigned
 
 void rtsp_recorder_s_run(rtsp_recorder_s *this)
 {/*{{{*/
+  (void)this;
+
   do {
 
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,-1)))
+    if ((err = epoll_s_wait(g_epoll,-1)))
     {
       cassert(err == ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED);
     }
   } while(g_terminate == 0);
 }/*}}}*/
 
-int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
-  (void)a_epoll;
-
   debug_message_6(fprintf(stderr,"rtsp_recorder_s_record_time_event: %u\n",a_index));
 
   // - read timer expiration counter -
@@ -112,7 +112,7 @@ int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,epo
 
       // - schedule next reconnect try timer -
       struct itimerspec itimerspec = {{0,0},{5,0}};
-      if (epoll_s_timer_callback(&this->epoll,&record->epoll_timer,&itimerspec,0,rtsp_recorder_s_record_time_event,this,a_index))
+      if (epoll_s_timer_callback(&record->epoll_timer,&itimerspec,0,rtsp_recorder_s_record_time_event,this,a_index))
       {
         throw_error(RECORDER_EPOLL_ERROR);
       }
@@ -121,7 +121,7 @@ int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,epo
     }
 
     // - register client fd -
-    if (epoll_s_fd_callback(&this->epoll,&client->epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,rtsp_recorder_s_client_fd_event,this,a_index))
+    if (epoll_s_fd_callback(&client->epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,rtsp_recorder_s_client_fd_event,this,a_index))
     {
       throw_error(RECORDER_EPOLL_ERROR);
     }
@@ -139,7 +139,7 @@ int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,epo
   return 0;
 }/*}}}*/
 
-int rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   debug_message_6(fprintf(stderr,"rtsp_recorder_s_client_fd_event: %u\n",a_index));
 
@@ -147,7 +147,7 @@ int rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll
   rtsp_record_s *record = this->records.data + a_index;
   rtsp_client_s *client = &this->client_list.data[record->client_idx].object;
 
-  if (rtsp_client_s_fd_event(client,a_index,a_epoll_event,a_epoll))
+  if (rtsp_client_s_fd_event(client,a_index,a_epoll_event))
   {
     rtsp_client_s_clear(client);
     rtsp_client_list_s_remove(&this->client_list,a_index);
@@ -156,7 +156,7 @@ int rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll
 
     // - schedule reconnect timer-
     struct itimerspec itimerspec = {{0,0},{5,0}};
-    if (epoll_s_timer_callback(&this->epoll,&record->epoll_timer,&itimerspec,0,rtsp_recorder_s_record_time_event,this,a_index))
+    if (epoll_s_timer_callback(&record->epoll_timer,&itimerspec,0,rtsp_recorder_s_record_time_event,this,a_index))
     {
       throw_error(RECORDER_EPOLL_ERROR);
     }
@@ -227,6 +227,11 @@ void signal_handler(int a_signum)
   __sync_add_and_fetch(&g_terminate,1);
 }/*}}}*/
 
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
+}/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -236,33 +241,40 @@ int main(int argc,char **argv)
 
   memcheck_init();
 
-  cassert(signal_s_simple_handler(signal_handler) == 0);
+  {
+    cassert(signal_s_simple_handler(signal_handler) == 0);
 
-  CONT_INIT(rtsp_recorder_s,recorder);
+    CONT_INIT_CLEAR(epoll_s,epoll);
+    epoll_s_create(&epoll,0);
 
-  const char *server_ips[] = {
-    //"10.2.35.6",
-    "192.168.3.29",
-  };
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
 
-  const usi server_ports[] = {
-    //554,
-    554,
-  };
+    CONT_INIT_CLEAR(rtsp_recorder_s,recorder);
 
-  const char *media[] = {
-    //"udpstream_ch1",
-    "axis-media/media.amp",
-  };
+    const char *server_ips[] = {
+      //"10.2.35.6",
+      "192.168.3.29",
+    };
 
-  const char *file_names[] = {
-    //"10.2.35.6",
-    "192.168.3.29",
-  };
+    const usi server_ports[] = {
+      //554,
+      554,
+    };
 
-  cassert(rtsp_recorder_s_create(&recorder,"recordings",1,server_ips,server_ports,media,file_names) == 0);
-  rtsp_recorder_s_run(&recorder);
-  rtsp_recorder_s_clear(&recorder);
+    const char *media[] = {
+      //"udpstream_ch1",
+      "axis-media/media.amp",
+    };
+
+    const char *file_names[] = {
+      //"10.2.35.6",
+      "192.168.3.29",
+    };
+
+    cassert(rtsp_recorder_s_create(&recorder,"recordings",1,server_ips,server_ports,media,file_names) == 0);
+    rtsp_recorder_s_run(&recorder);
+  }
 
   memcheck_release_assert();
 

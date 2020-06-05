@@ -335,10 +335,9 @@ int channel_conn_s_send_msg(channel_conn_s *this)
   return 0;
 }/*}}}*/
 
-int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
-  (void)a_epoll;
 
   if (a_epoll_event->data.fd != this->epoll_fd.fd)
   {
@@ -503,7 +502,7 @@ int channel_server_s_init_ssl(channel_server_s *this,const char *a_cert_file,con
 }/*}}}*/
 #endif
 
-int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
 
@@ -521,7 +520,7 @@ int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_even
   }
 
   unsigned conn_idx = channel_conn_list_s_append_blank(&this->conn_list);
-  if (epoll_s_fd_callback(a_epoll,&epoll_fd,EPOLLIN | EPOLLPRI,channel_server_s_conn_fd_event,this,conn_idx))
+  if (epoll_s_fd_callback(&epoll_fd,EPOLLIN | EPOLLPRI,channel_server_s_conn_fd_event,this,conn_idx))
   {
     epoll_fd_s_clear(&epoll_fd);
     channel_conn_list_s_remove(&this->conn_list,conn_idx);
@@ -529,7 +528,6 @@ int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_even
     throw_error(CHANNEL_SERVER_ACCEPT_ERROR);
   }
 
-  epoll_fd.epoll = a_epoll;
   channel_conn_s_create(&this->conn_list.data[conn_idx].object,
       &epoll_fd,this->conn_message_callback,this->cb_object,conn_idx);
 
@@ -562,12 +560,12 @@ int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_even
   return 0;
 }/*}}}*/
 
-int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   channel_server_s *this = (channel_server_s *)a_channel_server;
   channel_conn_s *conn = &this->conn_list.data[a_index].object;
 
-  if (channel_conn_s_fd_event(conn,0,a_epoll_event,a_epoll))
+  if (channel_conn_s_fd_event(conn,0,a_epoll_event))
   {
     // - call conn_drop_callback -
     if (((channel_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index))

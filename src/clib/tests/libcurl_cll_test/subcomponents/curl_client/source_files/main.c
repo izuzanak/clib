@@ -4,6 +4,7 @@ include "main.h"
 @end
 
 volatile int g_terminate = 0;
+epoll_s *g_epoll;
 
 // === global functions ========================================================
 
@@ -15,10 +16,9 @@ void signal_handler(int a_signum)
   __sync_add_and_fetch(&g_terminate,1);
 }/*}}}*/
 
-int epoll_curl_fd_event(void *a_curl_multi,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll)
+int epoll_curl_fd_event(void *a_curl_multi,unsigned a_index,epoll_event_s *a_event)
 {/*{{{*/
   (void)a_index;
-  (void)a_epoll;
 
   debug_message_6(fprintf(stderr,"epoll_curl_fd_event\n"));
 
@@ -34,10 +34,9 @@ int curl_socket_cb(curl_multi_s *a_curl_multi,int a_what,int a_fd,unsigned a_eve
 
   debug_message_6(fprintf(stderr,"curl_socket_cb\n"));
 
-  epoll_s *epoll = (epoll_s *)a_curl_multi->user_data;
-  epoll_fd_s epoll_fd = {NULL,a_fd};
+  epoll_fd_s epoll_fd = {a_fd};
 
-  return epoll_s_fd_callback(epoll,&epoll_fd,a_events,epoll_curl_fd_event,a_curl_multi,0);
+  return epoll_s_fd_callback(&epoll_fd,a_events,epoll_curl_fd_event,a_curl_multi,0);
 }/*}}}*/
 
 int curl_response_cb(curl_multi_s *a_curl_multi,curl_result_s *a_curl_result)
@@ -53,6 +52,11 @@ int curl_response_cb(curl_multi_s *a_curl_multi,curl_result_s *a_curl_result)
   return 0;
 }/*}}}*/
 
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
+}/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -63,14 +67,17 @@ int main(int argc,char **argv)
   memcheck_init();
   libcurl_cll_init();
 
-  cassert(signal_s_simple_handler(signal_handler) == 0);
-
   {
+    cassert(signal_s_simple_handler(signal_handler) == 0);
+
     CONT_INIT_CLEAR(epoll_s,epoll);
     epoll_s_create(&epoll,0);
 
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
+
     CONT_INIT_CLEAR(curl_multi_s,curl_multi);
-    cassert(curl_multi_s_create(&curl_multi,curl_socket_cb,curl_response_cb,&epoll) == 0);
+    cassert(curl_multi_s_create(&curl_multi,curl_socket_cb,curl_response_cb,NULL) == 0);
 
     unsigned idx = 0;
     do {
@@ -85,7 +92,7 @@ int main(int argc,char **argv)
     {
       // - wait on events -
       int err;
-      if ((err = epoll_s_wait(&epoll,-1)))
+      if ((err = epoll_s_wait(g_epoll,-1)))
       {
         cassert(err == ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED);
       }

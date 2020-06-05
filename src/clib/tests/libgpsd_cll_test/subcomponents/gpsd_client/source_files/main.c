@@ -4,6 +4,7 @@ include "main.h"
 @end
 
 volatile int g_terminate = 0;
+epoll_s *g_epoll;
 
 // === methods of generated structures =========================================
 
@@ -14,10 +15,9 @@ methods gpsd_client_s
 
 int gpsd_client_s_create(gpsd_client_s *this,const char *a_server_ip,usi a_server_port)
 {/*{{{*/
-  epoll_s_create(&this->epoll,0);
 
   // - create gpsd connection -
-  if (gpsd_conn_s_create(&this->connection,&this->epoll,
+  if (gpsd_conn_s_create(&this->connection,
         a_server_ip,a_server_port,
         gpsd_client_s_gpsd_callback,
         this,0))
@@ -30,11 +30,13 @@ int gpsd_client_s_create(gpsd_client_s *this,const char *a_server_ip,usi a_serve
 
 int gpsd_client_s_run(gpsd_client_s *this)
 {/*{{{*/
+  (void)this;
+
   while(!g_terminate)
   {
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,-1)))
+    if ((err = epoll_s_wait(g_epoll,-1)))
     {
       if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
       {
@@ -120,6 +122,11 @@ void signal_handler(int a_signum)
   __sync_add_and_fetch(&g_terminate,1);
 }/*}}}*/
 
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
+}/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -131,13 +138,20 @@ int main(int argc,char **argv)
   libtcp_cll_init();
   libgpsd_cll_init();
 
-  cassert(signal_s_simple_handler(signal_handler) == 0);
+  {
+    cassert(signal_s_simple_handler(signal_handler) == 0);
 
-  CONT_INIT(gpsd_client_s,gpsd_client);
+    CONT_INIT_CLEAR(epoll_s,epoll);
+    epoll_s_create(&epoll,0);
 
-  cassert(gpsd_client_s_create(&gpsd_client,"127.0.0.1",2948) == 0);
-  cassert(gpsd_client_s_run(&gpsd_client) == 0);
-  gpsd_client_s_clear(&gpsd_client);
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
+
+    CONT_INIT_CLEAR(gpsd_client_s,gpsd_client);
+
+    cassert(gpsd_client_s_create(&gpsd_client,"127.0.0.1",8001) == 0);
+    cassert(gpsd_client_s_run(&gpsd_client) == 0);
+  }
 
   libgpsd_cll_clear();
   libtcp_cll_clear();

@@ -298,10 +298,9 @@ int rtsp_client_s_recv_sdp(rtsp_client_s *this)
   return 0;
 }/*}}}*/
 
-int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
-  (void)a_epoll;
 
   if (a_epoll_event->data.fd != this->epoll_fd.fd)
   {

@@ -123,6 +123,7 @@ typedef long double ld;
 #define OPTION_TO_JSON ENABLED
 #define OPTION_FROM_JSON ENABLED
 #define OPTION_FROM_VAR ENABLED
+//#define OPTION_PERFORMANCE_TEST ENABLED
 
 // - error macros -
 #define throw_error(ERROR_ID)\

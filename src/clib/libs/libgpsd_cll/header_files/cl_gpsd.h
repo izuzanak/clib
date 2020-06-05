@@ -84,7 +84,7 @@ epoll_timer_s:epoll_timer
 gpsd_conn_s;
 @end
 
-WUR libgpsd_cll_EXPORT int gpsd_conn_s_create(gpsd_conn_s *this,epoll_s *a_epoll,
+WUR libgpsd_cll_EXPORT int gpsd_conn_s_create(gpsd_conn_s *this,
   const char *a_server_ip,unsigned short a_server_port,
   cl_gpsd_cbreq_t a_gpsd_callback,
   void *a_cb_object,unsigned a_cb_index);
@@ -92,8 +92,8 @@ WUR unsigned gpsd_conn_s_retrieve_line(bc_array_s *a_message,unsigned *a_input_i
 WUR static inline int gpsd_conn_s_message_call(gpsd_conn_s *this,unsigned a_type,...);
 WUR static inline int gpsd_conn_s_send_message(gpsd_conn_s *this,bc_array_s *a_message);
 WUR libgpsd_cll_EXPORT int gpsd_conn_s_conn_recv(void *a_gpsd_conn,unsigned a_index,bc_array_s *a_message);
-WUR libgpsd_cll_EXPORT int gpsd_conn_s_fd_event(void *a_gpsd_conn,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR libgpsd_cll_EXPORT int gpsd_conn_s_connect_time_event(void *a_gpsd_conn,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libgpsd_cll_EXPORT int gpsd_conn_s_fd_event(void *a_gpsd_conn,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR libgpsd_cll_EXPORT int gpsd_conn_s_connect_time_event(void *a_gpsd_conn,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === definition of global functions ==========================================
 

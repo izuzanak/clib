@@ -4,6 +4,7 @@ include "main.h"
 @end
 
 volatile int g_terminate = 0;
+epoll_s *g_epoll;
 
 // === methods of generated structures =========================================
 
@@ -186,11 +187,10 @@ void fuse_fs_read(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fus
   }
 }/*}}}*/
 
-int fuse_fd_event(void *a_fuse_session,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll)
+int fuse_fd_event(void *a_fuse_session,unsigned a_index,epoll_event_s *a_event)
 {/*{{{*/
   (void)a_index;
   (void)a_event;
-  (void)a_epoll;
 
   fuse_session_s *session = (fuse_session_s *)a_fuse_session;
   return fuse_session_s_process(session);
@@ -209,6 +209,11 @@ void signal_handler(int a_signum)
   }
 }/*}}}*/
 
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
+}/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -218,9 +223,9 @@ int main(int argc,char **argv)
 
   memcheck_init();
 
-  cassert(signal_s_simple_handler(signal_handler) == 0);
-
   {
+    cassert(signal_s_simple_handler(signal_handler) == 0);
+
     struct fuse_lowlevel_ops fuse_oper =
     {
       .lookup     = fuse_fs_lookup,
@@ -243,15 +248,18 @@ int main(int argc,char **argv)
     CONT_INIT_CLEAR(epoll_s,epoll);
     epoll_s_create(&epoll,0);
 
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
+
     CONT_INIT_CLEAR(epoll_fd_s,epoll_fd);
     cassert((epoll_fd.fd = dup(fuse_session_s_fd(&session))) != -1);
-    cassert(epoll_s_fd_callback(&epoll,&epoll_fd,EPOLLIN | EPOLLPRI,fuse_fd_event,&session,0) == 0);
+    cassert(epoll_s_fd_callback(&epoll_fd,EPOLLIN | EPOLLPRI,fuse_fd_event,&session,0) == 0);
 
     do {
 
       // - wait on events -
       int err;
-      if ((err = epoll_s_wait(&epoll,500)))
+      if ((err = epoll_s_wait(g_epoll,500)))
       {
         cassert(err == ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED);
       }

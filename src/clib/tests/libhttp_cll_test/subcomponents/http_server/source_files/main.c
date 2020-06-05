@@ -4,6 +4,7 @@ include "main.h"
 @end
 
 volatile int g_terminate = 0;
+epoll_s *g_epoll;
 
 // === methods of generated structures =========================================
 
@@ -14,8 +15,6 @@ methods http_comm_s
 
 int http_comm_s_create(http_comm_s *this,const char *a_ip,unsigned short a_port)
 {/*{{{*/
-  epoll_s_create(&this->epoll,0);
-
   if (http_server_s_create(&this->server,a_ip,a_port,
         http_comm_s_conn_request,
         http_comm_s_conn_response,
@@ -33,7 +32,7 @@ int http_comm_s_create(http_comm_s *this,const char *a_ip,unsigned short a_port)
 //  }
 //#endif
 
-  if(epoll_s_fd_callback(&this->epoll,&this->server.server.epoll_fd,
+  if(epoll_s_fd_callback(&this->server.server.epoll_fd,
         EPOLLIN | EPOLLPRI,http_comm_s_fd_event,this,0))
   {
     throw_error(HTTP_COMM_SERVER_EPOLL_ERROR);
@@ -44,11 +43,13 @@ int http_comm_s_create(http_comm_s *this,const char *a_ip,unsigned short a_port)
 
 int http_comm_s_run(http_comm_s *this)
 {/*{{{*/
+  (void)this;
+
   while(!g_terminate)
   {
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,-1)))
+    if ((err = epoll_s_wait(g_epoll,-1)))
     {
       if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
       {
@@ -105,11 +106,11 @@ int http_comm_s_conn_response(void *a_http_comm,unsigned a_index)
   return 0;
 }/*}}}*/
 
-int http_comm_s_fd_event(void *a_http_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int http_comm_s_fd_event(void *a_http_comm,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   http_comm_s *this = (http_comm_s *)a_http_comm;
 
-  if (tcp_server_s_fd_event(&this->server.server,a_index,a_epoll_event,a_epoll))
+  if (tcp_server_s_fd_event(&this->server.server,a_index,a_epoll_event))
   {
     throw_error(HTTP_COMM_CONN_SERVER_FD_EVENT_ERROR);
   }
@@ -127,6 +128,11 @@ void signal_handler(int a_signum)
   __sync_add_and_fetch(&g_terminate,1);
 }/*}}}*/
 
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
+}/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -137,15 +143,22 @@ int main(int argc,char **argv)
   memcheck_init();
   libtcp_cll_init();
 
-  cassert(signal_s_simple_handler(signal_handler) == 0);
+  {
+    cassert(signal_s_simple_handler(signal_handler) == 0);
 
-  const char *address = "192.168.3.6";
-  const unsigned short port = 8001;
+    const char *address = "192.168.3.6";
+    const unsigned short port = 8001;
 
-  CONT_INIT(http_comm_s,comm);
-  cassert(http_comm_s_create(&comm,address,port) == 0);
-  cassert(http_comm_s_run(&comm) == 0);
-  http_comm_s_clear(&comm);
+    CONT_INIT_CLEAR(epoll_s,epoll);
+    epoll_s_create(&epoll,0);
+
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
+
+    CONT_INIT_CLEAR(http_comm_s,comm);
+    cassert(http_comm_s_create(&comm,address,port) == 0);
+    cassert(http_comm_s_run(&comm) == 0);
+  }
 
   libtcp_cll_clear();
   memcheck_release_assert();

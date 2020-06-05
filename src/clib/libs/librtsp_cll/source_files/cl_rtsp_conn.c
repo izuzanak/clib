@@ -79,7 +79,7 @@ int rtsp_conn_s_send_resp(rtsp_conn_s *this,bc_array_s *a_msg)
     fd_s_write(&this->epoll_fd.fd,a_msg->data,a_msg->used);
 }/*}}}*/
 
-int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll)
+int rtsp_conn_s_recv_cmd(rtsp_conn_s *this)
 {/*{{{*/
   rtsp_server_s *server = (rtsp_server_s *)this->server;
   bc_array_s *msg = &this->in_msg;
@@ -297,8 +297,8 @@ this->session);
               socket_s_bind(&setup->udp_ctrl.fd,&data_in_addr) ||
               socket_s_address(&setup->udp_data.fd,&data_in_addr) ||
               socket_s_address(&setup->udp_ctrl.fd,&ctrl_in_addr) ||
-              epoll_s_fd_callback(a_epoll,&setup->udp_data,EPOLLIN | EPOLLPRI,rtsp_server_s_conn_fd_event,server,this->index) ||
-              epoll_s_fd_callback(a_epoll,&setup->udp_ctrl,EPOLLIN | EPOLLPRI,rtsp_server_s_conn_fd_event,server,this->index))
+              epoll_s_fd_callback(&setup->udp_data,EPOLLIN | EPOLLPRI,rtsp_server_s_conn_fd_event,server,this->index) ||
+              epoll_s_fd_callback(&setup->udp_ctrl,EPOLLIN | EPOLLPRI,rtsp_server_s_conn_fd_event,server,this->index))
           {
             throw_error(RTSP_CONN_UDP_SETUP_ERROR);
           }
@@ -381,7 +381,7 @@ this->session);
         }
 
         // - prepare first packet -
-        if (rtsp_conn_s_next_packet(this,a_epoll))
+        if (rtsp_conn_s_next_packet(this))
         {
           throw_error(RTSP_CONN_NEXT_PACKET_ERROR);
         }
@@ -443,7 +443,7 @@ this->session);
   return 0;
 }/*}}}*/
 
-int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
+int rtsp_conn_s_next_packet(rtsp_conn_s *this)
 {/*{{{*/
   rtsp_server_s *server = (rtsp_server_s *)this->server;
 
@@ -473,7 +473,7 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll)
   this->packet_time += RTSP_DELAY_TO_NANOSEC(delay);
 
   struct itimerspec itimerspec = {{0,0},{this->packet_time/1000000000,this->packet_time%1000000000}};
-  if (epoll_s_timer_callback(a_epoll,&this->epoll_send_timer,&itimerspec,TFD_TIMER_ABSTIME,rtsp_server_s_conn_time_event,this->server,this->index))
+  if (epoll_s_timer_callback(&this->epoll_send_timer,&itimerspec,TFD_TIMER_ABSTIME,rtsp_server_s_conn_time_event,this->server,this->index))
   {
     throw_error(RTSP_CONN_TIMER_CREATE_ERROR);
   }
@@ -571,7 +571,7 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
   return result;
 }/*}}}*/
 
-int rtsp_conn_s_process_packet(rtsp_conn_s *this,epoll_s *a_epoll)
+int rtsp_conn_s_process_packet(rtsp_conn_s *this)
 {/*{{{*/
 
   // - packet was send flag -
@@ -586,7 +586,7 @@ int rtsp_conn_s_process_packet(rtsp_conn_s *this,epoll_s *a_epoll)
   if (packet_send)
   {
     // - retrieve next packet -
-    if (rtsp_conn_s_next_packet(this,a_epoll))
+    if (rtsp_conn_s_next_packet(this))
     {
       throw_error(RTSP_CONN_NEXT_PACKET_ERROR);
     }
@@ -595,10 +595,9 @@ int rtsp_conn_s_process_packet(rtsp_conn_s *this,epoll_s *a_epoll)
   return 0;
 }/*}}}*/
 
-int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
-  (void)a_epoll;
 
   if (a_epoll_event->data.fd == this->epoll_fd.fd)
   {
@@ -609,7 +608,7 @@ int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epo
       {
         case c_rtsp_conn_state_RECV_COMMAND:
           {/*{{{*/
-            if (rtsp_conn_s_recv_cmd(this,a_epoll))
+            if (rtsp_conn_s_recv_cmd(this))
             {
               this->state = c_rtsp_conn_state_ERROR;
               throw_error(RTSP_CONN_RECEIVE_ERROR);
@@ -631,7 +630,7 @@ int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epo
         throw_error(RTSP_CONN_EPOLL_ERROR);
       }
 
-      if (rtsp_conn_s_process_packet(this,a_epoll))
+      if (rtsp_conn_s_process_packet(this))
       {
         throw_error(RTSP_CONN_PROCESS_PACKET_ERROR);
       }

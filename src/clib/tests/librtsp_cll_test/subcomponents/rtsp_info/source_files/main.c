@@ -96,7 +96,8 @@ int main(int argc,char **argv)
   cassert(signal_s_simple_handler(signal_handler) == 0);
 
   CONT_INIT(rtsp_info_s,info);
-  cassert(rtsp_info_s_create(&info,"../recordings/10.2.1.18.stream") == 0);
+  cassert(rtsp_info_s_create(&info,"recordings/192.168.3.29.stream") == 0);
+  //cassert(rtsp_info_s_create(&info,"../recordings/10.2.1.18.stream") == 0);
   //cassert(rtsp_info_s_create(&info,"../recordings/10.2.35.6.stream") == 0);
 
   do {

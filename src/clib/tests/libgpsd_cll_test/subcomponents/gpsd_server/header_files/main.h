@@ -36,7 +36,6 @@ bc_array_s:buffer
 message_queues_s:message_queues
 
 epoll_timer_s:message_timer
-epoll_s:epoll
 >
 gpsd_server_s;
 @end
@@ -44,11 +43,11 @@ gpsd_server_s;
 WUR int gpsd_server_s_create(gpsd_server_s *this,const char *a_ip,unsigned short a_port);
 void gpsd_server_s_schedule_message(gpsd_server_s *this,unsigned a_index,bc_array_s *a_buffer);
 WUR int gpsd_server_s_run(gpsd_server_s *this);
-WUR int gpsd_server_s_message_time_event(void *a_gpsd_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR int gpsd_server_s_message_time_event(void *a_gpsd_server,unsigned a_index,epoll_event_s *a_epoll_event);
 WUR int gpsd_server_s_conn_new(void *a_gpsd_server,unsigned a_index);
 WUR int gpsd_server_s_conn_drop(void *a_gpsd_server,unsigned a_index);
 WUR int gpsd_server_s_conn_recv(void *a_gpsd_server,unsigned a_index,bc_array_s *a_message);
-WUR int gpsd_server_s_fd_event(void *a_gpsd_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR int gpsd_server_s_fd_event(void *a_gpsd_server,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === inline methods of generated structures ==================================
 

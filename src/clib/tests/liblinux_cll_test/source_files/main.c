@@ -343,67 +343,6 @@ void test_epoll()
   bc_array_s_push(&buffer,'\0');\
 }/*}}}*/
 
-  CONT_INIT(regex_s,regex);
-  //regmatch_s match;
-
-  //CONT_INIT(epoll_s,epoll);
-  //EPOLL_S_TO_BUFFER(&epoll);
-  //puts(buffer.data);
-  //cassert(strcmp(buffer.data,"{fd:fd_s{-1},events:[],revents:[]}") == 0);
-
-  //// - epoll_s_create -
-  //epoll_s_create(&epoll,0);
-  //EPOLL_S_TO_BUFFER(&epoll);
-  //puts(buffer.data);
-
-  //cassert(regex_s_create(&regex,"^{fd:fd_s{[0-9]\\+},events:\\[\\],revents:\\[\\]}$") == 0);
-  //cassert(regex_s_match(&regex,buffer.data,&match));
-
-  //// - epoll_s_fd -
-  //cassert(epoll_s_fd(&epoll,0,EPOLLIN | EPOLLPRI) == 0);
-  //cassert(epoll_s_fd(&epoll,1,EPOLLIN | EPOLLPRI) == 0);
-  //cassert(epoll_s_fd(&epoll,2,EPOLLIN | EPOLLPRI) == 0);
-
-  //EPOLL_S_TO_BUFFER(&epoll);
-  //puts(buffer.data);
-
-  //cassert(regex_s_create(&regex,"^{fd:fd_s{[0-9]\\+},events:\\[3,3,3\\],revents:\\[\\]}$") == 0);
-  //cassert(regex_s_match(&regex,buffer.data,&match));
-
-  //cassert(epoll_s_fd(&epoll,0,EPOLLIN) == 0)
-  //cassert(epoll_s_fd(&epoll,1,0) == 0)
-
-  //EPOLL_S_TO_BUFFER(&epoll);
-  //puts(buffer.data);
-
-  //cassert(regex_s_create(&regex,"^{fd:fd_s{[0-9]\\+},events:\\[1,0,3\\],revents:\\[\\]}$") == 0);
-  //cassert(regex_s_match(&regex,buffer.data,&match));
-
-  //int fd = 0;
-  //while (fd < epoll.fd_events.used)
-  //{
-  //  cassert(epoll_s_fd(&epoll,fd++,0) == 0);
-  //}
-
-  //EPOLL_S_TO_BUFFER(&epoll);
-  //puts(buffer.data);
-
-  //cassert(regex_s_create(&regex,"^{fd:fd_s{[0-9]\\+},events:\\[0,0,0\\],revents:\\[\\]}$") == 0);
-  //cassert(regex_s_match(&regex,buffer.data,&match));
-
-  //CONT_INIT(pipe_s,pipe);
-  //cassert(pipe_s_popen(&pipe,"ls","r") == 0);
-
-  //cassert(epoll_s_fd(&epoll,stream_s_fd(&pipe),EPOLLIN | EPOLLPRI) == 0);
-
-  //// - epoll_s_wait -
-  //cassert(epoll_s_wait(&epoll,-1) == 0);
-  //UI_ARRAY_S_TO_BUFFER(&epoll.revents);
-  //puts(buffer.data);
-
-  //pipe_s_clear(&pipe);
-  //epoll_s_clear(&epoll);
-  regex_s_clear(&regex);
   bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/

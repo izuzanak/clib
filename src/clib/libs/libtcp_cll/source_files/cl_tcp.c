@@ -307,10 +307,9 @@ int tcp_conn_s_send_msg(tcp_conn_s *this)
   return 0;
 }/*}}}*/
 
-int tcp_conn_s_fd_event(tcp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int tcp_conn_s_fd_event(tcp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
-  (void)a_epoll;
 
   if (a_epoll_event->data.fd != this->epoll_fd.fd)
   {
@@ -477,7 +476,7 @@ int tcp_server_s_init_ssl(tcp_server_s *this,const char *a_cert_file,const char 
 }/*}}}*/
 #endif
 
-int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
 
@@ -495,7 +494,7 @@ int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_e
   }
 
   unsigned conn_idx = tcp_conn_list_s_append_blank(&this->conn_list);
-  if (epoll_s_fd_callback(a_epoll,&epoll_fd,EPOLLIN | EPOLLPRI,tcp_server_s_conn_fd_event,this,conn_idx))
+  if (epoll_s_fd_callback(&epoll_fd,EPOLLIN | EPOLLPRI,tcp_server_s_conn_fd_event,this,conn_idx))
   {
     epoll_fd_s_clear(&epoll_fd);
     tcp_conn_list_s_remove(&this->conn_list,conn_idx);
@@ -503,7 +502,6 @@ int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_e
     throw_error(TCP_SERVER_ACCEPT_ERROR);
   }
 
-  epoll_fd.epoll = a_epoll;
   tcp_conn_s_create(&this->conn_list.data[conn_idx].object,
       &epoll_fd,this->conn_recv_callback,this->conn_send_callback,this->cb_object,conn_idx);
 
@@ -536,12 +534,12 @@ int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_e
   return 0;
 }/*}}}*/
 
-int tcp_server_s_conn_fd_event(void *a_tcp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int tcp_server_s_conn_fd_event(void *a_tcp_server,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   tcp_server_s *this = (tcp_server_s *)a_tcp_server;
   tcp_conn_s *conn = &this->conn_list.data[a_index].object;
 
-  if (tcp_conn_s_fd_event(conn,0,a_epoll_event,a_epoll))
+  if (tcp_conn_s_fd_event(conn,0,a_epoll_event))
   {
     // - call conn_drop_callback -
     if (((tcp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index))

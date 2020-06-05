@@ -99,7 +99,7 @@ WUR libchannel_cll_EXPORT int channel_conn_s_init_ssl(channel_conn_s *this);
 #endif
 WUR int channel_conn_s_recv_msg(channel_conn_s *this);
 WUR int channel_conn_s_send_msg(channel_conn_s *this);
-WUR libchannel_cll_EXPORT int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libchannel_cll_EXPORT int channel_conn_s_fd_event(channel_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event);
 WUR static inline int channel_conn_s_schedule_message_var(channel_conn_s *this,var_s a_length_var,var_s a_data_var);
 WUR static inline int channel_conn_s_schedule_message(channel_conn_s *this,bc_array_s *a_message);
 
@@ -136,8 +136,8 @@ WUR libchannel_cll_EXPORT int channel_server_s_create(channel_server_s *this,
 #ifdef CLIB_WITH_OPENSSL
 WUR libchannel_cll_EXPORT int channel_server_s_init_ssl(channel_server_s *this,const char *a_cert_file,const char *a_pkey_file);
 #endif
-WUR libchannel_cll_EXPORT int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR libchannel_cll_EXPORT int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libchannel_cll_EXPORT int channel_server_s_fd_event(channel_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR libchannel_cll_EXPORT int channel_server_s_conn_fd_event(void *a_channel_server,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === definition of global functions ==========================================
 

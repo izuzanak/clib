@@ -114,7 +114,7 @@ bc_array_s:buffer
 od_channel_s;
 @end
 
-WUR libchannel_odl_EXPORT int od_channel_s_create(od_channel_s *this,const char *a_ip,unsigned short a_port,epoll_s *a_epoll,
+WUR libchannel_odl_EXPORT int od_channel_s_create(od_channel_s *this,const char *a_ip,unsigned short a_port,
     od_channel_cbreq_t a_channel_callback,
     void *a_cb_object);
 WUR static inline int od_channel_s_message_call(od_channel_s *this,unsigned a_index,unsigned a_type,...);
@@ -124,7 +124,7 @@ WUR static inline int od_channel_s_send_multi_message(od_channel_s *this,const u
 WUR int od_channel_s_conn_new(void *a_od_channel,unsigned a_index);
 WUR int od_channel_s_conn_drop(void *a_od_channel,unsigned a_index);
 WUR libchannel_odl_EXPORT int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array_s *a_message);
-WUR libchannel_odl_EXPORT int od_channel_s_fd_event(void *a_od_channel,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libchannel_odl_EXPORT int od_channel_s_fd_event(void *a_od_channel,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // -- od_channel_client_s --
 @begin
@@ -148,7 +148,7 @@ epoll_timer_s:ping_timer
 od_channel_client_s;
 @end
 
-WUR libchannel_odl_EXPORT int od_channel_client_s_create(od_channel_client_s *this,epoll_s *a_epoll,
+WUR libchannel_odl_EXPORT int od_channel_client_s_create(od_channel_client_s *this,
   const char *a_server_ip,unsigned short a_server_port,
   od_channel_cbreq_t a_channel_callback,
   void *a_cb_object,unsigned a_cb_index);
@@ -159,9 +159,9 @@ WUR static inline int od_channel_client_s_watch_path(od_channel_client_s *this,c
 WUR static inline int od_channel_client_s_set_path(od_channel_client_s *this,const char *a_path,var_s a_var);
 
 WUR libchannel_odl_EXPORT int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,const bc_array_s *a_message);
-WUR libchannel_odl_EXPORT int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR libchannel_odl_EXPORT int od_channel_client_s_connect_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR libchannel_odl_EXPORT int od_channel_client_s_ping_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libchannel_odl_EXPORT int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR libchannel_odl_EXPORT int od_channel_client_s_connect_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR libchannel_odl_EXPORT int od_channel_client_s_ping_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === definition of global functions ==========================================
 

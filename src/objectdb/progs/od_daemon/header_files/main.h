@@ -35,8 +35,6 @@ $// - temporary buffers -
 bc_array_s:buffer
 ui_array_s:indexes
 var_array_s:nodes
-
-epoll_s:epoll
 >
 od_daemon_s;
 @end

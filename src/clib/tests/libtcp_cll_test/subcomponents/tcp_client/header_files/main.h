@@ -56,7 +56,6 @@ struct
 <
 tcp_client_list_s:client_list
 bc_array_s:buffer
-epoll_s:epoll
 >
 tcp_comm_s;
 @end
@@ -64,8 +63,8 @@ tcp_comm_s;
 WUR int tcp_comm_s_create(tcp_comm_s *this,
   unsigned a_count,const char **a_server_ips,const usi *a_server_ports);
 WUR int tcp_comm_s_run(tcp_comm_s *this);
-WUR int tcp_comm_s_client_time_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR int tcp_comm_s_client_fd_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR int tcp_comm_s_client_time_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR int tcp_comm_s_client_fd_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event);
 WUR int tcp_comm_s_recv(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message);
 WUR int tcp_comm_s_send(void *a_tcp_comm,unsigned a_index);
 

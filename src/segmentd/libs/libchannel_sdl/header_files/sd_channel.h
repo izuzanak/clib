@@ -90,7 +90,7 @@ pointer:cb_object
 sd_channel_s;
 @end
 
-WUR libchannel_sdl_EXPORT int sd_channel_s_create(sd_channel_s *this,const char *a_ip,unsigned short a_port,epoll_s *a_epoll,
+WUR libchannel_sdl_EXPORT int sd_channel_s_create(sd_channel_s *this,const char *a_ip,unsigned short a_port,
     sd_channel_cbreq_t a_channel_callback,
     void *a_cb_object);
 WUR static inline int sd_channel_s_message_call(sd_channel_s *this,unsigned a_index,unsigned a_type,...);
@@ -100,7 +100,7 @@ WUR static inline int sd_channel_s_send_multi_message(sd_channel_s *this,const u
 WUR int sd_channel_s_conn_new(void *a_sd_channel,unsigned a_index);
 WUR int sd_channel_s_conn_drop(void *a_sd_channel,unsigned a_index);
 WUR libchannel_sdl_EXPORT int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array_s *a_message);
-WUR libchannel_sdl_EXPORT int sd_channel_s_fd_event(void *a_sd_channel,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libchannel_sdl_EXPORT int sd_channel_s_fd_event(void *a_sd_channel,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // -- sd_channel_client_s --
 @begin
@@ -120,15 +120,15 @@ epoll_timer_s:epoll_timer
 sd_channel_client_s;
 @end
 
-WUR libchannel_sdl_EXPORT int sd_channel_client_s_create(sd_channel_client_s *this,epoll_s *a_epoll,
+WUR libchannel_sdl_EXPORT int sd_channel_client_s_create(sd_channel_client_s *this,
   const char *a_server_ip,unsigned short a_server_port,
   sd_channel_cbreq_t a_channel_callback,
   void *a_cb_object,unsigned a_cb_index);
 WUR static inline int sd_channel_client_s_message_call(sd_channel_client_s *this,unsigned a_type,...);
 WUR static inline int sd_channel_client_s_send_message(sd_channel_client_s *this,bc_array_s *a_message);
 WUR libchannel_sdl_EXPORT int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,const bc_array_s *a_message);
-WUR libchannel_sdl_EXPORT int sd_channel_client_s_fd_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR libchannel_sdl_EXPORT int sd_channel_client_s_connect_time_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR libchannel_sdl_EXPORT int sd_channel_client_s_fd_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR libchannel_sdl_EXPORT int sd_channel_client_s_connect_time_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === inline methods of generated structures ==================================
 

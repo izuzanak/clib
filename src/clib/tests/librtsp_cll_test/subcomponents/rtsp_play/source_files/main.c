@@ -4,6 +4,7 @@ include "main.h"
 @end
 
 volatile int g_terminate = 0;
+epoll_s *g_epoll;
 
 // === methods of generated structures =========================================
 
@@ -29,7 +30,6 @@ int rtsp_player_s_create(rtsp_player_s *this,const char *a_base_dir,const char *
   string_s_set_ptr(&this->base_dir,a_base_dir);
   string_s_set_ptr(&this->ip,a_ip);
   this->port = a_port;
-  epoll_s_create(&this->epoll,0);
 
   if (rtsp_server_s_create(&this->server,&this->ip,this->port,
         rtsp_player_s_conn_new,
@@ -43,7 +43,7 @@ int rtsp_player_s_create(rtsp_player_s *this,const char *a_base_dir,const char *
     throw_error(PLAYER_RTSP_SERVER_CREATE_ERROR);
   }
 
-  if (epoll_s_fd_callback(&this->epoll,&this->server.epoll_fd,EPOLLIN | EPOLLPRI,rtsp_player_s_server_fd_event,this,0))
+  if (epoll_s_fd_callback(&this->server.epoll_fd,EPOLLIN | EPOLLPRI,rtsp_player_s_server_fd_event,this,0))
   {
     throw_error(PLAYER_RTSP_SERVER_CREATE_ERROR);
   }
@@ -53,22 +53,24 @@ int rtsp_player_s_create(rtsp_player_s *this,const char *a_base_dir,const char *
 
 void rtsp_player_s_run(rtsp_player_s *this)
 {/*{{{*/
+  (void)this;
+
   do {
 
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,-1)))
+    if ((err = epoll_s_wait(g_epoll,-1)))
     {
       cassert(err == ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED);
     }
   } while(g_terminate == 0);
 }/*}}}*/
 
-int rtsp_player_s_server_fd_event(void *a_rtsp_player,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_player_s_server_fd_event(void *a_rtsp_player,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   rtsp_player_s *this = (rtsp_player_s *)a_rtsp_player;
 
-  if (rtsp_server_s_fd_event(&this->server,a_index,a_epoll_event,a_epoll))
+  if (rtsp_server_s_fd_event(&this->server,a_index,a_epoll_event))
   {
     throw_error(PLAYER_SERVER_FD_EVENT_ERROR);
   }
@@ -187,6 +189,11 @@ void signal_handler(int a_signum)
   __sync_add_and_fetch(&g_terminate,1);
 }/*}}}*/
 
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
+}/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -196,12 +203,19 @@ int main(int argc,char **argv)
 
   memcheck_init();
 
-  cassert(signal_s_simple_handler(signal_handler) == 0);
+  {
+    cassert(signal_s_simple_handler(signal_handler) == 0);
 
-  CONT_INIT(rtsp_player_s,player);
-  cassert(rtsp_player_s_create(&player,"recordings","127.0.0.1",8000) == 0);
-  rtsp_player_s_run(&player);
-  rtsp_player_s_clear(&player);
+    CONT_INIT_CLEAR(epoll_s,epoll);
+    epoll_s_create(&epoll,0);
+
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
+
+    CONT_INIT_CLEAR(rtsp_player_s,player);
+    cassert(rtsp_player_s_create(&player,"recordings","127.0.0.1",8000) == 0);
+    rtsp_player_s_run(&player);
+  }
 
   memcheck_release_assert();
 

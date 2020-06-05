@@ -4,6 +4,7 @@ include "main.h"
 @end
 
 volatile int g_terminate = 0;
+epoll_s *g_epoll;
 
 // === methods of generated structures =========================================
 
@@ -22,8 +23,6 @@ int od_daemon_s_create(od_daemon_s *this)
   // - create object database -
   odb_database_s_create(&this->database);
 
-  epoll_s_create(&this->epoll,0);
-
   return 0;
 }/*}}}*/
 
@@ -39,7 +38,7 @@ int od_daemon_s_process_config(od_daemon_s *this)
     od_conf_ip_port_s *channel_cfg = &this->config.channel;
 
     // - create communication channel -
-    if (od_channel_s_create(&this->channel,channel_cfg->ip.data,channel_cfg->port,&this->epoll,
+    if (od_channel_s_create(&this->channel,channel_cfg->ip.data,channel_cfg->port,
           od_daemon_s_channel_callback,
           this))
     {
@@ -79,7 +78,7 @@ int od_daemon_s_run(od_daemon_s *this)
 
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,-1)))
+    if ((err = epoll_s_wait(g_epoll,-1)))
     {
       if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
       {
@@ -410,6 +409,11 @@ void signal_handler(int a_signum)
   __sync_add_and_fetch(&g_terminate,1);
 }/*}}}*/
 
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
+}/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -425,6 +429,12 @@ int main(int argc,char **argv)
 
   {
     cassert(signal_s_simple_handler(signal_handler) == 0);
+
+    CONT_INIT_CLEAR(epoll_s,epoll);
+    epoll_s_create(&epoll,0);
+
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
 
     CONT_INIT_CLEAR(process_s,process);
     cassert(process_s_create(&process,"od_daemon") == 0);

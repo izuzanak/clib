@@ -12,7 +12,7 @@ include "sd_channel.h"
 methods sd_channel_s
 @end
 
-int sd_channel_s_create(sd_channel_s *this,const char *a_ip,unsigned short a_port,epoll_s *a_epoll,
+int sd_channel_s_create(sd_channel_s *this,const char *a_ip,unsigned short a_port,
     sd_channel_cbreq_t a_channel_callback,
     void *a_cb_object)
 {/*{{{*/
@@ -31,7 +31,7 @@ int sd_channel_s_create(sd_channel_s *this,const char *a_ip,unsigned short a_por
     throw_error(SD_CHANNEL_SERVER_CREATE_ERROR);
   }
 
-  if(epoll_s_fd_callback(a_epoll,&this->server.epoll_fd,EPOLLIN | EPOLLPRI,sd_channel_s_fd_event,this,0))
+  if(epoll_s_fd_callback(&this->server.epoll_fd,EPOLLIN | EPOLLPRI,sd_channel_s_fd_event,this,0))
   {
     throw_error(SD_CHANNEL_SERVER_EPOLL_ERROR);
   }
@@ -384,11 +384,11 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
   return 0;
 }/*}}}*/
 
-int sd_channel_s_fd_event(void *a_sd_channel,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int sd_channel_s_fd_event(void *a_sd_channel,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   sd_channel_s *this = (sd_channel_s *)a_sd_channel;
 
-  if(channel_server_s_fd_event(&this->server,a_index,a_epoll_event,a_epoll))
+  if(channel_server_s_fd_event(&this->server,a_index,a_epoll_event))
   {
     throw_error(SD_CHANNEL_SERVER_FD_EVENT_ERROR);
   }
@@ -401,7 +401,7 @@ int sd_channel_s_fd_event(void *a_sd_channel,unsigned a_index,epoll_event_s *a_e
 methods sd_channel_client_s
 @end
 
-int sd_channel_client_s_create(sd_channel_client_s *this,epoll_s *a_epoll,
+int sd_channel_client_s_create(sd_channel_client_s *this,
   const char *a_server_ip,unsigned short a_server_port,
   sd_channel_cbreq_t a_channel_callback,
   void *a_cb_object,unsigned a_cb_index)
@@ -422,7 +422,7 @@ int sd_channel_client_s_create(sd_channel_client_s *this,epoll_s *a_epoll,
 
   // - register epoll timer -
   struct itimerspec itimerspec = {{0,0},{0,1}};
-  if (epoll_s_timer_callback(a_epoll,&this->epoll_timer,&itimerspec,0,sd_channel_client_s_connect_time_event,this,0))
+  if (epoll_s_timer_callback(&this->epoll_timer,&itimerspec,0,sd_channel_client_s_connect_time_event,this,0))
   {
     throw_error(SD_CHANNEL_CLIENT_EPOLL_ERROR);
   }
@@ -728,7 +728,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
   return 0;
 }/*}}}*/
 
-int sd_channel_client_s_fd_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int sd_channel_client_s_fd_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
 
@@ -737,13 +737,13 @@ int sd_channel_client_s_fd_event(void *a_sd_channel_client,unsigned a_index,epol
   // - store connecting state -
   int connecting = this->connection.connecting;
 
-  if (channel_conn_s_fd_event(&this->connection,0,a_epoll_event,a_epoll))
+  if (channel_conn_s_fd_event(&this->connection,0,a_epoll_event))
   {
     channel_conn_s_clear(&this->connection);
 
     // - register epoll timer -
     struct itimerspec itimerspec = {{0,0},{0,500000000}};
-    if (epoll_s_timer_callback(a_epoll,&this->epoll_timer,&itimerspec,0,sd_channel_client_s_connect_time_event,this,0))
+    if (epoll_s_timer_callback(&this->epoll_timer,&itimerspec,0,sd_channel_client_s_connect_time_event,this,0))
     {
       throw_error(SD_CHANNEL_CLIENT_EPOLL_ERROR);
     }
@@ -772,7 +772,7 @@ int sd_channel_client_s_fd_event(void *a_sd_channel_client,unsigned a_index,epol
   return 0;
 }/*}}}*/
 
-int sd_channel_client_s_connect_time_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int sd_channel_client_s_connect_time_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
 
@@ -787,11 +787,11 @@ int sd_channel_client_s_connect_time_event(void *a_sd_channel_client,unsigned a_
 
   if (channel_conn_s_create_client(&this->connection,
         this->server_ip.data,this->server_port,sd_channel_client_s_conn_message,this,0) ||
-      epoll_s_fd_callback(a_epoll,&this->connection.epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,sd_channel_client_s_fd_event,this,0))
+      epoll_s_fd_callback(&this->connection.epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,sd_channel_client_s_fd_event,this,0))
   {
     // - register epoll timer -
     struct itimerspec itimerspec = {{0,0},{0,500000000}};
-    if (epoll_s_timer_callback(a_epoll,&this->epoll_timer,&itimerspec,0,sd_channel_client_s_connect_time_event,this,0))
+    if (epoll_s_timer_callback(&this->epoll_timer,&itimerspec,0,sd_channel_client_s_connect_time_event,this,0))
     {
       throw_error(SD_CHANNEL_CLIENT_EPOLL_ERROR);
     }

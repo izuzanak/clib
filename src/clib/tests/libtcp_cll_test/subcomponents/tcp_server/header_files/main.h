@@ -22,7 +22,6 @@ struct
 <
 tcp_server_s:server
 bc_array_s:buffer
-epoll_s:epoll
 >
 tcp_comm_s;
 @end
@@ -33,7 +32,7 @@ WUR int tcp_comm_s_conn_new(void *a_tcp_comm,unsigned a_index);
 WUR int tcp_comm_s_conn_drop(void *a_tcp_comm,unsigned a_index);
 WUR int tcp_comm_s_conn_recv(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message);
 WUR int tcp_comm_s_conn_send(void *a_tcp_comm,unsigned a_index);
-WUR int tcp_comm_s_fd_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR int tcp_comm_s_fd_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === inline methods of generated structures ==================================
 

@@ -4,6 +4,7 @@ include "main.h"
 @end
 
 volatile int g_terminate = 0;
+epoll_s *g_epoll;
 
 // === global functions ========================================================
 
@@ -15,10 +16,9 @@ void signal_handler(int a_signum)
   __sync_add_and_fetch(&g_terminate,1);
 }/*}}}*/
 
-int epoll_ws_fd_event(void *a_ws_context,unsigned a_index,epoll_event_s *a_event,epoll_s *a_epoll)
+int epoll_ws_fd_event(void *a_ws_context,unsigned a_index,epoll_event_s *a_event)
 {/*{{{*/
   (void)a_index;
-  (void)a_epoll;
 
   debug_message_6(fprintf(stderr,"epoll_ws_fd_event\n"));
 
@@ -34,8 +34,9 @@ int ws_fd_event_cb(ws_context_s *a_ws_context,enum lws_callback_reasons a_reason
 
   debug_message_6(fprintf(stderr,"ws_fd_event_cb\n"));
 
-  epoll_fd_s epoll_fd = {NULL,a_fd};
-  return epoll_s_fd_callback(a_ws_context->user_data,&epoll_fd,a_events,epoll_ws_fd_event,a_ws_context,0);
+  epoll_fd_s epoll_fd = {a_fd};
+
+  return epoll_s_fd_callback(&epoll_fd,a_events,epoll_ws_fd_event,a_ws_context,0);
 }/*}}}*/
 
 int ws_prot_conn_cb(ws_conn_s *a_conn)
@@ -99,6 +100,11 @@ int ws_prot_conn_cb(ws_conn_s *a_conn)
   return 0;
 }/*}}}*/
 
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
+}/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -115,6 +121,9 @@ int main(int argc,char **argv)
     CONT_INIT_CLEAR(epoll_s,epoll);
     epoll_s_create(&epoll,0);
 
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
+
     CONT_INIT_CLEAR(string_array_s,prot_names);
     string_array_s_push_ptr(&prot_names,"protocol_0");
     string_array_s_push_ptr(&prot_names,"protocol_1");
@@ -124,7 +133,7 @@ int main(int argc,char **argv)
     pointer_array_s_push(&prot_callbacks,ws_prot_conn_cb);
 
     CONT_INIT_CLEAR(ws_context_s,ctx);
-    cassert(ws_context_s_create(&ctx,CONTEXT_PORT_NO_LISTEN,&prot_names,&prot_callbacks,ws_fd_event_cb,&epoll) == 0);
+    cassert(ws_context_s_create(&ctx,CONTEXT_PORT_NO_LISTEN,&prot_names,&prot_callbacks,ws_fd_event_cb,NULL) == 0);
 
     CONT_INIT_CLEAR(ws_client_s,client);
     cassert(ws_client_s_create(&client,&ctx,"127.0.0.1",8888,"/","protocol_0") == 0);
@@ -133,7 +142,7 @@ int main(int argc,char **argv)
     {
       // - wait on events -
       int err;
-      if ((err = epoll_s_wait(&epoll,-1)))
+      if ((err = epoll_s_wait(g_epoll,-1)))
       {
         cassert(err == ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED);
       }

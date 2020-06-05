@@ -21,7 +21,6 @@ struct
 <
 http_server_s:server
 bc_array_s:buffer
-epoll_s:epoll
 >
 http_comm_s;
 @end
@@ -30,7 +29,7 @@ WUR int http_comm_s_create(http_comm_s *this,const char *a_ip,unsigned short a_p
 WUR int http_comm_s_run(http_comm_s *this);
 WUR int http_comm_s_conn_request(void *a_http_comm,unsigned a_index,int a_complete);
 WUR int http_comm_s_conn_response(void *a_http_comm,unsigned a_index);
-WUR int http_comm_s_fd_event(void *a_http_comm,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR int http_comm_s_fd_event(void *a_http_comm,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === inline methods of generated structures ==================================
 

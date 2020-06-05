@@ -177,7 +177,7 @@ WUR int rtsp_client_s_send_cmd(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_sdp(rtsp_client_s *this);
-WUR librtsp_cll_EXPORT int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR librtsp_cll_EXPORT int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // -- rtsp_setup_s --
 @begin
@@ -252,12 +252,12 @@ librtsp_cll_EXPORT WUR int rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a
     unsigned a_index,epoll_fd_s *a_epoll_fd,socket_address_s *a_client_addr);
 void rtsp_conn_s_append_time(bc_array_s *a_trg);
 WUR int rtsp_conn_s_send_resp(rtsp_conn_s *this,bc_array_s *a_msg);
-WUR int rtsp_conn_s_recv_cmd(rtsp_conn_s *this,epoll_s *a_epoll);
-WUR int rtsp_conn_s_next_packet(rtsp_conn_s *this,epoll_s *a_epoll);
+WUR int rtsp_conn_s_recv_cmd(rtsp_conn_s *this);
+WUR int rtsp_conn_s_next_packet(rtsp_conn_s *this);
 WUR int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send);
-WUR librtsp_cll_EXPORT int rtsp_conn_s_process_packet(rtsp_conn_s *this,epoll_s *a_epoll);
-WUR static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR librtsp_cll_EXPORT int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR librtsp_cll_EXPORT int rtsp_conn_s_process_packet(rtsp_conn_s *this);
+WUR static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR librtsp_cll_EXPORT int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // -- rtsp_conn_list_s --
 @begin
@@ -308,9 +308,9 @@ WUR librtsp_cll_EXPORT int rtsp_server_s_create(rtsp_server_s *this,
 #ifdef CLIB_WITH_OPENSSL
 WUR librtsp_cll_EXPORT int rtsp_server_s_init_ssl(rtsp_server_s *this,const char *a_cert_file,const char *a_pkey_file);
 #endif
-WUR librtsp_cll_EXPORT int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR librtsp_cll_EXPORT int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
-WUR librtsp_cll_EXPORT int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll);
+WUR librtsp_cll_EXPORT int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR librtsp_cll_EXPORT int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR librtsp_cll_EXPORT int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === inline methods of generated structures ==================================
 
@@ -359,12 +359,12 @@ inlines rtsp_setups_s
 inlines rtsp_conn_s
 @end
 
-static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
   (void)a_epoll_event;
 
-  if (rtsp_conn_s_process_packet(this,a_epoll))
+  if (rtsp_conn_s_process_packet(this))
   {
     throw_error(RTSP_CONN_PROCESS_PACKET_ERROR);
   }

@@ -4,6 +4,7 @@ include "main.h"
 @end
 
 volatile int g_terminate = 0;
+epoll_s *g_epoll;
 
 // === methods of generated structures =========================================
 
@@ -24,8 +25,6 @@ methods gpsd_server_s
 
 int gpsd_server_s_create(gpsd_server_s *this,const char *a_ip,unsigned short a_port)
 {/*{{{*/
-  epoll_s_create(&this->epoll,0);
-
   if(tcp_server_s_create(&this->server,a_ip,a_port,
         gpsd_server_s_conn_new,
         gpsd_server_s_conn_drop,
@@ -36,7 +35,7 @@ int gpsd_server_s_create(gpsd_server_s *this,const char *a_ip,unsigned short a_p
     throw_error(GPSD_SERVER_CREATE_ERROR);
   }
 
-  if(epoll_s_fd_callback(&this->epoll,&this->server.epoll_fd,EPOLLIN | EPOLLPRI,gpsd_server_s_fd_event,this,0))
+  if(epoll_s_fd_callback(&this->server.epoll_fd,EPOLLIN | EPOLLPRI,gpsd_server_s_fd_event,this,0))
   {
     throw_error(GPSD_SERVER_EPOLL_ERROR);
   }
@@ -44,7 +43,7 @@ int gpsd_server_s_create(gpsd_server_s *this,const char *a_ip,unsigned short a_p
   // - schedule message send timer -
   struct itimerspec its_message = {{0,25000000},{0,1}};
 
-  if (epoll_s_timer_callback(&this->epoll,&this->message_timer,&its_message,0,
+  if (epoll_s_timer_callback(&this->message_timer,&its_message,0,
         gpsd_server_s_message_time_event,this,0))
   {
     throw_error(GPSD_SERVER_EPOLL_ERROR);
@@ -79,11 +78,13 @@ void gpsd_server_s_schedule_message(gpsd_server_s *this,unsigned a_index,bc_arra
 
 int gpsd_server_s_run(gpsd_server_s *this)
 {/*{{{*/
+  (void)this;
+
   while(!g_terminate)
   {
     // - wait on events -
     int err;
-    if ((err = epoll_s_wait(&this->epoll,-1)))
+    if ((err = epoll_s_wait(g_epoll,-1)))
     {
       if (err != ERROR_EPOLL_WAIT_SIGNAL_INTERRUPTED)
       {
@@ -95,10 +96,9 @@ int gpsd_server_s_run(gpsd_server_s *this)
   return 0;
 }/*}}}*/
 
-int gpsd_server_s_message_time_event(void *a_gpsd_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int gpsd_server_s_message_time_event(void *a_gpsd_server,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
-  (void)a_epoll;
 
   debug_message_7(fprintf(stderr,"gpsd_server_s_message_time_event\n"));
 
@@ -183,11 +183,11 @@ int gpsd_server_s_conn_recv(void *a_gpsd_server,unsigned a_index,bc_array_s *a_m
   return 0;
 }/*}}}*/
 
-int gpsd_server_s_fd_event(void *a_gpsd_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int gpsd_server_s_fd_event(void *a_gpsd_server,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   gpsd_server_s *this = (gpsd_server_s *)a_gpsd_server;
 
-  if (tcp_server_s_fd_event(&this->server,a_index,a_epoll_event,a_epoll))
+  if (tcp_server_s_fd_event(&this->server,a_index,a_epoll_event))
   {
     throw_error(GPSD_CONN_SERVER_FD_EVENT_ERROR);
   }
@@ -205,6 +205,11 @@ void signal_handler(int a_signum)
   __sync_add_and_fetch(&g_terminate,1);
 }/*}}}*/
 
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
+}/*}}}*/
+
 // === program entry function ==================================================
 
 int main(int argc,char **argv)
@@ -216,15 +221,22 @@ int main(int argc,char **argv)
   libtcp_cll_init();
   libgpsd_cll_init();
 
-  cassert(signal_s_simple_handler(signal_handler) == 0);
+  {
+    cassert(signal_s_simple_handler(signal_handler) == 0);
 
-  const char *address = "127.0.0.1";
-  const unsigned short port = 8001;
+    const char *address = "127.0.0.1";
+    const unsigned short port = 8001;
 
-  CONT_INIT(gpsd_server_s,comm);
-  cassert(gpsd_server_s_create(&comm,address,port) == 0);
-  cassert(gpsd_server_s_run(&comm) == 0);
-  gpsd_server_s_clear(&comm);
+    CONT_INIT_CLEAR(epoll_s,epoll);
+    epoll_s_create(&epoll,0);
+
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
+
+    CONT_INIT_CLEAR(gpsd_server_s,comm);
+    cassert(gpsd_server_s_create(&comm,address,port) == 0);
+    cassert(gpsd_server_s_run(&comm) == 0);
+  }
 
   libgpsd_cll_clear();
   libtcp_cll_clear();

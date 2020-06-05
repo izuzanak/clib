@@ -123,10 +123,10 @@ methods var_map_tree_s
 #if OPTION_TO_JSON == ENABLED
 void var_map_tree_s_to_json(const var_map_tree_s *this,bc_array_s *a_trg)
 {/*{{{*/
+  bc_array_s_push(a_trg,'{');
+
   if (this->root_idx != c_idx_not_exist)
   {
-    bc_array_s_push(a_trg,'{');
-
     var_map_tree_s_node *ptr = this->data;
     var_map_tree_s_node *ptr_end = ptr + this->used;
     int comma = 0;
@@ -150,13 +150,9 @@ void var_map_tree_s_to_json(const var_map_tree_s *this,bc_array_s *a_trg)
         var_s_to_json(&var_map->value,a_trg);
       }
     } while(++ptr < ptr_end);
+  }
 
-    bc_array_s_push(a_trg,'}');
-  }
-  else
-  {
-    bc_array_s_append(a_trg,2,"{}");
-  }
+  bc_array_s_push(a_trg,'}');
 }/*}}}*/
 
 void var_map_tree_s_to_json_nice(const var_map_tree_s *this,json_nice_s *a_json_nice,bc_array_s *a_trg)
@@ -197,7 +193,8 @@ void var_map_tree_s_to_json_nice(const var_map_tree_s *this,json_nice_s *a_json_
   }
   else
   {
-    bc_array_s_append(a_trg,2,"{}");
+    bc_array_s_push(a_trg,'{');
+    bc_array_s_push(a_trg,'}');
   }
 }/*}}}*/
 #endif

@@ -67,7 +67,7 @@ int rtsp_server_s_init_ssl(rtsp_server_s *this,const char *a_cert_file,const cha
 }/*}}}*/
 #endif
 
-int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
 
@@ -89,7 +89,7 @@ int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a
         }
 
         unsigned conn_idx = rtsp_conn_list_s_append_blank(&this->conn_list);
-        if (epoll_s_fd_callback(a_epoll,&epoll_fd,EPOLLIN | EPOLLPRI,rtsp_server_s_conn_fd_event,this,conn_idx))
+        if (epoll_s_fd_callback(&epoll_fd,EPOLLIN | EPOLLPRI,rtsp_server_s_conn_fd_event,this,conn_idx))
         {
           epoll_fd_s_clear(&epoll_fd);
           rtsp_conn_list_s_remove(&this->conn_list,conn_idx);
@@ -137,7 +137,7 @@ int rtsp_server_s_fd_event(rtsp_server_s *this,unsigned a_index,epoll_event_s *a
   return 0;
 }/*}}}*/
 
-int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
 
   // - read timer expiration counter -
@@ -150,7 +150,7 @@ int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,epoll_eve
   rtsp_server_s *this = (rtsp_server_s *)a_rtsp_server;
   rtsp_conn_s *conn = &this->conn_list.data[a_index].object;
 
-  if (rtsp_conn_s_time_event(conn,0,a_epoll_event,a_epoll))
+  if (rtsp_conn_s_time_event(conn,0,a_epoll_event))
   {
     // - call conn_drop_callback -
     (void)((rtsp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);
@@ -162,12 +162,12 @@ int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,epoll_eve
   return 0;
 }/*}}}*/
 
-int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   rtsp_server_s *this = (rtsp_server_s *)a_rtsp_server;
   rtsp_conn_s *conn = &this->conn_list.data[a_index].object;
 
-  if (rtsp_conn_s_fd_event(conn,0,a_epoll_event,a_epoll))
+  if (rtsp_conn_s_fd_event(conn,0,a_epoll_event))
   {
     // - call conn_drop_callback -
     (void)((rtsp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);

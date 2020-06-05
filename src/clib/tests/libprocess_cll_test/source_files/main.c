@@ -22,6 +22,8 @@ test_function_t test_functions[] =
 void test_dummy()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
+  cassert(system("mkdir -p " PROCESS_RUN_DIR_PATH "; mkdir -p " PROCESS_LOG_DIR_PATH) == 0); // NOLINT
+
   CONT_INIT_CLEAR(process_s,process);
   cassert(process_s_create(&process,"libprocess_cll_test") == 0);
 #endif

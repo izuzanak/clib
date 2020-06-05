@@ -41,7 +41,7 @@ pointer_tree_s g_od_channel_json_string_map;
 methods od_channel_s
 @end
 
-int od_channel_s_create(od_channel_s *this,const char *a_ip,unsigned short a_port,epoll_s *a_epoll,
+int od_channel_s_create(od_channel_s *this,const char *a_ip,unsigned short a_port,
     od_channel_cbreq_t a_channel_callback,
     void *a_cb_object)
 {/*{{{*/
@@ -60,7 +60,7 @@ int od_channel_s_create(od_channel_s *this,const char *a_ip,unsigned short a_por
     throw_error(OD_CHANNEL_SERVER_CREATE_ERROR);
   }
 
-  if(epoll_s_fd_callback(a_epoll,&this->server.epoll_fd,EPOLLIN | EPOLLPRI,od_channel_s_fd_event,this,0))
+  if(epoll_s_fd_callback(&this->server.epoll_fd,EPOLLIN | EPOLLPRI,od_channel_s_fd_event,this,0))
   {
     throw_error(OD_CHANNEL_SERVER_EPOLL_ERROR);
   }
@@ -282,11 +282,11 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
   return 0;
 }/*}}}*/
 
-int od_channel_s_fd_event(void *a_od_channel,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int od_channel_s_fd_event(void *a_od_channel,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   od_channel_s *this = (od_channel_s *)a_od_channel;
 
-  if(channel_server_s_fd_event(&this->server,a_index,a_epoll_event,a_epoll))
+  if(channel_server_s_fd_event(&this->server,a_index,a_epoll_event))
   {
     throw_error(OD_CHANNEL_SERVER_FD_EVENT_ERROR);
   }
@@ -299,7 +299,7 @@ int od_channel_s_fd_event(void *a_od_channel,unsigned a_index,epoll_event_s *a_e
 methods od_channel_client_s
 @end
 
-int od_channel_client_s_create(od_channel_client_s *this,epoll_s *a_epoll,
+int od_channel_client_s_create(od_channel_client_s *this,
   const char *a_server_ip,unsigned short a_server_port,
   od_channel_cbreq_t a_channel_callback,
   void *a_cb_object,unsigned a_cb_index)
@@ -321,14 +321,14 @@ int od_channel_client_s_create(od_channel_client_s *this,epoll_s *a_epoll,
 
   // - register connect timer -
   struct itimerspec its_connect = {{0,0},{0,1}};
-  if (epoll_s_timer_callback(a_epoll,&this->connect_timer,&its_connect,0,od_channel_client_s_connect_time_event,this,0))
+  if (epoll_s_timer_callback(&this->connect_timer,&its_connect,0,od_channel_client_s_connect_time_event,this,0))
   {
     throw_error(OD_CHANNEL_CLIENT_EPOLL_ERROR);
   }
 
   // - register ping timer -
   struct itimerspec its_ping = {OD_CHANNEL_PING_PERIOD,OD_CHANNEL_PING_PERIOD};
-  if (epoll_s_timer_callback(a_epoll,&this->ping_timer,&its_ping,0,od_channel_client_s_ping_time_event,this,0))
+  if (epoll_s_timer_callback(&this->ping_timer,&its_ping,0,od_channel_client_s_ping_time_event,this,0))
   {
     throw_error(OD_CHANNEL_CLIENT_EPOLL_ERROR);
   }
@@ -507,7 +507,7 @@ int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,
   return 0;
 }/*}}}*/
 
-int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
 
@@ -516,7 +516,7 @@ int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epol
   // - store connecting state -
   int connecting = this->connection.connecting;
 
-  if (channel_conn_s_fd_event(&this->connection,0,a_epoll_event,a_epoll))
+  if (channel_conn_s_fd_event(&this->connection,0,a_epoll_event))
   {
     channel_conn_s_clear(&this->connection);
 
@@ -564,7 +564,7 @@ int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epol
   return 0;
 }/*}}}*/
 
-int od_channel_client_s_connect_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int od_channel_client_s_connect_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
 
@@ -579,7 +579,7 @@ int od_channel_client_s_connect_time_event(void *a_od_channel_client,unsigned a_
 
   if (channel_conn_s_create_client(&this->connection,
         this->server_ip.data,this->server_port,od_channel_client_s_conn_message,this,0) ||
-      epoll_s_fd_callback(a_epoll,&this->connection.epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,od_channel_client_s_fd_event,this,0))
+      epoll_s_fd_callback(&this->connection.epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,od_channel_client_s_fd_event,this,0))
   {
     // - update connect timer -
     struct itimerspec its_connect = {{0,0},OD_CHANNEL_RECONNECT_PERIOD};
@@ -592,10 +592,9 @@ int od_channel_client_s_connect_time_event(void *a_od_channel_client,unsigned a_
   return 0;
 }/*}}}*/
 
-int od_channel_client_s_ping_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int od_channel_client_s_ping_time_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   (void)a_index;
-  (void)a_epoll;
 
   // - read timer expiration counter -
   uint64_t timer_exps;

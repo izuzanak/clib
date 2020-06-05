@@ -3,6 +3,8 @@
 include "main.h"
 @end
 
+epoll_s *g_epoll;
+
 // === program entry function ==================================================
 
 int conn_new(void *a_rtsp_server,unsigned a_index)
@@ -87,16 +89,21 @@ int conn_get_packet(void *a_rtsp_server,unsigned a_index,ulli *a_delay,bc_block_
   return 1;
 }/*}}}*/
 
-int server_fd_event(void *a_server,unsigned a_index,epoll_event_s *a_epoll_event,epoll_s *a_epoll)
+int server_fd_event(void *a_server,unsigned a_index,epoll_event_s *a_epoll_event)
 {/*{{{*/
   rtsp_server_s *server = (rtsp_server_s *)a_server;
 
-  if (rtsp_server_s_fd_event(server,a_index,a_epoll_event,a_epoll))
+  if (rtsp_server_s_fd_event(server,a_index,a_epoll_event))
   {
     throw_error(RTSP_TEST_SERVER_FD_EVENT_ERROR);
   }
 
   return 0;
+}/*}}}*/
+
+int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+{/*{{{*/
+  return epoll_s_fd_update(g_epoll,a_fd,a_evts,a_update_cb,a_callback);
 }/*}}}*/
 
 int main(int argc,char **argv)
@@ -105,43 +112,44 @@ int main(int argc,char **argv)
   (void)argv;
 
   memcheck_init();
+  
+  {
+    const char *address = "127.0.0.1";
+    const unsigned short port = 8000;
 
-  const char *address = "127.0.0.1";
-  const unsigned short port = 8000;
+    //const char *address = "10.2.35.6";
+    //const unsigned short port = 554;
 
-  //const char *address = "10.2.35.6";
-  //const unsigned short port = 554;
+    CONT_INIT_CLEAR(epoll_s,epoll);
+    cassert(epoll_s_create(&epoll,0) == 0);
 
-  CONT_INIT(epoll_s,epoll);
-  cassert(epoll_s_create(&epoll,0) == 0);
+    g_epoll_fd_update = epoll_fd_update;
+    g_epoll = &epoll;
 
-  CONT_INIT(string_s,ip);
-  string_s_set_ptr(&ip,address);
+    CONT_INIT_CLEAR(string_s,ip);
+    string_s_set_ptr(&ip,address);
 
-  CONT_INIT(rtsp_server_s,server);
-  cassert(rtsp_server_s_create(&server,&ip,port,
-        conn_new,
-        conn_drop,
-        conn_get_sdp,
-        conn_check_media,
-        conn_playing,
-        conn_get_packet,
-        &server) == 0);
+    CONT_INIT_CLEAR(rtsp_server_s,server);
+    cassert(rtsp_server_s_create(&server,&ip,port,
+          conn_new,
+          conn_drop,
+          conn_get_sdp,
+          conn_check_media,
+          conn_playing,
+          conn_get_packet,
+          &server) == 0);
 
-  cassert(epoll_s_fd_callback(&epoll,&server.epoll_fd,EPOLLIN | EPOLLPRI,server_fd_event,&server,0) == 0)
+    cassert(epoll_s_fd_callback(&server.epoll_fd,EPOLLIN | EPOLLPRI,server_fd_event,&server,0) == 0)
 
-  do {
+    do {
 
-    // - wait on events -
-    cassert(epoll_s_wait(&epoll,-1) == 0);
-  } while(
-  //server.conn_list.first_idx != c_idx_not_exist
-  1
-  );
-
-  rtsp_server_s_clear(&server);
-  epoll_s_clear(&epoll);
-  string_s_clear(&ip);
+      // - wait on events -
+      cassert(epoll_s_wait(g_epoll,-1) == 0);
+    } while(
+    //server.conn_list.first_idx != c_idx_not_exist
+    1
+    );
+  }
 
   memcheck_release_assert();
 

@@ -3,6 +3,8 @@
 include "cl_linux.h"
 @end
 
+epoll_fd_update_t g_epoll_fd_update = NULL;
+
 // === methods of structure fd_s ===============================================
 
 int fd_s_write(const fd_s *this,const void *a_src,size_t a_size)
@@ -476,19 +478,19 @@ methods epoll_s
 @end
 
 int epoll_s_fd_update(epoll_s *this,
-    epoll_fd_s *a_epoll_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
+    int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
 {/*{{{*/
   epoll_fd_events_s *fd_events = &this->fd_events;
 
   // - resize fd events if needed -
-  if (fd_events->used <= a_epoll_fd->fd)
+  if (fd_events->used <= a_fd)
   {
     unsigned old_used = fd_events->used;
-    epoll_fd_events_s_push_blanks(fd_events,a_epoll_fd->fd + 1 - fd_events->used);
+    epoll_fd_events_s_push_blanks(fd_events,a_fd + 1 - fd_events->used);
     memset(fd_events->data + old_used,0,(fd_events->used - old_used)*sizeof(epoll_fd_event_s));
   }
 
-  epoll_fd_event_s *fd_event = fd_events->data + a_epoll_fd->fd;
+  epoll_fd_event_s *fd_event = fd_events->data + a_fd;
 
   // - update callback if requested -
   if (a_update_cb)
@@ -503,23 +505,21 @@ int epoll_s_fd_update(epoll_s *this,
   {
     struct epoll_event epoll_event = {
       .events = a_evts,
-      .data.fd = a_epoll_fd->fd
+      .data.fd = a_fd
     };
 
     if (evts == 0)
     {
       // - ERROR -
-      if (epoll_ctl(this->fd,EPOLL_CTL_ADD,a_epoll_fd->fd,&epoll_event) == -1)
+      if (epoll_ctl(this->fd,EPOLL_CTL_ADD,a_fd,&epoll_event) == -1)
       {
         throw_error(EPOLL_CONTROL_ADD_ERROR);
       }
-
-      a_epoll_fd->epoll = this;
     }
     else if (a_evts == 0)
     {
       // - ERROR -
-      if (epoll_ctl(this->fd,EPOLL_CTL_DEL,a_epoll_fd->fd,&epoll_event) == -1)
+      if (epoll_ctl(this->fd,EPOLL_CTL_DEL,a_fd,&epoll_event) == -1)
       {
         // - closed fd, not problem -
         if (errno != EBADF)
@@ -527,13 +527,11 @@ int epoll_s_fd_update(epoll_s *this,
           throw_error(EPOLL_CONTROL_DELETE_ERROR);
         }
       }
-
-      a_epoll_fd->epoll = this;
     }
     else
     {
       // - ERROR -
-      if (epoll_ctl(this->fd,EPOLL_CTL_MOD,a_epoll_fd->fd,&epoll_event) == -1)
+      if (epoll_ctl(this->fd,EPOLL_CTL_MOD,a_fd,&epoll_event) == -1)
       {
         // - reopened fd, not problem -
         if (errno != ENOENT)
@@ -542,7 +540,7 @@ int epoll_s_fd_update(epoll_s *this,
         }
 
         // - ERROR -
-        if (epoll_ctl(this->fd,EPOLL_CTL_ADD,a_epoll_fd->fd,&epoll_event) == -1)
+        if (epoll_ctl(this->fd,EPOLL_CTL_ADD,a_fd,&epoll_event) == -1)
         {
           throw_error(EPOLL_CONTROL_ADD_ERROR);
         }
@@ -550,7 +548,7 @@ int epoll_s_fd_update(epoll_s *this,
     }
 
     // - update fd events -
-    fd_events->data[a_epoll_fd->fd].evts = a_evts;
+    fd_events->data[a_fd].evts = a_evts;
   }
 
   return 0;
@@ -586,7 +584,7 @@ int epoll_s_wait(epoll_s *this,int a_timeout)
     if (callback->function != NULL)
     {
       // - call event callback -
-      if (((epoll_fd_callback_t)callback->function)(callback->object,callback->index,&event,this))
+      if (((epoll_fd_callback_t)callback->function)(callback->object,callback->index,&event))
       {
         throw_error(EPOLL_FD_CALLBACK_ERROR);
       }
