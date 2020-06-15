@@ -22,7 +22,7 @@ test_function_t test_functions[] =
 void test_create()
 {/*{{{*/
 
-  // FIXME TODO continue ...
+  // TODO continue ...
 }/*}}}*/
 
 // === program entry function ==================================================

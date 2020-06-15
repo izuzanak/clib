@@ -81,7 +81,7 @@ int sd_segment_file_s_create(sd_segment_file_s *this,
   if (this->last_id > -1)
   {
     // - seek to record -
-    if (lseek64(this->fd,this->last_index*this->rec_size,SEEK_SET) == -1)
+    if (lseek64(this->fd,(off64_t)this->last_index*this->rec_size,SEEK_SET) == -1)
     {
       throw_error(SD_SEGFILE_RECORD_SEEK_ERROR);
     }
@@ -127,7 +127,7 @@ int sd_segment_file_s_write_record(sd_segment_file_s *this,
 
   // - seek to record -
   this->last_index = 1 - this->last_index;
-  if (lseek64(this->fd,this->last_index*this->rec_size,SEEK_SET) == -1)
+  if (lseek64(this->fd,(off64_t)this->last_index*this->rec_size,SEEK_SET) == -1)
   {
     throw_error(SD_SEGFILE_RECORD_SEEK_ERROR);
   }

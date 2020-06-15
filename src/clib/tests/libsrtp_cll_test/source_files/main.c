@@ -36,7 +36,7 @@ void test_srtp()
 
   policy.key = key;
 
-  // FIXME TODO continue ...
+  // TODO continue ...
 
 }/*}}}*/
 

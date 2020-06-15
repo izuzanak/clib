@@ -82,7 +82,7 @@ void json_parser_s_process_json_string(const char *a_ptr,const char *a_ptr_end,b
           unsigned value = 0;
 
           // - retrieve character value -
-          const char *a_ptr_end = a_ptr + 4;
+          const char *ptr_end = a_ptr + 4;
           do {
             value <<= 4;
 
@@ -103,7 +103,7 @@ void json_parser_s_process_json_string(const char *a_ptr,const char *a_ptr_end,b
               debug_assert(0);
             }
 
-          } while(++a_ptr < a_ptr_end);
+          } while(++a_ptr < ptr_end);
 
           // - convert utf16/32 value to utf8 character string -
           if (value <= 0x7f)
@@ -164,7 +164,7 @@ void json_parser_s_process_json_string(const char *a_ptr,const char *a_ptr_end,b
   bc_array_s_push(a_trg,'\0');
 }/*}}}*/
 
-unsigned json_parser_s_recognize_terminal(const bc_array_s *a_source,unsigned *a_input_idx)
+unsigned json_parser_s_recognize_terminal(const bc_array_s *a_source,unsigned *a_input_idx) // lgtm [cpp/use-of-goto]
 {/*{{{*/
 #define JSON_GET_NEXT_CHAR() \
   {\

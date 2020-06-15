@@ -91,7 +91,7 @@ void pa_rtsp_sdp_control(rtsp_sdp_parser_s *this)
 methods rtsp_sdp_parser_s
 @end
 
-unsigned rtsp_sdp_parser_s_recognize_terminal(rtsp_sdp_parser_s *this) // NOLINT
+unsigned rtsp_sdp_parser_s_recognize_terminal(rtsp_sdp_parser_s *this) // NOLINT, lgtm [cpp/use-of-goto]
 {/*{{{*/
   unsigned source_string_length = this->source_string.size - 1;
 

@@ -40,7 +40,7 @@ methods string_pair_tree_s
 methods http_conn_s
 @end
 
-unsigned http_conn_s_recognize_request_terminal(http_conn_s *this,const bc_array_s *a_source)
+unsigned http_conn_s_recognize_request_terminal(http_conn_s *this,const bc_array_s *a_source) // lgtm [cpp/use-of-goto]
 {/*{{{*/
 #define HTTP_REQUEST_GET_NEXT_CHAR() \
 {\
@@ -564,7 +564,7 @@ state_36_label:
 
 }/*}}}*/
 
-unsigned http_conn_s_recognize_header_terminal(http_conn_s *this,const bc_array_s *a_source)
+unsigned http_conn_s_recognize_header_terminal(http_conn_s *this,const bc_array_s *a_source) // lgtm [cpp/use-of-goto]
 {/*{{{*/
 #define HTTP_HEADER_GET_NEXT_CHAR() \
 {\
@@ -1533,7 +1533,7 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
   case c_http_conn_state_BODY:
     {/*{{{*/
 
-      //// FIXME debug print components
+      //// debug print components
       //if (conn->components.used != 0)
       //{
       //  bc_buffer_s *ptr = conn->components.data;
@@ -1543,7 +1543,7 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
       //  } while(++ptr < ptr_end);
       //}
 
-      //// FIXME debug print parameters
+      //// debug print parameters
       //if (conn->params.used != 0)
       //{
       //  bc_buffer_pair_s *ptr = conn->params.data;
@@ -1555,7 +1555,7 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
       //  } while(++ptr < ptr_end);
       //}
 
-      //// FIXME debug print headers
+      //// debug print headers
       //if (conn->headers.used != 0)
       //{
       //  bc_buffer_pair_s *ptr = conn->headers.data;

@@ -451,7 +451,11 @@ int main(int argc,char **argv)
       // - set configuration changed flag -
       daemon.config_changed_flag = 1;
 
-      if (od_daemon_s_run(&daemon)) {}
+      if (od_daemon_s_run(&daemon))
+      {
+        // - ignore return value, always terminate -
+      }
+
     } while(0);
   }
 

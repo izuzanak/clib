@@ -12,7 +12,7 @@ int main(int argc,char **argv)
 
   memcheck_init();
 
-  // FIXME TODO continue ...
+  // TODO continue ...
 
   memcheck_release_assert();
 

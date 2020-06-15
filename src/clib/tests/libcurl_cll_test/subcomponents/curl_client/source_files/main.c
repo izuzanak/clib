@@ -45,7 +45,7 @@ int curl_response_cb(curl_multi_s *a_curl_multi,curl_result_s *a_curl_result)
 
   debug_message_6(fprintf(stderr,"curl_response_cb\n"));
 
-  // FIXME TODO continue ...
+  // TODO continue ...
   fprintf(stderr,"a_curl_result->data.used: %u\n",a_curl_result->data.used);
   fprintf(stderr,"a_curl_result->user_data: %p\n",a_curl_result->user_data);
 

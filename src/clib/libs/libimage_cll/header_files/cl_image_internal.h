@@ -171,7 +171,7 @@ inline int image_internal_s_create(image_internal_s *this,
   }
 
   this->image_data_ptr->data = (unsigned char *)cmalloc(this->height*this->image_data_ptr->line_bytes);
-  memset(this->image_data_ptr->data,0,this->height*this->image_data_ptr->line_bytes);
+  memset(this->image_data_ptr->data,0,(size_t)this->height*this->image_data_ptr->line_bytes);
 
   return 1;
 }/*}}}*/

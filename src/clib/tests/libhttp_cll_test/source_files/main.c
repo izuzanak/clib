@@ -24,7 +24,7 @@ test_function_t test_functions[] =
 void test_http()
 {/*{{{*/
   
-  // FIXME TODO continue ...
+  // TODO continue ...
 }/*}}}*/
 
 // === program entry function ==================================================

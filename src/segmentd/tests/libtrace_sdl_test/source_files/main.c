@@ -76,7 +76,7 @@ void test_trace()
   lli lee_id_ms = sd_trace_s_lee_time(&trace,time - 1000000000ULL);
   lli gre_id_ms = sd_trace_s_gre_time(&trace,time - 1000000000ULL);
 
-  // FIXME
+  // debug output
   fprintf(stderr,"tail: %lld\n",tail);
   fprintf(stderr,"head: %lld\n",head);
   fprintf(stderr,"lee_id: %lld\n",lee_id);

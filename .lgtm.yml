@@ -25,7 +25,9 @@ extraction:
         - cmake ..
         - make
 
-#path_classifiers:
-#  generated:
-#    - exclude: c_src/**/*
+path_classifiers:
+  generated:
+    - exclude: c_src/**/*
+  test:
+    - exclude: c_src/**/*
 

@@ -126,7 +126,7 @@ int sd_daemon_s_update_segments(sd_daemon_s *this)
           // - log message -
           log_info_2("remove segment %s",segment->config.segment_id.data);
 
-          // FIXME TODO
+          // TODO
           // - send SEGMENT_IGNORE to watching channels
           // - remove from channel watches
           // - set update_watches
@@ -212,7 +212,7 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
           // - log message -
           log_info_2("remove trace %s",trace_descr->config.trace_id.data);
 
-          // FIXME TODO
+          // TODO
           // - send TRACE_IGNORE to watching channels
           // - remove from channel watches
           // - set update_watches
@@ -382,7 +382,7 @@ int sd_daemon_s_run(sd_daemon_s *this)
   return 0;
 }/*}}}*/
 
-// FIXME
+// debug output
 //void sd_debug_print(sd_daemon_s *this)
 //{/*{{{*/
 //  sd_daemon_s_update_watches(this);
@@ -442,7 +442,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
         this->update_watches = 1;
       }
 
-      // FIXME
+      // debug output
       //sd_debug_print(this);
     }/*}}}*/
     break;
@@ -599,7 +599,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
         this->update_watches = 1;
       }
       
-      // FIXME
+      // debug output
       //sd_debug_print(this);
 
       // - send response -
@@ -662,7 +662,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
         this->update_watches = 1;
       }
 
-      // FIXME
+      // debug output
       //sd_debug_print(this);
 
       // - send response -
@@ -1068,7 +1068,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
         this->update_watches = 1;
       }
 
-      // FIXME
+      // debug output
       //sd_debug_print(this);
 
       // - send response -
@@ -1175,7 +1175,11 @@ int main(int argc,char **argv)
       // - set configuration changed flag -
       daemon.config_changed_flag = 1;
 
-      if (sd_daemon_s_run(&daemon)) {}
+      if (sd_daemon_s_run(&daemon))
+      {
+        // - ignore return value, always terminate -
+      }
+
     } while(0);
   }
 

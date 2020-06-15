@@ -175,7 +175,7 @@ int gpsd_server_s_conn_recv(void *a_gpsd_server,unsigned a_index,bc_array_s *a_m
 
   debug_message_5(fprintf(stderr,"gpsd_server_s_conn_recv: %u - %.*s\n",a_index,a_message->used,a_message->data));
 
-  // FIXME TODO continue ...
+  // TODO continue ...
 
   // - clear message buffer -
   a_message->used = 0;
