@@ -155,16 +155,10 @@ endif()
 if(NOT DEFINED CS_COMPONENT_DIRS)
   set(CS_COMPONENT_DIRS
       "src/clib/tests"
-      "src/traced/tests"
-      "src/traced/progs"
       "src/segmentd/tests"
       "src/segmentd/progs"
-      "src/camsys/tests"
-      "src/camsys/progs"
       "src/objectdb/tests"
-      "src/objectdb/progs"
-      "src/macs/tests"
-      "src/macs/progs")
+      "src/objectdb/progs")
 endif()
 
 foreach(COMPONENT_DIR ${CS_COMPONENT_DIRS})
@@ -179,4 +173,11 @@ endif()
 foreach(COMPONENT ${CS_COMPONENTS})
   include_component("${COMPONENT}")
 endforeach()
+
+# - process programs -
+if(NOT DEFINED CS_INSTALL_BINS)
+  set(CS_INSTALL_BINS)
+endif()
+
+install(TARGETS ${CS_INSTALL_BINS} RUNTIME DESTINATION bin)
 
