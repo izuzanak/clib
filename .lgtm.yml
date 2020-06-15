@@ -1,0 +1,31 @@
+
+extraction:
+  cpp:
+    prepare:
+      packages: 
+        - libwebsockets-dev
+        - libmicrohttpd-dev
+        - libsnappy-dev
+        - libuuid1
+    configure:
+      command:
+        - git clone --branch=cont_c https://github.com/izuzanak/cont.git $LGTM_WORKSPACE/cont_c
+        - cd $LGTM_WORKSPACE/cont_c/build
+        - cmake -DCMAKE_INSTALL_PREFIX=install ..
+        - make
+        - make install
+    index:
+      build_command:
+        - export PATH=$PATH:$LGTM_WORKSPACE/cont_c/build/install/bin
+        - cd $LGTM_SRC/c_src/gen
+        - cmake ..
+        - cd proc_files
+        - mkdir -p build
+        - cd build
+        - cmake ..
+        - make
+
+#path_classifiers:
+#  generated:
+#    - exclude: c_src/**/*
+

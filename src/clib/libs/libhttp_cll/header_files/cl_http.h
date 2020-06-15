@@ -117,6 +117,21 @@ bc_buffer_pair_s;
 array<bc_buffer_pair_s> bc_buffer_pairs_s;
 @end
 
+// -- string_pair_s --
+@begin
+struct
+<
+string_s:id
+string_s:value
+>
+string_pair_s;
+@end
+
+// -- string_pair_tree_s --
+@begin
+rb_tree<string_pair_s> string_pair_tree_s;
+@end
+
 // -- http_conn_s --
 @begin
 struct
@@ -133,7 +148,8 @@ bc_buffer_s:http
 
 bc_buffer_pairs_s:headers
 
-bc_array_s:headers_data
+bc_array_s:headers_buffer
+bc_pointer:headers_data
 ulli:receive_size
 >
 http_conn_s;
@@ -142,6 +158,8 @@ http_conn_s;
 unsigned http_conn_s_recognize_request_terminal(http_conn_s *this,const bc_array_s *a_source);
 unsigned http_conn_s_recognize_header_terminal(http_conn_s *this,const bc_array_s *a_source);
 unsigned http_conn_s_decode_url(char *a_ptr,const char *a_ptr_end);
+
+void http_conn_s_get_headers_tree(http_conn_s *this,string_pair_tree_s *a_trg);
 
 // -- http_conns_s --
 @begin
@@ -194,6 +212,25 @@ inlines bc_buffer_pair_s
 @begin
 inlines bc_buffer_pairs_s
 @end
+
+// -- string_pair_s --
+@begin
+inlines string_pair_s
+@end
+
+// -- string_pair_tree_s --
+@begin
+inlines string_pair_tree_s
+@end
+
+static inline int string_pair_tree_s___compare_value(const string_pair_tree_s *this,const string_pair_s *a_first,const string_pair_s *a_second)
+{/*{{{*/
+  (void)this;
+
+  if (a_first->id.size < a_second->id.size) { return -1; }
+  if (a_first->id.size > a_second->id.size) { return 1; }
+  return strncasecmp(a_first->id.data,a_second->id.data,a_first->id.size - 1);
+}/*}}}*/
 
 // -- http_conn_s --
 @begin

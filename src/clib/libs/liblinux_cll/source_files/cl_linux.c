@@ -105,6 +105,7 @@ int fd_s_read_cnt(const fd_s *this,size_t a_count,bc_array_s *a_trg)
 {/*{{{*/
   debug_assert(*this != -1);
 
+  unsigned old_used = a_trg->used;
   bc_array_s_push_blanks(a_trg,a_count);
 
   unsigned readed = 0;
@@ -112,7 +113,7 @@ int fd_s_read_cnt(const fd_s *this,size_t a_count,bc_array_s *a_trg)
 
   do
   {
-    read_cnt = read(*this,a_trg->data + readed,a_count - readed);
+    read_cnt = read(*this,a_trg->data + old_used + readed,a_count - readed);
 
     // - ERROR -
     if (read_cnt == -1)

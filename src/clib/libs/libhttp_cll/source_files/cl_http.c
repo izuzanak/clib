@@ -25,6 +25,16 @@ methods bc_buffer_pair_s
 methods bc_buffer_pairs_s
 @end
 
+// -- string_pair_s --
+@begin
+methods string_pair_s
+@end
+
+// -- string_pair_tree_s --
+@begin
+methods string_pair_tree_s
+@end
+
 // -- http_conn_s --
 @begin
 methods http_conn_s
@@ -1201,6 +1211,25 @@ unsigned http_conn_s_decode_url(char *a_ptr,const char *a_ptr_end)
   return o_ptr - a_ptr;
 }/*}}}*/
 
+void http_conn_s_get_headers_tree(http_conn_s *this,string_pair_tree_s *a_trg)
+{/*{{{*/
+  string_pair_tree_s_clear(a_trg);
+
+  if (this->headers.used != 0)
+  {
+    bc_buffer_pair_s *bbp_ptr = this->headers.data;
+    bc_buffer_pair_s *bbp_ptr_end = bbp_ptr + this->headers.used;
+    do {
+      CONT_INIT_CLEAR(string_pair_s,pair);
+
+      string_s_set(&pair.id,bbp_ptr->id.length,this->headers_data + bbp_ptr->id.begin);
+      string_s_set(&pair.value,bbp_ptr->value.length,this->headers_data + bbp_ptr->value.begin);
+
+      string_pair_tree_s_unique_swap_insert(a_trg,&pair);
+    } while(++bbp_ptr < bbp_ptr_end);
+  }
+}/*}}}*/
+
 // -- http_conns_s --
 @begin
 methods http_conns_s
@@ -1543,6 +1572,9 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
       {
         if (a_message->used >= conn->message_size)
         {
+          // - set headers data -
+          conn->headers_data = a_message->data;
+
           // - call conn_request_callback -
           if (((http_conn_request_callback_t)this->conn_request_callback)(this->cb_object,a_index,1))
           {
@@ -1555,10 +1587,13 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
       else
       {
         // - copy headers data -
-        if (conn->headers_data.used == 0)
+        if (conn->headers_buffer.used == 0)
         {
-          bc_array_s_set(&conn->headers_data,conn->headers_size,a_message->data);
+          bc_array_s_set(&conn->headers_buffer,conn->headers_size,a_message->data);
           bc_array_s_tail(a_message,a_message->used - conn->headers_size);
+
+          // - set headers data -
+          conn->headers_data = conn->headers_buffer.data;
 
           // - update receive size -
           conn->receive_size += conn->headers_size;

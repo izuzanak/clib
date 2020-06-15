@@ -431,28 +431,28 @@ int tcp_server_s_create(tcp_server_s *this,
 
   tcp_server_s_clear(this);
 
-  string_s_set_ptr(&this->ip,a_ip);
-  this->port = a_port;
-
   this->conn_new_callback = a_conn_new_callback;
   this->conn_drop_callback = a_conn_drop_callback;
   this->conn_recv_callback = a_conn_recv_callback;
   this->conn_send_callback = a_conn_send_callback;
   this->cb_object = a_cb_object;
 
-  // - open server socket -
-  socket_address_s address;
-  if (socket_address_s_create(&address,this->ip.data,this->port) ||
-      socket_s_create(&this->epoll_fd.fd,AF_INET,SOCK_STREAM) ||
-      socket_s_listen(&this->epoll_fd.fd,&address,256))
+  if (a_ip != NULL)
   {
-    throw_error(TCP_SERVER_LISTEN_ERROR);
-  }
+    // - open listen socket -
+    socket_address_s address;
+    if (socket_address_s_create(&address,a_ip,a_port) ||
+        socket_s_create(&this->epoll_fd.fd,AF_INET,SOCK_STREAM) ||
+        socket_s_listen(&this->epoll_fd.fd,&address,256))
+    {
+      throw_error(TCP_SERVER_LISTEN_ERROR);
+    }
 
-  int yes = 1;
-  if (setsockopt(this->epoll_fd.fd,SOL_TCP,TCP_NODELAY,&yes,sizeof(int)))
-  {
-    throw_error(TCP_SERVER_SOCKOPT_ERROR);
+    int yes = 1;
+    if (setsockopt(this->epoll_fd.fd,SOL_TCP,TCP_NODELAY,&yes,sizeof(int)))
+    {
+      throw_error(TCP_SERVER_SOCKOPT_ERROR);
+    }
   }
 
   return 0;

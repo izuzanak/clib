@@ -114,9 +114,6 @@ list<tcp_conn_s> tcp_conn_list_s;
 @begin
 struct
 <
-string_s:ip
-usi:port
-
 pointer:conn_new_callback
 pointer:conn_drop_callback
 pointer:conn_recv_callback

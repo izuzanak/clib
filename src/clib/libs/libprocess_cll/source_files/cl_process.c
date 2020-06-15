@@ -34,7 +34,7 @@ int process_s_create(process_s *this,const char *a_name)
   CONT_INIT_CLEAR(bc_array_s,buffer);
   bc_array_s_append_format(&buffer,PROCESS_LOG_DIR_PATH "/%s.log",a_name);
 
-  if (logger_s_add_file(&this->logger,9,buffer.data,10485760,5))
+  if (logger_s_add_file(&this->logger,9,buffer.data,1048576,2))
   {
     throw_error(PROCESS_LOGGER_CREATE_ERROR);
   }
