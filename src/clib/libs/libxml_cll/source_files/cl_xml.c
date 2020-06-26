@@ -213,11 +213,14 @@ void xml_parser_s_characters(void *user,const xmlChar *ch,int len)
 
   // -----
 
-  var_s text_var = xml_parser_s_get_string_var(parser,len,(const char *)ch);
+  if (text_array_stack->used != 0 && cont_array_stack->used != 0)
+  {
+    var_s text_var = xml_parser_s_get_string_var(parser,len,(const char *)ch);
 
-  // - push text to text and content arrays -
-  var_array_s_push(var_arrays_s_last(text_array_stack),&text_var);
-  var_array_s_push(var_arrays_s_last(cont_array_stack),&text_var);
+    // - push text to text and content arrays -
+    var_array_s_push(var_arrays_s_last(text_array_stack),&text_var);
+    var_array_s_push(var_arrays_s_last(cont_array_stack),&text_var);
+  }
 }/*}}}*/
 
 var_s xml_parser_s_get_string_var(xml_parser_s *this,unsigned a_length,const char *a_data)
