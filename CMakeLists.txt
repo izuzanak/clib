@@ -64,7 +64,7 @@ function(process_component)
   if(${COMP_NAME} MATCHES "_[a-z]*l$")
     add_library(${COMP_NAME} SHARED ${PROC_SOURCE_FILES})
     set_target_properties(${COMP_NAME} PROPERTIES PREFIX "")
-    install(TARGETS ${COMP_NAME} LIBRARY DESTINATION lib)
+    install(TARGETS ${COMP_NAME} LIBRARY DESTINATION lib/clib)
   else()
     add_executable(${COMP_NAME} ${PROC_SOURCE_FILES})
 
