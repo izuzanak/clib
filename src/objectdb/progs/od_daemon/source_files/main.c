@@ -46,6 +46,32 @@ int od_daemon_s_process_config(od_daemon_s *this)
     }
   }
 
+  // - if storage configuration changed -
+  if (!od_conf_storage_s_compare(&this->config.storage,&this->last_config.storage))
+  {
+    od_conf_storage_s *storage_cfg = &this->config.storage;
+    
+    if (storage_cfg->path.size > 1)
+    {
+      // - open storage file -
+      if (file_s_open(&this->storage,storage_cfg->path.data,"r+b"))
+      {
+        throw_error(OD_DAEMON_STORAGE_FILE_OPEN_ERROR);
+      }
+
+      // - read database from storage -
+      if (od_daemon_s_storage_read(this))
+      {
+        throw_error(OD_DAEMON_STORAGE_READ_ERROR);
+      }
+    }
+    else
+    {
+      // - storage is not used -
+      file_s_clear(&this->storage);
+    }
+  }
+
   // - update last configuration -
   od_config_s_copy(&this->last_config,&this->config);
 
@@ -90,6 +116,184 @@ int od_daemon_s_run(od_daemon_s *this)
   return 0;
 }/*}}}*/
 
+void od_daemon_s_storage_record(od_daemon_s *this,const string_s *a_path,var_s a_data_var)\
+{/*{{{*/
+
+  // - prepare record buffer -
+  this->buffer.used = 0;
+  bc_array_s_push_blanks(&this->buffer,ODB_RECORD_HEADER_SIZE);
+  bc_array_s_append_ptr(&this->buffer,"{\"path\":");
+  string_s_to_json(a_path,&this->buffer);
+  bc_array_s_append_ptr(&this->buffer,",\"data\":");
+  var_s_to_json(&a_data_var,&this->buffer);
+  bc_array_s_push(&this->buffer,'}');
+
+  // - compute record crc -
+  crc16_s rec_crc = 0x5555;
+  crc16_s_update(&rec_crc,this->buffer.used - ODB_RECORD_HEADER_SIZE,this->buffer.data + ODB_RECORD_HEADER_SIZE);
+
+  // - update record buffer -
+  *((unsigned *)this->buffer.data) = this->buffer.used - ODB_RECORD_HEADER_SIZE;
+  *((usi *)(this->buffer.data + sizeof(unsigned))) = rec_crc;
+}/*}}}*/
+
+int od_daemon_s_storage_read(od_daemon_s *this)
+{/*{{{*/
+
+  // - log message -
+  log_info_2("storage, reading");
+
+  odb_database_s_create(&this->database);
+
+  struct stat st;
+  if (fstat(fileno(this->storage),&st))
+  {
+    throw_error(OD_STORAGE_FILE_READ_ERROR);
+  }
+
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+  CONT_INIT_CLEAR(json_parser_s,json_parser);
+
+  VAR_CLEAR(path_str_var,loc_s_string_ptr("path"));
+  VAR_CLEAR(data_str_var,loc_s_string_ptr("data"));
+
+  size_t rest_size = st.st_size;
+  do {
+
+    // - read record header -
+    if (rest_size < ODB_RECORD_HEADER_SIZE)
+    {
+      break;
+    }
+
+    rest_size -= ODB_RECORD_HEADER_SIZE;
+
+    buffer.used = 0;
+    if (stream_s_read_cnt(&this->storage,&buffer,ODB_RECORD_HEADER_SIZE))
+    {
+      throw_error(OD_STORAGE_FILE_READ_ERROR);
+    }
+
+    unsigned rec_size = *((unsigned *)buffer.data);
+    crc16_s rec_crc = *((usi *)(buffer.data + sizeof(unsigned)));
+
+    // - read record data -
+    if (rest_size < rec_size)
+    {
+      if (file_s_seek(&this->storage,-ODB_RECORD_HEADER_SIZE,SEEK_CUR))
+      {
+        throw_error(OD_STORAGE_FILE_READ_ERROR);
+      }
+
+      break;
+    }
+
+    buffer.used = 0;
+    if (stream_s_read_cnt(&this->storage,&buffer,rec_size))
+    {
+      throw_error(OD_STORAGE_FILE_READ_ERROR);
+    }
+
+    rest_size -= rec_size;
+
+    // - check record crc -
+    if (!crc16_s_valid(&rec_crc,0x5555,buffer.used,buffer.data))
+    {
+      // - last record corrupted (no problem) -
+      if (rest_size <= 0)
+      {
+        if (file_s_seek(&this->storage,-(ODB_RECORD_HEADER_SIZE + rec_size),SEEK_CUR))
+        {
+          throw_error(OD_STORAGE_FILE_READ_ERROR);
+        }
+
+        break;
+      }
+      else
+      {
+        throw_error(OD_STORAGE_FILE_READ_ERROR);
+      }
+    }
+
+    // - parse record data -
+    CONT_INIT_CLEAR(var_s,record_var);
+    if (json_parser_s_parse(&json_parser,&buffer,&record_var))
+    {
+      throw_error(OD_STORAGE_FILE_READ_ERROR);
+    }
+
+    // - set value in database -
+    VAR_CLEAR(path_var,loc_s_dict_get(record_var,path_str_var));
+    VAR_CLEAR(data_var,loc_s_dict_get(record_var,data_str_var));
+
+    int updated;
+    odb_database_s_set_value(&this->database,loc_s_string_value(path_var)->data,data_var,&updated);
+
+  } while(1);
+
+  // - log message -
+  log_info_2("storage, reading done");
+
+  return 0;
+}/*}}}*/
+
+int od_daemon_s_storage_write(od_daemon_s *this,const string_s *a_path,var_s a_data_var)
+{/*{{{*/
+
+  // - prepare record buffer -
+  od_daemon_s_storage_record(this,a_path,a_data_var);
+
+  long offset;
+  if (file_s_tell(&this->storage,&offset))
+  {
+    throw_error(OD_STORAGE_FILE_WRITE_ERROR);
+  }
+
+  // - maximal storage size exceeded -
+  if (offset + this->buffer.used > this->config.storage.max_size)
+  {
+    // - close storage file -
+    file_s_clear(&this->storage);
+
+    // - prepare record buffer -
+    CONT_INIT_CLEAR(string_s,root_path);
+    od_daemon_s_storage_record(this,&root_path,this->database.data_var);
+
+    CONT_INIT_CLEAR(bc_array_s,tmp_path);
+    bc_array_s_append_format(&tmp_path,"%s_tmp",this->config.storage.path.data);
+
+    CONT_INIT_CLEAR(file_s,tmp_storage);
+
+    // - create temporary storage file -
+    if (file_s_open(&tmp_storage,tmp_path.data,"wb") ||
+        stream_s_write(&tmp_storage,this->buffer.data,this->buffer.used) ||
+        stream_s_fflush(&tmp_storage) || fsync(fileno(tmp_storage)))
+    {
+      throw_error(OD_STORAGE_FILE_WRITE_ERROR);
+    }
+
+    file_s_clear(&tmp_storage);
+        
+    // - rename temporary storage file to storage file -
+    if (rename(tmp_path.data,this->config.storage.path.data) ||
+        file_s_open(&this->storage,this->config.storage.path.data,"ab"))
+    {
+      throw_error(OD_STORAGE_FILE_WRITE_ERROR);
+    }
+  }
+  else
+  {
+    // - write record to file - 
+    if (stream_s_write(&this->storage,this->buffer.data,this->buffer.used) ||
+        stream_s_fflush(&this->storage) || fsync(fileno(this->storage)))
+    {
+      throw_error(OD_STORAGE_FILE_WRITE_ERROR);
+    }
+  }
+
+  return 0;
+}/*}}}*/
+
 #define OD_DAEMON_REMOVE_CHANNEL_WATCH() \
 {/*{{{*/\
 \
@@ -111,7 +315,7 @@ int od_daemon_s_run(od_daemon_s *this)
   }\
 }/*}}}*/
 
-int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path)
+int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a_data_var)
 {/*{{{*/
 
   // - search for matching node -
@@ -121,6 +325,50 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path)
   // - find info nodes in path -
   this->nodes.used = 0;
   odb_database_s_nodes_path(&this->database,&this->nodes);
+
+  // - retrieve send modification info nodes -
+  this->indexes.used = 0;
+  if (this->nodes.used != 0)
+  {
+    var_s *n_ptr = this->nodes.data;
+    var_s *n_ptr_end = n_ptr + this->nodes.used;
+    do {
+      odb_node_s *node = loc_s_odb_node_value(*n_ptr);
+      var_map_tree_s *info = loc_s_dict_value(node->info);
+
+      if (info->root_idx != c_idx_not_exist)
+      {
+        var_map_tree_s_node *ptr = info->data;
+        var_map_tree_s_node *ptr_end = ptr + info->used;
+        do {
+          if (ptr->valid)
+          {
+            if (loc_s_int_value(ptr->object.value) & od_watch_SEND_MODIFICATIONS)
+            {
+              ui_array_s_push(&this->indexes,loc_s_int_value(ptr->object.key));
+            }
+          }
+        } while(++ptr < ptr_end);
+      }
+    } while(++n_ptr < n_ptr_end);
+  }
+
+  if (this->indexes.used != 0)
+  {
+    // - create watch modifications event message -
+    this->buffer.used = 0;
+    bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
+    string_s_to_json(a_path,&this->buffer);
+    bc_array_s_append_ptr(&this->buffer,",\"data\":");
+    var_s_to_json(&a_data_var,&this->buffer);
+    bc_array_s_push(&this->buffer,'}');
+
+    // - send watch modifications event message -
+    if (od_channel_s_send_multi_message(&this->channel,&this->indexes,&this->buffer))
+    {
+      throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+    }
+  }
 
   if (node_var != NULL)
   {
@@ -140,14 +388,6 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path)
       CONT_INIT_CLEAR(var_s,data_var);
       odb_database_s_get_value(&this->database,path->data,&data_var);
 
-      // - create watch event message -
-      this->buffer.used = 0;
-      bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
-      string_s_to_json(path,&this->buffer);
-      bc_array_s_append_ptr(&this->buffer,",\"data\":");
-      var_s_to_json(&data_var,&this->buffer);
-      bc_array_s_push(&this->buffer,'}');
-
       // - retrieve channel indexes -
       this->indexes.used = 0;
 
@@ -156,17 +396,28 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path)
         var_map_tree_s_node *ptr = info->data;
         var_map_tree_s_node *ptr_end = ptr + info->used;
         do {
-          if (ptr->valid)
+          if (ptr->valid && !(loc_s_int_value(ptr->object.value) & od_watch_SEND_MODIFICATIONS))
           {
             ui_array_s_push(&this->indexes,loc_s_int_value(ptr->object.key));
           }
         } while(++ptr < ptr_end);
       }
 
-      // - send watch event message -
-      if (od_channel_s_send_multi_message(&this->channel,&this->indexes,&this->buffer))
+      if (this->indexes.used != 0)
       {
-        throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+        // - create watch event message -
+        this->buffer.used = 0;
+        bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
+        string_s_to_json(path,&this->buffer);
+        bc_array_s_append_ptr(&this->buffer,",\"data\":");
+        var_s_to_json(&data_var,&this->buffer);
+        bc_array_s_push(&this->buffer,'}');
+
+        // - send watch event message -
+        if (od_channel_s_send_multi_message(&this->channel,&this->indexes,&this->buffer))
+        {
+          throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+        }
       }
 
     } while(++n_ptr < n_ptr_end);
@@ -229,6 +480,15 @@ int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       int updated;
       odb_database_s_set_value(&this->database,path->data,data_var,&updated);
 
+      if (updated && this->storage != NULL)
+      {
+        // - write record to storage -
+        if (od_daemon_s_storage_write(this,path,data_var))
+        {
+          throw_error(OD_DAEMON_STORAGE_WRITE_ERROR);
+        }
+      }
+
       // - send response -
       this->buffer.used = 0;
       bc_array_s_append_format(&this->buffer,"{\"resp\":\"set\",\"id\":%" HOST_LL_FORMAT "d,\"path\":",id);
@@ -243,7 +503,7 @@ int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       if (updated)
       {
         // - process watch updates -
-        if (od_daemon_s_process_updates(this,path))
+        if (od_daemon_s_process_updates(this,path,data_var))
         {
           throw_error(OD_DAEMON_PROCESS_UPDATES_ERROR);
         }
@@ -271,7 +531,7 @@ int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       }
 
       // - process watch updates -
-      if (od_daemon_s_process_updates(this,path))
+      if (od_daemon_s_process_updates(this,path,data_var))
       {
         throw_error(OD_DAEMON_PROCESS_UPDATES_ERROR);
       }
@@ -306,6 +566,7 @@ int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
     {/*{{{*/
       lli id = va_arg(a_ap,lli);
       const string_s *path = va_arg(a_ap,const string_s *);
+      int options = va_arg(a_ap,int);
 
       CONT_INIT_CLEAR(var_s,node_var);
       odb_database_s_add_node(&this->database,path->data,&node_var);
@@ -319,7 +580,7 @@ int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       }
 
       VAR_CLEAR(index_var,loc_s_int(a_index));
-      loc_s_dict_set(node->info,index_var,NULL);
+      loc_s_dict_set(node->info,index_var,loc_s_int(options));
 
       // - update channel watches -
       loc_s_dict_set(*var_array_s_at(&this->channel_watches,a_index),

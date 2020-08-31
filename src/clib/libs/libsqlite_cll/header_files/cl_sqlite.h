@@ -21,6 +21,33 @@ include "cl_var.h"
 
 // - error codes -
 #define ERROR_SQLITE_CONN_DB_OPEN_ERROR 1
+#define ERROR_SQLITE_CONN_EXECUTE_ERROR 2
+#define ERROR_SQLITE_CONN_PREPARE_ERROR 3
+
+// === definition of structure sqlite_stmt_s ===================================
+
+typedef struct sqlite_stmt_s
+{
+  sqlite3_stmt *stmt;
+  int done;
+}
+sqlite_stmt_s;
+
+@begin
+define sqlite_stmt_s dynamic
+@end
+
+static inline void sqlite_stmt_s_init(sqlite_stmt_s *this);
+static inline void sqlite_stmt_s_clear(sqlite_stmt_s *this);
+static inline void sqlite_stmt_s_flush_all(sqlite_stmt_s *this);
+static inline void sqlite_stmt_s_swap(sqlite_stmt_s *this,sqlite_stmt_s *a_second);
+static inline void sqlite_stmt_s_copy(sqlite_stmt_s *this,const sqlite_stmt_s *a_src);
+static inline int sqlite_stmt_s_compare(const sqlite_stmt_s *this,const sqlite_stmt_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void sqlite_stmt_s_to_string(const sqlite_stmt_s *this,bc_array_s *a_trg);
+#endif
+
+// FIXME TODO continue ...
 
 // === definition of structure sqlite_s ========================================
 
@@ -41,6 +68,63 @@ static inline void sqlite_s_to_string(const sqlite_s *this,bc_array_s *a_trg);
 
 WUR static inline int sqlite_s_open(sqlite_s *this,const char *a_path);
 WUR static inline int sqlite_s_open_v2(sqlite_s *this,const char *a_path,int a_flags);
+WUR static inline int sqlite_s_threadsave(void);
+WUR libsqlite_cll_EXPORT int sqlite_s_execute(sqlite_s *this,
+    const char *a_query,int a_query_size,var_s *a_trg);
+WUR libsqlite_cll_EXPORT int sqlite_s_prepare(sqlite_s *this,
+    const char *a_query,int a_query_size,sqlite_stmt_s *a_trg);
+
+// === inline methods of structure sqlite_s ====================================
+
+static inline void sqlite_stmt_s_init(sqlite_stmt_s *this)
+{/*{{{*/
+  this->stmt = NULL;
+  this->done = 0;
+}/*}}}*/
+
+static inline void sqlite_stmt_s_clear(sqlite_stmt_s *this)
+{/*{{{*/
+  if (this->stmt != NULL)
+  {
+    sqlite3_finalize(this->stmt);
+  }
+
+  sqlite_stmt_s_init(this);
+}/*}}}*/
+
+static inline void sqlite_stmt_s_flush_all(sqlite_stmt_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void sqlite_stmt_s_swap(sqlite_stmt_s *this,sqlite_stmt_s *a_second)
+{/*{{{*/
+  sqlite_stmt_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void sqlite_stmt_s_copy(sqlite_stmt_s *this,const sqlite_stmt_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int sqlite_stmt_s_compare(const sqlite_stmt_s *this,const sqlite_stmt_s *a_second)
+{/*{{{*/
+  (void)this;
+  (void)a_second;
+
+  cassert(0);
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void sqlite_stmt_s_to_string(const sqlite_stmt_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"sqlite_stmt_s{%p}",this);
+}/*}}}*/
+#endif
 
 // === inline methods of structure sqlite_s ====================================
 
@@ -118,6 +202,11 @@ static inline int sqlite_s_open_v2(sqlite_s *this,const char *a_path,int a_flags
   }
 
   return 0;
+}/*}}}*/
+
+static inline int sqlite_s_threadsave(void)
+{/*{{{*/
+  return sqlite3_threadsafe();
 }/*}}}*/
 
 #endif

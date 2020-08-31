@@ -8,7 +8,7 @@ include "od_conf.h"
 validator_s g_config_validator;
 const char g_config_schema[] =
 /*{{{*/
-"{\"ip_address\":[\"type\",3],\"ip_port_pair\":[\"type\",5,\"items\",[\"ip\",\"ip_address\",\"port\",\"uint16\"]],\"uint\":[\"type\",1,\">=\",0],\"uint16\":[\"ref\",\"uint\",\"<=\",65535],\"config\":[\"type\",5,\"items\",[\"channel\",\"ip_port_pair\"]]}";
+"{\"uint\":[\"type\",1,\">=\",0],\"uint16\":[\"ref\",\"uint\",\"<=\",65535],\"ip_address\":[\"type\",3],\"path\":[\"regex\",\"^[a-zA-Z0-9/\\\\._-]*$\"],\"ip_port_pair\":[\"type\",5,\"items\",[\"ip\",\"ip_address\",\"port\",\"uint16\"]],\"storage\":[\"type\",5,\"items\",[\"path\",\"path\",\"max_size\",\"uint\"]],\"config\":[\"type\",5,\"items\",[\"channel\",\"ip_port_pair\",\"storage\",\"storage\"]]}";
 /*}}}*/
 
 // === methods of generated structures =========================================
@@ -18,20 +18,15 @@ const char g_config_schema[] =
 methods od_conf_ip_port_s
 @end
 
+// -- od_conf_storage_s --
+@begin
+methods od_conf_storage_s
+@end
+
 // -- od_config_s --
 @begin
 methods od_config_s
 @end
-
-int od_config_s_from_var(od_config_s *this,var_s a_var)
-{/*{{{*/
-  if (od_conf_ip_port_s_from_var(&this->channel,loc_s_dict_str_get(a_var,"channel")))
-  {
-    throw_error(OBJECTDB_CONF_INVALID_CONFIGURATION);
-  }
-
-  return 0;
-}/*}}}*/
 
 int od_config_s_read_file(od_config_s *this,const char *a_file_name)
 {/*{{{*/

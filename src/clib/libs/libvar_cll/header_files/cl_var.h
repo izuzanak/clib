@@ -57,7 +57,7 @@ typedef struct loc_s
 
 typedef struct loc_s * var_s;
 
-static inline var_s loc_s___new();
+static inline var_s loc_s___new(void);
 static inline void loc_s___release(var_s this);
 static inline int loc_s_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED
@@ -183,7 +183,7 @@ void var_map_tree_s_to_json_nice(const var_map_tree_s *this,json_nice_s *a_json_
 // === definition of loc_s types ===============================================
 
 // - type BLANK -
-static inline var_s loc_s_blank();
+static inline var_s loc_s_blank(void);
 static inline void loc_s_blank_clear(var_s this);
 static inline int loc_s_blank_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED
@@ -237,7 +237,7 @@ static inline void loc_s_string_to_json_nice(var_s this,json_nice_s *a_json_nice
 static inline const string_s *loc_s_string_value(var_s this);
 
 // - type ARRAY -
-static inline var_s loc_s_array();
+static inline var_s loc_s_array(void);
 static inline void loc_s_array_clear(var_s this);
 static inline int loc_s_array_order(var_s a_first,var_s a_second);
 libvar_cll_EXPORT int loc_s_array___order(const var_array_s *a_first,const var_array_s *a_second);

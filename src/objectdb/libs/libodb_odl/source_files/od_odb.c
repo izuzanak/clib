@@ -35,93 +35,114 @@ void odb_database_s_create(odb_database_s *this)
 
 void odb_database_s_set_value(odb_database_s *this,const char *a_path,var_s a_value_var,int *a_updated)
 {/*{{{*/
-  var_s data_var = this->data_var;
 
-  const char *key_ptr = a_path;
-  const char *key_end_ptr;
-  do {
-    key_end_ptr = strchrnul(key_ptr,'/');
-
-    VAR_CLEAR(key_var,loc_s_string(key_end_ptr - key_ptr,key_ptr));
-
-    // - not last key -
-    if (*key_end_ptr != '\0')
+  // - path of root node -
+  if (a_path == NULL || a_path[0] == '\0')
+  {
+    // - compare actual and new value -
+    if (var_s_compare(&this->data_var,&a_value_var))
     {
-      // - key does exists -
-      if (loc_s_dict_has_key(data_var,key_var))
-      {
-        var_s next_data_var = loc_s_dict_get(data_var,key_var);
+      *a_updated = 0;
+    }
+    else
+    {
+      *a_updated = 1;
+      var_s_copy(&this->data_var,&a_value_var);
+    }
+  }
+  else
+  {
+    var_s data_var = this->data_var;
 
-        // - next data_var is not dict -
-        if (next_data_var->v_type != c_bi_type_dict)
+    const char *key_ptr = a_path;
+    const char *key_end_ptr;
+    do {
+      key_end_ptr = strchrnul(key_ptr,'/');
+
+      VAR_CLEAR(key_var,loc_s_string(key_end_ptr - key_ptr,key_ptr));
+
+      // - not last key -
+      if (*key_end_ptr != '\0')
+      {
+        // - key does exists -
+        if (loc_s_dict_has_key(data_var,key_var))
+        {
+          var_s next_data_var = loc_s_dict_get(data_var,key_var);
+
+          // - next data_var is not dict -
+          if (next_data_var->v_type != c_bi_type_dict)
+          {
+            var_s dict = loc_s_dict();
+            loc_s_dict_set(data_var,key_var,dict);
+            data_var = dict;
+          }
+          else
+          {
+            data_var = next_data_var;
+          }
+        }
+
+        // - key does not exist -
+        else
         {
           var_s dict = loc_s_dict();
           loc_s_dict_set(data_var,key_var,dict);
           data_var = dict;
         }
+      }
+
+      // - last key -
+      else
+      {
+        var_s value_var = loc_s_dict_get(data_var,key_var);
+
+        // - compare actual and new value -
+        if (var_s_compare(&value_var,&a_value_var))
+        {
+          *a_updated = 0;
+        }
         else
         {
-          data_var = next_data_var;
+          *a_updated = 1;
+          loc_s_dict_set(data_var,key_var,a_value_var);
         }
+
+        break;
       }
 
-      // - key does not exist -
-      else
-      {
-        var_s dict = loc_s_dict();
-        loc_s_dict_set(data_var,key_var,dict);
-        data_var = dict;
-      }
-    }
-
-    // - last key -
-    else
-    {
-      var_s value_var = loc_s_dict_get(data_var,key_var);
-
-      // - compare actual and new value -
-      if (var_s_compare(&value_var,&a_value_var))
-      {
-        *a_updated = 0;
-      }
-      else
-      {
-        *a_updated = 1;
-        loc_s_dict_set(data_var,key_var,a_value_var);
-      }
-
-      break;
-    }
-
-    key_ptr = key_end_ptr + 1;
-  } while(1);
+      key_ptr = key_end_ptr + 1;
+    } while(1);
+  }
 }/*}}}*/
 
 void odb_database_s_get_value(odb_database_s *this,const char *a_path,var_s *a_value_var)
 {/*{{{*/
   var_s data_var = this->data_var;
 
-  const char *key_ptr = a_path;
-  const char *key_end_ptr;
-  do {
-    key_end_ptr = strchrnul(key_ptr,'/');
+  if (a_path != NULL && a_path[0] != '\0')
+  {
+    const char *key_ptr = a_path;
+    const char *key_end_ptr;
+    do {
+      key_end_ptr = strchrnul(key_ptr,'/');
 
-    string_s key_str = {key_end_ptr - key_ptr + 1,(char *)key_ptr};
-    loc_s key_loc = {c_bi_type_string,{0},{.ptr = &key_str}};
+      string_s key_str = {key_end_ptr - key_ptr + 1,(char *)key_ptr};
+      loc_s key_loc = {c_bi_type_string,{0},{.ptr = &key_str}};
 
-    // - data_var is dictionary, and key does exist -
-    if (data_var->v_type == c_bi_type_dict && loc_s_dict_has_key(data_var,&key_loc))
-    {
-      data_var = loc_s_dict_get(data_var,&key_loc);
-    }
-    else
-    {
-      var_s_copy_loc(a_value_var,NULL);
-      return;
-    }
+      // - data_var is dictionary, and key does exist -
+      if (data_var->v_type == c_bi_type_dict && loc_s_dict_has_key(data_var,&key_loc))
+      {
+        data_var = loc_s_dict_get(data_var,&key_loc);
+      }
+      else
+      {
+        var_s_copy_loc(a_value_var,NULL);
+        return;
+      }
 
-    key_ptr = key_end_ptr + 1;
-  } while(*key_end_ptr != '\0');
+      key_ptr = key_end_ptr + 1;
+    } while(*key_end_ptr != '\0');
+  }
 
   var_s_copy_loc(a_value_var,data_var);
 }/*}}}*/
@@ -132,33 +153,36 @@ void odb_database_s_get_value(odb_database_s *this,const char *a_path,var_s *a_v
 \
   this->path_stack.used = 0;\
 \
-  const char *key_ptr = a_path;\
-  const char *key_end_ptr;\
-  do {\
-    key_end_ptr = strchrnul(key_ptr,'/');\
+  if (a_path != NULL && a_path[0] != '\0')\
+  {\
+    const char *key_ptr = a_path;\
+    const char *key_end_ptr;\
+    do {\
+      key_end_ptr = strchrnul(key_ptr,'/');\
 \
-    VAR_CLEAR(key_var,loc_s_string(key_end_ptr - key_ptr,key_ptr));\
+      VAR_CLEAR(key_var,loc_s_string(key_end_ptr - key_ptr,key_ptr));\
 \
-    /* - push node and key to stacks - */\
-    odb_node_key_s node_key = {node_var,key_var};\
-    odb_node_key_array_s_push(&this->path_stack,&node_key);\
+      /* - push node and key to stacks - */\
+      odb_node_key_s node_key = {node_var,key_var};\
+      odb_node_key_array_s_push(&this->path_stack,&node_key);\
 \
-    odb_node_s *node = loc_s_odb_node_value(node_var);\
+      odb_node_s *node = loc_s_odb_node_value(node_var);\
 \
-    /* - key does exists - */\
-    if (loc_s_dict_has_key(node->nodes,key_var))\
-    {\
-      node_var = loc_s_dict_get(node->nodes,key_var);\
-    }\
+      /* - key does exists - */\
+      if (loc_s_dict_has_key(node->nodes,key_var))\
+      {\
+        node_var = loc_s_dict_get(node->nodes,key_var);\
+      }\
 \
-    /* - key does not exist - */\
-    else\
-    {\
-      NOT_EXIST_CODE;\
-    }\
+      /* - key does not exist - */\
+      else\
+      {\
+        NOT_EXIST_CODE;\
+      }\
 \
-    key_ptr = key_end_ptr + 1;\
-  } while(*key_end_ptr != '\0');\
+      key_ptr = key_end_ptr + 1;\
+    } while(*key_end_ptr != '\0');\
+  }\
 \
   var_s_copy_loc(a_info_var,node_var);\
 /*}}}*/

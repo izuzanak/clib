@@ -5,6 +5,7 @@
 @begin
 include "cl_test.h"
 include "cl_json.h"
+include "cl_sys.h"
 @end
 
 // === definition of generated structures ======================================
@@ -180,6 +181,7 @@ void test_json_parse();
 void test_json_parse_comments();
 void test_json_create();
 void test_from_json();
+void test_load_json();
 
 // === program entry function ==================================================
 

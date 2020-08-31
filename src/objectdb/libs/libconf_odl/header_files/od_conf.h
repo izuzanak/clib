@@ -40,21 +40,32 @@ struct
 string_s:ip
 usi:port
 >
+options ( from_var )
 od_conf_ip_port_s;
 @end
 
-WUR static inline int od_conf_ip_port_s_from_var(od_conf_ip_port_s *this,var_s a_var);
+// -- od_conf_storage_s --
+@begin
+struct
+<
+string_s:path
+lli:max_size
+>
+options ( from_var )
+od_conf_storage_s;
+@end
 
 // -- od_config_s --
 @begin
 struct
 <
 od_conf_ip_port_s:channel
+od_conf_storage_s:storage
 >
+options ( from_var )
 od_config_s;
 @end
 
-WUR libconf_odl_EXPORT int od_config_s_from_var(od_config_s *this,var_s a_var);
 WUR libconf_odl_EXPORT int od_config_s_read_file(od_config_s *this,const char *a_file_name);
 
 // === definition of global functions ==========================================
@@ -69,13 +80,10 @@ void libconf_odl_clear();
 inlines od_conf_ip_port_s
 @end
 
-static inline int od_conf_ip_port_s_from_var(od_conf_ip_port_s *this,var_s a_var)
-{/*{{{*/
-  string_s_copy(&this->ip,loc_s_string_value(loc_s_dict_str_get(a_var,"ip")));
-  this->port = loc_s_int_value(loc_s_dict_str_get(a_var,"port"));
-
-  return 0;
-}/*}}}*/
+// -- od_conf_storage_s --
+@begin
+inlines od_conf_storage_s
+@end
 
 // -- od_config_s --
 @begin

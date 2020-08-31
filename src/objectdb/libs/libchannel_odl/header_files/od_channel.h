@@ -75,6 +75,8 @@ enum
   od_channel_UPDATE,
   od_channel_PING,
 
+  od_channel_OPTIONS,
+
   od_channel_LAST,
 };/*}}}*/
 

@@ -3,6 +3,7 @@
 #define __MAIN_H
 
 @begin
+include "cl_crc.h"
 include "cl_process.h"
 include "od_conf.h"
 include "od_channel.h"
@@ -14,8 +15,18 @@ include "od_odb.h"
 #define ERROR_OD_DAEMON_EPOLL_WAIT_ERROR 2
 
 #define ERROR_OD_DAEMON_CHANNEL_CREATE_ERROR 1
-#define ERROR_OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR 2
-#define ERROR_OD_DAEMON_PROCESS_UPDATES_ERROR 3
+#define ERROR_OD_DAEMON_STORAGE_FILE_OPEN_ERROR 2
+#define ERROR_OD_DAEMON_STORAGE_READ_ERROR 3
+#define ERROR_OD_DAEMON_STORAGE_WRITE_ERROR 4
+#define ERROR_OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR 5
+#define ERROR_OD_DAEMON_PROCESS_UPDATES_ERROR 6
+
+#define ERROR_OD_STORAGE_FILE_READ_ERROR 1
+#define ERROR_OD_STORAGE_FILE_WRITE_ERROR 2
+
+// === constants and definitions ===============================================
+
+#define ODB_RECORD_HEADER_SIZE (sizeof(unsigned) + sizeof(usi))
 
 // === definition of generated structures ======================================
 
@@ -31,6 +42,8 @@ odb_database_s:database
 od_channel_s:channel
 var_array_s:channel_watches
 
+file_s:storage
+
 $// - temporary buffers -
 bc_array_s:buffer
 ui_array_s:indexes
@@ -43,7 +56,11 @@ WUR int od_daemon_s_create(od_daemon_s *this);
 WUR int od_daemon_s_process_config(od_daemon_s *this);
 WUR int od_daemon_s_run(od_daemon_s *this);
 
-WUR int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path);
+void od_daemon_s_storage_record(od_daemon_s *this,const string_s *a_path,var_s a_data_var);
+WUR int od_daemon_s_storage_read(od_daemon_s *this);
+WUR int od_daemon_s_storage_write(od_daemon_s *this,const string_s *a_path,var_s a_data_var);
+
+WUR int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a_data_var);
 WUR int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
 
 // === inline methods of generated structures ==================================

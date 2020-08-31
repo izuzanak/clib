@@ -25,6 +25,8 @@ const char g_od_json_parser_init[] =
 "\"update\","
 "\"ping\","
 
+"\"options\","
+
 "\"last\","
 
 "\"\""
@@ -232,15 +234,17 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
   case od_channel_WATCH:
     {/*{{{*/
       var_s path_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_PATH]);
+      var_s options_var = loc_s_dict_get(msg_var,string_vars->data[od_channel_OPTIONS]);
 
-      if (path_var == NULL || path_var->v_type != c_bi_type_string)
+      if ((path_var == NULL || path_var->v_type != c_bi_type_string) ||
+          (options_var != NULL && options_var->v_type != c_bi_type_integer))
       {
         throw_error(OD_CHANNEL_MESSAGE_ERROR);
       }
 
       // - call callback -
       if (od_channel_s_message_call(this,a_index,od_channel_cbreq_WATCH,id,
-            loc_s_string_value(path_var)))
+            loc_s_string_value(path_var),options_var == NULL ? 0 : loc_s_int_value(options_var)))
       {
         throw_error(OD_CHANNEL_SERVER_CALLBACK_ERROR);
       }

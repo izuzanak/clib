@@ -13,6 +13,7 @@ const char *test_names[] =
   "json_parse_comments",
   "json_create",
   "from_json",
+  "load_json",
 };/*}}}*/
 
 test_function_t test_functions[] =
@@ -21,6 +22,7 @@ test_function_t test_functions[] =
   test_json_parse_comments,
   test_json_create,
   test_from_json,
+  test_load_json,
 };/*}}}*/
 
 // === methods of generated structures =========================================
@@ -447,6 +449,17 @@ void test_from_json()
   cassert(strncmp(target.data,"[{first:1,second:1,array:[{first:0,second:1,third:2}]},{first:2,second:1,array:[{first:0,second:1,third:2}]},{first:3,second:1,array:[{first:0,second:1,third:2}]}]",target.used) == 0);
 #endif
 #endif
+}/*}}}*/
+
+void test_load_json()
+{/*{{{*/
+  CONT_INIT_CLEAR(file_s,file);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+  CONT_INIT_CLEAR(var_s,object);
+
+  //cassert(file_s_open(&file,"/home/jirka/folder/work/programming/git/uclang/uclang_build/macs/generated/phase.json","rb") == 0);
+  //cassert(file_s_read_close(&file,&buffer) == 0);
+  //cassert(json_parse(&buffer,&object) == 0);
 }/*}}}*/
 
 // === program entry function ==================================================

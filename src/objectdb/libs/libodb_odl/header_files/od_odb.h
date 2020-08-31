@@ -20,6 +20,13 @@ include "cl_var.h"
 // - error codes -
 #define ERROR_OD_ODB_DUMMY_ERROR 1
 
+// === constants and definitions ===============================================
+
+enum
+{/*{{{*/
+  od_watch_SEND_MODIFICATIONS = 0x01,
+};/*}}}*/
+
 // === definition of generated structures ======================================
 
 // -- odb_node_s --
@@ -143,8 +150,8 @@ static inline void loc_s_odb_node_to_string(var_s this,bc_array_s *a_trg)
   var_s_to_string(&odb_node->info,a_trg);
   bc_array_s_append_ptr(a_trg,",path:");
   var_s_to_string(&odb_node->path,a_trg);
-  //bc_array_s_append_ptr(a_trg,",nodes:");
-  //var_s_to_string(&odb_node->nodes,a_trg);
+  bc_array_s_append_ptr(a_trg,",nodes:");
+  var_s_to_string(&odb_node->nodes,a_trg);
   bc_array_s_push(a_trg,'}');
 }/*}}}*/
 #endif
