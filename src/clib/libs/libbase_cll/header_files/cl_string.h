@@ -143,6 +143,7 @@ static inline void string_s_copy(string_s *this,const string_s *a_src)
     return;
   }
 
+  debug_assert(a_src->size > 0);
   this->data = (char *)cmalloc(a_src->size*sizeof(char));
   memcpy(this->data,a_src->data,(a_src->size - 1)*sizeof(char));
 

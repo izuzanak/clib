@@ -34,7 +34,7 @@ void test_sqlite()
 #define DB_PATH "/dev/shm/db.sql"
 //#define DB_PATH "tests/libsqlite_cll_test/sqlite/db.sql"
 
-  cassert(system("rm -f " DB_PATH) == 0);
+  cassert(system("rm -f " DB_PATH) == 0); // NOLINT
 
   // - sqlite_s_open -
   CONT_INIT(sqlite_s,sqlite_0);

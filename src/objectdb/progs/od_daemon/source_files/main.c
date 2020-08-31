@@ -209,10 +209,8 @@ int od_daemon_s_storage_read(od_daemon_s *this)
 
         break;
       }
-      else
-      {
-        throw_error(OD_STORAGE_FILE_READ_ERROR);
-      }
+
+      throw_error(OD_STORAGE_FILE_READ_ERROR);
     }
 
     // - parse record data -
@@ -224,6 +222,8 @@ int od_daemon_s_storage_read(od_daemon_s *this)
 
     // - set value in database -
     VAR_CLEAR(path_var,loc_s_dict_get(record_var,path_str_var));
+    debug_assert(path_var != NULL);
+
     VAR_CLEAR(data_var,loc_s_dict_get(record_var,data_str_var));
 
     int updated;
