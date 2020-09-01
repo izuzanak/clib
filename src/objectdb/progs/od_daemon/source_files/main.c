@@ -326,8 +326,13 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
   this->nodes.used = 0;
   odb_database_s_nodes_path(&this->database,&this->nodes);
 
+  // - check matching node for info -
+  if (node_var != NULL && loc_s_odb_node_value(node_var)->info != NULL)
+  {
+    var_array_s_push(&this->nodes,&node_var);
+  }
+
   // - retrieve send modification info nodes -
-  this->indexes.used = 0;
   if (this->nodes.used != 0)
   {
     var_s *n_ptr = this->nodes.data;
@@ -335,6 +340,9 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
     do {
       odb_node_s *node = loc_s_odb_node_value(*n_ptr);
       var_map_tree_s *info = loc_s_dict_value(node->info);
+
+      // - retrieve channel indexes -
+      this->indexes.used = 0;
 
       if (info->root_idx != c_idx_not_exist)
       {
@@ -350,30 +358,46 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
           }
         } while(++ptr < ptr_end);
       }
+
+      if (this->indexes.used != 0)
+      {
+        // - create watch modifications event message -
+        this->buffer.used = 0;
+        bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
+        string_s_to_json(loc_s_string_value(node->path),&this->buffer);
+        bc_array_s_append_ptr(&this->buffer,",\"mod\":");
+        string_s_to_json(a_path,&this->buffer);
+        bc_array_s_append_ptr(&this->buffer,",\"data\":");
+        var_s_to_json(&a_data_var,&this->buffer);
+        bc_array_s_push(&this->buffer,'}');
+
+        // - send watch modifications event message -
+        if (od_channel_s_send_multi_message(&this->channel,&this->indexes,&this->buffer))
+        {
+          throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+        }
+      }
+
     } while(++n_ptr < n_ptr_end);
-  }
-
-  if (this->indexes.used != 0)
-  {
-    // - create watch modifications event message -
-    this->buffer.used = 0;
-    bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
-    string_s_to_json(a_path,&this->buffer);
-    bc_array_s_append_ptr(&this->buffer,",\"data\":");
-    var_s_to_json(&a_data_var,&this->buffer);
-    bc_array_s_push(&this->buffer,'}');
-
-    // - send watch modifications event message -
-    if (od_channel_s_send_multi_message(&this->channel,&this->indexes,&this->buffer))
-    {
-      throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
-    }
   }
 
   if (node_var != NULL)
   {
-    // - find info nodes in subtree -
-    odb_database_s_nodes_tree(node_var,&this->nodes);
+    odb_node_s *node = loc_s_odb_node_value(node_var);
+
+    // - find info nodes in subtrees -
+    var_map_tree_s *tree = loc_s_dict_value(node->nodes);
+    if (tree->root_idx != c_idx_not_exist)
+    {
+      var_map_tree_s_node *ptr = tree->data;
+      var_map_tree_s_node *ptr_end = ptr + tree->used;
+      do {
+        if (ptr->valid)
+        {
+          odb_database_s_nodes_tree(ptr->object.value,&this->nodes);
+        }
+      } while(++ptr < ptr_end);
+    }
   }
 
   if (this->nodes.used != 0)
