@@ -691,6 +691,7 @@ int main(int argc,char **argv)
   char *name = "od_daemon";
   char *conf = "od_config.json";
 
+  // - process command line arguments -
   if (argc > 1)
   {
     int arg_idx = 1;
@@ -703,9 +704,17 @@ int main(int argc,char **argv)
       {
         conf = argv[arg_idx] + 7;
       }
+      else
+      {
+        cassert(0);
+      }
     } while(++arg_idx < argc);
   }
 
+  // - create process directories -
+  cassert(system("mkdir -p " PROCESS_RUN_DIR_PATH " " PROCESS_LOG_DIR_PATH) == 0); // NOLINT
+
+  // - create process -
   {
     cassert(signal_s_simple_handler(signal_handler) == 0);
 
