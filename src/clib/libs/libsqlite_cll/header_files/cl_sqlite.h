@@ -47,7 +47,7 @@ static inline int sqlite_stmt_s_compare(const sqlite_stmt_s *this,const sqlite_s
 static inline void sqlite_stmt_s_to_string(const sqlite_stmt_s *this,bc_array_s *a_trg);
 #endif
 
-// FIXME TODO continue ...
+// TODO continue ...
 
 // === definition of structure sqlite_s ========================================
 

@@ -27,8 +27,6 @@ include "cl_validator.h"
 
 // === constants and definitions ===============================================
 
-#define OD_JSON_CONFIG_FILE "od_config.json"
-
 extern validator_s g_config_validator;
 
 // === definition of generated structures ======================================

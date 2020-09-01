@@ -73,14 +73,14 @@ void test_add_remove_node()
   buffer.used = 0;
   var_s_to_string(&info,&buffer);
   bc_array_s_push(&buffer,'\0');
-  cassert(strcmp(buffer.data,"odb_node{info:<null>,path:first/second/third/value_1}") == 0);
+  cassert(strcmp(buffer.data,"odb_node{info:<null>,path:first/second/third/value_1,nodes:[]}") == 0);
 
   var_s_copy_loc(&loc_s_odb_node_value(info)->info,loc_s_string_ptr("watch"));
 
   buffer.used = 0;
   var_s_to_string(&info,&buffer);
   bc_array_s_push(&buffer,'\0');
-  cassert(strcmp(buffer.data,"odb_node{info:watch,path:first/second/third/value_1}") == 0);
+  cassert(strcmp(buffer.data,"odb_node{info:watch,path:first/second/third/value_1,nodes:[]}") == 0);
 
   odb_database_s_add_node(&db,"first/second/third/value_0",&info);
   odb_database_s_remove_node(&db);
@@ -90,7 +90,7 @@ void test_add_remove_node()
   buffer.used = 0;
   var_s_to_string(&db.node_var,&buffer);
   bc_array_s_push(&buffer,'\0');
-  cassert(strcmp(buffer.data,"odb_node{info:<null>,path:}") == 0);
+  cassert(strcmp(buffer.data,"odb_node{info:<null>,path:,nodes:[]}") == 0);
 #endif
 }/*}}}*/
 
@@ -113,7 +113,7 @@ void test_find_remove_node()
   buffer.used = 0;
   var_s_to_string(&info,&buffer);
   bc_array_s_push(&buffer,'\0');
-  cassert(strcmp(buffer.data,"odb_node{info:<null>,path:first/second/third/value_1}") == 0);
+  cassert(strcmp(buffer.data,"odb_node{info:<null>,path:first/second/third/value_1,nodes:[]}") == 0);
 
   odb_database_s_find_node(&db,"first/second/third/value_2",&info);
 
@@ -152,7 +152,7 @@ void test_nodes_path_tree()
   buffer.used = 0;
   var_array_s_to_string(&nodes,&buffer);
   bc_array_s_push(&buffer,'\0');
-  cassert(strcmp(buffer.data,"[odb_node{info:info_2,path:first/second}]") == 0);
+  cassert(strcmp(buffer.data,"[odb_node{info:info_2,path:first/second,nodes:[third:odb_node{info:info_1,path:first/second/third,nodes:[value:odb_node{info:info_0,path:first/second/third/value,nodes:[]}]}]}]") == 0);
 
   nodes.used = 0;
   odb_database_s_nodes_tree(node,&nodes);
@@ -160,7 +160,7 @@ void test_nodes_path_tree()
   buffer.used = 0;
   var_array_s_to_string(&nodes,&buffer);
   bc_array_s_push(&buffer,'\0');
-  cassert(strcmp(buffer.data,"[odb_node{info:info_1,path:first/second/third},odb_node{info:info_0,path:first/second/third/value}]") == 0);
+  cassert(strcmp(buffer.data,"[odb_node{info:info_1,path:first/second/third,nodes:[value:odb_node{info:info_0,path:first/second/third/value,nodes:[]}]},odb_node{info:info_0,path:first/second/third/value,nodes:[]}]") == 0);
 #endif
 }/*}}}*/
 

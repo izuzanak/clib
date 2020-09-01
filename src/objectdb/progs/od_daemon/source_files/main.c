@@ -688,6 +688,24 @@ int main(int argc,char **argv)
   libconf_odl_init();
   libodb_odl_init();
 
+  char *name = "od_daemon";
+  char *conf = "od_config.json";
+
+  if (argc > 1)
+  {
+    int arg_idx = 1;
+    do {
+      if (strncmp("--name=",argv[arg_idx],7) == 0)
+      {
+        name = argv[arg_idx] + 7;
+      }
+      else if (strncmp("--conf=",argv[arg_idx],7) == 0)
+      {
+        conf = argv[arg_idx] + 7;
+      }
+    } while(++arg_idx < argc);
+  }
+
   {
     cassert(signal_s_simple_handler(signal_handler) == 0);
 
@@ -698,13 +716,13 @@ int main(int argc,char **argv)
     g_epoll = &epoll;
 
     CONT_INIT_CLEAR(process_s,process);
-    cassert(process_s_create(&process,"od_daemon") == 0);
+    cassert(process_s_create(&process,name) == 0);
 
     do {
       CONT_INIT_CLEAR(od_daemon_s,daemon);
 
       if (od_daemon_s_create(&daemon) ||
-          od_config_s_read_file(&daemon.config,OD_JSON_CONFIG_FILE))
+          od_config_s_read_file(&daemon.config,conf))
       {
         break;
       }
