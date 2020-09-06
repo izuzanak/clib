@@ -340,6 +340,7 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
     do {
       odb_node_s *node = loc_s_odb_node_value(*n_ptr);
       var_map_tree_s *info = loc_s_dict_value(node->info);
+      const string_s *path = loc_s_string_value(node->path);
 
       // - retrieve channel indexes -
       this->indexes.used = 0;
@@ -364,9 +365,9 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
         // - create watch modifications event message -
         this->buffer.used = 0;
         bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
-        string_s_to_json(loc_s_string_value(node->path),&this->buffer);
+        string_s_to_json(path,&this->buffer);
         bc_array_s_append_ptr(&this->buffer,",\"mod\":");
-        string_s_to_json(a_path,&this->buffer);
+        string_s_buffer_to_json(a_path->data + path->size - 1 + 1,a_path->data + a_path->size - 1,&this->buffer);
         bc_array_s_append_ptr(&this->buffer,",\"data\":");
         var_s_to_json(&a_data_var,&this->buffer);
         bc_array_s_push(&this->buffer,'}');

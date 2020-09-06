@@ -35,17 +35,14 @@ void string_s_set_format(string_s *this,const char *a_format,...)
   }
 }/*}}}*/
 
-void string_s_to_json(const string_s *this,bc_array_s *a_trg)
+void string_s_buffer_to_json(const char *a_ptr,const char *a_ptr_end,bc_array_s *a_trg)
 {/*{{{*/
   bc_array_s_push(a_trg,'"');
 
-  if (this->size > 1)
+  if (a_ptr < a_ptr_end)
   {
-    char *ptr = this->data;
-    char *ptr_end = ptr + this->size - 1;
     do {
-
-      switch (*ptr)
+      switch (*a_ptr)
       {
         case '\b':
           bc_array_s_push(a_trg,'\\');
@@ -76,10 +73,9 @@ void string_s_to_json(const string_s *this,bc_array_s *a_trg)
           bc_array_s_push(a_trg,'"');
           break;
         default:
-          bc_array_s_push(a_trg,*ptr);
+          bc_array_s_push(a_trg,*a_ptr);
       }
-
-    } while(++ptr < ptr_end);
+    } while(++a_ptr < a_ptr_end);
   }
 
   bc_array_s_push(a_trg,'"');
