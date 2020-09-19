@@ -1,6 +1,6 @@
 
 set(CONF_COMPONENTS
-  "src/segmentd/libs/libsegfile_sdl"
+  "src/clib/libs/libtest_cll"
   "src/segmentd/libs/libsegfiles_sdl")
 set(CONF_HEADER_DIRS)
 

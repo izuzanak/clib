@@ -4,6 +4,7 @@
 
 @begin
 include "sd_segfile.h"
+include "sd_segfiles.h"
 @end
 
 // - function export definitions -
@@ -19,7 +20,8 @@ include "sd_segfile.h"
 
 // - error codes -
 #define ERROR_SD_SEGMENT_DESCR_FILE_CREATE_ERROR 1
-#define ERROR_SD_SEGMENT_DESCR_INVALID_SEGMENT_TYPE 2
+#define ERROR_SD_SEGMENT_DESCR_FILES_CREATE_ERROR 2
+#define ERROR_SD_SEGMENT_DESCR_INVALID_SEGMENT_TYPE 3
 
 // === constants and definitions ===============================================
 

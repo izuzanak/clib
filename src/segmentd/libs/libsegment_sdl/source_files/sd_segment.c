@@ -21,25 +21,45 @@ int sd_segment_descr_s_create(sd_segment_descr_s *this,sd_conf_segment_s *a_conf
 
   sd_conf_segment_s_copy(&this->config,a_config);
 
-  if (this->config.type == c_sd_segment_type_FILE)
+  switch (this->config.type)
   {
-    sd_segment_file_s *segfile = (sd_segment_file_s *)cmalloc(sizeof(sd_segment_file_s));
-    sd_segment_file_s_init(segfile);
+  case c_sd_segment_type_FILE:
+    {/*{{{*/
+      sd_segment_file_s *segfile = (sd_segment_file_s *)cmalloc(sizeof(sd_segment_file_s));
+      sd_segment_file_s_init(segfile);
 
-    // - create segment handle -
-    sd_segment_handle_s_create(&this->handle,segfile,
-        (sd_segment_clear_cb_t)sd_segment_file_s_clear,
-        (sd_segment_write_record_cb_t)sd_segment_file_s_write_record,
-        (sd_segment_get_record_cb_t)sd_segment_file_s_get_record);
+      // - create segment handle -
+      sd_segment_handle_s_create(&this->handle,segfile,
+          (sd_segment_clear_cb_t)sd_segment_file_s_clear,
+          (sd_segment_write_record_cb_t)sd_segment_file_s_write_record,
+          (sd_segment_get_record_cb_t)sd_segment_file_s_get_record);
 
-    // - create segment file -
-    if (sd_segment_file_s_create(segfile,this->config.path.data,this->config.size))
-    {
-      throw_error(SD_SEGMENT_DESCR_FILE_CREATE_ERROR);
-    }
-  }
-  else
-  {
+      // - create segment file -
+      if (sd_segment_file_s_create(segfile,this->config.path.data,this->config.size))
+      {
+        throw_error(SD_SEGMENT_DESCR_FILE_CREATE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case c_sd_segment_type_FILES:
+    {/*{{{*/
+      sd_segment_files_s *segfiles = (sd_segment_files_s *)cmalloc(sizeof(sd_segment_files_s));
+      sd_segment_files_s_init(segfiles);
+
+      // - create segment handle -
+      sd_segment_handle_s_create(&this->handle,segfiles,
+          (sd_segment_clear_cb_t)sd_segment_files_s_clear,
+          (sd_segment_write_record_cb_t)sd_segment_files_s_write_record,
+          (sd_segment_get_record_cb_t)sd_segment_files_s_get_record);
+
+      // - create segment file -
+      if (sd_segment_files_s_create(segfiles,this->config.path.data,this->config.size))
+      {
+        throw_error(SD_SEGMENT_DESCR_FILES_CREATE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  default:
     throw_error(SD_SEGMENT_DESCR_INVALID_SEGMENT_TYPE);
   }
 

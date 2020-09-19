@@ -5,31 +5,31 @@ include "main.h"
 
 // === constants and definitions ===============================================
 
-const char *test_name = "libsegfile_sdl_test";
+const char *test_name = "libsegfiles_sdl_test";
 
 const char *test_names[] =
 {/*{{{*/
-  "segfile",
+  "segfiles",
 };/*}}}*/
 
 test_function_t test_functions[] =
 {/*{{{*/
-  test_segfile,
+  test_segfiles,
 };/*}}}*/
 
 // === test execution functions ================================================
 
-void test_segfile()
+void test_segfiles()
 {/*{{{*/
-  CONT_INIT_CLEAR(sd_segment_file_s,segfile);
-  cassert(sd_segment_file_s_create(&segfile,"tests/libsegfile_sdl_test/segfile/segfile.img",512) == 0);
+  CONT_INIT_CLEAR(sd_segment_files_s,segfiles);
+  cassert(sd_segment_files_s_create(&segfiles,"tests/libsegfiles_sdl_test/segfiles/segfiles.img",512) == 0);
 
   CONT_INIT_CLEAR(bc_array_s,buffer);
   time_s time;
 
-  // - sd_segment_file_s_get_record -
+  // - sd_segment_files_s_get_record -
   bc_array_s record;
-  if (sd_segment_file_s_get_record(&segfile,&time,&record))
+  if (sd_segment_files_s_get_record(&segfiles,&time,&record))
   {
     fprintf(stderr,"No record created yet\n");
   }
@@ -39,7 +39,7 @@ void test_segfile()
   }
 
   //fprintf(stderr,"BEFORE: ");
-  //DEBUG_PRINT(sd_record_s,(sd_record_s *)segfile.rec_data.data);
+  //DEBUG_PRINT(sd_record_s,(sd_record_s *)segfiles.rec_data.data);
 
   unsigned idx = 0;
   do {
@@ -49,17 +49,17 @@ void test_segfile()
     bc_array_s_append_format(&buffer,"Hello segment: ");
     time_s_to_string(&time,&buffer);
 
-    // - sd_segment_file_s_write_record -
-    cassert(sd_segment_file_s_write_record(&segfile,
+    // - sd_segment_files_s_write_record -
+    cassert(sd_segment_files_s_write_record(&segfiles,
           time,buffer.used,buffer.data) == 0);
   } while(++idx < 1);
 
-  // - sd_segment_file_s_get_record -
-  cassert(sd_segment_file_s_get_record(&segfile,&time,&record) == 0);
+  // - sd_segment_files_s_get_record -
+  cassert(sd_segment_files_s_get_record(&segfiles,&time,&record) == 0);
   fprintf(stderr,"Record: %.*s\n",record.used,record.data);
 
   //fprintf(stderr,"AFTER: ");
-  //DEBUG_PRINT(sd_record_s,(sd_record_s *)segfile.rec_data.data);
+  //DEBUG_PRINT(sd_record_s,(sd_record_s *)segfiles.rec_data.data);
 }/*}}}*/
 
 // === program entry function ==================================================

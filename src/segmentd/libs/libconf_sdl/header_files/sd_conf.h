@@ -38,6 +38,7 @@ extern validator_s g_config_validator;
 enum
 {
   c_sd_segment_type_FILE = 0,
+  c_sd_segment_type_FILES,
 };
 
 // - trace data type identifiers -
@@ -193,6 +194,10 @@ static inline int sd_conf_segment_s_from_var(sd_conf_segment_s *this,var_s a_var
   if (strcmp(type->data,"file") == 0)
   {
     this->type = c_sd_segment_type_FILE;
+  }
+  else if (strcmp(type->data,"files") == 0)
+  {
+    this->type = c_sd_segment_type_FILES;
   }
   else
   {

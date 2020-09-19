@@ -1,7 +1,6 @@
 
 set(CONF_COMPONENTS
-  "src/segmentd/libs/libsegfile_sdl"
-  "src/segmentd/libs/libsegfiles_sdl")
+  "src/segmentd/libs/librecord_sdl")
 set(CONF_HEADER_DIRS)
 
 set(CONF_DO_BUILD TRUE)
