@@ -1176,8 +1176,6 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
       }/*}}}*/
       break;
 
-      // TODO continue ... validate other properties
-
       // - ERROR -
       default:
         VALIDATE_STACKS_PUSH_PROP_KEY();

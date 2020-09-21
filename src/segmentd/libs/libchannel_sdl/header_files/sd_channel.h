@@ -69,6 +69,8 @@ enum
   sd_channel_cbreq_TRACE_WATCH,
   sd_channel_cbreq_TRACE_IGNORE,
   sd_channel_cbreq_TRACE_UPDATE,
+
+  sd_channel_cbreq_CONFIG = 30,
 };/*}}}*/
 
 // === definition of generated structures ======================================

@@ -157,6 +157,7 @@ sd_config_s;
 @end
 
 WUR libconf_sdl_EXPORT int sd_config_s_from_var(sd_config_s *this,var_s a_var);
+WUR libconf_sdl_EXPORT int sd_config_s_from_buffer(sd_config_s *this,const bc_array_s *a_buffer);
 WUR libconf_sdl_EXPORT int sd_config_s_read_file(sd_config_s *this,const char *a_file_name);
 
 // === definition of global functions ==========================================

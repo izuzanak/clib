@@ -113,9 +113,12 @@ int sd_segment_files_s_write_record(sd_segment_files_s *this,
 
   fd_s_clear(&fd);
 
-  if (rename(this->path_tmp.data,this->path.data))
+  // - syncfs is used to asure, that directory entry is also synced -
+  if (rename(this->path_tmp.data,this->path.data) ||
+      (fd = open(this->path.data,O_WRONLY)) == -1 ||
+      syncfs(fd))
   {
-    throw_error(SD_SEGFILES_FILE_RENAME_ERROR);
+    throw_error(SD_SEGFILES_RECORD_WRITE_ERROR);
   }
 
   return 0;

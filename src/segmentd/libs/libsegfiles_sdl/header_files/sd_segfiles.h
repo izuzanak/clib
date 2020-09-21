@@ -20,10 +20,9 @@ include "sd_record.h"
 // - error codes -
 #define ERROR_SD_SEGFILES_FILE_OPEN_ERROR 1
 #define ERROR_SD_SEGFILES_FILE_STAT_ERROR 2
-#define ERROR_SD_SEGFILES_FILE_RENAME_ERROR 3
-#define ERROR_SD_SEGFILES_RECORD_WRITE_ERROR 4
-#define ERROR_SD_SEGFILES_RECORD_READ_ERROR 5
-#define ERROR_SD_SEGFILES_RECORD_NOT_EXIST 6
+#define ERROR_SD_SEGFILES_RECORD_WRITE_ERROR 3
+#define ERROR_SD_SEGFILES_RECORD_READ_ERROR 4
+#define ERROR_SD_SEGFILES_RECORD_NOT_EXIST 5
 
 // === constants and definitions ===============================================
 

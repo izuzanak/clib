@@ -35,17 +35,17 @@ safe_rb_tree<sd_segment_descr_s> sd_segment_tree_s;
 safe_rb_tree<sd_trace_descr_s> sd_trace_tree_s;
 @end
 
-// -- ui_tree_s --
+// -- id_tree_s --
 @begin
-safe_rb_tree<ui> ui_tree_s;
+safe_rb_tree<string_s> id_tree_s;
 @end
 
 // -- sd_channel_watch_s --
 @begin
 struct
 <
-ui_tree_s:segment_idxs
-ui_tree_s:trace_idxs
+id_tree_s:segment_ids
+id_tree_s:trace_ids
 >
 sd_channel_watch_s;
 @end
@@ -59,7 +59,6 @@ array<sd_channel_watch_s> sd_channel_watches_s;
 @begin
 struct
 <
-bi:config_changed_flag
 sd_config_s:config
 sd_config_s:last_config
 
@@ -78,7 +77,7 @@ sd_daemon_s;
 WUR int sd_daemon_s_create(sd_daemon_s *this);
 
 WUR int sd_daemon_s_process_config(sd_daemon_s *this);
-WUR int sd_daemon_s_update_segments(sd_daemon_s *this);
+WUR int sd_daemon_s_update_segments(sd_daemon_s *this,ui_array_s *a_updated);
 WUR int sd_daemon_s_update_traces(sd_daemon_s *this);
 
 void sd_daemon_s_do_update_watches(sd_daemon_s *this);
@@ -126,16 +125,18 @@ static inline int sd_trace_tree_s___compare_value(const sd_trace_tree_s *this,co
   return memcmp(first->data,second->data,first->size - 1);
 }/*}}}*/
 
-// -- ui_tree_s --
+// -- id_tree_s --
 @begin
-inlines ui_tree_s
+inlines id_tree_s
 @end
 
-static inline int ui_tree_s___compare_value(const ui_tree_s *this,const ui *a_first,const ui *a_second)
+static inline int id_tree_s___compare_value(const id_tree_s *this,const string_s *a_first,const string_s *a_second)
 {/*{{{*/
   (void)this;
 
-  return *a_first < *a_second ? -1 : *a_first > *a_second ? 1 : 0;
+  if (a_first->size < a_second->size) { return -1; }
+  if (a_first->size > a_second->size) { return 1; }
+  return memcmp(a_first->data,a_second->data,a_first->size - 1);
 }/*}}}*/
 
 // -- sd_channel_watch_s --

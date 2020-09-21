@@ -370,6 +370,19 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                   }
                 }/*}}}*/
                 break;
+              case sd_channel_cbreq_CONFIG:
+                {/*{{{*/
+                  const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+
+                  // - call callback -
+                  if (sd_channel_s_message_call(
+                        this,a_index,request,id,
+                        &data))
+                  {
+                    throw_error(SD_CHANNEL_SERVER_CALLBACK_ERROR);
+                  }
+                }/*}}}*/
+                break;
             }
           }
         }/*}}}*/

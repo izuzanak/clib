@@ -122,6 +122,8 @@ methods sd_config_s
 
 int sd_config_s_from_var(sd_config_s *this,var_s a_var)
 {/*{{{*/
+  sd_config_s_clear(this);
+
   if (sd_conf_ip_port_s_from_var(&this->channel,loc_s_dict_str_get(a_var,"channel")) ||
       sd_conf_segment_tree_s_from_var(&this->segments,loc_s_dict_str_get(a_var,"segments")) ||
       sd_conf_trace_tree_s_from_var(&this->traces,loc_s_dict_str_get(a_var,"traces")))
@@ -132,29 +134,12 @@ int sd_config_s_from_var(sd_config_s *this,var_s a_var)
   return 0;
 }/*}}}*/
 
-int sd_config_s_read_file(sd_config_s *this,const char *a_file_name)
+int sd_config_s_from_buffer(sd_config_s *this,const bc_array_s *a_buffer)
 {/*{{{*/
-  sd_config_s_clear(this);
-
-  CONT_INIT_CLEAR(file_s,file);
-
-  if (file_s_open(&file,a_file_name,"r"))
-  {
-    throw_error(SEGMENTD_CONF_OPEN_ERROR);
-  }
-
-  CONT_INIT_CLEAR(bc_array_s,conf_buffer);
-
-  if (file_s_read_close(&file,&conf_buffer))
-  {
-    throw_error(SEGMENTD_CONF_READ_ERROR);
-  }
-  bc_array_s_push(&conf_buffer,'\0');
-
   CONT_INIT_CLEAR(json_parser_s,json_parser);
   CONT_INIT_CLEAR(var_s,config_var);
 
-  if (json_parser_s_parse(&json_parser,&conf_buffer,&config_var) ||
+  if (json_parser_s_parse(&json_parser,a_buffer,&config_var) ||
       config_var->v_type != c_bi_type_dict)
   {
     throw_error(SEGMENTD_CONF_PARSE_ERROR);
@@ -172,6 +157,30 @@ int sd_config_s_read_file(sd_config_s *this,const char *a_file_name)
 
   // - retrieve configuration -
   if (sd_config_s_from_var(this,config_var))
+  {
+    throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
+  }
+
+  return 0;
+}/*}}}*/
+
+int sd_config_s_read_file(sd_config_s *this,const char *a_file_name)
+{/*{{{*/
+  CONT_INIT_CLEAR(file_s,file);
+
+  if (file_s_open(&file,a_file_name,"r"))
+  {
+    throw_error(SEGMENTD_CONF_OPEN_ERROR);
+  }
+
+  CONT_INIT_CLEAR(bc_array_s,conf_buffer);
+
+  if (file_s_read_close(&file,&conf_buffer))
+  {
+    throw_error(SEGMENTD_CONF_READ_ERROR);
+  }
+
+  if (sd_config_s_from_buffer(this,&conf_buffer))
   {
     throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
   }
