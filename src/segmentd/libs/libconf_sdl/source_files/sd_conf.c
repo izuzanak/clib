@@ -8,7 +8,7 @@ include "sd_conf.h"
 validator_s g_config_validator;
 const char g_config_schema[] =
 /*{{{*/
-"{\"ip_address\":[\"type\",3],\"ip_port_pair\":[\"type\",5,\"items\",[\"ip\",\"ip_address\",\"port\",\"uint16\"]],\"path\":[\"regex\",\"^[a-zA-Z0-9/\\\\._-]\\\\+$\"],\"int\":[\"type\",1],\"uint\":[\"type\",1,\">=\",0],\"uint16\":[\"ref\",\"uint\",\"<=\",65535],\"uint32\":[\"ref\",\"uint\",\"<=\",4294967295],\"string_not_empty\":[\"type\",3,\"length >\",0],\"segment\":[\"type\",5,\"items\",[\"segment_id\",\"string_not_empty\",\"size\",\"uint\",\"type\",[\"regex\",\"^\\\\(file\\\\|files\\\\)$\"],\"path\",\"path\"]],\"mmap\":[\"type\",5,\"items\",[\"path\",\"path\",\"offset\",\"uint\",\"size\",\"uint\"]],\"record\":[\"type\",5,\"items\",[\"type\",[\"==\",\"raw\"],\"size\",\"uint\"]],\"trace_data\":[\"type\",5,\"items\",[\"type\",\"string_not_empty\"]],\"trace\":[\"type\",5,\"items\",[\"trace_id\",\"string_not_empty\",\"record\",\"record\",\"header\",\"trace_data\",\"trace\",\"mmap\",\"timestamp_div\",\"int\",\"timestamp\",\"trace_data\"]],\"config\":[\"type\",5,\"items\",[\"channel\",\"ip_port_pair\",\"segments\",[\"type\",4,\"all-items\",\"segment\"],\"traces\",[\"type\",4,\"all-items\",\"trace\"]]]}";
+"{\"ip_address\":[\"type\",3],\"ip_port_pair\":[\"type\",5,\"items\",[\"ip\",\"ip_address\",\"port\",\"uint16\"]],\"path\":[\"regex\",\"^[a-zA-Z0-9/\\\\._-]\\\\+$\"],\"int\":[\"type\",1],\"uint\":[\"type\",1,\">=\",0],\"uint16\":[\"ref\",\"uint\",\"<=\",65535],\"uint32\":[\"ref\",\"uint\",\"<=\",4294967295],\"string_not_empty\":[\"type\",3,\"length >\",0],\"segment\":[\"type\",5,\"items\",[\"segment_id\",\"string_not_empty\",\"size\",\"uint\",\"type\",[\"regex\",\"^\\\\(file\\\\|files\\\\)$\"],\"path\",\"path\"]],\"mmap\":[\"type\",5,\"items\",[\"path\",\"path\",\"offset\",\"uint\",\"size\",\"uint\"]],\"record\":[\"type\",5,\"items\",[\"type\",[\"==\",\"raw\"],\"size\",\"uint\"]],\"trace_data\":[\"type\",5,\"items\",[\"type\",\"string_not_empty\"]],\"trace\":[\"type\",5,\"items\",[\"trace_id\",\"string_not_empty\",\"record\",\"record\",\"header\",\"trace_data\",\"trace\",\"mmap\",\"timestamp_div\",\"int\",\"timestamp\",\"trace_data\"]],\"config\":[\"type\",5,\"items\",[\"channel\",\"ip_port_pair\",\"segments\",[\"type\",5,\"all-keys\",\"string_not_empty\",\"all-items\",\"segment\"],\"traces\",[\"type\",5,\"all-keys\",\"string_not_empty\",\"all-items\",\"trace\"]]]}";
 /*}}}*/
 
 // === methods of generated structures =========================================
@@ -32,28 +32,32 @@ int sd_conf_segment_tree_s_from_var(sd_conf_segment_tree_s *this,var_s a_var)
 {/*{{{*/
   sd_conf_segment_tree_s_clear(this);
 
-  var_array_s *conf_segments_arr = loc_s_array_value(a_var);
+  var_map_tree_s *conf_segments_tree = loc_s_dict_value(a_var);
 
-  if (conf_segments_arr->used != 0)
+  if (conf_segments_tree->count != 0)
   {
-    var_s *ct_ptr = conf_segments_arr->data;
-    var_s *ct_ptr_end = ct_ptr + conf_segments_arr->used;
+    var_map_tree_s_node *vmtn_ptr = conf_segments_tree->data;
+    var_map_tree_s_node *vmtn_ptr_end = vmtn_ptr + conf_segments_tree->used;
     do {
-      CONT_INIT_CLEAR(sd_conf_segment_s,conf_segment);
-      if (sd_conf_segment_s_from_var(&conf_segment,*ct_ptr))
+      if (vmtn_ptr->valid)
       {
-        throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
-      }
+        // - verify segment identifiers -
+        var_s segment_id_var = loc_s_dict_str_get(vmtn_ptr->object.value,"segment_id");
+        if (!var_s_compare(&vmtn_ptr->object.key,&segment_id_var))
+        {
+          throw_error(SEGMENTD_CONF_SEGMENT_ID_MISMATCH);
+        }
 
-      // - check uniqueness of segment id -
-      unsigned ct_index = sd_conf_segment_tree_s_get_idx(this,&conf_segment);
-      if (ct_index != c_idx_not_exist)
-      {
-        throw_error(SEGMENTD_CONF_NON_UNIQUE_SEGMENT_ID);
-      }
+        // - initialize segment -
+        CONT_INIT_CLEAR(sd_conf_segment_s,conf_segment);
+        if (sd_conf_segment_s_from_var(&conf_segment,vmtn_ptr->object.value))
+        {
+          throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
+        }
 
-      sd_conf_segment_tree_s_swap_insert(this,&conf_segment);
-    } while(++ct_ptr < ct_ptr_end);
+        sd_conf_segment_tree_s_swap_insert(this,&conf_segment);
+      }
+    } while(++vmtn_ptr < vmtn_ptr_end);
   }
 
   return 0;
@@ -88,28 +92,32 @@ int sd_conf_trace_tree_s_from_var(sd_conf_trace_tree_s *this,var_s a_var)
 {/*{{{*/
   sd_conf_trace_tree_s_clear(this);
 
-  var_array_s *conf_traces_arr = loc_s_array_value(a_var);
+  var_map_tree_s *conf_traces_tree = loc_s_dict_value(a_var);
 
-  if (conf_traces_arr->used != 0)
+  if (conf_traces_tree->count != 0)
   {
-    var_s *ct_ptr = conf_traces_arr->data;
-    var_s *ct_ptr_end = ct_ptr + conf_traces_arr->used;
+    var_map_tree_s_node *vmtn_ptr = conf_traces_tree->data;
+    var_map_tree_s_node *vmtn_ptr_end = vmtn_ptr + conf_traces_tree->used;
     do {
-      CONT_INIT_CLEAR(sd_conf_trace_s,conf_trace);
-      if (sd_conf_trace_s_from_var(&conf_trace,*ct_ptr))
+      if (vmtn_ptr->valid)
       {
-        throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
-      }
+        // - verify trace identifiers -
+        var_s trace_id_var = loc_s_dict_str_get(vmtn_ptr->object.value,"trace_id");
+        if (!var_s_compare(&vmtn_ptr->object.key,&trace_id_var))
+        {
+          throw_error(SEGMENTD_CONF_TRACE_ID_MISMATCH);
+        }
 
-      // - check uniqueness of trace id -
-      unsigned ct_index = sd_conf_trace_tree_s_get_idx(this,&conf_trace);
-      if (ct_index != c_idx_not_exist)
-      {
-        throw_error(SEGMENTD_CONF_NON_UNIQUE_TRACE_ID);
-      }
+        // - initialize trace -
+        CONT_INIT_CLEAR(sd_conf_trace_s,conf_trace);
+        if (sd_conf_trace_s_from_var(&conf_trace,vmtn_ptr->object.value))
+        {
+          throw_error(SEGMENTD_CONF_INVALID_CONFIGURATION);
+        }
 
-      sd_conf_trace_tree_s_swap_insert(this,&conf_trace);
-    } while(++ct_ptr < ct_ptr_end);
+        sd_conf_trace_tree_s_swap_insert(this,&conf_trace);
+      }
+    } while(++vmtn_ptr < vmtn_ptr_end);
   }
 
   return 0;

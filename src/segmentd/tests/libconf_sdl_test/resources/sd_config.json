@@ -3,16 +3,16 @@
     "ip": "0.0.0.0",
     "port": 9001
   },
-  "segments": [
-    {
+  "segments": {
+    "gps": {
       "segment_id": "gps",
       "size": 512,
       "type": "file",
       "path": "/dev/shm/segment_gps.img"
     }
-  ],
-  "traces": [
-    {
+  },
+  "traces": {
+    "gps": {
       "trace_id": "gps",
       "record": {
         "type": "raw",
@@ -41,7 +41,7 @@
         }
       }
     },
-    {
+    "meter": {
       "trace_id": "meter",
       "record": {
         "type": "raw",
@@ -72,5 +72,5 @@
         }
       }
     }
-  ]
+  }
 }
