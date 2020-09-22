@@ -29,8 +29,6 @@ include "cl_validator.h"
 
 // === constants and definitions ===============================================
 
-#define SD_JSON_CONFIG_FILE "sd_config.json"
-
 extern validator_s g_config_validator;
 
 // - segment type identifiers -

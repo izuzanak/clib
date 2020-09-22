@@ -1203,6 +1203,33 @@ int main(int argc,char **argv)
   libconf_sdl_init();
   librecord_sdl_init();
 
+  char *name = "sd_daemon";
+  char *conf = "sd_config.json";
+
+  // - process command line arguments -
+  if (argc > 1)
+  {
+    int arg_idx = 1;
+    do {
+      if (strncmp("--name=",argv[arg_idx],7) == 0)
+      {
+        name = argv[arg_idx] + 7;
+      }
+      else if (strncmp("--conf=",argv[arg_idx],7) == 0)
+      {
+        conf = argv[arg_idx] + 7;
+      }
+      else
+      {
+        cassert(0);
+      }
+    } while(++arg_idx < argc);
+  }
+
+  // - create process directories -
+  cassert(system("mkdir -p " PROCESS_RUN_DIR_PATH " " PROCESS_LOG_DIR_PATH) == 0); // NOLINT
+
+  // - create process -
   {
     cassert(signal_s_simple_handler(signal_handler) == 0);
 
@@ -1213,13 +1240,13 @@ int main(int argc,char **argv)
     g_epoll = &epoll;
 
     CONT_INIT_CLEAR(process_s,process);
-    cassert(process_s_create(&process,"sd_daemon") == 0);
+    cassert(process_s_create(&process,name) == 0);
 
     do {
       CONT_INIT_CLEAR(sd_daemon_s,daemon);
 
       if (sd_daemon_s_create(&daemon) ||
-          sd_config_s_read_file(&daemon.config,SD_JSON_CONFIG_FILE) ||
+          sd_config_s_read_file(&daemon.config,conf) ||
           sd_daemon_s_process_config(&daemon))
       {
         break;
