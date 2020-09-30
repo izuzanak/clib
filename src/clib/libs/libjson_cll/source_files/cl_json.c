@@ -262,16 +262,13 @@ state_2_label:
    if (in_char == 34) {
       goto state_18_label;
    }
-   if (in_char >= 35 && in_char < 92) {
+   if (in_char < 92) {
       goto state_2_label;
    }
    if (in_char == 92) {
       goto state_19_label;
    }
-   if (in_char >= 93) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 3 -
 state_3_label:
@@ -284,10 +281,7 @@ state_3_label:
    if (in_char == 10) {
       goto state_20_label;
    }
-   if (in_char >= 11) {
-      goto state_3_label;
-   }
-   return c_idx_not_exist;
+   goto state_3_label;
 
 // - STATE 4 -
 state_4_label:
@@ -478,10 +472,7 @@ state_21_label:
    if (in_char == 42) {
       goto state_29_label;
    }
-   if (in_char >= 43) {
-      goto state_21_label;
-   }
-   return c_idx_not_exist;
+   goto state_21_label;
 
 // - STATE 22 -
 state_22_label:
@@ -494,10 +485,7 @@ state_22_label:
    if (in_char == 10) {
       goto state_30_label;
    }
-   if (in_char >= 11) {
-      goto state_22_label;
-   }
-   return c_idx_not_exist;
+   goto state_22_label;
 
 // - STATE 23 -
 state_23_label:
@@ -588,10 +576,7 @@ state_29_label:
    if (in_char == 47) {
       goto state_37_label;
    }
-   if (in_char >= 48) {
-      goto state_21_label;
-   }
-   return c_idx_not_exist;
+   goto state_21_label;
 
 // - STATE 30 -
 state_30_label:

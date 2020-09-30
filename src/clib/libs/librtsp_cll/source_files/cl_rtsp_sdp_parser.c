@@ -122,7 +122,7 @@ unsigned rtsp_sdp_parser_s_recognize_terminal(rtsp_sdp_parser_s *this) // NOLINT
    if (in_char == 0) {
       goto state_1_label;
    }
-   if (in_char >= 1 && in_char < 10) {
+   if (in_char < 10) {
       goto state_2_label;
    }
    if (in_char >= 11 && in_char < 13) {

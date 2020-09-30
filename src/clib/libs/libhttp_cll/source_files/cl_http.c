@@ -106,7 +106,7 @@ state_1_label:
    if (in_char == 37) {
       goto state_9_label;
    }
-   if (in_char >= 38 && in_char < 61) {
+   if (in_char < 61) {
       goto state_8_label;
    }
    if (in_char >= 62) {
@@ -218,7 +218,7 @@ state_8_label:
    if (in_char == 37) {
       goto state_17_label;
    }
-   if (in_char >= 38 && in_char < 61) {
+   if (in_char < 61) {
       goto state_8_label;
    }
    if (in_char >= 62) {
@@ -455,7 +455,7 @@ state_27_label:
    if (in_char == 37) {
       goto state_17_label;
    }
-   if (in_char >= 38 && in_char < 61) {
+   if (in_char < 61) {
       goto state_27_label;
    }
    if (in_char >= 62) {
@@ -596,28 +596,25 @@ unsigned http_conn_s_recognize_header_terminal(http_conn_s *this,const bc_array_
    if (in_char == 13) {
       goto state_2_label;
    }
-   if (in_char >= 14 && in_char < 58) {
+   if (in_char < 58) {
       goto state_1_label;
    }
    if (in_char == 58) {
       goto state_3_label;
    }
-   if (in_char >= 59 && in_char < 67) {
+   if (in_char < 67) {
       goto state_1_label;
    }
    if (in_char == 67) {
       goto state_4_label;
    }
-   if (in_char >= 68 && in_char < 99) {
+   if (in_char < 99) {
       goto state_1_label;
    }
    if (in_char == 99) {
       goto state_4_label;
    }
-   if (in_char >= 100) {
-      goto state_1_label;
-   }
-   return c_idx_not_exist;
+   goto state_1_label;
 
 // - STATE 1 -
 state_1_label:

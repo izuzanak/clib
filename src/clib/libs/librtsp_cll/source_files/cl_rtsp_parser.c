@@ -2960,10 +2960,7 @@ state_240_label:
    if (in_char == 34) {
       goto state_275_label;
    }
-   if (in_char >= 35) {
-      goto state_240_label;
-   }
-   return c_idx_not_exist;
+   goto state_240_label;
 
 // - STATE 241 -
 state_241_label:

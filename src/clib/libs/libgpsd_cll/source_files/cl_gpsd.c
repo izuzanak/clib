@@ -106,10 +106,7 @@ fa_start_label:
    if (in_char == 13) {
       goto state_1_label;
    }
-   if (in_char >= 14) {
-      goto state_0_label;
-   }
-   return c_idx_not_exist;
+   goto state_0_label;
 
 // - STATE 1 -
 state_1_label:
