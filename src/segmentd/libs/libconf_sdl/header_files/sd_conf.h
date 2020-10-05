@@ -259,6 +259,14 @@ inlines sd_conf_trace_data_s
 
 static inline int sd_conf_trace_data_s_from_var(sd_conf_trace_data_s *this,var_s a_var)
 {/*{{{*/
+
+  // - reset mmap integers -
+  this->mmap.offset = 0;
+  this->mmap.size = 0;
+
+  // - reset segment integers -
+  this->segment.size = 0;
+
   var_s type_var = loc_s_dict_str_get(a_var,"type");
   const string_s *type = loc_s_string_value(type_var);
 

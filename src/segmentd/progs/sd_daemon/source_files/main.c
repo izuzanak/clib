@@ -260,7 +260,7 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
   if (this->config.traces.root_idx != c_idx_not_exist)
   {
     sd_conf_trace_tree_s_node *scttn_ptr = this->config.traces.data;
-    sd_conf_trace_tree_s_node *tcttn_ptr_end = scttn_ptr + this->config.traces.used;
+    sd_conf_trace_tree_s_node *scttn_ptr_end = scttn_ptr + this->config.traces.used;
     do {
       if (scttn_ptr->valid)
       {
@@ -308,7 +308,7 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
           }
         }
       }
-    } while(++scttn_ptr < tcttn_ptr_end);
+    } while(++scttn_ptr < scttn_ptr_end);
   }
 
   return 0;
