@@ -23,15 +23,16 @@ include "sd_segment.h"
 #define ERROR_SD_TRACE_HEADER_QUEUE_SIZE_ERROR 1
 #define ERROR_SD_TRACE_TRACE_QUEUE_SIZE_ERROR 2
 #define ERROR_SD_TRACE_TIMESTAMP_TRACE_QUEUE_SIZE_ERROR 3
-#define ERROR_SD_TRACE_WRITE_HEADER_ERROR 4
-#define ERROR_SD_TRACE_WRITE_TIMESTAMP_QUEUE_ERROR 5
-#define ERROR_SD_TRACE_INVALID_RECORD_ID 6
-#define ERROR_SD_TRACE_INVALID_RECORD_CRC 7
-#define ERROR_SD_TRACE_MMAP_CREATE_ERROR 8
-#define ERROR_SD_TRACE_SEGMENT_INVALID_SIZE 9
-#define ERROR_SD_TRACE_SEGMENT_CREATE_ERROR 10
-#define ERROR_SD_TRACE_SEGMENT_WRITE_ERROR 11
-#define ERROR_SD_TRACE_INVALID_TRACE_DATA_TYPE 12
+#define ERROR_SD_TRACE_READ_TIMESTAMP_STRUCTURES_ERROR 4
+#define ERROR_SD_TRACE_WRITE_HEADER_ERROR 5
+#define ERROR_SD_TRACE_WRITE_TIMESTAMP_QUEUE_ERROR 6
+#define ERROR_SD_TRACE_INVALID_RECORD_ID 7
+#define ERROR_SD_TRACE_INVALID_RECORD_CRC 8
+#define ERROR_SD_TRACE_MMAP_CREATE_ERROR 9
+#define ERROR_SD_TRACE_SEGMENT_INVALID_SIZE 10
+#define ERROR_SD_TRACE_SEGMENT_CREATE_ERROR 11
+#define ERROR_SD_TRACE_SEGMENT_WRITE_ERROR 12
+#define ERROR_SD_TRACE_INVALID_TRACE_DATA_TYPE 13
 
 #define ERROR_SD_TRACE_DESCR_FILE_OPEN_ERROR 1
 #define ERROR_SD_TRACE_DESCR_MMAP_CREATE_ERROR 2
@@ -146,6 +147,7 @@ sd_trace_queue_s:ts_trace_queue
 sd_segment_descr_s:ts_segment
 
 lli:timestamp_div
+bi:timestamp_nomem
 
 sd_record_timestamp_array_s:timestamp_buffer
 sd_record_timestamp_queue_s:timestamp_queue
@@ -165,15 +167,22 @@ WUR int sd_trace_s_create(sd_trace_s *this,
     void *ts_trace_data,ulli ts_trace_size,
     sd_conf_segment_s *a_ts_segment,
     unsigned a_data_size,
-    lli a_timestamp_div);
-void sd_trace_s_update_timestamp_structures(sd_trace_s *this,sd_record_timestamp_s *a_timestamp);
+    lli a_timestamp_div,
+    int a_timestamp_nomem);
+WUR libtrace_sdl_EXPORT int sd_trace_s_read_timestamp_structures(sd_trace_s *this);
+libtrace_sdl_EXPORT void sd_trace_s_clear_timestamp_structures(sd_trace_s *this);
+libtrace_sdl_EXPORT void sd_trace_s_update_timestamp_structures(sd_trace_s *this,sd_record_timestamp_s *a_timestamp);
 WUR libtrace_sdl_EXPORT int sd_trace_s_write_header(sd_trace_s *this,time_s a_time);
 WUR libtrace_sdl_EXPORT int sd_trace_s_write_timestamp_queue(sd_trace_s *this,time_s a_time);
 
 static inline lli sd_trace_s_head(sd_trace_s *this);
 static inline lli sd_trace_s_tail(sd_trace_s *this);
-static inline lli sd_trace_s_lee_time(sd_trace_s *this,time_s a_time);
-static inline lli sd_trace_s_gre_time(sd_trace_s *this,time_s a_time);
+
+WUR static inline int sd_trace_s_init_timestamp(sd_trace_s *this);
+static inline void sd_trace_s_clear_timestamp(sd_trace_s *this);
+libtrace_sdl_EXPORT lli sd_trace_s_lee_time(sd_trace_s *this,time_s a_time);
+libtrace_sdl_EXPORT lli sd_trace_s_gre_time(sd_trace_s *this,time_s a_time);
+
 WUR libtrace_sdl_EXPORT int sd_trace_s_write_record(sd_trace_s *this,
     time_s a_time,unsigned a_size,const char *a_data);
 WUR libtrace_sdl_EXPORT int sd_trace_s_read_record(sd_trace_s *this,
@@ -394,30 +403,25 @@ static inline lli sd_trace_s_tail(sd_trace_s *this)
   return -1;
 }/*}}}*/
 
-static inline lli sd_trace_s_lee_time(sd_trace_s *this,time_s a_time)
+static inline int sd_trace_s_init_timestamp(sd_trace_s *this)
 {/*{{{*/
-  sd_record_timestamp_s search_timestamp = {-1,a_time};
-
-  unsigned timestamp_idx = sd_record_timestamp_tree_s_get_lee_idx(&this->timestamp_tree,&search_timestamp);
-  if (timestamp_idx == c_idx_not_exist)
+  if (this->timestamp_nomem)
   {
-    return -1;
+    if (sd_trace_s_read_timestamp_structures(this))
+    {
+      throw_error(SD_TRACE_READ_TIMESTAMP_STRUCTURES_ERROR);
+    }
   }
 
-  return sd_record_timestamp_tree_s_at(&this->timestamp_tree,timestamp_idx)->id;
+  return 0;
 }/*}}}*/
 
-static inline lli sd_trace_s_gre_time(sd_trace_s *this,time_s a_time)
+static inline void sd_trace_s_clear_timestamp(sd_trace_s *this)
 {/*{{{*/
-  sd_record_timestamp_s search_timestamp = {-1,a_time};
-
-  unsigned timestamp_idx = sd_record_timestamp_tree_s_get_gre_idx(&this->timestamp_tree,&search_timestamp);
-  if (timestamp_idx == c_idx_not_exist)
+  if (this->timestamp_nomem)
   {
-    return -1;
+    sd_trace_s_clear_timestamp_structures(this);
   }
-
-  return sd_record_timestamp_tree_s_at(&this->timestamp_tree,timestamp_idx)->id;
 }/*}}}*/
 
 // -- sd_trace_descr_s --

@@ -52,7 +52,7 @@ void test_trace()
     c_sd_trace_data_type_MMAP,
     mmap.address + header_size,ts_trace_size,
     NULL,
-    rec_size,10) == 0);
+    rec_size,10,0) == 0);
 
   CONT_INIT_CLEAR(bc_array_s,buffer);
   bc_array_s_append_format(&buffer,"Hello trace world!!!");

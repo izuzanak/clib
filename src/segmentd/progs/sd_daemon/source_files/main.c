@@ -1010,8 +1010,15 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
 
       sd_trace_descr_s *trace = sd_trace_tree_s_at(&this->traces,trace_idx);
 
+      if (sd_trace_s_init_timestamp(&trace->trace))
+      {
+        throw_error(SD_DAEMON_TRACE_INIT_TIMESTAMP_ERROR);
+      }
+
       lli first_id = sd_trace_s_gre_time(&trace->trace,first_time);
       lli last_id = sd_trace_s_lee_time(&trace->trace,last_time);
+
+      sd_trace_s_clear_timestamp(&trace->trace);
 
       lli range_count = (first_id != -1 && last_id != -1 && first_id <= last_id) ? last_id - first_id + 1 : 0;
       lli resp_count = (count < 1 || count > range_count) ? range_count : count;
@@ -1115,8 +1122,16 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       }
 
       sd_trace_descr_s *trace = sd_trace_tree_s_at(&this->traces,trace_idx);
+
+      if (sd_trace_s_init_timestamp(&trace->trace))
+      {
+        throw_error(SD_DAEMON_TRACE_INIT_TIMESTAMP_ERROR);
+      }
+
       lli record_id = a_type == sd_channel_cbreq_TRACE_LEE_TIME ?
         sd_trace_s_lee_time(&trace->trace,time) : sd_trace_s_gre_time(&trace->trace,time);
+
+      sd_trace_s_clear_timestamp(&trace->trace);
 
       // - send response -
       this->buffer.used = 0;

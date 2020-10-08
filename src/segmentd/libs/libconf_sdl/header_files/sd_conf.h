@@ -128,6 +128,7 @@ sd_conf_record_s:record
 sd_conf_trace_data_s:header
 sd_conf_mmap_s:trace
 lli:timestamp_div
+bi:timestamp_nomem
 sd_conf_trace_data_s:timestamp
 >
 sd_conf_trace_s;
@@ -317,6 +318,7 @@ static inline int sd_conf_trace_s_from_var(sd_conf_trace_s *this,var_s a_var)
 {/*{{{*/
   string_s_copy(&this->trace_id,loc_s_string_value(loc_s_dict_str_get(a_var,"trace_id")));
   this->timestamp_div = loc_s_int_value(loc_s_dict_str_get(a_var,"timestamp_div"));
+  this->timestamp_nomem = loc_s_dict_str_get(a_var,"timestamp_nomem") != NULL;
 
   if (sd_conf_record_s_from_var(&this->record,loc_s_dict_str_get(a_var,"record")) ||
       sd_conf_trace_data_s_from_var(&this->header,loc_s_dict_str_get(a_var,"header")) ||
