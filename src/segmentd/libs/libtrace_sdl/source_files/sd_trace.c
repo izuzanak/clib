@@ -471,7 +471,7 @@ int sd_trace_s_read_timestamp_structures(sd_trace_s *this)
     {
     case c_sd_trace_data_type_MMAP:
       {/*{{{*/
-        if (&this->ts_trace_queue.used != 0)
+        if (this->ts_trace_queue.used != 0)
         {
           sd_record_timestamp_array_s_set(&this->timestamp_buffer,trace_rec_cnt,
             (sd_record_timestamp_s *)sd_trace_queue_s_last(&this->ts_trace_queue)->data);
@@ -526,13 +526,17 @@ int sd_trace_s_read_timestamp_structures(sd_trace_s *this)
     sd_record_timestamp_array_s_copy_resize(&this->timestamp_buffer,trace_rec_cnt);
     this->timestamp_buffer.used = trace_rec_cnt;
 
-    // - reset timestamp values -
-    sd_record_timestamp_s *ts_ptr = this->timestamp_buffer.data;
-    sd_record_timestamp_s *ts_ptr_end = ts_ptr + this->timestamp_buffer.used;
-    do {
-      ts_ptr->id = -1;
-      ts_ptr->time = 0;
-    } while(++ts_ptr < ts_ptr_end);
+    // - check created timestamp buffer -
+    if (this->timestamp_buffer.used != 0)
+    {
+      // - reset timestamp values -
+      sd_record_timestamp_s *ts_ptr = this->timestamp_buffer.data;
+      sd_record_timestamp_s *ts_ptr_end = ts_ptr + this->timestamp_buffer.used;
+      do {
+        ts_ptr->id = -1;
+        ts_ptr->time = 0;
+      } while(++ts_ptr < ts_ptr_end);
+    }
   }
 
   // - set timestamp queue buffer -
@@ -779,18 +783,16 @@ lli sd_trace_s_lee_time(sd_trace_s *this,time_s a_time)
 
     return id;
   }
-  else
+
+  sd_record_timestamp_s search_timestamp = {-1,a_time};
+
+  unsigned timestamp_idx = sd_record_timestamp_tree_s_get_lee_idx(&this->timestamp_tree,&search_timestamp);
+  if (timestamp_idx == c_idx_not_exist)
   {
-    sd_record_timestamp_s search_timestamp = {-1,a_time};
-
-    unsigned timestamp_idx = sd_record_timestamp_tree_s_get_lee_idx(&this->timestamp_tree,&search_timestamp);
-    if (timestamp_idx == c_idx_not_exist)
-    {
-      return -1;
-    }
-
-    return sd_record_timestamp_tree_s_at(&this->timestamp_tree,timestamp_idx)->id;
+    return -1;
   }
+
+  return sd_record_timestamp_tree_s_at(&this->timestamp_tree,timestamp_idx)->id;
 }/*}}}*/
 
 lli sd_trace_s_gre_time(sd_trace_s *this,time_s a_time)
@@ -821,18 +823,16 @@ lli sd_trace_s_gre_time(sd_trace_s *this,time_s a_time)
 
     return id;
   }
-  else
+
+  sd_record_timestamp_s search_timestamp = {-1,a_time};
+
+  unsigned timestamp_idx = sd_record_timestamp_tree_s_get_gre_idx(&this->timestamp_tree,&search_timestamp);
+  if (timestamp_idx == c_idx_not_exist)
   {
-    sd_record_timestamp_s search_timestamp = {-1,a_time};
-
-    unsigned timestamp_idx = sd_record_timestamp_tree_s_get_gre_idx(&this->timestamp_tree,&search_timestamp);
-    if (timestamp_idx == c_idx_not_exist)
-    {
-      return -1;
-    }
-
-    return sd_record_timestamp_tree_s_at(&this->timestamp_tree,timestamp_idx)->id;
+    return -1;
   }
+
+  return sd_record_timestamp_tree_s_at(&this->timestamp_tree,timestamp_idx)->id;
 }/*}}}*/
 
 int sd_trace_s_write_record(sd_trace_s *this,time_s a_time,unsigned a_size,const char *a_data)

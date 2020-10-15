@@ -959,7 +959,8 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
         // - adjust first id -
         if (first_id < trace_tail)
         {
-          first_id += ((trace_tail - first_id) / step + 1)*step;
+          first_id += ((trace_tail - first_id) / step)*step;
+          if (first_id < 0) { first_id += step; }
         }
 
         // - adjust last id -
