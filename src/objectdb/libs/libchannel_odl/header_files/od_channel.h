@@ -167,8 +167,8 @@ WUR libchannel_odl_EXPORT int od_channel_client_s_ping_time_event(void *a_od_cha
 
 // === definition of global functions ==========================================
 
-extern json_parser_s g_od_channel_json_parser;
-extern pointer_tree_s g_od_channel_json_string_map;
+extern string_tree_s g_const_strings;
+extern var_array_s g_string_vars;
 
 void libchannel_odl_init();
 void libchannel_odl_clear();
@@ -195,7 +195,8 @@ static inline int od_channel_s_send_message(od_channel_s *this,unsigned a_index,
 {/*{{{*/
 #if OPTION_BRUTAL_ASSERT == ENABLED
   CONT_INIT_CLEAR(var_s,msg_var);
-  brutal_assert(json_parser_s_parse(&g_od_channel_json_parser,a_message,&msg_var) == 0);
+  CONT_INIT_CLEAR(json_parser_s,json_parser);
+  brutal_assert(json_parser_s_parse(&json_parser,a_message,&msg_var) == 0);
 #endif
 
   // - log message -
@@ -243,7 +244,8 @@ static inline int od_channel_client_s_send_message(od_channel_client_s *this,bc_
 {/*{{{*/
 #if OPTION_BRUTAL_ASSERT == ENABLED
   CONT_INIT_CLEAR(var_s,msg_var);
-  brutal_assert(json_parser_s_parse(&g_od_channel_json_parser,a_message,&msg_var) == 0);
+  CONT_INIT_CLEAR(json_parser_s,json_parser);
+  brutal_assert(json_parser_s_parse(&json_parser,a_message,&msg_var) == 0);
 #endif
 
   // - log message -
