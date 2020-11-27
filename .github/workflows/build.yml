@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Update ubuntu
+        run: sudo apt-get update
+
+      - name: Install libraries
+        run: >
+          sudo apt-get -y install
+          libwebsockets-dev
+          libmicrohttpd-dev
+          libsnappy-dev
+          libuuid1
+
+      - name: Build and install cont_c
+        run: |
+          git clone --branch=cont_c https://github.com/izuzanak/cont.git ${GITHUB_WORKSPACE}/../cont_c
+
+          cd ${GITHUB_WORKSPACE}/../cont_c/build
+          cmake ..
+          make
+          sudo make install
+
+      - name: Build clib
+        run: |
+          cd ${GITHUB_WORKSPACE}/build
+          cmake -DCMAKE_BUILD_TYPE="Debug" ..
+          make
+
+      - name: Test clib
+        run: |
+          cd ${GITHUB_WORKSPACE}/build
+          mkdir -p /dev/shm/{run,log}
+          make test
+
