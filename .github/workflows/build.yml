@@ -23,6 +23,7 @@ jobs:
           libmicrohttpd-dev
           libsnappy-dev
           libuuid1
+          libpam0g-dev
 
       - name: Build and install cont_c
         run: |
