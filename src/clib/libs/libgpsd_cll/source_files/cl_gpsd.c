@@ -5,33 +5,28 @@ include "cl_gpsd.h"
 
 // === constants and definitions ===============================================
 
-const char g_gpsd_json_parser_init[] =
-/*{{{*/
-"{"
-"\"first\":["
+const char *g_gpsd_strings[] =
+{/*{{{*/
+  "first",
 
-"\"class\","
+  "class",
 
-"\"VERSION\","
-"\"DEVICES\","
-"\"DEVICE\","
-"\"SKY\","
-"\"WATCH\","
-"\"TPV\","
+  "VERSION",
+  "DEVICES",
+  "DEVICE",
+  "SKY",
+  "WATCH",
+  "TPV",
 
-"\"release\","
-"\"rev\","
-"\"proto_major\","
-"\"proto_minor\","
+  "release",
+  "rev",
+  "proto_major",
+  "proto_minor",
 
-"\"last\","
+  "last",
+};/*}}}*/
 
-"\"\""
-"]}";
-/*}}}*/
-
-json_parser_s g_gpsd_json_parser;
-pointer_tree_s g_gpsd_json_string_map;
+var_tree_s g_gpsd_vars;
 
 // === methods of generated structures =========================================
 
@@ -136,7 +131,6 @@ int gpsd_conn_s_conn_recv(void *a_gpsd_conn,unsigned a_index,bc_array_s *a_messa
     LOG_MSG_PARAMETERS(a_message->used,a_message->data));
 
   gpsd_conn_s *this = (gpsd_conn_s *)a_gpsd_conn;
-  var_array_s *string_vars = &g_gpsd_json_parser.string_vars;
 
   unsigned input_idx = 0;
   do {
@@ -153,19 +147,14 @@ int gpsd_conn_s_conn_recv(void *a_gpsd_conn,unsigned a_index,bc_array_s *a_messa
     bc_array_s message = {message_length,message_length,a_message->data + old_input_idx};
 
     CONT_INIT_CLEAR(var_s,msg_var);
-    if (json_parser_s_parse(&g_gpsd_json_parser,&message,&msg_var))
+    CONT_INIT_CLEAR(json_parser_s,json_parser);
+    if (json_parser_s_parse(&json_parser,&message,&msg_var))
     {
-      // - reset parser state after syntax error -
-      g_gpsd_json_parser.string_idxs.used = 0;
-      g_gpsd_json_parser.values.used = 0;
-      g_gpsd_json_parser.arrays.used = 0;
-      g_gpsd_json_parser.objects.used = 0;
-
       throw_error(GPSD_MESSAGE_ERROR);
     }
 
-    var_s class_var = loc_s_dict_get(msg_var,string_vars->data[cl_gpsd_class]);
-    unsigned class_idx = pointer_tree_s_get_idx(&g_gpsd_json_string_map,class_var);
+    var_s class_var = loc_s_dict_get(msg_var,g_gpsd_vars.data[cl_gpsd_class].object);
+    unsigned class_idx = var_tree_s_get_idx(&g_gpsd_vars,&class_var);
 
     switch (class_idx)
     {
@@ -320,28 +309,18 @@ int gpsd_conn_s_connect_time_event(void *a_gpsd_conn,unsigned a_index,epoll_even
 
 void libgpsd_cll_init()
 {/*{{{*/
-  json_parser_s_init(&g_gpsd_json_parser);
-  pointer_tree_s_init(&g_gpsd_json_string_map);
+  var_tree_s_init(&g_gpsd_vars);
 
-  // - initialize json parser strings -
-  CONT_INIT_CLEAR(var_s,dummy_var);
-  unsigned jpi_length = strlen(g_gpsd_json_parser_init);
-  bc_array_s buffer = {jpi_length,jpi_length,(char *)g_gpsd_json_parser_init};
-  cassert(json_parser_s_parse(&g_gpsd_json_parser,&buffer,&dummy_var) == 0);
-
-  // - initialize json string map -
-  var_array_s *string_vars = &g_gpsd_json_parser.string_vars;
-
-  unsigned s_idx = cl_gpsd_first;
-  unsigned s_idx_end = cl_gpsd_last;
+  const char **s_ptr = g_gpsd_strings;
+  const char **s_ptr_end = (void *)s_ptr + sizeof(g_gpsd_strings);
   do {
-    pointer_tree_s_insert(&g_gpsd_json_string_map,string_vars->data[s_idx]);
-  } while(++s_idx <= s_idx_end);
+    VAR_CLEAR(value,loc_s_string_ptr(*s_ptr));
+    var_tree_s_insert(&g_gpsd_vars,&value);
+  } while(++s_ptr < s_ptr_end);
 }/*}}}*/
 
 void libgpsd_cll_clear()
 {/*{{{*/
-  json_parser_s_clear(&g_gpsd_json_parser);
-  pointer_tree_s_clear(&g_gpsd_json_string_map);
+  var_tree_s_clear(&g_gpsd_vars);
 }/*}}}*/
 

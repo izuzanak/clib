@@ -167,8 +167,7 @@ WUR libchannel_odl_EXPORT int od_channel_client_s_ping_time_event(void *a_od_cha
 
 // === definition of global functions ==========================================
 
-extern string_tree_s g_const_strings;
-extern var_array_s g_string_vars;
+extern var_tree_s g_od_channel_vars;
 
 void libchannel_odl_init();
 void libchannel_odl_clear();

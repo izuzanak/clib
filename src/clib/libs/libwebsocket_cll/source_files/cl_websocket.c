@@ -292,6 +292,38 @@ int ws_context_s_create(ws_context_s *this,
 
 // === methods of structure ws_conn_s ==========================================
 
+int ws_conn_s_write(ws_conn_s *this,
+    const char *a_data,size_t a_size,enum lws_write_protocol a_protocol)
+{/*{{{*/
+  unsigned message_size = LWS_SEND_BUFFER_PRE_PADDING + a_size +
+    LWS_SEND_BUFFER_POST_PADDING;
+
+  // - retrieve message buffer -
+  bc_array_s *buffer = &this->message_buffer;
+
+  // - resize message buffer -
+  if (buffer->used < message_size)
+  {
+    buffer->used = 0;
+    bc_array_s_reserve(buffer,message_size);
+    buffer->used = buffer->size;
+  }
+
+  // - pointer to data in buffer -
+  unsigned char *buff_ptr = (unsigned char *)buffer->data + LWS_SEND_BUFFER_PRE_PADDING;
+
+  // - fill data to buffer -
+  memcpy(buff_ptr,a_data,a_size);
+
+  // - ERROR -
+  if (lws_write(this->ws_ptr,buff_ptr,a_size,a_protocol) != a_size)
+  {
+    throw_error(WS_CONN_WRITE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
 // === methods of structure ws_client_s ========================================
 
 int ws_client_s_create(ws_client_s *this,ws_context_s *a_ctx,

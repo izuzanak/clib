@@ -97,8 +97,7 @@ WUR libgpsd_cll_EXPORT int gpsd_conn_s_connect_time_event(void *a_gpsd_conn,unsi
 
 // === definition of global functions ==========================================
 
-extern json_parser_s g_gpsd_json_parser;
-extern pointer_tree_s g_gpsd_json_string_map;
+extern var_tree_s g_gpsd_vars;
 
 void libgpsd_cll_init();
 void libgpsd_cll_clear();

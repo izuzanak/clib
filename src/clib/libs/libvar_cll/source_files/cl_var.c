@@ -110,6 +110,11 @@ methods var_arrays_s
 methods var_queue_s
 @end
 
+// -- var_tree_s --
+@begin
+methods var_tree_s
+@end
+
 // -- var_map_s --
 @begin
 methods var_map_s

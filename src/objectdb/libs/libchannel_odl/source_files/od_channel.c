@@ -5,36 +5,31 @@ include "od_channel.h"
 
 // === constants and definitions ===============================================
 
-const char g_od_json_parser_init[] =
-/*{{{*/
-"{"
-"\"first\":["
+const char *g_od_channel_strings[] = 
+{/*{{{*/
+  "first",
 
-"\"id\","
+  "id",
 
-"\"type\","
-"\"resp\","
-"\"path\","
-"\"data\","
+  "type",
+  "resp",
+  "path",
+  "data",
 
-"\"set\","
-"\"cmd\","
-"\"get\","
-"\"watch\","
-"\"ignore\","
-"\"update\","
-"\"ping\","
+  "set",
+  "cmd",
+  "get",
+  "watch",
+  "ignore",
+  "update",
+  "ping",
 
-"\"options\","
+  "options",
 
-"\"last\","
+  "last",
+};/*}}}*/
 
-"\"\""
-"]}";
-/*}}}*/
-
-string_tree_s g_const_strings;
-var_array_s g_string_vars;
+var_tree_s g_od_channel_vars;
 
 // === methods of generated structures =========================================
 
@@ -159,22 +154,22 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
     throw_error(OD_CHANNEL_MESSAGE_ERROR);
   }
 
-  var_s id_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_ID]);
+  var_s id_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_ID].object);
   if (id_var == NULL || id_var->v_type != c_bi_type_integer)
   {
     throw_error(OD_CHANNEL_MESSAGE_ERROR);
   }
 
   lli id = loc_s_int_value(id_var);
-  var_s type_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_TYPE]);
-  unsigned type_idx = string_tree_s_get_idx(&g_const_strings,loc_s_string_value(type_var));
+  var_s type_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_TYPE].object);
+  unsigned type_idx = var_tree_s_get_idx(&g_od_channel_vars,&type_var);
 
   switch (type_idx)
   {
   case od_channel_SET:
     {/*{{{*/
-      var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
-      var_s data_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_DATA]);
+      var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+      var_s data_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_DATA].object);
 
       if (path_var == NULL || path_var->v_type != c_bi_type_string ||
           data_var == NULL)
@@ -192,8 +187,8 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
     break;
   case od_channel_CMD:
     {/*{{{*/
-      var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
-      var_s data_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_DATA]);
+      var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+      var_s data_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_DATA].object);
 
       if (path_var == NULL || path_var->v_type != c_bi_type_string ||
           data_var == NULL)
@@ -211,7 +206,7 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
     break;
   case od_channel_GET:
     {/*{{{*/
-      var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
+      var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
 
       if (path_var == NULL || path_var->v_type != c_bi_type_string)
       {
@@ -228,8 +223,8 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
     break;
   case od_channel_WATCH:
     {/*{{{*/
-      var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
-      var_s options_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_OPTIONS]);
+      var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+      var_s options_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_OPTIONS].object);
 
       if ((path_var == NULL || path_var->v_type != c_bi_type_string) ||
           (options_var != NULL && options_var->v_type != c_bi_type_integer))
@@ -247,7 +242,7 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
     break;
   case od_channel_IGNORE:
     {/*{{{*/
-      var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
+      var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
 
       if (path_var == NULL || path_var->v_type != c_bi_type_string)
       {
@@ -355,22 +350,22 @@ int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,
     throw_error(OD_CHANNEL_MESSAGE_ERROR);
   }
 
-  var_s id_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_ID]);
+  var_s id_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_ID].object);
   if (id_var == NULL || id_var->v_type != c_bi_type_integer)
   {
     throw_error(OD_CHANNEL_MESSAGE_ERROR);
   }
 
   lli id = loc_s_int_value(id_var);
-  var_s type_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_TYPE]);
-  unsigned type_idx = string_tree_s_get_idx(&g_const_strings,loc_s_string_value(type_var));
+  var_s type_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_TYPE].object);
+  unsigned type_idx = var_tree_s_get_idx(&g_od_channel_vars,&type_var);
 
   switch (type_idx)
   {
   case od_channel_UPDATE:
     {/*{{{*/
-      var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
-      var_s data_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_DATA]);
+      var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+      var_s data_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_DATA].object);
 
       if (path_var == NULL || path_var->v_type != c_bi_type_string ||
           data_var == NULL)
@@ -388,14 +383,14 @@ int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,
     break;
   default:
     {/*{{{*/
-      var_s resp_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_RESP]);
-      unsigned resp_idx = string_tree_s_get_idx(&g_const_strings,loc_s_string_value(resp_var));
+      var_s resp_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_RESP].object);
+      unsigned resp_idx = var_tree_s_get_idx(&g_od_channel_vars,&resp_var);
 
       switch (resp_idx)
       {
       case od_channel_SET:
         {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
+          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
 
           if (path_var == NULL || path_var->v_type != c_bi_type_string)
           {
@@ -412,7 +407,7 @@ int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,
         break;
       case od_channel_CMD:
         {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
+          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
 
           if (path_var == NULL || path_var->v_type != c_bi_type_string)
           {
@@ -429,8 +424,8 @@ int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,
         break;
       case od_channel_GET:
         {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
-          var_s data_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_DATA]);
+          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+          var_s data_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_DATA].object);
 
           if (path_var == NULL || path_var->v_type != c_bi_type_string ||
               data_var == NULL)
@@ -448,7 +443,7 @@ int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,
         break;
       case od_channel_WATCH:
         {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
+          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
 
           if (path_var == NULL || path_var->v_type != c_bi_type_string)
           {
@@ -465,7 +460,7 @@ int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,
         break;
       case od_channel_IGNORE:
         {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_string_vars.data[od_channel_PATH]);
+          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
 
           if (path_var == NULL || path_var->v_type != c_bi_type_string)
           {
@@ -617,25 +612,18 @@ int od_channel_client_s_ping_time_event(void *a_od_channel_client,unsigned a_ind
 
 void libchannel_odl_init()
 {/*{{{*/
+  var_tree_s_init(&g_od_channel_vars);
 
-  // - initialize json parser strings -
-  unsigned jpi_length = strlen(g_od_json_parser_init);
-  bc_array_s buffer = {jpi_length,jpi_length,(char *)g_od_json_parser_init};
-
-  CONT_INIT_CLEAR(var_s,dummy_var);
-  CONT_INIT_CLEAR(json_parser_s,json_parser);
-  cassert(json_parser_s_parse(&json_parser,&buffer,&dummy_var) == 0);
-
-  string_tree_s_init(&g_const_strings);
-  string_tree_s_swap(&g_const_strings,&json_parser.const_strings);
-
-  var_array_s_init(&g_string_vars);
-  var_array_s_swap(&g_string_vars,&json_parser.string_vars);
+  const char **s_ptr = g_od_channel_strings;
+  const char **s_ptr_end = (void *)s_ptr + sizeof(g_od_channel_strings);
+  do {
+    VAR_CLEAR(value,loc_s_string_ptr(*s_ptr));
+    var_tree_s_insert(&g_od_channel_vars,&value);
+  } while(++s_ptr < s_ptr_end);
 }/*}}}*/
 
 void libchannel_odl_clear()
 {/*{{{*/
-  string_tree_s_clear(&g_const_strings);
-  var_array_s_clear(&g_string_vars);
+  var_tree_s_clear(&g_od_channel_vars);
 }/*}}}*/
 

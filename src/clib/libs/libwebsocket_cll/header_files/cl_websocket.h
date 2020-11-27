@@ -90,6 +90,7 @@ typedef struct ws_conn_s
   struct lws *ws_ptr;
   enum lws_callback_reasons reason;
   void *user_data;
+  bc_array_s message_buffer;
   bc_array_s data_buffer;
   void *data_in;
   size_t data_len;
@@ -113,7 +114,7 @@ static inline void **ws_conn_s_ctx_user_data(ws_conn_s *this);
 static inline const char *ws_conn_s_protocol_name(ws_conn_s *this);
 static inline void ws_conn_s_callback_on_writable(ws_conn_s *this);
 static inline void ws_conn_s_set_timeout(ws_conn_s *this,enum pending_timeout a_reason,int a_seconds);
-WUR static inline int ws_conn_s_write(ws_conn_s *this,
+WUR libwebsockets_cll_EXPORT int ws_conn_s_write(ws_conn_s *this,
     const char *a_data,size_t a_size,enum lws_write_protocol a_protocol);
 
 // === definition of structure ws_client_s =====================================
@@ -255,6 +256,7 @@ static inline void ws_conn_s_init(ws_conn_s *this)
   this->prot_idx = c_idx_not_exist;
   this->ws_ptr = NULL;
   this->user_data = NULL;
+  bc_array_s_init(&this->message_buffer);
   bc_array_s_init(&this->data_buffer);
   this->data_in = NULL;
   this->data_len = 0;
@@ -262,6 +264,7 @@ static inline void ws_conn_s_init(ws_conn_s *this)
 
 static inline void ws_conn_s_clear(ws_conn_s *this)
 {/*{{{*/
+  bc_array_s_clear(&this->message_buffer);
   bc_array_s_clear(&this->data_buffer);
 
   ws_conn_s_init(this);
@@ -319,36 +322,6 @@ static inline void ws_conn_s_callback_on_writable(ws_conn_s *this)
 static inline void ws_conn_s_set_timeout(ws_conn_s *this,enum pending_timeout a_reason,int a_seconds)
 {/*{{{*/
   lws_set_timeout(this->ws_ptr,a_reason,a_seconds);
-}/*}}}*/
-
-static inline int ws_conn_s_write(ws_conn_s *this,
-    const char *a_data,size_t a_size,enum lws_write_protocol a_protocol)
-{/*{{{*/
-
-  // - allocate data buffer -
-  unsigned char *buffer = (unsigned char *)cmalloc(
-      LWS_SEND_BUFFER_PRE_PADDING + a_size +
-      LWS_SEND_BUFFER_POST_PADDING);
-
-  // - pointer to data in buffer -
-  unsigned char *buff_ptr = buffer + LWS_SEND_BUFFER_PRE_PADDING;
-
-  // - fill data to buffer -
-  memcpy(buff_ptr,a_data,a_size);
-
-  // - ERROR -
-  if (lws_write(this->ws_ptr,buff_ptr,a_size,a_protocol) != a_size)
-  {
-    // - release data buffer -
-    cfree(buffer);
-
-    throw_error(WS_CONN_WRITE_ERROR);
-  }
-
-  // - release data buffer -
-  cfree(buffer);
-
-  return 0;
 }/*}}}*/
 
 // === inline methods of structure ws_client_s =================================

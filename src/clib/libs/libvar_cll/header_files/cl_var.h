@@ -154,6 +154,11 @@ array<var_array_s> var_arrays_s;
 queue<var_s> var_queue_s;
 @end
 
+// -- var_tree_s --
+@begin
+safe_rb_tree<var_s> var_tree_s;
+@end
+
 // -- var_map_s --
 @begin
 struct
@@ -478,6 +483,18 @@ inlines var_arrays_s
 @begin
 inlines var_queue_s
 @end
+
+// -- var_tree_s --
+@begin
+inlines var_tree_s
+@end
+
+static inline int var_tree_s___compare_value(const var_tree_s *this,const var_s *a_first,const var_s *a_second)
+{/*{{{*/
+  (void)this;
+
+  return loc_s_order(*a_first,*a_second);
+}/*}}}*/
 
 // -- var_map_s --
 @begin
