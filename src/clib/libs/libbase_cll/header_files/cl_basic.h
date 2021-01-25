@@ -264,10 +264,12 @@ typedef long double ld;
 // - pointer typedef -
 typedef void * pointer;
 typedef char * bc_pointer;
+typedef const char * cbc_pointer;
 
 @begin
 define pointer basic
 define bc_pointer basic
+define cbc_pointer basic
 @end
 
 #endif

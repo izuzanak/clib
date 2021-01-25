@@ -5,7 +5,7 @@ include "main.h"
 
 // === constants and definitions ===============================================
 
-const char *test_name = "libhttp_cll_test";
+const char *test_name = "libmicrohttp_cll_test";
 
 const char *test_names[] =
 {/*{{{*/

@@ -56,7 +56,9 @@ libbase_cll_EXPORT unsigned string_s_get_idx(string_s *this,unsigned a_idx,unsig
 
 // -- string_array_s --
 @begin
-array<string_s> string_array_s;
+array<string_s>
+options ( to_json )
+string_array_s;
 @end
 
 static inline void string_array_s_push_ptr(string_array_s *this,const char *a_data);
