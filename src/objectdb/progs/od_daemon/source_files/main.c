@@ -116,17 +116,17 @@ int od_daemon_s_run(od_daemon_s *this)
   return 0;
 }/*}}}*/
 
-void od_daemon_s_storage_record(od_daemon_s *this,const string_s *a_path,var_s a_data_var)\
+void od_daemon_s_storage_record(od_daemon_s *this,const string_s *a_path,var_s a_data_var)
 {/*{{{*/
 
   // - prepare record buffer -
   this->buffer.used = 0;
   bc_array_s_push_blanks(&this->buffer,ODB_RECORD_HEADER_SIZE);
-  bc_array_s_append_ptr(&this->buffer,"{\"path\":");
+  bc_array_s_push(&this->buffer,'[');
   string_s_to_json(a_path,&this->buffer);
-  bc_array_s_append_ptr(&this->buffer,",\"data\":");
+  bc_array_s_push(&this->buffer,',');
   var_s_to_json(&a_data_var,&this->buffer);
-  bc_array_s_push(&this->buffer,'}');
+  bc_array_s_push(&this->buffer,']');
 
   // - compute record crc -
   crc16_s rec_crc = 0x5555;
@@ -153,9 +153,6 @@ int od_daemon_s_storage_read(od_daemon_s *this)
 
   CONT_INIT_CLEAR(bc_array_s,buffer);
   CONT_INIT_CLEAR(json_parser_s,json_parser);
-
-  VAR_CLEAR(path_str_var,loc_s_string_ptr("path"));
-  VAR_CLEAR(data_str_var,loc_s_string_ptr("data"));
 
   size_t rest_size = st.st_size;
   do {
@@ -221,13 +218,11 @@ int od_daemon_s_storage_read(od_daemon_s *this)
     }
 
     // - set value in database -
-    VAR_CLEAR(path_var,loc_s_dict_get(record_var,path_str_var));
-    debug_assert(path_var != NULL);
-
-    VAR_CLEAR(data_var,loc_s_dict_get(record_var,data_str_var));
+    var_array_s *record_arr = loc_s_array_value(record_var);
 
     int updated;
-    odb_database_s_set_value(&this->database,loc_s_string_value(path_var)->data,data_var,&updated);
+    odb_database_s_set_value(&this->database,
+        loc_s_string_value(record_arr->data[0])->data,record_arr->data[1],&updated);
 
   } while(1);
 
