@@ -962,7 +962,6 @@ static inline void epoll_borrow_fd_s_clear(epoll_borrow_fd_s *this)
 {/*{{{*/
   if (this->fd != -1)
   {
-
     epoll_callback_s callback = {NULL,NULL,0};
     cassert(g_epoll_fd_update(this->fd,0,1,&callback) == 0);
 

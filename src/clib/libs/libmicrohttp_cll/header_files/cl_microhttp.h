@@ -33,6 +33,8 @@ include "cl_sys.h"
 #define ERROR_HTTP_SERVER_INTERNAL_ERROR 2
 
 #define ERROR_HTTP_CONN_CANNOT_QUEUE_RESPONSE 1
+#define ERROR_HTTP_CONN_ALREADY_SUSPENDED 2
+#define ERROR_HTTP_CONN_NOT_SUSPENDED 3
 
 #define ERROR_HTTP_RESP_CREATE_ERROR 1
 
@@ -151,6 +153,8 @@ static inline void http_conn_s_to_string(const http_conn_s *this,bc_array_s *a_t
 #endif
 
 void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_key_value_tree_s *a_trg);
+WUR static inline int http_conn_s_suspend(http_conn_s *this);
+WUR static inline int http_conn_s_resume(http_conn_s *this);
 WUR libmicrohttp_cll_EXPORT int http_conn_s_queue_response(http_conn_s *this,
     unsigned a_status_code,http_resp_s *a_resp);
 
@@ -224,7 +228,7 @@ static inline void http_server_s_clear(http_server_s *this)
     do {
 
       // - retrieve suspended connection -
-      http_conn_s *conn_ptr = (http_conn_s *)pointer_list_s_at(&this->suspended_conns,sc_idx);
+      http_conn_s *conn_ptr = (http_conn_s *)*pointer_list_s_at(&this->suspended_conns,sc_idx);
 
       // - resume suspended connection -
       MHD_resume_connection(conn_ptr->connection);
@@ -369,6 +373,43 @@ static inline void http_conn_s_to_string(const http_conn_s *this,bc_array_s *a_t
   bc_array_s_append_format(a_trg,"http_conn_s{%p}",this);
 }/*}}}*/
 #endif
+
+int http_conn_s_suspend(http_conn_s *this)
+{/*{{{*/
+
+  // - ERROR -
+  if (this->suspend_idx != c_idx_not_exist)
+  {
+    throw_error(HTTP_CONN_ALREADY_SUSPENDED);
+  }
+
+  // - suspend connection -
+  MHD_suspend_connection(this->connection);
+
+  // - add suspended connection to server -
+  this->suspend_idx = pointer_list_s_append(&this->server->suspended_conns,this);
+
+  return 0;
+}/*}}}*/
+
+int http_conn_s_resume(http_conn_s *this)
+{/*{{{*/
+
+  // - ERROR -
+  if (this->suspend_idx == c_idx_not_exist)
+  {
+    throw_error(HTTP_CONN_NOT_SUSPENDED);
+  }
+
+  // - resume connection -
+  MHD_resume_connection(this->connection);
+
+  // - remove suspended connection from server -
+  pointer_list_s_remove(&this->server->suspended_conns,this->suspend_idx);
+  this->suspend_idx = c_idx_not_exist;
+
+  return 0;
+}/*}}}*/
 
 // === inline methods of structure http_resp_s =================================
 
