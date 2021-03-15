@@ -35,6 +35,24 @@ include "cl_struct.h"
 
 #define ERROR_PIPE_OPEN_ERROR 1
 
+#ifdef __GNUC__
+// - should match glibc structure -
+typedef struct IO_FILE_plus IO_FILE_plus;
+struct IO_FILE_plus
+{
+  FILE file;
+  void *vtable;
+};
+
+// - should match glibc structure -
+typedef struct IO_proc_file IO_proc_file;
+struct IO_proc_file
+{
+  IO_FILE_plus file;
+  pid_t pid;
+};
+#endif
+
 // === definition of structure pollfd_s ========================================
 
 typedef struct pollfd pollfd_s;
@@ -102,6 +120,9 @@ static inline void pipe_s_to_string(const pipe_s *this,bc_array_s *a_trg);
 WUR static inline int pipe_s_popen(pipe_s *this,const char *a_command,const char *a_type);
 WUR static inline int pipe_s_write_close(pipe_s *this,const void *a_src,size_t a_size);
 WUR static inline int pipe_s_read_close(pipe_s *this,bc_array_s *a_trg);
+#ifdef __GNUC__
+WUR static inline pid_t pipe_s_pid(pipe_s *this);
+#endif
 
 // === definition of generated structures ======================================
 
@@ -386,6 +407,15 @@ static inline int pipe_s_read_close(pipe_s *this,bc_array_s *a_trg)
 
   return 0;
 }/*}}}*/
+
+#ifdef __GNUC__
+static inline pid_t pipe_s_pid(pipe_s *this)
+{/*{{{*/
+  debug_assert(*this != NULL);
+
+  return ((IO_proc_file *)*this)->pid;
+}/*}}}*/
+#endif
 
 // === inline methods of generated structures ==================================
 
