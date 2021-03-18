@@ -79,7 +79,8 @@ int main(int argc,char **argv)
 
     //const char *server_ip = "127.0.0.1";
     //const unsigned short port = 8006;
-    //const char *media = "mpv/56043001/last/all/single";
+    //const char *media = "local/test/56043001/9200/9300/single";
+    ////const char *media = "local/test/56043001/9200/9300/burst";
 
     const char *server_ip = "192.168.3.29";
     //const char *server_ip = "192.168.0.90";

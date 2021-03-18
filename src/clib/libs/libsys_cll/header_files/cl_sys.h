@@ -40,7 +40,7 @@ include "cl_struct.h"
 typedef struct IO_FILE_plus IO_FILE_plus;
 struct IO_FILE_plus
 {
-  FILE file;
+  FILE file; // NOLINT(cert-fio38-c,misc-non-copyable-objects)
   void *vtable;
 };
 
