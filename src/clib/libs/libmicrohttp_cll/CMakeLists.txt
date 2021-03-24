@@ -10,6 +10,12 @@ else()
   endif()
 endif()
 
+if(FORCE_CLIB_LIBMICROHTTPD)
+  set(LIBMICROHTTPD_FOUND TRUE)
+  set(LIBMICROHTTPD_INCLUDE_DIRS "")
+  set(LIBMICROHTTPD_LIBRARIES "microhttpd")
+endif()
+
 set(CONF_COMPONENTS
   "src/clib/libs/libsys_cll")
 set(CONF_HEADER_DIRS)

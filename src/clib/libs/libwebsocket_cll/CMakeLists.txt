@@ -10,6 +10,12 @@ else()
   endif()
 endif()
 
+if(FORCE_CLIB_LIBWEBSOCKETS)
+  set(LIBWEBSOCKETS_FOUND TRUE)
+  set(LIBWEBSOCKETS_INCLUDE_DIRS "")
+  set(LIBWEBSOCKETS_LIBRARIES "websockets")
+endif()
+
 set(CONF_COMPONENTS
   "src/clib/libs/libbase_cll")
 set(CONF_HEADER_DIRS)

@@ -17,8 +17,13 @@ include "cl_logger.h"
 #endif
 #endif
 
+#ifdef SHELF
+#define PROCESS_RUN_DIR_PATH "/var/run"
+#define PROCESS_LOG_DIR_PATH "/var/log"
+#else
 #define PROCESS_RUN_DIR_PATH "/dev/shm/run"
 #define PROCESS_LOG_DIR_PATH "/dev/shm/log"
+#endif
 
 // - error codes -
 #define ERROR_PROCESS_DIRECTORY_MISSING 1
