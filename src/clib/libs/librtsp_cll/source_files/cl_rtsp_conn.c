@@ -447,36 +447,60 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this)
 {/*{{{*/
   rtsp_server_s *server = (rtsp_server_s *)this->server;
 
-  ulli delay;
+  do {
 
-  // - call conn_get_packet_callback -
-  if (((rtsp_conn_get_packet_callback_t)server->conn_get_packet_callback)(
-        server->cb_object,this->index,&delay,&this->packet))
-  {
-    throw_error(RTSP_CONN_CALLBACK_ERROR);
-  }
+    // - call conn_get_packet_callback -
+    ulli delay;
+    if (((rtsp_conn_get_packet_callback_t)server->conn_get_packet_callback)(
+          server->cb_object,this->index,&delay,&this->packet))
+    {
+      throw_error(RTSP_CONN_CALLBACK_ERROR);
+    }
 
-  this->pkt_channel = RTP_PKT_GET_CHANNEL(this->packet.data);
+    this->pkt_channel = RTP_PKT_GET_CHANNEL(this->packet.data);
 
-  // - retrieve channel  -
-  switch (this->pkt_channel)
-  {
-  case 0:
-  case 2:
-  case 4:
-    break;
-  default:
-    throw_error(RTSP_CONN_INVALID_PACKET_CHANNEL);
-  }
+    // - retrieve channel  -
+    switch (this->pkt_channel)
+    {
+    case 0:
+    case 2:
+    case 4:
+      break;
+    default:
+      throw_error(RTSP_CONN_INVALID_PACKET_CHANNEL);
+    }
 
-  // - schedule packet send timer -
-  this->packet_time += RTSP_DELAY_TO_NANOSEC(delay);
+    // - packet send flag -
+    int packet_send = 1;
 
-  struct itimerspec itimerspec = {{0,0},{this->packet_time/1000000000,this->packet_time%1000000000}};
-  if (epoll_s_timer_callback(&this->epoll_send_timer,&itimerspec,TFD_TIMER_ABSTIME,rtsp_server_s_conn_time_event,this->server,this->index))
-  {
-    throw_error(RTSP_CONN_TIMER_CREATE_ERROR);
-  }
+    if (delay == 0)
+    {
+      if (rtsp_conn_s_send_packet(this,&packet_send))
+      {
+        throw_error(RTSP_CONN_SEND_PACKET_ERROR);
+      }
+    }
+    else
+    {
+      // - schedule packet send timer -
+      this->packet_time += RTSP_DELAY_TO_NANOSEC(delay);
+
+      // - reset packet send flag -
+      packet_send = 0;
+    }
+
+    if (!packet_send)
+    {
+      struct itimerspec itimerspec = {{0,0},{this->packet_time/1000000000,this->packet_time%1000000000}};
+      if (epoll_s_timer_callback(&this->epoll_send_timer,&itimerspec,TFD_TIMER_ABSTIME,rtsp_server_s_conn_time_event,this->server,this->index))
+      {
+        throw_error(RTSP_CONN_TIMER_CREATE_ERROR);
+      }
+
+      break;
+    }
+
+  } while(1);
 
   return 0;
 }/*}}}*/
@@ -574,7 +598,7 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
 int rtsp_conn_s_process_packet(rtsp_conn_s *this)
 {/*{{{*/
 
-  // - packet was send flag -
+  // - packet send flag -
   int packet_send = 1;
 
   if (rtsp_conn_s_send_packet(this,&packet_send))
