@@ -129,125 +129,103 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
 
   unsigned msg_old_used = msg->used;
 
-  // - read message header -
-  if (msg->used < 4)
-  {
   if ((
 #ifdef CLIB_WITH_OPENSSL
-      this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
+    this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
 #endif
-      fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == msg_old_used)
-    {
-      throw_error(RTSP_CLIENT_READ_ERROR);
-    }
+    fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == msg_old_used)
+  {
+    throw_error(RTSP_CLIENT_READ_ERROR);
+  }
 
-    if (msg->used < 4)
+  unsigned offset = 0;
+
+  do {
+    char *msg_data = msg->data + offset;
+    unsigned msg_used = msg->used - offset;
+
+    // - check message header -
+    if (msg_used < 4)
     {
+      bc_array_s_tail(msg,msg->used - offset);
       return 0;
     }
-  }
 
-  // - begin of data packet -
-  if (msg->data[0] == '$')
-  {
-    unsigned pkt_size = ntohs(*(uint16_t *)(msg->data + 2)) + 4;
-
-    if (msg->used < pkt_size)
+    // - begin of data packet -
+    if (msg_data[0] == '$')
     {
-      unsigned pkt_msg_old_used = msg->used;
-      if ((
-#ifdef CLIB_WITH_OPENSSL
-          this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
-#endif
-          fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == pkt_msg_old_used)
-      {
-        throw_error(RTSP_CLIENT_READ_ERROR);
-      }
+      unsigned pkt_size = (((unsigned char)msg_data[2] << 8) + (unsigned char)msg_data[3]) + 4;
 
-      if (msg->used < pkt_size)
+      if (msg_used < pkt_size)
       {
+        bc_array_s_tail(msg,msg->used - offset);
         return 0;
       }
+
+      // - adjust message size for callback -
+      bc_array_s message = {pkt_size,pkt_size,msg_data};
+
+      // - call recv_packet_callback -
+      if (((rtsp_recv_packet_callback_t)this->recv_packet_callback)(this->cb_object,this->cb_index,&message))
+      {
+        throw_error(RTSP_CLIENT_CALLBACK_ERROR);
+      }
+
+      // - update offset -
+      offset += pkt_size;
+
+      continue;
     }
 
-    // - adjust message size for callback -
-    unsigned msg_used = msg->used;
-    msg->used = pkt_size;
+    // - parse command response -
+    string_s string = {msg_used + 1,msg_data};
 
-    // - call recv_packet_callback -
-    if (((rtsp_recv_packet_callback_t)this->recv_packet_callback)(this->cb_object,this->cb_index,msg))
+    // - parse check command response -
+    if (rtsp_parser_s_parse(&this->parser,&string,0))
     {
-      throw_error(RTSP_CLIENT_CALLBACK_ERROR);
+      bc_array_s_tail(msg,msg->used - offset);
+      return 0;
     }
 
-    // - reset message size -
-    msg->used = msg_used;
-    bc_array_s_tail(msg,msg->used - pkt_size);
+    debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s\n",this->parser.input_idx,msg_data));
 
-    return 0;
-  }
-
-  // - read new data if available -
-  if (msg_old_used == msg->used)
-  {
-    if ((
-#ifdef CLIB_WITH_OPENSSL
-        this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
-#endif
-        fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == msg_old_used)
+    // - parse process command response -
+    if (rtsp_parser_s_parse(&this->parser,&string,1))
     {
-      throw_error(RTSP_CLIENT_READ_ERROR);
+      throw_error(RTSP_CONN_PARSE_ERROR);
     }
-  }
 
-  // - parse command response -
-  string_s string = {msg->used + 1,msg->data};
+    switch (this->parser.command)
+    {
+      case c_rtsp_command_RESPONSE:
+        break;
+      case c_rtsp_command_SET_PARAMETER:
+        {/*{{{*/
 
-  // - parse check command response -
-  if (rtsp_parser_s_parse(&this->parser,&string,0))
-  {
-    return 0;
-  }
-
-  debug_message_6(fprintf(stderr,"rtsp_client_s <<<<<\n%.*s\n",this->parser.input_idx,msg->data));
-
-  // - parse process command response -
-  if (rtsp_parser_s_parse(&this->parser,&string,1))
-  {
-    throw_error(RTSP_CONN_PARSE_ERROR);
-  }
-
-  switch (this->parser.command)
-  {
-    case c_rtsp_command_RESPONSE:
-      break;
-    case c_rtsp_command_SET_PARAMETER:
-      {/*{{{*/
-
-        // - if ping requested -
-        if (this->parser.ping)
-        {
-          this->out_msg.used = 0;
-          bc_array_s_append_format(&this->out_msg,
+          // - if ping requested -
+          if (this->parser.ping)
+          {
+            this->out_msg.used = 0;
+            bc_array_s_append_format(&this->out_msg,
 "RTSP/1.0 200 OK\r\n"
 "CSeq: %u\r\n"
 "\r\n",this->parser.cseq);
 
-          if (rtsp_client_s_send_cmd(this))
-          {
-            this->state = c_rtsp_client_state_ERROR;
-            throw_error(RTSP_CLIENT_SEND_ERROR);
+            if (rtsp_client_s_send_cmd(this))
+            {
+              this->state = c_rtsp_client_state_ERROR;
+              throw_error(RTSP_CLIENT_SEND_ERROR);
+            }
           }
-        }
-      }/*}}}*/
-      break;
-    default:
-      throw_error(RTSP_CLIENT_UNKNOWN_COMMAND);
-  }
+        }/*}}}*/
+        break;
+      default:
+        throw_error(RTSP_CLIENT_UNKNOWN_COMMAND);
+    }
 
-  bc_array_s_tail(msg,msg->used - this->parser.input_idx);
+    offset += this->parser.input_idx;
 
-  return 0;
+  } while(1);
 }/*}}}*/
 
 int rtsp_client_s_recv_sdp(rtsp_client_s *this)
