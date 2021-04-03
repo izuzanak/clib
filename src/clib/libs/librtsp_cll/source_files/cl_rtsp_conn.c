@@ -447,6 +447,9 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this)
 {/*{{{*/
   rtsp_server_s *server = (rtsp_server_s *)this->server;
 
+  // - maximal packet burst in one call -
+  int max_pkt_burst = 1000;
+
   do {
 
     // - call conn_get_packet_callback -
@@ -473,7 +476,7 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this)
     // - packet send flag -
     int packet_send = 1;
 
-    if (delay == 0)
+    if (delay == 0 && --max_pkt_burst >= 0)
     {
       if (rtsp_conn_s_send_packet(this,&packet_send))
       {
