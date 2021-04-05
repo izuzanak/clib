@@ -238,6 +238,9 @@ uc:pkt_channel
 bc_block_s:packet
 ulli:packet_time
 
+ulli:pkt_delay
+bc_array_s:pkt_buffer
+
 ui:state
 ui:sequence
 ulli:session
@@ -258,6 +261,7 @@ WUR int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send);
 WUR librtsp_cll_EXPORT int rtsp_conn_s_process_packet(rtsp_conn_s *this);
 WUR static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event);
 WUR librtsp_cll_EXPORT int rtsp_conn_s_fd_event(rtsp_conn_s *this,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR static inline int rtsp_conn_s_write_pkt_buffer(rtsp_conn_s *this);
 
 // -- rtsp_conn_list_s --
 @begin
@@ -367,6 +371,25 @@ static inline int rtsp_conn_s_time_event(rtsp_conn_s *this,unsigned a_index,epol
   if (rtsp_conn_s_process_packet(this))
   {
     throw_error(RTSP_CONN_PROCESS_PACKET_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int rtsp_conn_s_write_pkt_buffer(rtsp_conn_s *this)
+{/*{{{*/
+  if (this->pkt_buffer.used != 0)
+  {
+    if (
+#ifdef CLIB_WITH_OPENSSL
+      this->ssl != NULL ? ssl_conn_s_write(&this->ssl,this->pkt_buffer.data,this->pkt_buffer.used) :
+#endif
+      fd_s_write(&this->epoll_fd.fd,this->pkt_buffer.data,this->pkt_buffer.used))
+    {
+      return 1;
+    }
+
+    this->pkt_buffer.used = 0;
   }
 
   return 0;

@@ -447,16 +447,18 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this)
 {/*{{{*/
   rtsp_server_s *server = (rtsp_server_s *)this->server;
 
-  // - maximal packet burst in one call -
-  int max_pkt_burst = 1000;
-
   do {
 
     // - call conn_get_packet_callback -
-    ulli delay;
     if (((rtsp_conn_get_packet_callback_t)server->conn_get_packet_callback)(
-          server->cb_object,this->index,&delay,&this->packet))
+          server->cb_object,this->index,&this->pkt_delay,&this->packet))
     {
+      // - write packet buffer -
+      if (rtsp_conn_s_write_pkt_buffer(this))
+      {
+        throw_error(RTSP_CONN_NEXT_PACKET_ERROR);
+      }
+
       throw_error(RTSP_CONN_CALLBACK_ERROR);
     }
 
@@ -476,7 +478,7 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this)
     // - packet send flag -
     int packet_send = 1;
 
-    if (delay == 0 && --max_pkt_burst >= 0)
+    if (this->pkt_delay == 0)
     {
       if (rtsp_conn_s_send_packet(this,&packet_send))
       {
@@ -485,8 +487,14 @@ int rtsp_conn_s_next_packet(rtsp_conn_s *this)
     }
     else
     {
+      // - write packet buffer -
+      if (rtsp_conn_s_write_pkt_buffer(this))
+      {
+        throw_error(RTSP_CONN_NEXT_PACKET_ERROR);
+      }
+
       // - schedule packet send timer -
-      this->packet_time += RTSP_DELAY_TO_NANOSEC(delay);
+      this->packet_time += RTSP_DELAY_TO_NANOSEC(this->pkt_delay);
 
       // - reset packet send flag -
       packet_send = 0;
@@ -548,9 +556,18 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
         throw_error(RTSP_CONN_UPDATE_TCP_QUEUE_STATE_ERROR);
       }
 
+      // - update space by size of packet buffer -
+      rtsp_setup->tcp_outq_space -= this->pkt_buffer.used;
+
       // - still not enought space in output queue -
       if (rtsp_setup->tcp_outq_space <= RTSP_TCP_OUTPUT_WRITE_LIMIT)
       {
+        // - write packet buffer -
+        if (rtsp_conn_s_write_pkt_buffer(this))
+        {
+          throw_error(RTSP_CONN_SEND_PACKET_ERROR);
+        }
+
         // - modify fd epoll events: input and output -
         if (epoll_fd_s_modify_events(&this->epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI))
         {
@@ -572,11 +589,21 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
     // - modify packet sequence and time stamp -
     RTSP_CONN_S_SEND_PACKET_MODIFY_PACKET();
 
-    int result =
+    int result;
+    if (this->pkt_delay == 0)
+    {
+      bc_array_s_append(&this->pkt_buffer,this->packet.size,this->packet.data);
+
+      result = 0;
+    }
+    else
+    {
+      result =
 #ifdef CLIB_WITH_OPENSSL
-      this->ssl != NULL ? ssl_conn_s_write(&this->ssl,this->packet.data,this->packet.size) :
+        this->ssl != NULL ? ssl_conn_s_write(&this->ssl,this->packet.data,this->packet.size) :
 #endif
-      fd_s_write(&this->epoll_fd.fd,this->packet.data,this->packet.size);
+        fd_s_write(&this->epoll_fd.fd,this->packet.data,this->packet.size);
+    }
 
     // - reset packet channel and time stamp -
     RTP_PKT_SET_CHANNEL(this->packet.data,this->pkt_channel);
