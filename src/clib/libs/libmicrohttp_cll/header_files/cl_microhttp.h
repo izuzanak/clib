@@ -8,6 +8,7 @@ include "cl_sys.h"
 
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
 #include <fcntl.h>
+#include <netdb.h>
 #include <poll.h>
 #elif SYSTEM_TYPE == SYSTEM_TYPE_WINDOWS
 #include <fcntl.h>
@@ -35,6 +36,7 @@ include "cl_sys.h"
 #define ERROR_HTTP_CONN_CANNOT_QUEUE_RESPONSE 1
 #define ERROR_HTTP_CONN_ALREADY_SUSPENDED 2
 #define ERROR_HTTP_CONN_NOT_SUSPENDED 3
+#define ERROR_HTTP_CONN_CANNOT_RETRIEVE_CLIENT_IP 4
 
 #define ERROR_HTTP_RESP_CREATE_ERROR 1
 
@@ -153,6 +155,7 @@ static inline void http_conn_s_to_string(const http_conn_s *this,bc_array_s *a_t
 #endif
 
 void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_key_value_tree_s *a_trg);
+WUR int http_conn_s_client_ip(http_conn_s *this,bc_array_s *a_trg);
 WUR static inline int http_conn_s_suspend(http_conn_s *this);
 WUR static inline int http_conn_s_resume(http_conn_s *this);
 WUR libmicrohttp_cll_EXPORT int http_conn_s_queue_response(http_conn_s *this,

@@ -258,6 +258,33 @@ void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_k
   this->http_key_value_tree = NULL;
 }/*}}}*/
 
+int http_conn_s_client_ip(http_conn_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  const union MHD_ConnectionInfo *info;
+  info = MHD_get_connection_info(this->connection,MHD_CONNECTION_INFO_CLIENT_ADDRESS);
+
+  // - ERROR -
+  if (info == NULL)
+  {
+    throw_error(HTTP_CONN_CANNOT_RETRIEVE_CLIENT_IP);
+  }
+
+  const unsigned max_ip_size = 256;
+  bc_array_s_reserve(a_trg,max_ip_size + 1);
+
+  // - ERROR -
+  if (getnameinfo(info->client_addr,sizeof(struct sockaddr_in),
+        a_trg->data + a_trg->used,max_ip_size,NULL,0,NI_NUMERICHOST | NI_NUMERICSERV) != 0)
+  {
+    throw_error(HTTP_CONN_CANNOT_RETRIEVE_CLIENT_IP);
+  }
+
+  // - adjust result size -
+  a_trg->used += strlen(a_trg->data + a_trg->used);
+
+  return 0;
+}/*}}}*/
+
 int http_conn_s_queue_response(http_conn_s *this,unsigned a_status_code,http_resp_s *a_resp)
 {/*{{{*/
 

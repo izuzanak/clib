@@ -102,7 +102,7 @@ void test_operations()
   cassert(image_s_io_copy(&copy,&image) == 0);
   cassert(image_s_write_png_file(&copy,"tests/libimage_cll_test/operations/copy.png") == 0);
 
-  // TODO ... test image_s_io_apply
+  // TODO (devel) ... test image_s_io_apply
 
   CONT_INIT_CLEAR(image_s,converted);
   cassert(image_s_create(&converted,image.width,image.height,c_image_pixel_format_GRAY8) == 0);

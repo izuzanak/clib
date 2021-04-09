@@ -69,7 +69,7 @@ int http_comm_s_conn_request(void *a_http_comm,unsigned a_index,int a_complete)
 
   if (a_complete)
   {
-    // TODO debug response
+    // TODO (devel) debug response
     CONT_INIT(bc_array_s,buffer);
     bc_array_s_append_ptr(&buffer,
 "HTTP/1.1 200 OK\r\n"
