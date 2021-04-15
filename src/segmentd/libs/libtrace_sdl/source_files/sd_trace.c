@@ -422,6 +422,11 @@ int sd_trace_s_create(sd_trace_s *this,
             // - update begin of timestamp trace queue -
             this->ts_trace_queue.begin = (last_ts_trace_idx + 1) % this->ts_trace_queue.size;
           }
+          else
+          {
+            // - reset used records of timestamp trace queue -
+            this->ts_trace_queue.used = 0;
+          }
         }/*}}}*/
         break;
       case c_sd_trace_data_type_SEGMENT:
@@ -579,7 +584,8 @@ int sd_trace_s_read_timestamp_structures(sd_trace_s *this)
     unsigned record_idx = 0;
 
     // - process tail of trace queue -
-    if (this->trace_last_id - timestamp_last_id < this->trace_queue.used)
+    if (timestamp_last_id != -1 &&
+        this->trace_last_id - timestamp_last_id < this->trace_queue.used)
     {
       record_idx = this->trace_queue.used - (this->trace_last_id - timestamp_last_id);
     }
