@@ -108,7 +108,7 @@ typedef unsigned rtsp_pkt_delay_t;
 
 typedef struct rtsp_client_s rtsp_client_s;
 typedef int (*rtsp_recv_sdp_callback_t)(void *a_object,unsigned a_index,const string_s *a_server_ip,const bc_array_s *a_src);
-typedef int (*rtsp_recv_packet_callback_t)(void *a_object,unsigned a_index,const bc_array_s *a_src);
+typedef int (*rtsp_recv_packet_callback_t)(void *a_object,unsigned a_index,time_s a_time,const bc_array_s *a_src);
 
 typedef struct rtsp_server_s rtsp_server_s;
 typedef int (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
@@ -161,6 +161,8 @@ string_s:audio_control
 ui:state
 ui:sequence
 string_s:session
+
+time_s:ping_time
 >
 rtsp_client_s;
 @end

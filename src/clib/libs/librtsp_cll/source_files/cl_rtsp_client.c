@@ -162,17 +162,47 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
         return 0;
       }
 
+      // - retrieve packet receive time -
+      time_s time;
+      if (clock_s_gettime(CLOCK_MONOTONIC,&time))
+      {
+        throw_error(RTSP_CLIENT_GET_TIME_ERROR);
+      }
+
       // - adjust message size for callback -
       bc_array_s message = {pkt_size,pkt_size,msg_data};
 
       // - call recv_packet_callback -
-      if (((rtsp_recv_packet_callback_t)this->recv_packet_callback)(this->cb_object,this->cb_index,&message))
+      if (((rtsp_recv_packet_callback_t)this->recv_packet_callback)(this->cb_object,this->cb_index,time,&message))
       {
         throw_error(RTSP_CLIENT_CALLBACK_ERROR);
       }
 
       // - update offset -
       offset += pkt_size;
+
+      // - ping time elapsed -
+      if (time > this->ping_time)
+      {
+        if (this->ping_time > 0)
+        {
+          this->out_msg.used = 0;
+          bc_array_s_append_format(&this->out_msg,
+"GET_PARAMETER %s RTSP/1.0\r\n"
+"CSeq: %u\r\n"
+"Session: %s\r\n"
+"\r\n",this->media_url.data,this->sequence++,this->session.data);
+
+          if (rtsp_client_s_send_cmd(this))
+          {
+            this->state = c_rtsp_client_state_ERROR;
+            throw_error(RTSP_CLIENT_SEND_ERROR);
+          }
+        }
+
+        // - schedule next ping -
+        this->ping_time = time + 30000000000ULL;
+      }
 
       continue;
     }
@@ -502,6 +532,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
           }
 
           this->state = c_rtsp_client_state_RECV_PLAY_OR_DATA;
+          this->ping_time = 0;
         }
         else
         {
@@ -546,6 +577,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
         }
 
         this->state = c_rtsp_client_state_RECV_PLAY_OR_DATA;
+        this->ping_time = 0;
       }/*}}}*/
       break;
 

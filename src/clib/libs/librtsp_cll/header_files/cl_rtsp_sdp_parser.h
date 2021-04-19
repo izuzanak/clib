@@ -18,6 +18,7 @@ enum
   rtsp_sdp_media_type_VIDEO,
   rtsp_sdp_media_type_AUDIO,
   rtsp_sdp_media_type_TEXT,
+  rtsp_sdp_media_type_APPLICATION,
 };/*}}}*/
 
 // -- rtsp_sdp_parser_s --
@@ -50,6 +51,7 @@ void pa_rtsp_sdp_null(rtsp_sdp_parser_s *this);
 void pa_rtsp_sdp_video(rtsp_sdp_parser_s *this);
 void pa_rtsp_sdp_audio(rtsp_sdp_parser_s *this);
 void pa_rtsp_sdp_text(rtsp_sdp_parser_s *this);
+void pa_rtsp_sdp_application(rtsp_sdp_parser_s *this);
 void pa_rtsp_sdp_control(rtsp_sdp_parser_s *this);
 
 // === inline methods of generated structures ==================================

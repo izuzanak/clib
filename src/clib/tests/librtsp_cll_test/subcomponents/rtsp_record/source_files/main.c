@@ -192,18 +192,12 @@ int rtsp_recorder_s_recv_sdp(void *a_rtsp_recorder,unsigned a_index,const string
   return 0;
 }/*}}}*/
 
-int rtsp_recorder_s_recv_packet(void *a_rtsp_recorder,unsigned a_index,const bc_array_s *a_src)
+int rtsp_recorder_s_recv_packet(void *a_rtsp_recorder,unsigned a_index,time_s a_time,const bc_array_s *a_src)
 {/*{{{*/
   rtsp_recorder_s *this = (rtsp_recorder_s *)a_rtsp_recorder;
   rtsp_record_s *record = this->records.data + a_index;
 
-  ulli time;
-  if (clock_s_gettime(CLOCK_MONOTONIC,&time))
-  {
-    throw_error(RECORDER_GET_TIME_ERROR);
-  }
-
-  rtsp_pkt_delay_t delay = RTSP_DELAY_FROM_NANOSEC(time - record->last_pkt_time);
+  rtsp_pkt_delay_t delay = RTSP_DELAY_FROM_NANOSEC(a_time - record->last_pkt_time);
 
   if (stream_s_write(&record->stream_file,&delay,sizeof(rtsp_pkt_delay_t)) ||
       stream_s_write(&record->stream_file,a_src->data,a_src->used))
@@ -212,7 +206,7 @@ int rtsp_recorder_s_recv_packet(void *a_rtsp_recorder,unsigned a_index,const bc_
   }
 
   // - update last packet time -
-  record->last_pkt_time = time;
+  record->last_pkt_time = a_time;
 
   return 0;
 }/*}}}*/

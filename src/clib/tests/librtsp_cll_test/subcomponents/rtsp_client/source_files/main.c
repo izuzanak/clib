@@ -26,7 +26,7 @@ int client_recv_sdp(void *a_client_list,unsigned a_index,const string_s *a_serve
   return 0;
 }/*}}}*/
 
-int client_recv_packet(void *a_client_list,unsigned a_index,const bc_array_s *a_src)
+int client_recv_packet(void *a_client_list,unsigned a_index,time_s a_time,const bc_array_s *a_src)
 {/*{{{*/
   (void)a_client_list;
   (void)a_index;
@@ -82,10 +82,14 @@ int main(int argc,char **argv)
     //const char *media = "local/test/56043001/9200/9300/single";
     ////const char *media = "local/test/56043001/9200/9300/burst";
 
-    const char *server_ip = "192.168.3.29";
-    //const char *server_ip = "192.168.0.90";
+    //const char *server_ip = "192.168.3.29";
+    //const unsigned short port = 554;
+    //const char *media = "axis-media/media.amp";
+
+    const char *server_ip = "10.177.3.105";
     const unsigned short port = 554;
-    const char *media = "axis-media/media.amp";
+    //const char *media = "onvif/profile2/media.smp";
+    const char *media = "onvif/profile3/media.smp";
 
     //const char *server_ip = "10.2.1.18";
     //const unsigned short port = 554;
