@@ -362,7 +362,7 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
         bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
         string_s_to_json(path,&this->buffer);
         bc_array_s_append_ptr(&this->buffer,",\"mod\":");
-        string_s_buffer_to_json(a_path->data + path->size - 1 + 1,a_path->data + a_path->size - 1,&this->buffer);
+        string_s_buffer_to_json(a_path->data + path->size - 1 + (path->size > 1),a_path->data + a_path->size - 1,&this->buffer);
         bc_array_s_append_ptr(&this->buffer,",\"data\":");
         var_s_to_json(&a_data_var,&this->buffer);
         bc_array_s_push(&this->buffer,'}');

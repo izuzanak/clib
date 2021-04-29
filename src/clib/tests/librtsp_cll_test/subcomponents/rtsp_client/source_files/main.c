@@ -30,6 +30,7 @@ int client_recv_packet(void *a_client_list,unsigned a_index,time_s a_time,const 
 {/*{{{*/
   (void)a_client_list;
   (void)a_index;
+  (void)a_time;
   (void)a_src;
 
   // - packet received indication -
