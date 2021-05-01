@@ -46,7 +46,8 @@ file_s:storage
 
 $// - temporary buffers -
 bc_array_s:buffer
-ui_array_s:indexes
+ui_array_s:reg_indexes
+ui_array_s:mod_indexes
 var_array_s:nodes
 >
 od_daemon_s;

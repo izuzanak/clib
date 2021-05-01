@@ -338,7 +338,7 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
       const string_s *path = loc_s_string_value(node->path);
 
       // - retrieve channel indexes -
-      this->indexes.used = 0;
+      this->mod_indexes.used = 0;
 
       if (info->root_idx != c_idx_not_exist)
       {
@@ -349,13 +349,13 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
           {
             if (loc_s_int_value(ptr->object.value) & od_watch_SEND_MODIFICATIONS)
             {
-              ui_array_s_push(&this->indexes,loc_s_int_value(ptr->object.key));
+              ui_array_s_push(&this->mod_indexes,loc_s_int_value(ptr->object.key));
             }
           }
         } while(++ptr < ptr_end);
       }
 
-      if (this->indexes.used != 0)
+      if (this->mod_indexes.used != 0)
       {
         // - create watch modifications event message -
         this->buffer.used = 0;
@@ -368,7 +368,7 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
         bc_array_s_push(&this->buffer,'}');
 
         // - send watch modifications event message -
-        if (od_channel_s_send_multi_message(&this->channel,&this->indexes,&this->buffer))
+        if (od_channel_s_send_multi_message(&this->channel,&this->mod_indexes,&this->buffer))
         {
           throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
         }
@@ -376,6 +376,9 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
 
     } while(++n_ptr < n_ptr_end);
   }
+
+  // - store tree nodes base -
+  unsigned tree_nodes_base = this->nodes.used;
 
   if (node_var != NULL)
   {
@@ -400,6 +403,7 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
   {
     var_s *n_ptr = this->nodes.data;
     var_s *n_ptr_end = n_ptr + this->nodes.used;
+    var_s *n_ptr_tree_base = this->nodes.data + tree_nodes_base;
     do {
       odb_node_s *node = loc_s_odb_node_value(*n_ptr);
       var_map_tree_s *info = loc_s_dict_value(node->info);
@@ -408,22 +412,34 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
       CONT_INIT_CLEAR(var_s,data_var);
       odb_database_s_get_value(&this->database,path->data,&data_var);
 
-      // - retrieve channel indexes -
-      this->indexes.used = 0;
+      this->reg_indexes.used = 0;
+      this->mod_indexes.used = 0;
 
+      // - retrieve channel indexes -
       if (info->root_idx != c_idx_not_exist)
       {
         var_map_tree_s_node *ptr = info->data;
         var_map_tree_s_node *ptr_end = ptr + info->used;
         do {
-          if (ptr->valid && !(loc_s_int_value(ptr->object.value) & od_watch_SEND_MODIFICATIONS))
+          if (ptr->valid)
           {
-            ui_array_s_push(&this->indexes,loc_s_int_value(ptr->object.key));
+            if (loc_s_int_value(ptr->object.value) & od_watch_SEND_MODIFICATIONS)
+            {
+              // - node in update tree -
+              if (n_ptr >= n_ptr_tree_base)
+              {
+                ui_array_s_push(&this->mod_indexes,loc_s_int_value(ptr->object.key));
+              }
+            }
+            else
+            {
+              ui_array_s_push(&this->reg_indexes,loc_s_int_value(ptr->object.key));
+            }
           }
         } while(++ptr < ptr_end);
       }
 
-      if (this->indexes.used != 0)
+      if (this->reg_indexes.used != 0)
       {
         // - create watch event message -
         this->buffer.used = 0;
@@ -434,7 +450,25 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
         bc_array_s_push(&this->buffer,'}');
 
         // - send watch event message -
-        if (od_channel_s_send_multi_message(&this->channel,&this->indexes,&this->buffer))
+        if (od_channel_s_send_multi_message(&this->channel,&this->reg_indexes,&this->buffer))
+        {
+          throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+        }
+      }
+
+      if (this->mod_indexes.used != 0)
+      {
+        // - create watch event message -
+        this->buffer.used = 0;
+        bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
+        string_s_to_json(path,&this->buffer);
+        bc_array_s_append_ptr(&this->buffer,",\"mod\":\"\"");
+        bc_array_s_append_ptr(&this->buffer,",\"data\":");
+        var_s_to_json(&data_var,&this->buffer);
+        bc_array_s_push(&this->buffer,'}');
+
+        // - send watch event message -
+        if (od_channel_s_send_multi_message(&this->channel,&this->mod_indexes,&this->buffer))
         {
           throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
         }
@@ -558,6 +592,60 @@ int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
 
       // - reset command data -
       odb_database_s_set_value(&this->database,path->data,NULL,&updated);
+    }/*}}}*/
+    break;
+  case od_channel_cbreq_LIST:
+    {/*{{{*/
+      lli id = va_arg(a_ap,lli);
+      const string_s *path = va_arg(a_ap,const string_s *);
+
+      CONT_INIT_CLEAR(var_s,data_var);
+      odb_database_s_get_value(&this->database,path->data,&data_var);
+
+      // - variable is dictionary -
+      if (data_var != NULL && data_var->v_type == c_bi_type_dict)
+      {
+        VAR_CLEAR(keys_var,loc_s_array());
+        var_array_s *keys_array = (var_array_s *)keys_var->v_data.ptr;
+
+        // - retrieve dictionary keys -
+        var_map_tree_s *tree = (var_map_tree_s *)data_var->v_data.ptr;
+        if (tree->count != 0)
+        {
+          var_array_s_reserve(keys_array,tree->count);
+
+          var_map_tree_s_node *vmtn_ptr = tree->data;
+          var_map_tree_s_node *vmtn_ptr_end = vmtn_ptr + tree->used;
+          do {
+            if (vmtn_ptr->valid)
+            {
+              var_array_s_push_blank(keys_array);
+              var_s_copy(var_array_s_last(keys_array),&vmtn_ptr->object.key);
+            }
+          } while(++vmtn_ptr < vmtn_ptr_end);
+        }
+
+        var_s_copy_loc(&data_var,keys_var);
+      }
+
+      // - variable is not dictionary -
+      else
+      {
+        var_s_copy_loc(&data_var,NULL);
+      }
+
+      // - send response -
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,"{\"resp\":\"list\",\"id\":%" HOST_LL_FORMAT "d,\"path\":",id);
+      string_s_to_json(path,&this->buffer);
+      bc_array_s_append_ptr(&this->buffer,",\"data\":");
+      var_s_to_json(&data_var,&this->buffer);
+      bc_array_s_push(&this->buffer,'}');
+
+      if (od_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
     }/*}}}*/
     break;
   case od_channel_cbreq_GET:
