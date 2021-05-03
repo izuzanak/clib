@@ -82,7 +82,7 @@ enum
 };/*}}}*/
 
 // - type of control packet -
-enum 
+enum
 {/*{{{*/
   MQTT_PACKET_TYPE_CONNECT     = 1,
   MQTT_PACKET_TYPE_CONNACK     = 2,

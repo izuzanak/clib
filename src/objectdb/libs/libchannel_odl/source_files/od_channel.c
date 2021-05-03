@@ -5,7 +5,7 @@ include "od_channel.h"
 
 // === constants and definitions ===============================================
 
-const char *g_od_channel_strings[] = 
+const char *g_od_channel_strings[] =
 {/*{{{*/
   "first",
 

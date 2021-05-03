@@ -565,7 +565,7 @@ int sd_trace_s_read_timestamp_structures(sd_trace_s *this)
     if (this->timestamp_queue.used != 0)
     {
       unsigned tsq_idx = 0;
-      do 
+      do
       {
         // - insert timestamp to timestamp tree -
         sd_record_timestamp_tree_s_insert(&this->timestamp_tree,
@@ -771,7 +771,7 @@ lli sd_trace_s_lee_time(sd_trace_s *this,time_s a_time)
     if (this->timestamp_queue.used != 0)
     {
       unsigned tsq_idx = 0;
-      do 
+      do
       {
         sd_record_timestamp_s *timestamp = sd_record_timestamp_queue_s_at(&this->timestamp_queue,tsq_idx);
         if (timestamp->time <= a_time)
@@ -811,7 +811,7 @@ lli sd_trace_s_gre_time(sd_trace_s *this,time_s a_time)
     if (this->timestamp_queue.used != 0)
     {
       unsigned tsq_idx = 0;
-      do 
+      do
       {
         sd_record_timestamp_s *timestamp = sd_record_timestamp_queue_s_at(&this->timestamp_queue,tsq_idx);
         if (timestamp->time >= a_time)

@@ -176,7 +176,7 @@ void od_fuser_s_get_ino_value(od_fuser_s *this,unsigned a_ino,var_s *a_value_var
     do {
       string_s *name = &this->ino_name_tree.data[ui_array_s_pop(&this->ino_stack)].object.name;
       bc_array_s_append(&this->buffer,name->size - 1,name->data);
-      
+
       if (this->ino_stack.used == 0)
       {
         break;

@@ -50,7 +50,7 @@ int od_daemon_s_process_config(od_daemon_s *this)
   if (!od_conf_storage_s_compare(&this->config.storage,&this->last_config.storage))
   {
     od_conf_storage_s *storage_cfg = &this->config.storage;
-    
+
     if (storage_cfg->path.size > 1)
     {
       // - open storage file -
@@ -268,7 +268,7 @@ int od_daemon_s_storage_write(od_daemon_s *this,const string_s *a_path,var_s a_d
     }
 
     file_s_clear(&tmp_storage);
-        
+
     // - rename temporary storage file to storage file -
     if (rename(tmp_path.data,this->config.storage.path.data) ||
         file_s_open(&this->storage,this->config.storage.path.data,"ab"))
@@ -278,7 +278,7 @@ int od_daemon_s_storage_write(od_daemon_s *this,const string_s *a_path,var_s a_d
   }
   else
   {
-    // - write record to file - 
+    // - write record to file -
     if (stream_s_write(&this->storage,this->buffer.data,this->buffer.used) ||
         stream_s_fflush(&this->storage) || fsync(fileno(this->storage)))
     {

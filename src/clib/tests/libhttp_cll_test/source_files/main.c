@@ -23,7 +23,7 @@ test_function_t test_functions[] =
 
 void test_http()
 {/*{{{*/
-  
+
   // TODO (devel) continue ...
 }/*}}}*/
 

@@ -112,7 +112,7 @@ int main(int argc,char **argv)
   (void)argv;
 
   memcheck_init();
-  
+
   {
     const char *address = "127.0.0.1";
     const unsigned short port = 8000;

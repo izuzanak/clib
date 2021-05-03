@@ -1452,7 +1452,7 @@ int mqtt_conn_s_send_pubrel(mqtt_conn_s *this,uint16_t a_packet_id,uint8_t a_rea
 int mqtt_conn_s_send_subscribe(mqtt_conn_s *this,mqtt_subscribe_s *a_subscribe)
 {/*{{{*/
   uint32_t remaining_length = 2 + a_subscribe->props.used;
-  
+
   if (mqtt_var_byte_len(a_subscribe->props.used,&remaining_length))
   {
     throw_error(MQTT_INVALID_SUBSCRIBE_PACKET);
