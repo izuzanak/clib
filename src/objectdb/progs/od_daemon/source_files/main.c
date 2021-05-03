@@ -321,12 +321,6 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
   this->nodes.used = 0;
   odb_database_s_nodes_path(&this->database,&this->nodes);
 
-  // - check matching node for info -
-  if (node_var != NULL && loc_s_odb_node_value(node_var)->info != NULL)
-  {
-    var_array_s_push(&this->nodes,&node_var);
-  }
-
   // - retrieve send modification info nodes -
   if (this->nodes.used != 0)
   {
@@ -338,7 +332,7 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
       const string_s *path = loc_s_string_value(node->path);
 
       // - retrieve channel indexes -
-      this->mod_indexes.used = 0;
+      this->indexes.used = 0;
 
       if (info->root_idx != c_idx_not_exist)
       {
@@ -349,26 +343,32 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
           {
             if (loc_s_int_value(ptr->object.value) & od_watch_SEND_MODIFICATIONS)
             {
-              ui_array_s_push(&this->mod_indexes,loc_s_int_value(ptr->object.key));
+              ui_array_s_push(&this->indexes,loc_s_int_value(ptr->object.key));
             }
           }
         } while(++ptr < ptr_end);
       }
 
-      if (this->mod_indexes.used != 0)
+      if (this->indexes.used != 0)
       {
         // - create watch modifications event message -
         this->buffer.used = 0;
         bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
         string_s_to_json(path,&this->buffer);
-        bc_array_s_append_ptr(&this->buffer,",\"mod\":");
-        string_s_buffer_to_json(a_path->data + path->size - 1 + (path->size > 1),a_path->data + a_path->size - 1,&this->buffer);
+
+        // - do not send empty mod -
+        if (a_path->size > path->size)
+        {
+          bc_array_s_append_ptr(&this->buffer,",\"mod\":");
+          string_s_buffer_to_json(a_path->data + path->size - 1 + (path->size > 1),a_path->data + a_path->size - 1,&this->buffer);
+        }
+
         bc_array_s_append_ptr(&this->buffer,",\"data\":");
         var_s_to_json(&a_data_var,&this->buffer);
         bc_array_s_push(&this->buffer,'}');
 
         // - send watch modifications event message -
-        if (od_channel_s_send_multi_message(&this->channel,&this->mod_indexes,&this->buffer))
+        if (od_channel_s_send_multi_message(&this->channel,&this->indexes,&this->buffer))
         {
           throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
         }
@@ -382,21 +382,7 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
 
   if (node_var != NULL)
   {
-    odb_node_s *node = loc_s_odb_node_value(node_var);
-
-    // - find info nodes in subtrees -
-    var_map_tree_s *tree = loc_s_dict_value(node->nodes);
-    if (tree->root_idx != c_idx_not_exist)
-    {
-      var_map_tree_s_node *ptr = tree->data;
-      var_map_tree_s_node *ptr_end = ptr + tree->used;
-      do {
-        if (ptr->valid)
-        {
-          odb_database_s_nodes_tree(ptr->object.value,&this->nodes);
-        }
-      } while(++ptr < ptr_end);
-    }
+    odb_database_s_nodes_tree(node_var,&this->nodes);
   }
 
   if (this->nodes.used != 0)
@@ -412,8 +398,7 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
       CONT_INIT_CLEAR(var_s,data_var);
       odb_database_s_get_value(&this->database,path->data,&data_var);
 
-      this->reg_indexes.used = 0;
-      this->mod_indexes.used = 0;
+      this->indexes.used = 0;
 
       // - retrieve channel indexes -
       if (info->root_idx != c_idx_not_exist)
@@ -428,18 +413,18 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
               // - node in update tree -
               if (n_ptr >= n_ptr_tree_base)
               {
-                ui_array_s_push(&this->mod_indexes,loc_s_int_value(ptr->object.key));
+                ui_array_s_push(&this->indexes,loc_s_int_value(ptr->object.key));
               }
             }
             else
             {
-              ui_array_s_push(&this->reg_indexes,loc_s_int_value(ptr->object.key));
+              ui_array_s_push(&this->indexes,loc_s_int_value(ptr->object.key));
             }
           }
         } while(++ptr < ptr_end);
       }
 
-      if (this->reg_indexes.used != 0)
+      if (this->indexes.used != 0)
       {
         // - create watch event message -
         this->buffer.used = 0;
@@ -450,39 +435,20 @@ int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a
         bc_array_s_push(&this->buffer,'}');
 
         // - send watch event message -
-        if (od_channel_s_send_multi_message(&this->channel,&this->reg_indexes,&this->buffer))
+        if (od_channel_s_send_multi_message(&this->channel,&this->indexes,&this->buffer))
         {
           throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
         }
       }
-
-      if (this->mod_indexes.used != 0)
-      {
-        // - create watch event message -
-        this->buffer.used = 0;
-        bc_array_s_append_format(&this->buffer,"{\"type\":\"update\",\"id\":0,\"path\":");
-        string_s_to_json(path,&this->buffer);
-        bc_array_s_append_ptr(&this->buffer,",\"mod\":\"\"");
-        bc_array_s_append_ptr(&this->buffer,",\"data\":");
-        var_s_to_json(&data_var,&this->buffer);
-        bc_array_s_push(&this->buffer,'}');
-
-        // - send watch event message -
-        if (od_channel_s_send_multi_message(&this->channel,&this->mod_indexes,&this->buffer))
-        {
-          throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
-        }
-      }
-
     } while(++n_ptr < n_ptr_end);
   }
 
   return 0;
 }/*}}}*/
 
-int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap)
+int od_daemon_s_channel_callback(void *a_od_daemon,unsigned a_index,unsigned a_type,va_list a_ap)
 {/*{{{*/
-  od_daemon_s *this = (od_daemon_s *)a_sd_daemon;
+  od_daemon_s *this = (od_daemon_s *)a_od_daemon;
 
   switch (a_type)
   {

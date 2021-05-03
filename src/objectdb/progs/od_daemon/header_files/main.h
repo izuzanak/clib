@@ -46,8 +46,7 @@ file_s:storage
 
 $// - temporary buffers -
 bc_array_s:buffer
-ui_array_s:reg_indexes
-ui_array_s:mod_indexes
+ui_array_s:indexes
 var_array_s:nodes
 >
 od_daemon_s;
@@ -62,7 +61,7 @@ WUR int od_daemon_s_storage_read(od_daemon_s *this);
 WUR int od_daemon_s_storage_write(od_daemon_s *this,const string_s *a_path,var_s a_data_var);
 
 WUR int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a_data_var);
-WUR int od_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
+WUR int od_daemon_s_channel_callback(void *a_od_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
 
 // === inline methods of generated structures ==================================
 

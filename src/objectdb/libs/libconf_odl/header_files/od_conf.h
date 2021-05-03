@@ -53,12 +53,23 @@ options ( from_var )
 od_conf_storage_s;
 @end
 
+// -- od_conf_fuser_s --
+@begin
+struct
+<
+string_s:mountpoint
+>
+options ( from_var )
+od_conf_fuser_s;
+@end
+
 // -- od_config_s --
 @begin
 struct
 <
 od_conf_ip_port_s:channel
 od_conf_storage_s:storage
+od_conf_fuser_s:fuser
 >
 options ( from_var )
 od_config_s;
@@ -81,6 +92,11 @@ inlines od_conf_ip_port_s
 // -- od_conf_storage_s --
 @begin
 inlines od_conf_storage_s
+@end
+
+// -- od_conf_fuser_s --
+@begin
+inlines od_conf_fuser_s
 @end
 
 // -- od_config_s --

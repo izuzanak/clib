@@ -6,5 +6,8 @@
   "storage": {
     "path": "od_storage.bin",
     "max_size": 10485760
+  },
+  "fuser": {
+    "mountpoint": "/dev/shm/odb"
   }
 }

@@ -65,6 +65,7 @@ enum
   od_channel_TYPE,
   od_channel_RESP,
   od_channel_PATH,
+  od_channel_MOD,
   od_channel_DATA,
 
   od_channel_SET,

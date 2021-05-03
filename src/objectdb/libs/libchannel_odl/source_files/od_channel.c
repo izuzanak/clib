@@ -14,6 +14,7 @@ const char *g_od_channel_strings[] =
   "type",
   "resp",
   "path",
+  "mod",
   "data",
 
   "set",
@@ -376,157 +377,171 @@ int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,
 
   lli id = loc_s_int_value(id_var);
   var_s type_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_TYPE].object);
-  unsigned type_idx = var_tree_s_get_idx(&g_od_channel_vars,&type_var);
+  var_s resp_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_RESP].object);
 
-  switch (type_idx)
+  if (type_var != NULL)
+  {/*{{{*/
+    unsigned type_idx = var_tree_s_get_idx(&g_od_channel_vars,&type_var);
+
+    switch (type_idx)
+    {
+    case od_channel_UPDATE:
+      {/*{{{*/
+        var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+        var_s mod_var  = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_MOD].object);
+        var_s data_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_DATA].object);
+
+        if (path_var == NULL || path_var->v_type != c_bi_type_string ||
+            (mod_var != NULL && mod_var->v_type != c_bi_type_string) ||
+            data_var == NULL)
+        {
+          throw_error(OD_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (od_channel_client_s_message_call(this,od_channel_cbevt_UPDATE,id,
+              loc_s_string_value(path_var),
+              mod_var == NULL ? NULL : loc_s_string_value(mod_var),
+              data_var))
+        {
+          throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    default:
+      throw_error(OD_CHANNEL_MESSAGE_ERROR);
+    }
+  }/*}}}*/
+  else if (resp_var != NULL)
+  {/*{{{*/
+    unsigned resp_idx = var_tree_s_get_idx(&g_od_channel_vars,&resp_var);
+
+    switch (resp_idx)
+    {
+    case od_channel_SET:
+      {/*{{{*/
+        var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+
+        if (path_var == NULL || path_var->v_type != c_bi_type_string)
+        {
+          throw_error(OD_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (od_channel_client_s_message_call(this,od_channel_cbresp_SET,id,
+              loc_s_string_value(path_var)))
+        {
+          throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case od_channel_CMD:
+      {/*{{{*/
+        var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+
+        if (path_var == NULL || path_var->v_type != c_bi_type_string)
+        {
+          throw_error(OD_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (od_channel_client_s_message_call(this,od_channel_cbresp_CMD,id,
+              loc_s_string_value(path_var)))
+        {
+          throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case od_channel_LIST:
+      {/*{{{*/
+        var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+        var_s data_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_DATA].object);
+
+        if (path_var == NULL || path_var->v_type != c_bi_type_string ||
+            data_var == NULL)
+        {
+          throw_error(OD_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (od_channel_client_s_message_call(this,od_channel_cbresp_LIST,id,
+              loc_s_string_value(path_var),data_var))
+        {
+          throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case od_channel_GET:
+      {/*{{{*/
+        var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+        var_s data_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_DATA].object);
+
+        if (path_var == NULL || path_var->v_type != c_bi_type_string ||
+            data_var == NULL)
+        {
+          throw_error(OD_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (od_channel_client_s_message_call(this,od_channel_cbresp_GET,id,
+              loc_s_string_value(path_var),data_var))
+        {
+          throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case od_channel_WATCH:
+      {/*{{{*/
+        var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+
+        if (path_var == NULL || path_var->v_type != c_bi_type_string)
+        {
+          throw_error(OD_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (od_channel_client_s_message_call(this,od_channel_cbresp_WATCH,id,
+              loc_s_string_value(path_var)))
+        {
+          throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case od_channel_IGNORE:
+      {/*{{{*/
+        var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+
+        if (path_var == NULL || path_var->v_type != c_bi_type_string)
+        {
+          throw_error(OD_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (od_channel_client_s_message_call(this,od_channel_cbresp_IGNORE,id,
+              loc_s_string_value(path_var)))
+        {
+          throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case od_channel_PING:
+      {/*{{{*/
+
+        // - update connect timer -
+        struct itimerspec its_connect = {{0,0},OD_CHANNEL_PING_TIMEOUT};
+        if (epoll_timer_s_settime(&this->connect_timer,&its_connect,0))
+        {
+          throw_error(OD_CHANNEL_CLIENT_TIMER_SETTIME_ERROR);
+        }
+      }/*}}}*/
+      break;
+    default:
+      throw_error(OD_CHANNEL_MESSAGE_ERROR);
+    }
+  }/*}}}*/
+  else
   {
-  case od_channel_UPDATE:
-    {/*{{{*/
-      var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
-      var_s data_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_DATA].object);
-
-      if (path_var == NULL || path_var->v_type != c_bi_type_string ||
-          data_var == NULL)
-      {
-        throw_error(OD_CHANNEL_MESSAGE_ERROR);
-      }
-
-      // - call callback -
-      if (od_channel_client_s_message_call(this,od_channel_cbevt_UPDATE,id,
-            loc_s_string_value(path_var),data_var))
-      {
-        throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
-      }
-    }/*}}}*/
-    break;
-  default:
-    {/*{{{*/
-      var_s resp_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_RESP].object);
-      unsigned resp_idx = var_tree_s_get_idx(&g_od_channel_vars,&resp_var);
-
-      switch (resp_idx)
-      {
-      case od_channel_SET:
-        {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
-
-          if (path_var == NULL || path_var->v_type != c_bi_type_string)
-          {
-            throw_error(OD_CHANNEL_MESSAGE_ERROR);
-          }
-
-          // - call callback -
-          if (od_channel_client_s_message_call(this,od_channel_cbresp_SET,id,
-                loc_s_string_value(path_var)))
-          {
-            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
-          }
-        }/*}}}*/
-        break;
-      case od_channel_CMD:
-        {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
-
-          if (path_var == NULL || path_var->v_type != c_bi_type_string)
-          {
-            throw_error(OD_CHANNEL_MESSAGE_ERROR);
-          }
-
-          // - call callback -
-          if (od_channel_client_s_message_call(this,od_channel_cbresp_CMD,id,
-                loc_s_string_value(path_var)))
-          {
-            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
-          }
-        }/*}}}*/
-        break;
-      case od_channel_LIST:
-        {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
-          var_s data_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_DATA].object);
-
-          if (path_var == NULL || path_var->v_type != c_bi_type_string ||
-              data_var == NULL)
-          {
-            throw_error(OD_CHANNEL_MESSAGE_ERROR);
-          }
-
-          // - call callback -
-          if (od_channel_client_s_message_call(this,od_channel_cbresp_LIST,id,
-                loc_s_string_value(path_var),data_var))
-          {
-            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
-          }
-        }/*}}}*/
-        break;
-      case od_channel_GET:
-        {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
-          var_s data_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_DATA].object);
-
-          if (path_var == NULL || path_var->v_type != c_bi_type_string ||
-              data_var == NULL)
-          {
-            throw_error(OD_CHANNEL_MESSAGE_ERROR);
-          }
-
-          // - call callback -
-          if (od_channel_client_s_message_call(this,od_channel_cbresp_GET,id,
-                loc_s_string_value(path_var),data_var))
-          {
-            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
-          }
-        }/*}}}*/
-        break;
-      case od_channel_WATCH:
-        {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
-
-          if (path_var == NULL || path_var->v_type != c_bi_type_string)
-          {
-            throw_error(OD_CHANNEL_MESSAGE_ERROR);
-          }
-
-          // - call callback -
-          if (od_channel_client_s_message_call(this,od_channel_cbresp_WATCH,id,
-                loc_s_string_value(path_var)))
-          {
-            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
-          }
-        }/*}}}*/
-        break;
-      case od_channel_IGNORE:
-        {/*{{{*/
-          var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
-
-          if (path_var == NULL || path_var->v_type != c_bi_type_string)
-          {
-            throw_error(OD_CHANNEL_MESSAGE_ERROR);
-          }
-
-          // - call callback -
-          if (od_channel_client_s_message_call(this,od_channel_cbresp_IGNORE,id,
-                loc_s_string_value(path_var)))
-          {
-            throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
-          }
-        }/*}}}*/
-        break;
-      case od_channel_PING:
-        {/*{{{*/
-
-          // - update connect timer -
-          struct itimerspec its_connect = {{0,0},OD_CHANNEL_PING_TIMEOUT};
-          if (epoll_timer_s_settime(&this->connect_timer,&its_connect,0))
-          {
-            throw_error(OD_CHANNEL_CLIENT_TIMER_SETTIME_ERROR);
-          }
-        }/*}}}*/
-        break;
-      default:
-        throw_error(OD_CHANNEL_MESSAGE_ERROR);
-      }
-    }/*}}}*/
+    throw_error(OD_CHANNEL_MESSAGE_ERROR);
   }
 
   return 0;
