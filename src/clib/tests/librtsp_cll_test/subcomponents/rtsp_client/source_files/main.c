@@ -87,10 +87,18 @@ int main(int argc,char **argv)
     //const unsigned short port = 554;
     //const char *media = "axis-media/media.amp";
 
-    const char *server_ip = "10.177.3.105";
+    //const char *server_ip = "10.177.3.105";
+    //const unsigned short port = 554;
+    ////const char *media = "onvif/profile2/media.smp";
+    //const char *media = "onvif/profile3/media.smp";
+
+    //const char *server_ip = "10.177.3.106";
+    //const unsigned short port = 554;
+    //const char *media = "h264";
+
+    const char *server_ip = "10.177.3.107";
     const unsigned short port = 554;
-    //const char *media = "onvif/profile2/media.smp";
-    const char *media = "onvif/profile3/media.smp";
+    const char *media = "v1";
 
     //const char *server_ip = "10.2.1.18";
     //const unsigned short port = 554;

@@ -20,8 +20,8 @@ const unsigned rtsp_sdp_rule_body_lengths[c_rtsp_sdp_rule_cnt] = {2, 2, 1, 1, 1,
 
 const unsigned rtsp_sdp_lalr_table[rtsp_sdp_lalr_state_cnt*c_rtsp_sdp_terminal_plus_nonterminal_cnt] =
 {/*{{{*/
-    RTSP_SDP_SHIFT(3),    RTSP_SDP_SHIFT(4),    RTSP_SDP_SHIFT(5),    RTSP_SDP_SHIFT(6),    RTSP_SDP_SHIFT(7),    RTSP_SDP_SHIFT(8),       rtsp_sdp_blank,       rtsp_sdp_blank,     RTSP_SDP_GOTO(1),     RTSP_SDP_GOTO(2),
-    RTSP_SDP_SHIFT(3),    RTSP_SDP_SHIFT(4),    RTSP_SDP_SHIFT(5),    RTSP_SDP_SHIFT(6),    RTSP_SDP_SHIFT(7),    RTSP_SDP_SHIFT(8),   RTSP_SDP_SHIFT(10),       rtsp_sdp_blank,       rtsp_sdp_blank,     RTSP_SDP_GOTO(9),
+    RTSP_SDP_SHIFT(4),    RTSP_SDP_SHIFT(5),    RTSP_SDP_SHIFT(6),    RTSP_SDP_SHIFT(7),    RTSP_SDP_SHIFT(8),    RTSP_SDP_SHIFT(3),       rtsp_sdp_blank,       rtsp_sdp_blank,     RTSP_SDP_GOTO(1),     RTSP_SDP_GOTO(2),
+    RTSP_SDP_SHIFT(4),    RTSP_SDP_SHIFT(5),    RTSP_SDP_SHIFT(6),    RTSP_SDP_SHIFT(7),    RTSP_SDP_SHIFT(8),    RTSP_SDP_SHIFT(3),   RTSP_SDP_SHIFT(10),       rtsp_sdp_blank,       rtsp_sdp_blank,     RTSP_SDP_GOTO(9),
    RTSP_SDP_REDUCE(2),   RTSP_SDP_REDUCE(2),   RTSP_SDP_REDUCE(2),   RTSP_SDP_REDUCE(2),   RTSP_SDP_REDUCE(2),   RTSP_SDP_REDUCE(2),   RTSP_SDP_REDUCE(2),       rtsp_sdp_blank,       rtsp_sdp_blank,       rtsp_sdp_blank,
    RTSP_SDP_REDUCE(3),   RTSP_SDP_REDUCE(3),   RTSP_SDP_REDUCE(3),   RTSP_SDP_REDUCE(3),   RTSP_SDP_REDUCE(3),   RTSP_SDP_REDUCE(3),   RTSP_SDP_REDUCE(3),       rtsp_sdp_blank,       rtsp_sdp_blank,       rtsp_sdp_blank,
    RTSP_SDP_REDUCE(4),   RTSP_SDP_REDUCE(4),   RTSP_SDP_REDUCE(4),   RTSP_SDP_REDUCE(4),   RTSP_SDP_REDUCE(4),   RTSP_SDP_REDUCE(4),   RTSP_SDP_REDUCE(4),       rtsp_sdp_blank,       rtsp_sdp_blank,       rtsp_sdp_blank,
@@ -171,16 +171,16 @@ state_1_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14) {
-      goto state_2_label;
-   }
-   return 6;
+   goto state_2_label;
 
 // - STATE 2 -
 state_2_label:
@@ -190,16 +190,16 @@ state_2_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 3 -
 state_3_label:
@@ -209,22 +209,22 @@ state_3_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 61) {
+   if (in_char < 61) {
       goto state_2_label;
    }
    if (in_char == 61) {
       goto state_6_label;
    }
-   if (in_char >= 62) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 4 -
 state_4_label:
@@ -234,32 +234,35 @@ state_4_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 61) {
+   if (in_char < 61) {
       goto state_2_label;
    }
    if (in_char == 61) {
       goto state_7_label;
    }
-   if (in_char >= 62) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 5 -
 state_5_label:
-   RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
+   RTSP_SDP_CLOSE_CHAR(5);
    RTSP_SDP_GET_NEXT_CHAR();
 
    if (in_char == 10) {
-      goto state_8_label;
+      goto state_5_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 13) {
+      goto state_5_label;
+   }
+   return 5;
 
 // - STATE 6 -
 state_6_label:
@@ -269,22 +272,22 @@ state_6_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 99) {
+   if (in_char < 99) {
       goto state_2_label;
    }
    if (in_char == 99) {
-      goto state_9_label;
+      goto state_8_label;
    }
-   if (in_char >= 100) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 7 -
 state_7_label:
@@ -294,39 +297,59 @@ state_7_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 97) {
+   if (in_char < 97) {
       goto state_2_label;
    }
    if (in_char == 97) {
-      goto state_10_label;
+      goto state_9_label;
    }
-   if (in_char >= 98 && in_char < 116) {
+   if (in_char < 116) {
       goto state_2_label;
    }
    if (in_char == 116) {
-      goto state_11_label;
+      goto state_10_label;
    }
    if (in_char == 117) {
       goto state_2_label;
    }
    if (in_char == 118) {
-      goto state_12_label;
+      goto state_11_label;
    }
-   if (in_char >= 119) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 8 -
 state_8_label:
-   RTSP_SDP_CLOSE_CHAR(0);
-   return 0;
+   RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
+   RTSP_SDP_GET_NEXT_CHAR();
+
+   if (in_char < 10) {
+      goto state_2_label;
+   }
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
+      goto state_2_label;
+   }
+   if (in_char == 13) {
+      goto state_5_label;
+   }
+   if (in_char < 111) {
+      goto state_2_label;
+   }
+   if (in_char == 111) {
+      goto state_12_label;
+   }
+   goto state_2_label;
 
 // - STATE 9 -
 state_9_label:
@@ -336,22 +359,28 @@ state_9_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 111) {
+   if (in_char < 112) {
       goto state_2_label;
    }
-   if (in_char == 111) {
+   if (in_char == 112) {
       goto state_13_label;
    }
-   if (in_char >= 112) {
+   if (in_char < 117) {
       goto state_2_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 117) {
+      goto state_14_label;
+   }
+   goto state_2_label;
 
 // - STATE 10 -
 state_10_label:
@@ -361,28 +390,22 @@ state_10_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 112) {
+   if (in_char < 101) {
       goto state_2_label;
    }
-   if (in_char == 112) {
-      goto state_14_label;
-   }
-   if (in_char >= 113 && in_char < 117) {
-      goto state_2_label;
-   }
-   if (in_char == 117) {
+   if (in_char == 101) {
       goto state_15_label;
    }
-   if (in_char >= 118) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 11 -
 state_11_label:
@@ -392,22 +415,22 @@ state_11_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 101) {
+   if (in_char < 105) {
       goto state_2_label;
    }
-   if (in_char == 101) {
+   if (in_char == 105) {
       goto state_16_label;
    }
-   if (in_char >= 102) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 12 -
 state_12_label:
@@ -417,22 +440,22 @@ state_12_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 105) {
+   if (in_char < 110) {
       goto state_2_label;
    }
-   if (in_char == 105) {
+   if (in_char == 110) {
       goto state_17_label;
    }
-   if (in_char >= 106) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 13 -
 state_13_label:
@@ -442,22 +465,22 @@ state_13_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 110) {
+   if (in_char < 112) {
       goto state_2_label;
    }
-   if (in_char == 110) {
+   if (in_char == 112) {
       goto state_18_label;
    }
-   if (in_char >= 111) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 14 -
 state_14_label:
@@ -467,22 +490,22 @@ state_14_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 112) {
+   if (in_char < 100) {
       goto state_2_label;
    }
-   if (in_char == 112) {
+   if (in_char == 100) {
       goto state_19_label;
    }
-   if (in_char >= 113) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 15 -
 state_15_label:
@@ -492,22 +515,22 @@ state_15_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 100) {
+   if (in_char < 120) {
       goto state_2_label;
    }
-   if (in_char == 100) {
+   if (in_char == 120) {
       goto state_20_label;
    }
-   if (in_char >= 101) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 16 -
 state_16_label:
@@ -517,22 +540,22 @@ state_16_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 120) {
+   if (in_char < 100) {
       goto state_2_label;
    }
-   if (in_char == 120) {
+   if (in_char == 100) {
       goto state_21_label;
    }
-   if (in_char >= 121) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 17 -
 state_17_label:
@@ -542,22 +565,22 @@ state_17_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 100) {
+   if (in_char < 116) {
       goto state_2_label;
    }
-   if (in_char == 100) {
+   if (in_char == 116) {
       goto state_22_label;
    }
-   if (in_char >= 101) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 18 -
 state_18_label:
@@ -567,22 +590,22 @@ state_18_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 116) {
+   if (in_char < 108) {
       goto state_2_label;
    }
-   if (in_char == 116) {
+   if (in_char == 108) {
       goto state_23_label;
    }
-   if (in_char >= 117) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 19 -
 state_19_label:
@@ -592,22 +615,22 @@ state_19_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 108) {
+   if (in_char < 105) {
       goto state_2_label;
    }
-   if (in_char == 108) {
+   if (in_char == 105) {
       goto state_24_label;
    }
-   if (in_char >= 109) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 20 -
 state_20_label:
@@ -617,22 +640,22 @@ state_20_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 105) {
+   if (in_char < 116) {
       goto state_2_label;
    }
-   if (in_char == 105) {
+   if (in_char == 116) {
       goto state_25_label;
    }
-   if (in_char >= 106) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 21 -
 state_21_label:
@@ -642,22 +665,22 @@ state_21_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 116) {
+   if (in_char < 101) {
       goto state_2_label;
    }
-   if (in_char == 116) {
+   if (in_char == 101) {
       goto state_26_label;
    }
-   if (in_char >= 117) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 22 -
 state_22_label:
@@ -667,22 +690,22 @@ state_22_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 101) {
+   if (in_char < 114) {
       goto state_2_label;
    }
-   if (in_char == 101) {
+   if (in_char == 114) {
       goto state_27_label;
    }
-   if (in_char >= 102) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 23 -
 state_23_label:
@@ -692,22 +715,22 @@ state_23_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 114) {
+   if (in_char < 105) {
       goto state_2_label;
    }
-   if (in_char == 114) {
+   if (in_char == 105) {
       goto state_28_label;
    }
-   if (in_char >= 115) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 24 -
 state_24_label:
@@ -717,22 +740,22 @@ state_24_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 105) {
+   if (in_char < 111) {
       goto state_2_label;
    }
-   if (in_char == 105) {
+   if (in_char == 111) {
       goto state_29_label;
    }
-   if (in_char >= 106) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 25 -
 state_25_label:
@@ -740,24 +763,18 @@ state_25_label:
    RTSP_SDP_GET_NEXT_CHAR();
 
    if (in_char < 10) {
-      goto state_2_label;
+      goto state_25_label;
    }
-   if (in_char >= 11 && in_char < 13) {
-      goto state_2_label;
-   }
-   if (in_char == 13) {
-      goto state_5_label;
-   }
-   if (in_char >= 14 && in_char < 111) {
-      goto state_2_label;
-   }
-   if (in_char == 111) {
+   if (in_char == 10) {
       goto state_30_label;
    }
-   if (in_char >= 112) {
-      goto state_2_label;
+   if (in_char < 13) {
+      goto state_25_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 13) {
+      goto state_30_label;
+   }
+   goto state_25_label;
 
 // - STATE 26 -
 state_26_label:
@@ -765,18 +782,24 @@ state_26_label:
    RTSP_SDP_GET_NEXT_CHAR();
 
    if (in_char < 10) {
-      goto state_26_label;
+      goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
-      goto state_26_label;
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
+      goto state_2_label;
    }
    if (in_char == 13) {
+      goto state_5_label;
+   }
+   if (in_char < 111) {
+      goto state_2_label;
+   }
+   if (in_char == 111) {
       goto state_31_label;
    }
-   if (in_char >= 14) {
-      goto state_26_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 27 -
 state_27_label:
@@ -786,22 +809,22 @@ state_27_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 111) {
+   if (in_char < 111) {
       goto state_2_label;
    }
    if (in_char == 111) {
       goto state_32_label;
    }
-   if (in_char >= 112) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 28 -
 state_28_label:
@@ -811,22 +834,22 @@ state_28_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 111) {
+   if (in_char < 99) {
       goto state_2_label;
    }
-   if (in_char == 111) {
+   if (in_char == 99) {
       goto state_33_label;
    }
-   if (in_char >= 112) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 29 -
 state_29_label:
@@ -834,53 +857,50 @@ state_29_label:
    RTSP_SDP_GET_NEXT_CHAR();
 
    if (in_char < 10) {
-      goto state_2_label;
+      goto state_29_label;
    }
-   if (in_char >= 11 && in_char < 13) {
-      goto state_2_label;
-   }
-   if (in_char == 13) {
-      goto state_5_label;
-   }
-   if (in_char >= 14 && in_char < 99) {
-      goto state_2_label;
-   }
-   if (in_char == 99) {
+   if (in_char == 10) {
       goto state_34_label;
    }
-   if (in_char >= 100) {
-      goto state_2_label;
+   if (in_char < 13) {
+      goto state_29_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 13) {
+      goto state_34_label;
+   }
+   goto state_29_label;
 
 // - STATE 30 -
 state_30_label:
-   RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
+   RTSP_SDP_CLOSE_CHAR(2);
    RTSP_SDP_GET_NEXT_CHAR();
 
-   if (in_char < 10) {
-      goto state_30_label;
-   }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
       goto state_30_label;
    }
    if (in_char == 13) {
-      goto state_35_label;
-   }
-   if (in_char >= 14) {
       goto state_30_label;
    }
-   return c_idx_not_exist;
+   return 2;
 
 // - STATE 31 -
 state_31_label:
    RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
    RTSP_SDP_GET_NEXT_CHAR();
 
-   if (in_char == 10) {
-      goto state_36_label;
+   if (in_char < 10) {
+      goto state_31_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 10) {
+      goto state_35_label;
+   }
+   if (in_char < 13) {
+      goto state_31_label;
+   }
+   if (in_char == 13) {
+      goto state_35_label;
+   }
+   goto state_31_label;
 
 // - STATE 32 -
 state_32_label:
@@ -888,18 +908,24 @@ state_32_label:
    RTSP_SDP_GET_NEXT_CHAR();
 
    if (in_char < 10) {
-      goto state_32_label;
+      goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
-      goto state_32_label;
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
+      goto state_2_label;
    }
    if (in_char == 13) {
-      goto state_37_label;
+      goto state_5_label;
    }
-   if (in_char >= 14) {
-      goto state_32_label;
+   if (in_char < 108) {
+      goto state_2_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 108) {
+      goto state_36_label;
+   }
+   goto state_2_label;
 
 // - STATE 33 -
 state_33_label:
@@ -909,72 +935,98 @@ state_33_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 108) {
+   if (in_char < 97) {
       goto state_2_label;
    }
-   if (in_char == 108) {
-      goto state_38_label;
+   if (in_char == 97) {
+      goto state_37_label;
    }
-   if (in_char >= 109) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 34 -
 state_34_label:
+   RTSP_SDP_CLOSE_CHAR(1);
+   RTSP_SDP_GET_NEXT_CHAR();
+
+   if (in_char == 10) {
+      goto state_34_label;
+   }
+   if (in_char == 13) {
+      goto state_34_label;
+   }
+   return 1;
+
+// - STATE 35 -
+state_35_label:
+   RTSP_SDP_CLOSE_CHAR(0);
+   RTSP_SDP_GET_NEXT_CHAR();
+
+   if (in_char == 10) {
+      goto state_35_label;
+   }
+   if (in_char == 13) {
+      goto state_35_label;
+   }
+   return 0;
+
+// - STATE 36 -
+state_36_label:
    RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
    RTSP_SDP_GET_NEXT_CHAR();
 
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 97) {
+   if (in_char < 58) {
       goto state_2_label;
    }
-   if (in_char == 97) {
-      goto state_39_label;
+   if (in_char == 58) {
+      goto state_38_label;
    }
-   if (in_char >= 98) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
-
-// - STATE 35 -
-state_35_label:
-   RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
-   RTSP_SDP_GET_NEXT_CHAR();
-
-   if (in_char == 10) {
-      goto state_40_label;
-   }
-   return c_idx_not_exist;
-
-// - STATE 36 -
-state_36_label:
-   RTSP_SDP_CLOSE_CHAR(3);
-   return 3;
+   goto state_2_label;
 
 // - STATE 37 -
 state_37_label:
    RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
    RTSP_SDP_GET_NEXT_CHAR();
 
-   if (in_char == 10) {
-      goto state_41_label;
+   if (in_char < 10) {
+      goto state_2_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
+      goto state_2_label;
+   }
+   if (in_char == 13) {
+      goto state_5_label;
+   }
+   if (in_char < 116) {
+      goto state_2_label;
+   }
+   if (in_char == 116) {
+      goto state_39_label;
+   }
+   goto state_2_label;
 
 // - STATE 38 -
 state_38_label:
@@ -982,24 +1034,18 @@ state_38_label:
    RTSP_SDP_GET_NEXT_CHAR();
 
    if (in_char < 10) {
-      goto state_2_label;
+      goto state_38_label;
    }
-   if (in_char >= 11 && in_char < 13) {
-      goto state_2_label;
+   if (in_char == 10) {
+      goto state_40_label;
+   }
+   if (in_char < 13) {
+      goto state_38_label;
    }
    if (in_char == 13) {
-      goto state_5_label;
+      goto state_40_label;
    }
-   if (in_char >= 14 && in_char < 58) {
-      goto state_2_label;
-   }
-   if (in_char == 58) {
-      goto state_42_label;
-   }
-   if (in_char >= 59) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_38_label;
 
 // - STATE 39 -
 state_39_label:
@@ -1009,32 +1055,60 @@ state_39_label:
    if (in_char < 10) {
       goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
       goto state_2_label;
    }
    if (in_char == 13) {
       goto state_5_label;
    }
-   if (in_char >= 14 && in_char < 116) {
+   if (in_char < 105) {
       goto state_2_label;
    }
-   if (in_char == 116) {
-      goto state_43_label;
+   if (in_char == 105) {
+      goto state_41_label;
    }
-   if (in_char >= 117) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_2_label;
 
 // - STATE 40 -
 state_40_label:
-   RTSP_SDP_CLOSE_CHAR(2);
-   return 2;
+   RTSP_SDP_CLOSE_CHAR(4);
+   RTSP_SDP_GET_NEXT_CHAR();
+
+   if (in_char == 10) {
+      goto state_40_label;
+   }
+   if (in_char == 13) {
+      goto state_40_label;
+   }
+   return 4;
 
 // - STATE 41 -
 state_41_label:
-   RTSP_SDP_CLOSE_CHAR(1);
-   return 1;
+   RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
+   RTSP_SDP_GET_NEXT_CHAR();
+
+   if (in_char < 10) {
+      goto state_2_label;
+   }
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
+      goto state_2_label;
+   }
+   if (in_char == 13) {
+      goto state_5_label;
+   }
+   if (in_char < 111) {
+      goto state_2_label;
+   }
+   if (in_char == 111) {
+      goto state_42_label;
+   }
+   goto state_2_label;
 
 // - STATE 42 -
 state_42_label:
@@ -1042,18 +1116,24 @@ state_42_label:
    RTSP_SDP_GET_NEXT_CHAR();
 
    if (in_char < 10) {
-      goto state_42_label;
+      goto state_2_label;
    }
-   if (in_char >= 11 && in_char < 13) {
-      goto state_42_label;
+   if (in_char == 10) {
+      goto state_5_label;
+   }
+   if (in_char < 13) {
+      goto state_2_label;
    }
    if (in_char == 13) {
-      goto state_44_label;
+      goto state_5_label;
    }
-   if (in_char >= 14) {
-      goto state_42_label;
+   if (in_char < 110) {
+      goto state_2_label;
    }
-   return c_idx_not_exist;
+   if (in_char == 110) {
+      goto state_43_label;
+   }
+   goto state_2_label;
 
 // - STATE 43 -
 state_43_label:
@@ -1061,123 +1141,31 @@ state_43_label:
    RTSP_SDP_GET_NEXT_CHAR();
 
    if (in_char < 10) {
-      goto state_2_label;
+      goto state_43_label;
    }
-   if (in_char >= 11 && in_char < 13) {
-      goto state_2_label;
+   if (in_char == 10) {
+      goto state_44_label;
+   }
+   if (in_char < 13) {
+      goto state_43_label;
    }
    if (in_char == 13) {
-      goto state_5_label;
+      goto state_44_label;
    }
-   if (in_char >= 14 && in_char < 105) {
-      goto state_2_label;
-   }
-   if (in_char == 105) {
-      goto state_45_label;
-   }
-   if (in_char >= 106) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
+   goto state_43_label;
 
 // - STATE 44 -
 state_44_label:
-   RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
+   RTSP_SDP_CLOSE_CHAR(3);
    RTSP_SDP_GET_NEXT_CHAR();
 
    if (in_char == 10) {
-      goto state_46_label;
-   }
-   return c_idx_not_exist;
-
-// - STATE 45 -
-state_45_label:
-   RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
-   RTSP_SDP_GET_NEXT_CHAR();
-
-   if (in_char < 10) {
-      goto state_2_label;
-   }
-   if (in_char >= 11 && in_char < 13) {
-      goto state_2_label;
+      goto state_44_label;
    }
    if (in_char == 13) {
-      goto state_5_label;
+      goto state_44_label;
    }
-   if (in_char >= 14 && in_char < 111) {
-      goto state_2_label;
-   }
-   if (in_char == 111) {
-      goto state_47_label;
-   }
-   if (in_char >= 112) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
-
-// - STATE 46 -
-state_46_label:
-   RTSP_SDP_CLOSE_CHAR(5);
-   return 5;
-
-// - STATE 47 -
-state_47_label:
-   RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
-   RTSP_SDP_GET_NEXT_CHAR();
-
-   if (in_char < 10) {
-      goto state_2_label;
-   }
-   if (in_char >= 11 && in_char < 13) {
-      goto state_2_label;
-   }
-   if (in_char == 13) {
-      goto state_5_label;
-   }
-   if (in_char >= 14 && in_char < 110) {
-      goto state_2_label;
-   }
-   if (in_char == 110) {
-      goto state_48_label;
-   }
-   if (in_char >= 111) {
-      goto state_2_label;
-   }
-   return c_idx_not_exist;
-
-// - STATE 48 -
-state_48_label:
-   RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
-   RTSP_SDP_GET_NEXT_CHAR();
-
-   if (in_char < 10) {
-      goto state_48_label;
-   }
-   if (in_char >= 11 && in_char < 13) {
-      goto state_48_label;
-   }
-   if (in_char == 13) {
-      goto state_49_label;
-   }
-   if (in_char >= 14) {
-      goto state_48_label;
-   }
-   return c_idx_not_exist;
-
-// - STATE 49 -
-state_49_label:
-   RTSP_SDP_CLOSE_CHAR(c_idx_not_exist);
-   RTSP_SDP_GET_NEXT_CHAR();
-
-   if (in_char == 10) {
-      goto state_50_label;
-   }
-   return c_idx_not_exist;
-
-// - STATE 50 -
-state_50_label:
-   RTSP_SDP_CLOSE_CHAR(4);
-   return 4;
+   return 3;
 
 }/*}}}*/
 

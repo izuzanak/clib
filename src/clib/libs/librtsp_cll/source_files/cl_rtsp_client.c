@@ -295,9 +295,31 @@ int rtsp_client_s_recv_sdp(rtsp_client_s *this)
     throw_error(RTSP_CLIENT_PARSE_ERROR);
   }
 
-  // - store video and audio controls -
-  string_s_swap(&this->video_control,&sdp_parser.video_control);
-  string_s_swap(&this->audio_control,&sdp_parser.audio_control);
+  // - store video control -
+  if (sdp_parser.video_control.size - 1 < 4 ||
+      strncmp(sdp_parser.video_control.data,"rtsp",4) != 0)
+  {
+    CONT_INIT_CLEAR(bc_array_s,buffer);
+    bc_array_s_append_format(&buffer,"%s/%s",this->media_url.data,sdp_parser.video_control.data);
+    string_s_set(&this->video_control,buffer.used,buffer.data);
+  }
+  else
+  {
+    string_s_swap(&this->video_control,&sdp_parser.video_control);
+  }
+
+  // - store audio control -
+  if (sdp_parser.audio_control.size - 1 < 4 ||
+      strncmp(sdp_parser.audio_control.data,"rtsp",4) != 0)
+  {
+    CONT_INIT_CLEAR(bc_array_s,buffer);
+    bc_array_s_append_format(&buffer,"%s/%s",this->media_url.data,sdp_parser.audio_control.data);
+    string_s_set(&this->audio_control,buffer.used,buffer.data);
+  }
+  else
+  {
+    string_s_swap(&this->audio_control,&sdp_parser.audio_control);
+  }
 
   rtsp_sdp_parser_s_clear(&sdp_parser);
 
