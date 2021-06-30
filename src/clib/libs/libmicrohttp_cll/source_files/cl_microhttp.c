@@ -17,7 +17,7 @@ methods http_key_value_tree_s
 
 // === methods of structure http_server_s ======================================
 
-int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
+MHD_RESULT http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
     const char *url,const char *method,const char *version,
     const char *upload_data,size_t *upload_data_size,void **con_cls)
 {/*{{{*/
@@ -112,7 +112,7 @@ int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
   return MHD_YES;
 }/*}}}*/
 
-int conn_key_value_func(void *cls,enum MHD_ValueKind kind,
+MHD_RESULT conn_key_value_func(void *cls,enum MHD_ValueKind kind,
     const char *key,const char *value)
 {/*{{{*/
   (void)kind;

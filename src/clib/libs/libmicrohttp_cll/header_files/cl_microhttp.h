@@ -18,6 +18,12 @@ include "cl_sys.h"
 
 #include <microhttpd.h>
 
+#if MHD_VERSION >= 0x00097002
+#define MHD_RESULT enum MHD_Result
+#else
+#define MHD_RESULT int
+#endif
+
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
 #define libmicrohttp_cll_EXPORT
@@ -105,10 +111,10 @@ static inline int http_server_s_compare(const http_server_s *this,const http_ser
 static inline void http_server_s_to_string(const http_server_s *this,bc_array_s *a_trg);
 #endif
 
-int http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
+MHD_RESULT http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
     const char *url,const char *method,const char *version,
     const char *upload_data,size_t *upload_data_size,void **con_cls);
-int conn_key_value_func(void *cls,enum MHD_ValueKind kind,
+MHD_RESULT conn_key_value_func(void *cls,enum MHD_ValueKind kind,
     const char *key,const char *value);
 void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
     void **con_cls,enum MHD_RequestTerminationCode toe);
