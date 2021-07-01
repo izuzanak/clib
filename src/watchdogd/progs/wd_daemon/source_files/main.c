@@ -73,7 +73,7 @@ int wd_daemon_s_process_config(wd_daemon_s *this)
     }
 
     // - open watchdog driver -
-    if ((this->wdg_fd = open(watchdog_cfg->path.data,O_WRONLY)) == -1)
+    if ((this->wdg_fd = open(watchdog_cfg->path.data,O_WRONLY | O_APPEND)) == -1)
     {
       throw_error(WD_DAEMON_WATCHDOG_OPEN_ERROR);
     }
@@ -125,6 +125,15 @@ int wd_daemon_s_run(wd_daemon_s *this)
       {
         throw_error(WD_DAEMON_EPOLL_WAIT_ERROR);
       }
+    }
+  }
+
+  // - terminated normally, stop watchdog driver -
+  if (this->wdg_fd != -1)
+  {
+    if (fd_s_write(&this->wdg_fd,"V",1))
+    {
+      throw_error(WD_DAEMON_WATCHDOG_WRITE_ERROR);
     }
   }
 
