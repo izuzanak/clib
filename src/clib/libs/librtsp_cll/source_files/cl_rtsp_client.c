@@ -296,8 +296,9 @@ int rtsp_client_s_recv_sdp(rtsp_client_s *this)
   }
 
   // - store video control -
-  if (sdp_parser.video_control.size - 1 < 4 ||
-      strncmp(sdp_parser.video_control.data,"rtsp",4) != 0)
+  if (sdp_parser.video_control.size > 1 &&
+      (sdp_parser.video_control.size - 1 < 4 ||
+       strncmp(sdp_parser.video_control.data,"rtsp",4) != 0))
   {
     CONT_INIT_CLEAR(bc_array_s,buffer);
     bc_array_s_append_format(&buffer,"%s/%s",this->media_url.data,sdp_parser.video_control.data);
@@ -309,8 +310,9 @@ int rtsp_client_s_recv_sdp(rtsp_client_s *this)
   }
 
   // - store audio control -
-  if (sdp_parser.audio_control.size - 1 < 4 ||
-      strncmp(sdp_parser.audio_control.data,"rtsp",4) != 0)
+  if (sdp_parser.audio_control.size > 1 &&
+      (sdp_parser.audio_control.size - 1 < 4 ||
+       strncmp(sdp_parser.audio_control.data,"rtsp",4) != 0))
   {
     CONT_INIT_CLEAR(bc_array_s,buffer);
     bc_array_s_append_format(&buffer,"%s/%s",this->media_url.data,sdp_parser.audio_control.data);
