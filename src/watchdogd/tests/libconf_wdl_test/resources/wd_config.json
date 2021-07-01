@@ -1,0 +1,10 @@
+{
+  "channel": {
+    "ip": "0.0.0.0",
+    "port": 10000
+  },
+  "watchdog": {
+    "path": "/dev/shm/wdog.txt",
+    "period": 1
+  }
+}
