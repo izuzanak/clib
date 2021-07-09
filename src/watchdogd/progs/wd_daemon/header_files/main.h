@@ -15,6 +15,7 @@ include "wd_channel.h"
 #define ERROR_WD_DAEMON_EPOLL_ERROR 3
 #define ERROR_WD_DAEMON_TIMER_READ_ERROR 4
 #define ERROR_WD_DAEMON_INVALID_MONITOR_NAME 5
+#define ERROR_WD_DAEMON_GET_TIME_ERROR 6
 
 #define ERROR_WD_DAEMON_CHANNEL_CREATE_ERROR 1
 #define ERROR_WD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR 2
@@ -29,7 +30,11 @@ include "wd_channel.h"
 struct
 <
 string_s:name
-ui:timeout
+lli:timeout
+
+time_s:enable_time
+time_s:keepalive_time
+
 epoll_timer_s:timer
 >
 wd_monitor_s;

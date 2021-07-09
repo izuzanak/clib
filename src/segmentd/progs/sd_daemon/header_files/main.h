@@ -4,6 +4,7 @@
 
 @begin
 include "cl_process.h"
+include "wd_channel.h"
 include "sd_channel.h"
 include "sd_trace.h"
 @end
@@ -11,18 +12,22 @@ include "sd_trace.h"
 // - error codes -
 #define ERROR_SD_DAEMON_CONFIG_DATA_ERROR 1
 #define ERROR_SD_DAEMON_EPOLL_WAIT_ERROR 2
-#define ERROR_SD_DAEMON_SEGMENT_CREATE_ERROR 3
-#define ERROR_SD_DAEMON_SEGMENT_NOT_EXIST 4
-#define ERROR_SD_DAEMON_SEGMENT_INVALID_WRITE_SIZE 5
-#define ERROR_SD_DAEMON_SEGMENT_WRITE_ERROR 6
-#define ERROR_SD_DAEMON_TRACE_CREATE_ERROR 7
-#define ERROR_SD_DAEMON_TRACE_NOT_EXIST 8
-#define ERROR_SD_DAEMON_TRACE_INVALID_WRITE_SIZE 9
-#define ERROR_SD_DAEMON_TRACE_WRITE_ERROR 10
-#define ERROR_SD_DAEMON_TRACE_INIT_TIMESTAMP_ERROR 11
+#define ERROR_SD_DAEMON_EPOLL_ERROR 3
+#define ERROR_SD_DAEMON_TIMER_SETTIME_ERROR 4
+#define ERROR_SD_DAEMON_TIMER_READ_ERROR 5
+#define ERROR_SD_DAEMON_SEGMENT_CREATE_ERROR 6
+#define ERROR_SD_DAEMON_SEGMENT_NOT_EXIST 7
+#define ERROR_SD_DAEMON_SEGMENT_INVALID_WRITE_SIZE 8
+#define ERROR_SD_DAEMON_SEGMENT_WRITE_ERROR 9
+#define ERROR_SD_DAEMON_TRACE_CREATE_ERROR 10
+#define ERROR_SD_DAEMON_TRACE_NOT_EXIST 11
+#define ERROR_SD_DAEMON_TRACE_INVALID_WRITE_SIZE 12
+#define ERROR_SD_DAEMON_TRACE_WRITE_ERROR 13
+#define ERROR_SD_DAEMON_TRACE_INIT_TIMESTAMP_ERROR 14
 
 #define ERROR_SD_DAEMON_CHANNEL_CREATE_ERROR 20
-#define ERROR_SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR 21
+#define ERROR_SD_DAEMON_WATCHDOG_CHANNEL_CREATE_ERROR 21
+#define ERROR_SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR 22
 
 // === definition of generated structures ======================================
 
@@ -70,6 +75,9 @@ sd_channel_s:channel
 sd_channel_watches_s:channel_watches
 bi:update_watches
 
+wd_channel_client_s:watchdog_channel
+epoll_timer_s:watchdog_timer
+
 bc_array_s:buffer
 >
 sd_daemon_s;
@@ -87,6 +95,8 @@ static inline void sd_daemon_s_update_watches(sd_daemon_s *this);
 WUR int sd_daemon_s_run(sd_daemon_s *this);
 
 WUR int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
+WUR int sd_daemon_s_watchdog_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
+WUR int sd_daemon_s_watchdog_time_event(void *a_sd_daemon,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === inline methods of generated structures ==================================
 

@@ -3,6 +3,9 @@
 include "main.h"
 @end
 
+const char *g_name;
+const char *g_conf;
+
 volatile int g_terminate = 0;
 epoll_s *g_epoll;
 
@@ -65,6 +68,28 @@ int sd_daemon_s_process_config(sd_daemon_s *this)
           this))
     {
       throw_error(SD_DAEMON_CHANNEL_CREATE_ERROR);
+    }
+  }
+
+  // - if watchdog channel configuration changed -
+  if (!sd_conf_ip_port_s_compare(&this->config.watchdog,&this->last_config.watchdog))
+  {
+    sd_conf_ip_port_s *watchdog_cfg = &this->config.watchdog;
+
+    if (watchdog_cfg->ip.size > 1)
+    {
+      // - create watchdog channel -
+      if (wd_channel_client_s_create(&this->watchdog_channel,
+            watchdog_cfg->ip.data,watchdog_cfg->port,
+            sd_daemon_s_watchdog_channel_callback,
+            this,0))
+      {
+        throw_error(SD_DAEMON_WATCHDOG_CHANNEL_CREATE_ERROR);
+      }
+    }
+    else
+    {
+      wd_channel_client_s_clear(&this->watchdog_channel);
     }
   }
 
@@ -1192,6 +1217,87 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
   return 0;
 }/*}}}*/
 
+int sd_daemon_s_watchdog_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap)
+{/*{{{*/
+  (void)a_ap;
+
+  sd_daemon_s *this = (sd_daemon_s *)a_sd_daemon;
+
+  switch (a_type)
+  {
+  case wd_channel_cbreq_NEW:
+    {/*{{{*/
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,
+          "{\"type\":\"enable\",\"id\":%" HOST_LL_FORMAT "d,\"name\":\"%s\",\"timeout\":60}",
+          ++this->watchdog_channel.message_id,g_name);
+
+      if (wd_channel_client_s_send_message(&this->watchdog_channel,&this->buffer))
+      {
+        throw_error(SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+
+      // - schedule watchdog timer -
+      struct itimerspec its_watchdog = {{30,0},{30,0}};
+      if (epoll_s_timer_callback(&this->watchdog_timer,&its_watchdog,0,
+            sd_daemon_s_watchdog_time_event,this,0))
+      {
+        throw_error(SD_DAEMON_EPOLL_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case wd_channel_cbreq_DROP:
+    {/*{{{*/
+      
+      // - disable watchdog timer -
+      struct itimerspec its_watchdog = {{0,0},{0,0}};
+      if (epoll_timer_s_settime(&this->watchdog_timer,&its_watchdog,0))
+      {
+        throw_error(SD_DAEMON_TIMER_SETTIME_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case wd_channel_cbresp_ENABLE:
+  case wd_channel_cbresp_DISABLE:
+  case wd_channel_cbresp_STATUS:
+    break;
+  default:
+    {/*{{{*/
+
+      // - log message -
+      log_info_2("channel watchdog %u, unknown request",a_index);
+    }/*}}}*/
+  }
+
+  return 0;
+}/*}}}*/
+
+int sd_daemon_s_watchdog_time_event(void *a_sd_daemon,unsigned a_index,epoll_event_s *a_epoll_event)
+{/*{{{*/
+  (void)a_index;
+
+  // - read timer expiration counter -
+  uint64_t timer_exps;
+  if (read(a_epoll_event->data.fd,&timer_exps,sizeof(timer_exps)) != sizeof(timer_exps))
+  {
+    throw_error(SD_DAEMON_TIMER_READ_ERROR);
+  }
+
+  sd_daemon_s *this = (sd_daemon_s *)a_sd_daemon;
+
+  this->buffer.used = 0;
+  bc_array_s_append_format(&this->buffer,
+      "{\"type\":\"keepalive\",\"id\":%" HOST_LL_FORMAT "d,\"name\":\"%s\"}",
+      ++this->watchdog_channel.message_id,g_name);
+
+  if (wd_channel_client_s_send_message(&this->watchdog_channel,&this->buffer))
+  {
+    throw_error(SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
 // === global functions ========================================================
 
 void signal_handler(int a_signum)
@@ -1216,11 +1322,12 @@ int main(int argc,char **argv)
 
   memcheck_init();
   libchannel_cll_init();
+  libchannel_wdl_init();
   libconf_sdl_init();
   librecord_sdl_init();
 
-  char *name = "sd_daemon";
-  char *conf = "sd_config.json";
+  g_name = "sd_daemon";
+  g_conf = "sd_config.json";
 
   // - process command line arguments -
   if (argc > 1)
@@ -1229,11 +1336,11 @@ int main(int argc,char **argv)
     do {
       if (strncmp("--name=",argv[arg_idx],7) == 0)
       {
-        name = argv[arg_idx] + 7;
+        g_name = argv[arg_idx] + 7;
       }
       else if (strncmp("--conf=",argv[arg_idx],7) == 0)
       {
-        conf = argv[arg_idx] + 7;
+        g_conf = argv[arg_idx] + 7;
       }
       else
       {
@@ -1256,13 +1363,13 @@ int main(int argc,char **argv)
     g_epoll = &epoll;
 
     CONT_INIT_CLEAR(process_s,process);
-    cassert(process_s_create(&process,name) == 0);
+    cassert(process_s_create(&process,g_name) == 0);
 
     do {
       CONT_INIT_CLEAR(sd_daemon_s,daemon);
 
       if (sd_daemon_s_create(&daemon) ||
-          sd_config_s_read_file(&daemon.config,conf) ||
+          sd_config_s_read_file(&daemon.config,g_conf) ||
           sd_daemon_s_process_config(&daemon))
       {
         break;
@@ -1278,6 +1385,7 @@ int main(int argc,char **argv)
 
   librecord_sdl_clear();
   libconf_sdl_clear();
+  libchannel_wdl_clear();
   libchannel_cll_clear();
   memcheck_release_assert();
 

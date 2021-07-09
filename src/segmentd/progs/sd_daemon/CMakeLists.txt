@@ -1,6 +1,7 @@
 
 set(CONF_COMPONENTS
   "src/clib/libs/libprocess_cll"
+  "src/watchdogd/libs/libchannel_wdl"
   "src/segmentd/libs/libchannel_sdl"
   "src/segmentd/libs/libtrace_sdl")
 set(CONF_HEADER_DIRS)

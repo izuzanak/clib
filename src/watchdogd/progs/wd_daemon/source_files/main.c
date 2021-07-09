@@ -179,6 +179,15 @@ int wd_daemon_s_channel_callback(void *a_wd_daemon,unsigned a_index,unsigned a_t
       wd_monitor_s *monitor = wd_monitor_tree_s_at(&this->monitor_tree,monitor_idx);
       monitor->timeout = timeout;
 
+      // - retrieve monitor enable time -
+      if (clock_s_gettime(CLOCK_MONOTONIC,&monitor->enable_time))
+      {
+        throw_error(WD_DAEMON_GET_TIME_ERROR);
+      }
+
+      // - set monitor keepalive time -
+      monitor->keepalive_time = monitor->enable_time;
+
       // - schedule monitor timer -
       struct itimerspec its_monitor = {{0,0},{monitor->timeout,0}};
       if (epoll_s_timer_callback(&monitor->timer,&its_monitor,0,
@@ -242,6 +251,12 @@ int wd_daemon_s_channel_callback(void *a_wd_daemon,unsigned a_index,unsigned a_t
 
       wd_monitor_s *monitor = wd_monitor_tree_s_at(&this->monitor_tree,monitor_idx);
 
+      // - retrieve monitor keepalive time -
+      if (clock_s_gettime(CLOCK_MONOTONIC,&monitor->keepalive_time))
+      {
+        throw_error(WD_DAEMON_GET_TIME_ERROR);
+      }
+
       // - schedule monitor timer -
       struct itimerspec its_monitor = {{0,0},{monitor->timeout,0}};
       if (epoll_s_timer_callback(&monitor->timer,&its_monitor,0,
@@ -261,6 +276,12 @@ int wd_daemon_s_channel_callback(void *a_wd_daemon,unsigned a_index,unsigned a_t
 
       if (this->monitor_tree.count != 0)
       {
+        time_s time;
+        if (clock_s_gettime(CLOCK_MONOTONIC,&time))
+        {
+          throw_error(WD_DAEMON_GET_TIME_ERROR);
+        }
+
         wd_monitor_tree_s_node *mtn_ptr = this->monitor_tree.data;
         wd_monitor_tree_s_node *mtn_ptr_end = mtn_ptr + this->monitor_tree.used;
         int first_monitor = 1;
@@ -281,8 +302,14 @@ int wd_daemon_s_channel_callback(void *a_wd_daemon,unsigned a_index,unsigned a_t
 
             bc_array_s_append_ptr(&this->buffer,"{\"name\":");
             string_s_to_json(&monitor->name,&this->buffer);
-            bc_array_s_append_format(&this->buffer,",\"timeout\":%" HOST_LL_FORMAT "d}",
-                monitor->timeout);
+            bc_array_s_append_format(&this->buffer,
+                ",\"timeout\":%" HOST_LL_FORMAT "d"
+                ",\"enabled\":%" HOST_LL_FORMAT "d"
+                ",\"keepalive\":%" HOST_LL_FORMAT "d"
+                "}",
+                monitor->timeout,
+                (time - monitor->enable_time) / 1000000000ULL,
+                (time - monitor->keepalive_time) / 1000000000ULL);
           }
         } while(++mtn_ptr < mtn_ptr_end);
       }

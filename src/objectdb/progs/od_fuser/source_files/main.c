@@ -232,7 +232,7 @@ int od_fuser_s_channel_callback(void *a_od_fuser,unsigned a_index,unsigned a_typ
       this->buffer.used = 0;
       bc_array_s_append_format(&this->buffer,
           "{\"type\":\"watch\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"\",\"options\":1}",
-          this->channel.message_id++);
+          ++this->channel.message_id);
 
       if (od_channel_client_s_send_message(&this->channel,&this->buffer))
       {

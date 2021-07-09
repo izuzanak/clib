@@ -148,6 +148,7 @@ WUR libconf_sdl_EXPORT int sd_conf_trace_tree_s_from_var(sd_conf_trace_tree_s *t
 struct
 <
 sd_conf_ip_port_s:channel
+sd_conf_ip_port_s:watchdog
 sd_conf_segment_tree_s:segments
 sd_conf_trace_tree_s:traces
 >

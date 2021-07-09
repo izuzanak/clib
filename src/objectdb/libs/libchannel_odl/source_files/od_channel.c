@@ -648,7 +648,7 @@ int od_channel_client_s_ping_time_event(void *a_od_channel_client,unsigned a_ind
   if (this->connected)
   {
     this->buffer.used = 0;
-    bc_array_s_append_format(&this->buffer,"{\"type\":\"ping\",\"id\":%" HOST_LL_FORMAT "d}",this->message_id++);
+    bc_array_s_append_format(&this->buffer,"{\"type\":\"ping\",\"id\":%" HOST_LL_FORMAT "d}",++this->message_id);
 
     // - send message -
     if (od_channel_client_s_send_message(this,&this->buffer))

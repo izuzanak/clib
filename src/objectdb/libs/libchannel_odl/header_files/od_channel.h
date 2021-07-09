@@ -266,7 +266,7 @@ static inline int od_channel_client_s_send_message(od_channel_client_s *this,bc_
 static inline int od_channel_client_s_watch_path(od_channel_client_s *this,const char *a_path)
 {/*{{{*/
   this->buffer.used = 0;
-  bc_array_s_append_format(&this->buffer,"{\"type\":\"watch\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\"}",this->message_id++,a_path);
+  bc_array_s_append_format(&this->buffer,"{\"type\":\"watch\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\"}",++this->message_id,a_path);
 
   if (od_channel_client_s_send_message(this,&this->buffer))
   {
@@ -279,7 +279,7 @@ static inline int od_channel_client_s_watch_path(od_channel_client_s *this,const
 static inline int od_channel_client_s_set_path(od_channel_client_s *this,const char *a_path,var_s a_var)
 {/*{{{*/
   this->buffer.used = 0;
-  bc_array_s_append_format(&this->buffer,"{\"type\":\"set\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\",\"data\":",this->message_id++,a_path);
+  bc_array_s_append_format(&this->buffer,"{\"type\":\"set\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\",\"data\":",++this->message_id,a_path);
   var_s_to_json(&a_var,&this->buffer);
   bc_array_s_push(&this->buffer,'}');
 
