@@ -8,7 +8,7 @@ include "od_conf.h"
 validator_s g_config_validator;
 const char g_config_schema[] =
 /*{{{*/
-"{\"uint\":[\"type\",1,\">=\",0],\"uint16\":[\"ref\",\"uint\",\"<=\",65535],\"ip_address\":[\"type\",3],\"path\":[\"regex\",\"^[a-zA-Z0-9/\\\\._-]*$\"],\"ip_port_pair\":[\"type\",5,\"items\",[\"ip\",\"ip_address\",\"port\",\"uint16\"]],\"storage\":[\"type\",5,\"items\",[\"path\",\"path\",\"max_size\",\"uint\"]],\"fuser\":[\"type\",5,\"items\",[\"mountpoint\",\"path\"]],\"config\":[\"type\",5,\"items\",[\"channel\",\"ip_port_pair\",\"storage\",\"storage\",\"fuser\",\"fuser\"]]}";
+"{\"uint\":[\"type\",1,\">=\",0],\"uint16\":[\"ref\",\"uint\",\"<=\",65535],\"ip_address\":[\"type\",3],\"path\":[\"regex\",\"^[a-zA-Z0-9/\\\\._-]*$\"],\"ip_port_pair\":[\"type\",5,\"items\",[\"ip\",\"ip_address\",\"port\",\"uint16\"]],\"storage\":[\"type\",5,\"items\",[\"path\",\"path\",\"max_size\",\"uint\"]],\"fuser\":[\"type\",5,\"items\",[\"mountpoint\",\"path\"]],\"config\":[\"type\",5,\"items\",[\"channel\",\"ip_port_pair\",\"storage\",\"storage\",\"watchdog\",\"ip_port_pair\",\"fuser\",\"fuser\"]]}";
 /*}}}*/
 
 // === methods of generated structures =========================================

@@ -3,6 +3,9 @@
 include "main.h"
 @end
 
+const char *g_name;
+const char *g_conf;
+
 volatile int g_terminate = 0;
 epoll_s *g_epoll;
 
@@ -69,6 +72,28 @@ int od_daemon_s_process_config(od_daemon_s *this)
     {
       // - storage is not used -
       file_s_clear(&this->storage);
+    }
+  }
+
+  // - if watchdog channel configuration changed -
+  if (!od_conf_ip_port_s_compare(&this->config.watchdog,&this->last_config.watchdog))
+  {
+    od_conf_ip_port_s *watchdog_cfg = &this->config.watchdog;
+
+    if (watchdog_cfg->ip.size > 1)
+    {
+      // - create watchdog channel -
+      if (wd_channel_client_s_create(&this->watchdog_channel,
+            watchdog_cfg->ip.data,watchdog_cfg->port,
+            od_daemon_s_watchdog_channel_callback,
+            this,0))
+      {
+        throw_error(OD_DAEMON_WATCHDOG_CHANNEL_CREATE_ERROR);
+      }
+    }
+    else
+    {
+      wd_channel_client_s_clear(&this->watchdog_channel);
     }
   }
 
@@ -734,6 +759,112 @@ int od_daemon_s_channel_callback(void *a_od_daemon,unsigned a_index,unsigned a_t
   return 0;
 }/*}}}*/
 
+int od_daemon_s_watchdog_channel_callback(void *a_od_daemon,unsigned a_index,unsigned a_type,va_list a_ap)
+{/*{{{*/
+  od_daemon_s *this = (od_daemon_s *)a_od_daemon;
+
+  switch (a_type)
+  {
+  case wd_channel_cbreq_NEW:
+    {/*{{{*/
+      
+      // - enable watchdog monitor -
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,
+          "{\"type\":\"enable\",\"id\":%" HOST_LL_FORMAT "d,\"name\":\"%s\",\"timeout\":60}",
+          ++this->watchdog_channel.message_id,g_name);
+
+      if (wd_channel_client_s_send_message(&this->watchdog_channel,&this->buffer))
+      {
+        throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+
+      // - register watchdog update -
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,
+          "{\"type\":\"watch\",\"id\":%" HOST_LL_FORMAT "d}",
+          ++this->watchdog_channel.message_id);
+
+      if (wd_channel_client_s_send_message(&this->watchdog_channel,&this->buffer))
+      {
+        throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+
+      // - schedule watchdog timer -
+      struct itimerspec its_watchdog = {{30,0},{30,0}};
+      if (epoll_s_timer_callback(&this->watchdog_timer,&its_watchdog,0,
+            od_daemon_s_watchdog_time_event,this,0))
+      {
+        throw_error(OD_DAEMON_EPOLL_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case wd_channel_cbreq_DROP:
+    {/*{{{*/
+      
+      // - disable watchdog timer -
+      struct itimerspec its_watchdog = {{0,0},{0,0}};
+      if (epoll_timer_s_settime(&this->watchdog_timer,&its_watchdog,0))
+      {
+        throw_error(OD_DAEMON_TIMER_SETTIME_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case wd_channel_cbresp_ENABLE:
+  case wd_channel_cbresp_DISABLE:
+  case wd_channel_cbresp_WATCH:
+  case wd_channel_cbresp_IGNORE:
+  case wd_channel_cbresp_STATUS:
+    break;
+  case wd_channel_cbevt_UPDATE:
+    {/*{{{*/
+      (void)va_arg(a_ap,lli);
+      const string_s *reason = va_arg(a_ap,const string_s *);
+
+      if (strcmp(reason->data,"timeout") == 0)
+      {
+        // - terminate daemon -
+        __sync_add_and_fetch(&g_terminate,1);
+      }
+    }/*}}}*/
+    break;
+  default:
+    {/*{{{*/
+
+      // - log message -
+      log_info_2("channel watchdog %u, unknown request",a_index);
+    }/*}}}*/
+  }
+
+  return 0;
+}/*}}}*/
+
+int od_daemon_s_watchdog_time_event(void *a_od_daemon,unsigned a_index,epoll_event_s *a_epoll_event)
+{/*{{{*/
+  (void)a_index;
+
+  // - read timer expiration counter -
+  uint64_t timer_exps;
+  if (read(a_epoll_event->data.fd,&timer_exps,sizeof(timer_exps)) != sizeof(timer_exps))
+  {
+    throw_error(OD_DAEMON_TIMER_READ_ERROR);
+  }
+
+  od_daemon_s *this = (od_daemon_s *)a_od_daemon;
+
+  this->buffer.used = 0;
+  bc_array_s_append_format(&this->buffer,
+      "{\"type\":\"keepalive\",\"id\":%" HOST_LL_FORMAT "d,\"name\":\"%s\"}",
+      ++this->watchdog_channel.message_id,g_name);
+
+  if (wd_channel_client_s_send_message(&this->watchdog_channel,&this->buffer))
+  {
+    throw_error(OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
 // === global functions ========================================================
 
 void signal_handler(int a_signum)
@@ -758,12 +889,13 @@ int main(int argc,char **argv)
 
   memcheck_init();
   libchannel_cll_init();
+  libchannel_wdl_init();
   libchannel_odl_init();
   libconf_odl_init();
   libodb_odl_init();
 
-  char *name = "od_daemon";
-  char *conf = "od_config.json";
+  g_name = "od_daemon";
+  g_conf = "od_config.json";
 
   // - process command line arguments -
   if (argc > 1)
@@ -772,11 +904,11 @@ int main(int argc,char **argv)
     do {
       if (strncmp("--name=",argv[arg_idx],7) == 0)
       {
-        name = argv[arg_idx] + 7;
+        g_name = argv[arg_idx] + 7;
       }
       else if (strncmp("--conf=",argv[arg_idx],7) == 0)
       {
-        conf = argv[arg_idx] + 7;
+        g_conf = argv[arg_idx] + 7;
       }
       else
       {
@@ -799,13 +931,13 @@ int main(int argc,char **argv)
     g_epoll = &epoll;
 
     CONT_INIT_CLEAR(process_s,process);
-    cassert(process_s_create(&process,name) == 0);
+    cassert(process_s_create(&process,g_name) == 0);
 
     do {
       CONT_INIT_CLEAR(od_daemon_s,daemon);
 
       if (od_daemon_s_create(&daemon) ||
-          od_config_s_read_file(&daemon.config,conf))
+          od_config_s_read_file(&daemon.config,g_conf))
       {
         break;
       }
@@ -824,6 +956,7 @@ int main(int argc,char **argv)
   libodb_odl_clear();
   libconf_odl_clear();
   libchannel_odl_clear();
+  libchannel_wdl_clear();
   libchannel_cll_clear();
   memcheck_release_assert();
 

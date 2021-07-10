@@ -2,6 +2,7 @@
 set(CONF_COMPONENTS
   "src/clib/libs/libcrc_cll"
   "src/clib/libs/libprocess_cll"
+  "src/watchdogd/libs/libchannel_wdl"
   "src/objectdb/libs/libconf_odl"
   "src/objectdb/libs/libchannel_odl"
   "src/objectdb/libs/libodb_odl")

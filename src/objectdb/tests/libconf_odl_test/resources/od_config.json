@@ -7,6 +7,10 @@
     "path": "od_storage.bin",
     "max_size": 10485760
   },
+  "watchdog": {
+    "ip": "127.0.0.1",
+    "port": 9006
+  },
   "fuser": {
     "mountpoint": "/dev/shm/odb"
   }

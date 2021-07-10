@@ -5,6 +5,7 @@
 @begin
 include "cl_crc.h"
 include "cl_process.h"
+include "wd_channel.h"
 include "od_conf.h"
 include "od_channel.h"
 include "od_odb.h"
@@ -13,13 +14,17 @@ include "od_odb.h"
 // - error codes -
 #define ERROR_OD_DAEMON_CONFIG_DATA_ERROR 1
 #define ERROR_OD_DAEMON_EPOLL_WAIT_ERROR 2
+#define ERROR_OD_DAEMON_EPOLL_ERROR 3
+#define ERROR_OD_DAEMON_TIMER_SETTIME_ERROR 4
+#define ERROR_OD_DAEMON_TIMER_READ_ERROR 5
 
 #define ERROR_OD_DAEMON_CHANNEL_CREATE_ERROR 1
-#define ERROR_OD_DAEMON_STORAGE_FILE_OPEN_ERROR 2
-#define ERROR_OD_DAEMON_STORAGE_READ_ERROR 3
-#define ERROR_OD_DAEMON_STORAGE_WRITE_ERROR 4
-#define ERROR_OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR 5
-#define ERROR_OD_DAEMON_PROCESS_UPDATES_ERROR 6
+#define ERROR_OD_DAEMON_WATCHDOG_CHANNEL_CREATE_ERROR 2
+#define ERROR_OD_DAEMON_STORAGE_FILE_OPEN_ERROR 3
+#define ERROR_OD_DAEMON_STORAGE_READ_ERROR 4
+#define ERROR_OD_DAEMON_STORAGE_WRITE_ERROR 5
+#define ERROR_OD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR 6
+#define ERROR_OD_DAEMON_PROCESS_UPDATES_ERROR 7
 
 #define ERROR_OD_STORAGE_FILE_READ_ERROR 1
 #define ERROR_OD_STORAGE_FILE_WRITE_ERROR 2
@@ -44,6 +49,9 @@ var_array_s:channel_watches
 
 file_s:storage
 
+wd_channel_client_s:watchdog_channel
+epoll_timer_s:watchdog_timer
+
 $// - temporary buffers -
 bc_array_s:buffer
 ui_array_s:indexes
@@ -62,6 +70,8 @@ WUR int od_daemon_s_storage_write(od_daemon_s *this,const string_s *a_path,var_s
 
 WUR int od_daemon_s_process_updates(od_daemon_s *this,const string_s *a_path,var_s a_data_var);
 WUR int od_daemon_s_channel_callback(void *a_od_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
+WUR int od_daemon_s_watchdog_channel_callback(void *a_od_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
+WUR int od_daemon_s_watchdog_time_event(void *a_od_daemon,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === inline methods of generated structures ==================================
 
