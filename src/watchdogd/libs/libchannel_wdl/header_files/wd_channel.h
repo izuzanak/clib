@@ -48,23 +48,23 @@ typedef int (*wd_channel_cbreq_t)(void *a_object,unsigned a_index,unsigned a_typ
 
 enum
 {/*{{{*/
-  wd_channel_FIRST = 1,
-
-  wd_channel_ID,
+  wd_channel_ID = 1,
 
   wd_channel_TYPE,
   wd_channel_RESP,
   wd_channel_NAME,
   wd_channel_TIMEOUT,
   wd_channel_DATA,
+  wd_channel_REASON,
 
   wd_channel_ENABLE,
   wd_channel_DISABLE,
   wd_channel_KEEPALIVE,
+  wd_channel_WATCH,
+  wd_channel_IGNORE,
+  wd_channel_UPDATE,
   wd_channel_STATUS,
   wd_channel_PING,
-
-  wd_channel_LAST,
 };/*}}}*/
 
 enum
@@ -75,11 +75,17 @@ enum
   wd_channel_cbreq_ENABLE = 0,
   wd_channel_cbreq_DISABLE,
   wd_channel_cbreq_KEEPALIVE,
+  wd_channel_cbreq_WATCH,
+  wd_channel_cbreq_IGNORE,
   wd_channel_cbreq_STATUS,
 
   wd_channel_cbresp_ENABLE,
   wd_channel_cbresp_DISABLE,
+  wd_channel_cbresp_WATCH,
+  wd_channel_cbresp_IGNORE,
   wd_channel_cbresp_STATUS,
+
+  wd_channel_cbevt_UPDATE,
 };/*}}}*/
 
 // === definition of generated structures ======================================

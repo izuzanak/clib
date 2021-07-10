@@ -7,8 +7,6 @@ include "od_channel.h"
 
 const char *g_od_channel_strings[] =
 {/*{{{*/
-  "first",
-
   "id",
 
   "type",
@@ -27,8 +25,6 @@ const char *g_od_channel_strings[] =
   "ping",
 
   "options",
-
-  "last",
 };/*}}}*/
 
 var_tree_s g_od_channel_vars;

@@ -1219,18 +1219,29 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
 
 int sd_daemon_s_watchdog_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_type,va_list a_ap)
 {/*{{{*/
-  (void)a_ap;
-
   sd_daemon_s *this = (sd_daemon_s *)a_sd_daemon;
 
   switch (a_type)
   {
   case wd_channel_cbreq_NEW:
     {/*{{{*/
+      
+      // - enable watchdog monitor -
       this->buffer.used = 0;
       bc_array_s_append_format(&this->buffer,
           "{\"type\":\"enable\",\"id\":%" HOST_LL_FORMAT "d,\"name\":\"%s\",\"timeout\":60}",
           ++this->watchdog_channel.message_id,g_name);
+
+      if (wd_channel_client_s_send_message(&this->watchdog_channel,&this->buffer))
+      {
+        throw_error(SD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+
+      // - register watchdog update -
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,
+          "{\"type\":\"watch\",\"id\":%" HOST_LL_FORMAT "d}",
+          ++this->watchdog_channel.message_id);
 
       if (wd_channel_client_s_send_message(&this->watchdog_channel,&this->buffer))
       {
@@ -1259,7 +1270,21 @@ int sd_daemon_s_watchdog_channel_callback(void *a_sd_daemon,unsigned a_index,uns
     break;
   case wd_channel_cbresp_ENABLE:
   case wd_channel_cbresp_DISABLE:
+  case wd_channel_cbresp_WATCH:
+  case wd_channel_cbresp_IGNORE:
   case wd_channel_cbresp_STATUS:
+    break;
+  case wd_channel_cbevt_UPDATE:
+    {/*{{{*/
+      (void)va_arg(a_ap,lli);
+      const string_s *reason = va_arg(a_ap,const string_s *);
+
+      if (strcmp(reason->data,"timeout") == 0)
+      {
+        // - terminate daemon -
+        __sync_add_and_fetch(&g_terminate,1);
+      }
+    }/*}}}*/
     break;
   default:
     {/*{{{*/

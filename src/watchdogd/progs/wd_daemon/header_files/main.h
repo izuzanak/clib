@@ -54,6 +54,7 @@ wd_config_s:config
 wd_config_s:last_config
 
 wd_channel_s:channel
+ui_array_s:channel_watches
 wd_monitor_tree_s:monitor_tree
 bi:monitors_ok
 

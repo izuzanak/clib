@@ -61,29 +61,38 @@ int wd_daemon_s_process_config(wd_daemon_s *this)
   {
     wd_conf_watchdog_s *watchdog_cfg = &this->config.watchdog;
 
-    // - stop watchdog driver -
-    if (this->wdg_fd != -1)
+    if (this->wdg_fd != -1 && this->monitors_ok)
     {
+      // - stop watchdog driver -
       if (fd_s_write(&this->wdg_fd,"V",1))
       {
         throw_error(WD_DAEMON_WATCHDOG_WRITE_ERROR);
       }
-
-      fd_s_clear(&this->wdg_fd);
     }
 
-    // - open watchdog driver -
-    if ((this->wdg_fd = open(watchdog_cfg->path.data,O_WRONLY | O_APPEND)) == -1)
-    {
-      throw_error(WD_DAEMON_WATCHDOG_OPEN_ERROR);
-    }
+    fd_s_clear(&this->wdg_fd);
 
-    // - schedule watchdog timer -
-    struct itimerspec its_watchdog = {{watchdog_cfg->period,0},{0,1}};
-    if (epoll_s_timer_callback(&this->wdg_timer,&its_watchdog,0,
-          wd_daemon_s_watchdog_time_event,this,0))
+    // - watchdog path is not empty -
+    if (watchdog_cfg->path.size > 1)
     {
-      throw_error(WD_DAEMON_EPOLL_ERROR);
+      // - open watchdog driver -
+      if ((this->wdg_fd = open(watchdog_cfg->path.data,O_WRONLY | O_APPEND)) == -1)
+      {
+        throw_error(WD_DAEMON_WATCHDOG_OPEN_ERROR);
+      }
+
+      // - schedule watchdog timer -
+      struct itimerspec its_watchdog = {{watchdog_cfg->period,0},{0,1}};
+      if (epoll_s_timer_callback(&this->wdg_timer,&its_watchdog,0,
+            wd_daemon_s_watchdog_time_event,this,0))
+      {
+        throw_error(WD_DAEMON_EPOLL_ERROR);
+      }
+    }
+    else
+    {
+      // - disable watchdog timer -
+      epoll_timer_s_clear(&this->wdg_timer);
     }
   }
 
@@ -128,9 +137,10 @@ int wd_daemon_s_run(wd_daemon_s *this)
     }
   }
 
-  // - terminated normally, stop watchdog driver -
-  if (this->wdg_fd != -1)
+  // - terminated normally -
+  if (this->wdg_fd != -1 && this->monitors_ok)
   {
+    // - stop watchdog driver -
     if (fd_s_write(&this->wdg_fd,"V",1))
     {
       throw_error(WD_DAEMON_WATCHDOG_WRITE_ERROR);
@@ -148,10 +158,20 @@ int wd_daemon_s_channel_callback(void *a_wd_daemon,unsigned a_index,unsigned a_t
   {
   case wd_channel_cbreq_NEW:
     {/*{{{*/
+      while (this->channel_watches.used <= a_index)
+      {
+        ui_array_s_push(&this->channel_watches,0);
+      }
+
+      // - reset channel watch flag -
+      *ui_array_s_at(&this->channel_watches,a_index) = 0;
     }/*}}}*/
     break;
   case wd_channel_cbreq_DROP:
     {/*{{{*/
+
+      // - reset channel watch flag -
+      *ui_array_s_at(&this->channel_watches,a_index) = 0;
     }/*}}}*/
     break;
   case wd_channel_cbreq_ENABLE:
@@ -266,6 +286,40 @@ int wd_daemon_s_channel_callback(void *a_wd_daemon,unsigned a_index,unsigned a_t
       }
     }/*}}}*/
     break;
+  case wd_channel_cbreq_WATCH:
+    {/*{{{*/
+      lli id = va_arg(a_ap,lli);
+
+      // - set channel watch flag -
+      *ui_array_s_at(&this->channel_watches,a_index) = 1;
+
+      // - send response -
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,"{\"resp\":\"watch\",\"id\":%" HOST_LL_FORMAT "d}",id);
+
+      if (wd_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(WD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case wd_channel_cbreq_IGNORE:
+    {/*{{{*/
+      lli id = va_arg(a_ap,lli);
+
+      // - reset channel watch flag -
+      *ui_array_s_at(&this->channel_watches,a_index) = 0;
+
+      // - send response -
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,"{\"resp\":\"ignore\",\"id\":%" HOST_LL_FORMAT "d}",id);
+
+      if (wd_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(WD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
   case wd_channel_cbreq_STATUS:
     {/*{{{*/
       lli id = va_arg(a_ap,lli);
@@ -347,7 +401,7 @@ int wd_daemon_s_watchdog_time_event(void *a_wd_daemon,unsigned a_index,epoll_eve
   wd_daemon_s *this = (wd_daemon_s *)a_wd_daemon;
 
   // - all monitors are ok -
-  if (this->monitors_ok)
+  if (this->wdg_fd != -1 && this->monitors_ok)
   {
     // - refresh timer driver -
     if (fd_s_write(&this->wdg_fd,".",1))
@@ -374,6 +428,36 @@ int wd_daemon_s_monitor_time_event(void *a_wd_daemon,unsigned a_index,epoll_even
 
   // - log message -
   log_info_2("monitor TIMEOUT, name: %s",monitor->name.data);
+
+  // - monitors were ok -
+  if (this->monitors_ok)
+  {
+    if (this->channel_watches.used != 0)
+    {
+      CONT_INIT_CLEAR(ui_array_s,indexes);
+
+      unsigned index = 0;
+      do
+      {
+        if (this->channel_watches.data[index])
+        {
+          ui_array_s_push(&indexes,index);
+        }
+      } while(++index < this->channel_watches.used);
+
+      if (indexes.used != 0)
+      {
+        this->buffer.used = 0;
+        bc_array_s_append_ptr(&this->buffer,"{\"type\":\"update\",\"reason\":\"timeout\",\"id\":0}");
+
+        // - send update message -
+        if (wd_channel_s_send_multi_message(&this->channel,&indexes,&this->buffer))
+        {
+          throw_error(WD_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+        }
+      }
+    }
+  }
 
   // - reset monitors ok flag -
   this->monitors_ok = 0;

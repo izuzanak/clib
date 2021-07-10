@@ -7,8 +7,6 @@ include "wd_channel.h"
 
 const char *g_wd_channel_strings[] =
 {/*{{{*/
-  "first",
-
   "id",
 
   "type",
@@ -16,14 +14,16 @@ const char *g_wd_channel_strings[] =
   "name",
   "timeout",
   "data",
+  "reason",
 
   "enable",
   "disable",
   "keepalive",
+  "watch",
+  "ignore",
+  "update",
   "status",
   "ping",
-
-  "last",
 };/*}}}*/
 
 var_tree_s g_wd_channel_vars;
@@ -222,6 +222,26 @@ int wd_channel_s_conn_message(void *a_wd_channel,unsigned a_index,const bc_array
       }
     }/*}}}*/
     break;
+  case wd_channel_WATCH:
+    {/*{{{*/
+
+      // - call callback -
+      if (wd_channel_s_message_call(this,a_index,wd_channel_cbreq_WATCH,id))
+      {
+        throw_error(WD_CHANNEL_SERVER_CALLBACK_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case wd_channel_IGNORE:
+    {/*{{{*/
+
+      // - call callback -
+      if (wd_channel_s_message_call(this,a_index,wd_channel_cbreq_IGNORE,id))
+      {
+        throw_error(WD_CHANNEL_SERVER_CALLBACK_ERROR);
+      }
+    }/*}}}*/
+    break;
   case wd_channel_STATUS:
     {/*{{{*/
 
@@ -332,58 +352,114 @@ int wd_channel_client_s_conn_message(void *a_wd_channel_client,unsigned a_index,
   }
 
   lli id = loc_s_int_value(id_var);
+  var_s type_var = loc_s_dict_get(msg_var,g_wd_channel_vars.data[wd_channel_TYPE].object);
   var_s resp_var = loc_s_dict_get(msg_var,g_wd_channel_vars.data[wd_channel_RESP].object);
-  unsigned resp_idx = var_tree_s_get_idx(&g_wd_channel_vars,&resp_var);
 
-  switch (resp_idx)
+  if (type_var != NULL)
+  {/*{{{*/
+    unsigned type_idx = var_tree_s_get_idx(&g_wd_channel_vars,&type_var);
+
+    switch (type_idx)
+    {
+    case wd_channel_UPDATE:
+      {/*{{{*/
+        var_s action_var = loc_s_dict_get(msg_var,g_wd_channel_vars.data[wd_channel_REASON].object);
+
+        if (action_var == NULL || action_var->v_type != c_bi_type_string)
+        {
+          throw_error(WD_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (wd_channel_client_s_message_call(this,wd_channel_cbevt_UPDATE,id,
+              loc_s_string_value(action_var)))
+        {
+          throw_error(WD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    default:
+      throw_error(WD_CHANNEL_MESSAGE_ERROR);
+    }
+  }/*}}}*/
+  else if (resp_var != NULL)
+  {/*{{{*/
+    unsigned resp_idx = var_tree_s_get_idx(&g_wd_channel_vars,&resp_var);
+
+    switch (resp_idx)
+    {
+    case wd_channel_ENABLE:
+      {/*{{{*/
+        // - call callback -
+        if (wd_channel_client_s_message_call(this,wd_channel_cbresp_ENABLE,id))
+        {
+          throw_error(WD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case wd_channel_DISABLE:
+      {/*{{{*/
+        // - call callback -
+        if (wd_channel_client_s_message_call(this,wd_channel_cbresp_DISABLE,id))
+        {
+          throw_error(WD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case wd_channel_WATCH:
+      {/*{{{*/
+
+        // - call callback -
+        if (wd_channel_client_s_message_call(this,wd_channel_cbresp_WATCH,id))
+        {
+          throw_error(WD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case wd_channel_IGNORE:
+      {/*{{{*/
+
+        // - call callback -
+        if (wd_channel_client_s_message_call(this,wd_channel_cbresp_IGNORE,id))
+        {
+          throw_error(WD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case wd_channel_STATUS:
+      {/*{{{*/
+        var_s data_var = loc_s_dict_get(msg_var,g_wd_channel_vars.data[wd_channel_DATA].object);
+
+        if (data_var == NULL)
+        {
+          throw_error(WD_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (wd_channel_client_s_message_call(this,wd_channel_cbresp_STATUS,id,
+              data_var))
+        {
+          throw_error(WD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case wd_channel_PING:
+      {/*{{{*/
+
+        // - update connect timer -
+        struct itimerspec its_connect = {{0,0},WD_CHANNEL_PING_TIMEOUT};
+        if (epoll_timer_s_settime(&this->connect_timer,&its_connect,0))
+        {
+          throw_error(WD_CHANNEL_CLIENT_TIMER_SETTIME_ERROR);
+        }
+      }/*}}}*/
+      break;
+    default:
+      throw_error(WD_CHANNEL_MESSAGE_ERROR);
+    }
+  }/*}}}*/
+  else
   {
-  case wd_channel_ENABLE:
-    {/*{{{*/
-      // - call callback -
-      if (wd_channel_client_s_message_call(this,wd_channel_cbresp_ENABLE,id))
-      {
-        throw_error(WD_CHANNEL_CLIENT_CALLBACK_ERROR);
-      }
-    }/*}}}*/
-    break;
-  case wd_channel_DISABLE:
-    {/*{{{*/
-      // - call callback -
-      if (wd_channel_client_s_message_call(this,wd_channel_cbresp_DISABLE,id))
-      {
-        throw_error(WD_CHANNEL_CLIENT_CALLBACK_ERROR);
-      }
-    }/*}}}*/
-    break;
-  case wd_channel_STATUS:
-    {/*{{{*/
-      var_s data_var = loc_s_dict_get(msg_var,g_wd_channel_vars.data[wd_channel_DATA].object);
-
-      if (data_var == NULL)
-      {
-        throw_error(WD_CHANNEL_MESSAGE_ERROR);
-      }
-
-      // - call callback -
-      if (wd_channel_client_s_message_call(this,wd_channel_cbresp_STATUS,id,
-            data_var))
-      {
-        throw_error(WD_CHANNEL_CLIENT_CALLBACK_ERROR);
-      }
-    }/*}}}*/
-    break;
-  case wd_channel_PING:
-    {/*{{{*/
-
-      // - update connect timer -
-      struct itimerspec its_connect = {{0,0},WD_CHANNEL_PING_TIMEOUT};
-      if (epoll_timer_s_settime(&this->connect_timer,&its_connect,0))
-      {
-        throw_error(WD_CHANNEL_CLIENT_TIMER_SETTIME_ERROR);
-      }
-    }/*}}}*/
-    break;
-  default:
     throw_error(WD_CHANNEL_MESSAGE_ERROR);
   }
 

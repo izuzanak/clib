@@ -58,9 +58,7 @@ typedef int (*od_channel_cbreq_t)(void *a_object,unsigned a_index,unsigned a_typ
 
 enum
 {/*{{{*/
-  od_channel_FIRST = 1,
-
-  od_channel_ID,
+  od_channel_ID = 1,
 
   od_channel_TYPE,
   od_channel_RESP,
@@ -78,8 +76,6 @@ enum
   od_channel_PING,
 
   od_channel_OPTIONS,
-
-  od_channel_LAST,
 };/*}}}*/
 
 enum
