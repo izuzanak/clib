@@ -134,6 +134,26 @@ int fd_s_read_cnt(const fd_s *this,size_t a_count,bc_array_s *a_trg)
   return 0;
 }/*}}}*/
 
+int fd_s_read_max(const fd_s *this,size_t a_count,bc_array_s *a_trg)
+{/*{{{*/
+  debug_assert(*this != -1);
+
+  // - prepare target buffer -
+  bc_array_s_reserve(a_trg,a_count);
+
+  long int read_cnt = read(*this,a_trg->data + a_trg->used,a_count);
+
+  // - ERROR -
+  if (read_cnt == -1)
+  {
+    throw_error(FD_READ_ERROR);
+  }
+
+  a_trg->used += read_cnt;
+
+  return 0;
+}/*}}}*/
+
 // === methods of structure socket_s ===========================================
 
 int socket_s_bind(const socket_s *this,const socket_address_s *a_addr)

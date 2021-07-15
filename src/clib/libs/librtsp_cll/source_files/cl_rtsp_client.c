@@ -133,7 +133,7 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
 #ifdef CLIB_WITH_OPENSSL
     this->ssl != NULL ? ssl_conn_s_read(&this->ssl,this->epoll_fd.fd,msg) :
 #endif
-    fd_s_read(&this->epoll_fd.fd,msg)) || msg->used == msg_old_used)
+    fd_s_read_max(&this->epoll_fd.fd,65536,msg)) || msg->used == msg_old_used)
   {
     throw_error(RTSP_CLIENT_READ_ERROR);
   }
