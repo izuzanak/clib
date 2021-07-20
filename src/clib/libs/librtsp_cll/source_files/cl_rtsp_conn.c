@@ -532,8 +532,18 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
   if (time_stamp < rtsp_setup->last_time_stamp ||\
       time_stamp - rtsp_setup->last_time_stamp > 100000)\
   {\
-    rtsp_setup->time_stamp_offset = rtsp_setup->last_time_stamp - RTP_PKT_GET_TIME_STAMP(this->packet.data);\
-    time_stamp = rtsp_setup->last_time_stamp;\
+    ulli time_stamp_llu = (ulli)old_time_stamp + (ulli)rtsp_setup->time_stamp_offset;\
+\
+    /* - timestamp overflow detection - */\
+    if (time_stamp_llu > UINT_MAX)\
+    {\
+      rtsp_setup->time_stamp_offset -= UINT_MAX;\
+    }\
+    else\
+    {\
+      rtsp_setup->time_stamp_offset = rtsp_setup->last_time_stamp - old_time_stamp;\
+      time_stamp = rtsp_setup->last_time_stamp;\
+    }\
   }\
 \
   /* - update last time stamp - */\
