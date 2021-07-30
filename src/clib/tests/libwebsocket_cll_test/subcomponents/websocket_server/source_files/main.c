@@ -95,7 +95,7 @@ int main(int argc,char **argv)
     cassert(signal_s_simple_handler(signal_handler) == 0);
 
     CONT_INIT_CLEAR(epoll_s,epoll);
-    epoll_s_create(&epoll,0);
+    epoll_s_create(&epoll,EPOLL_CLOEXEC);
 
     g_epoll_fd_update = epoll_fd_update;
     g_epoll = &epoll;

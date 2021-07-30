@@ -119,7 +119,7 @@ int main(int argc,char **argv)
 
   {
     CONT_INIT_CLEAR(epoll_s,epoll);
-    epoll_s_create(&epoll,0);
+    epoll_s_create(&epoll,EPOLL_CLOEXEC);
 
     g_epoll_fd_update = epoll_fd_update;
     g_epoll = &epoll;

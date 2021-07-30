@@ -121,7 +121,7 @@ int main(int argc,char **argv)
     //const unsigned short port = 554;
 
     CONT_INIT_CLEAR(epoll_s,epoll);
-    cassert(epoll_s_create(&epoll,0) == 0);
+    cassert(epoll_s_create(&epoll,EPOLL_CLOEXEC) == 0);
 
     g_epoll_fd_update = epoll_fd_update;
     g_epoll = &epoll;
