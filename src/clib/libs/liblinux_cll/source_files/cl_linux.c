@@ -543,7 +543,7 @@ int epoll_s_fd_update(epoll_s *this,
       if (epoll_ctl(this->fd,EPOLL_CTL_DEL,a_fd,&epoll_event) == -1)
       {
         // - closed fd, not problem -
-        if (errno != EBADF)
+        if (errno != EBADF && errno != ENOENT)
         {
           throw_error(EPOLL_CONTROL_DELETE_ERROR);
         }
