@@ -592,6 +592,9 @@ void test_prop_all_items()
   loc_s_dict_set(value_3,loc_s_string_ptr("second"),loc_s_int(10));
   loc_s_dict_set(value_3,loc_s_string_ptr("third"),loc_s_int(11));
 
+  VAR_CLEAR(value_4,loc_s_int(10));
+  VAR_CLEAR(value_5,loc_s_int(11));
+
   CONT_INIT_CLEAR(validator_s,validator);
   cassert(validator_s_create(&validator,schema) == 0);
   cassert(validator_s_validate(&validator,str_test_var,value_0) == 0);
@@ -607,6 +610,13 @@ void test_prop_all_items()
   cassert(strcmp(buffer.data,"[third]") == 0);
   VAR_ARRAY_S_TO_STRING(&validator.props_stack);
   cassert(strcmp(buffer.data,"[test,all-items,third,==]") == 0);
+
+  cassert(validator_s_validate(&validator,str_test_var,value_4) == 0);
+  cassert(validator_s_validate(&validator,str_test_var,value_5));
+  VAR_ARRAY_S_TO_STRING(&validator.value_stack);
+  cassert(strcmp(buffer.data,"[]") == 0);
+  VAR_ARRAY_S_TO_STRING(&validator.props_stack);
+  cassert(strcmp(buffer.data,"[test,all-items,==]") == 0);
 
   bc_array_s_clear(&buffer);
 #endif

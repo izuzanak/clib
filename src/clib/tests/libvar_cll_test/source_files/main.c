@@ -17,6 +17,7 @@ const char *test_names[] =
   "var_dict",
   "register_type",
   "from_var",
+  "at_path",
 };/*}}}*/
 
 test_function_t test_functions[] =
@@ -29,6 +30,7 @@ test_function_t test_functions[] =
   test_var_dict,
   test_register_type,
   test_from_var,
+  test_at_path,
 };/*}}}*/
 
 // === methods of generated structures =========================================
@@ -445,12 +447,19 @@ void test_var_dict()
   DICT_TO_STRING(dict_0);
   cassert(strcmp(buffer.data,"[0:A,1:B,2:C,3:D,4:E,10:0,11:0,12:0,13:0,14:0]") == 0);
 
-#if OPTION_TO_JSON == ENABLED
   VAR_CLEAR(dict_1,loc_s_dict());
   loc_s_dict_set(dict_1,loc_s_string_ptr("first"),loc_s_int(1));
   loc_s_dict_set(dict_1,loc_s_string_ptr("second"),loc_s_int(2));
   loc_s_dict_set(dict_1,loc_s_string_ptr("third"),loc_s_int(3));
 
+  // - loc_s_dict_first_key -
+  var_s dict_0_first_key = loc_s_dict_first_key(dict_0);
+  cassert(loc_s_int_value(dict_0_first_key) == 0);
+
+  var_s dict_1_first_key = loc_s_dict_first_key(dict_1);
+  cassert(strcmp(loc_s_string_value(dict_1_first_key)->data,"first") == 0);
+
+#if OPTION_TO_JSON == ENABLED
   VAR_CLEAR(dict_2,loc_s_dict());
   loc_s_dict_set(dict_2,loc_s_string_ptr("first"),loc_s_int(1));
   loc_s_dict_set(dict_2,loc_s_string_ptr("second"),loc_s_int(2));
@@ -768,6 +777,44 @@ void test_from_var()
         "{first:11,second:12,array:[{first:11,second:12,third:13}]}]",
         buffer.used) == 0);
 #endif
+#endif
+}/*}}}*/
+
+void test_at_path()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+
+  VAR_CLEAR(dict_1,loc_s_dict());
+  loc_s_dict_set(dict_1,loc_s_string_ptr("first"),loc_s_int(1));
+  loc_s_dict_set(dict_1,loc_s_string_ptr("second"),loc_s_int(2));
+  loc_s_dict_set(dict_1,loc_s_string_ptr("third"),loc_s_int(3));
+
+  VAR_CLEAR(dict_2,loc_s_dict());
+  loc_s_dict_set(dict_2,loc_s_string_ptr("first"),loc_s_int(4));
+  loc_s_dict_set(dict_2,loc_s_string_ptr("second"),loc_s_int(5));
+  loc_s_dict_set(dict_2,loc_s_string_ptr("third"),loc_s_int(6));
+
+  loc_s_dict_set(dict_1,loc_s_string_ptr("fourth"),dict_2);
+
+  VAR_CLEAR(array_1,loc_s_array());
+  loc_s_array_push(array_1,loc_s_string_ptr("one"));
+  loc_s_array_push(array_1,loc_s_string_ptr("two"));
+  loc_s_array_push(array_1,loc_s_string_ptr("three"));
+
+  loc_s_dict_set(dict_1,loc_s_string_ptr("fifth"),array_1);
+
+  cassert(loc_s_int_value(loc_s_at_path(dict_1,"first")) == 1);
+  cassert(loc_s_int_value(loc_s_at_path(dict_1,"second")) == 2);
+  cassert(loc_s_int_value(loc_s_at_path(dict_1,"third")) == 3);
+
+  cassert(loc_s_int_value(loc_s_at_path(dict_1,"fourth/first")) == 4);
+  cassert(loc_s_int_value(loc_s_at_path(dict_1,"fourth/second")) == 5);
+  cassert(loc_s_int_value(loc_s_at_path(dict_1,"fourth/third")) == 6);
+
+  cassert(strcmp(loc_s_string_value(loc_s_at_path(dict_1,"fifth/0"))->data,"one") == 0);
+  cassert(strcmp(loc_s_string_value(loc_s_at_path(dict_1,"fifth/1"))->data,"two") == 0);
+  cassert(strcmp(loc_s_string_value(loc_s_at_path(dict_1,"fifth/2"))->data,"three") == 0);
 #endif
 }/*}}}*/
 

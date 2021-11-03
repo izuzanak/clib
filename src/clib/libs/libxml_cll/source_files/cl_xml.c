@@ -3,7 +3,24 @@
 include "cl_xml.h"
 @end
 
+// === constants and definitions ===============================================
+
+var_s g_str_empty_var = NULL;
+var_s g_str_attrs_var = NULL;
+var_s g_str_nodes_var = NULL;
+var_s g_str_text_var = NULL;
+
 // === methods of generated structures =========================================
+
+// -- string_map_s --
+@begin
+methods string_map_s
+@end
+
+// -- string_map_tree_s --
+@begin
+methods string_map_tree_s
+@end
 
 // -- xml_create_stack_element_s --
 @begin
@@ -94,6 +111,167 @@ void xml_node_s_update_node_dict(var_s this)
   pointer_array_s_clear(&node_stack);
 }/*}}}*/
 
+int xml_node_s___node_dict_to_var(var_s this,var_s *a_trg)
+{/*{{{*/
+  xml_node_s *node = loc_s_xml_node_value(this);
+
+  // - create node dictionary -
+  var_s_copy_loc(a_trg,loc_s_dict());
+
+  // - has nodes flag -
+  int has_nodes = 0;
+
+  // - process attributes -
+  if (node->attributes != NULL)
+  {
+    loc_s_dict_set(*a_trg,g_str_attrs_var,node->attributes);
+  }
+
+  // - process nodes -
+  if (node->node_dict != NULL)
+  {
+    var_map_tree_s *node_tree = loc_s_dict_value(node->node_dict);
+    if (node_tree->count != 0)
+    {
+      has_nodes = 1;
+
+      var_s nodes_var = loc_s_dict();
+      loc_s_dict_set(*a_trg,g_str_nodes_var,nodes_var);
+
+      var_map_tree_s_node *ptr = node_tree->data;
+      var_map_tree_s_node *ptr_end = ptr + node_tree->used;
+      do
+      {
+        if (ptr->valid)
+        {
+          CONT_INIT_CLEAR(var_s,value_var);
+
+          // - process single node -
+          if (ptr->object.value->v_type == g_type_xml_node)
+          {/*{{{*/
+            if (xml_node_s___node_dict_to_var(ptr->object.value,&value_var))
+            {
+              throw_error(XML_NODE_NODE_DICT_TO_VAR_ERROR);
+            }
+          }/*}}}*/
+
+          // - process array of nodes -
+          else if (ptr->object.value->v_type == c_bi_type_array)
+          {/*{{{*/
+            var_array_s *array = loc_s_array_value(ptr->object.value);
+
+            var_s_copy_loc(&value_var,loc_s_array());
+
+            if (array->used != 0)
+            {
+              var_s *ptr = array->data;
+              var_s *ptr_end = ptr + array->used;
+              do
+              {
+                CONT_INIT_CLEAR(var_s,node_var);
+                if (xml_node_s___node_dict_to_var(*ptr,&node_var))
+                {
+                  throw_error(XML_NODE_NODE_DICT_TO_VAR_ERROR);
+                }
+
+                loc_s_array_push(value_var,node_var);
+              } while(++ptr < ptr_end);
+            }
+          }/*}}}*/
+          else
+          {
+            throw_error(XML_NODE_NODE_VALUE_TYPE_ERROR);
+          }
+
+          loc_s_dict_set(nodes_var,ptr->object.key,value_var);
+        }
+      } while(++ptr < ptr_end);
+    }
+  }
+
+  // - process texts -
+  if (!has_nodes)
+  {
+    CONT_INIT_CLEAR(var_s,value_var);
+
+    if (node->texts != NULL)
+    {
+      switch (node->texts->v_type)
+      {
+      case c_bi_type_string:
+        {/*{{{*/
+          var_s_copy_loc(&value_var,node->texts);
+        }/*}}}*/
+        break;
+      case c_bi_type_array:
+        {/*{{{*/
+          CONT_INIT(bc_array_s,buffer);
+
+          var_array_s *array = loc_s_array_value(node->texts);
+
+          if (array->used != 0)
+          {
+            var_s *ptr = array->data;
+            var_s *ptr_end = ptr + array->used;
+            do
+            {
+              if ((*ptr)->v_type == c_bi_type_string)
+              {
+                const string_s *string = loc_s_string_value(*ptr);
+                bc_array_s_append(&buffer,string->size - 1,string->data);
+              }
+              else
+              {
+                bc_array_s_clear(&buffer);
+
+                throw_error(XML_NODE_NODE_VALUE_TYPE_ERROR);
+              }
+            } while(++ptr < ptr_end);
+          }
+
+          bc_array_s_push(&buffer,'\0');
+
+          var_s_copy_loc(&value_var,loc_s_string_ptr(""));
+          string_s *string = (string_s *)loc_s_string_value(value_var);
+          string->size = buffer.used;
+          string->data = buffer.data;
+        }/*}}}*/
+        break;
+      default:
+        throw_error(XML_NODE_NODE_VALUE_TYPE_ERROR);
+      }
+    }
+    else
+    {
+      var_s_copy_loc(&value_var,g_str_empty_var);
+    }
+
+    loc_s_dict_set(*a_trg,g_str_text_var,value_var);
+  }
+
+  return 0;
+}/*}}}*/
+
+int xml_node_s_node_dict_to_var(var_s this,var_s *a_trg)
+{/*{{{*/
+  if (this->v_type != g_type_xml_node)
+  {
+    throw_error(XML_NODE_NODE_VALUE_TYPE_ERROR);
+  }
+
+  var_s_copy_loc(a_trg,loc_s_dict());
+
+  CONT_INIT_CLEAR(var_s,node_var);
+  if (xml_node_s___node_dict_to_var(this,&node_var))
+  {
+    throw_error(XML_NODE_NODE_DICT_TO_VAR_ERROR);
+  }
+
+  loc_s_dict_set(*a_trg,loc_s_xml_node_value(this)->name,node_var);
+
+  return 0;
+}/*}}}*/
+
 // -- xml_parser_s --
 @begin
 methods xml_parser_s
@@ -104,12 +282,15 @@ void xml_parser_s_start_element(void *user,const xmlChar *name,const xmlChar **a
   (void)name;
 
   xml_parser_s *parser = (xml_parser_s *)user;
+  var_array_s *ns_stack = &parser->ns_stack;
   var_array_s *attrs_stack = &parser->attrs_stack;
   var_arrays_s *node_array_stack = &parser->node_array_stack;
   var_arrays_s *text_array_stack = &parser->text_array_stack;
   var_arrays_s *cont_array_stack = &parser->cont_array_stack;
 
   // -----
+
+  unsigned ns_stack_used = ns_stack->used;
 
   if (a_attrs != NULL)
   {
@@ -119,17 +300,55 @@ void xml_parser_s_start_element(void *user,const xmlChar *name,const xmlChar **a
     const char **attrs = (const char **)a_attrs;
     while (*attrs != NULL)
     {
-      var_s attr_name = xml_parser_s_get_string_var(parser,strlen(attrs[0]),attrs[0]);
-      var_s attr_value = xml_parser_s_get_string_var(parser,strlen(attrs[1]),attrs[1]);
+      const char *attr_name = attrs[0];
+      const char *attr_value = attrs[1];
 
-      var_map_s insert_map = {attr_name,attr_value};
+      var_s attr_name_var = NULL;
+
+      // - namespace attribute -
+      if (strncmp("xmlns",attr_name,5) == 0)
+      {
+        string_map_s ns_search = {{strlen(attr_value) + 1,(char *)attr_value},};
+        unsigned ns_abbr_idx = string_map_tree_s_get_idx(&parser->ns_abbr_map,&ns_search);
+
+        if (attr_name[5] == '\0')
+        {
+          if (ns_abbr_idx != c_idx_not_exist)
+          {
+            var_array_s_push_loc(ns_stack,loc_s_string_str(
+                  &string_map_tree_s_at(&parser->ns_abbr_map,ns_abbr_idx)->value));
+          }
+        }
+        else if (attr_name[5] == ':')
+        {
+          const char *namespace = attr_name + 6;
+          string_map_tree_s_insert_map(&parser->abbr_ns_map,namespace,attr_value);
+
+          if (ns_abbr_idx != c_idx_not_exist)
+          {
+            parser->buffer.used = 0;
+            bc_array_s_append_format(&parser->buffer,"xmlns:%s",
+                string_map_tree_s_at(&parser->ns_abbr_map,ns_abbr_idx)->value.data);
+            attr_name_var = xml_parser_s_get_string_var(parser,parser->buffer.used,parser->buffer.data);
+          }
+        }
+      }
+
+      if (attr_name_var == NULL)
+      {
+        attr_name_var = xml_parser_s_get_string_var(parser,strlen(attr_name),attr_name);
+      }
+
+      var_s attr_value_var = xml_parser_s_get_string_var(parser,strlen(attr_value),attr_value);
+
+      var_map_s insert_map = {attr_name_var,attr_value_var};
       unsigned index = var_map_tree_s_unique_insert(tree,&insert_map);
 
       var_map_s *map = &(tree->data + index)->object;
 
-      if (map->value != attr_value)
+      if (map->value != attr_value_var)
       {
-        var_s_copy_loc(&map->value,attr_value);
+        var_s_copy_loc(&map->value,attr_value_var);
       }
 
       attrs += 2;
@@ -141,6 +360,13 @@ void xml_parser_s_start_element(void *user,const xmlChar *name,const xmlChar **a
   {
     var_s dict_var = NULL;
     var_array_s_push(attrs_stack,&dict_var);
+  }
+
+  if (ns_stack_used == ns_stack->used)
+  {
+    // - duplicate last namespace -
+    var_s ns_var = *var_array_s_last(ns_stack);
+    var_array_s_push(ns_stack,&ns_var);
   }
 
   // - push new node array -
@@ -156,6 +382,7 @@ void xml_parser_s_start_element(void *user,const xmlChar *name,const xmlChar **a
 void xml_parser_s_end_element(void *user,const xmlChar *name)
 {/*{{{*/
   xml_parser_s *parser = (xml_parser_s *)user;
+  var_array_s *ns_stack = &parser->ns_stack;
   var_array_s *attrs_stack = &parser->attrs_stack;
   var_arrays_s *node_array_stack = &parser->node_array_stack;
   var_arrays_s *text_array_stack = &parser->text_array_stack;
@@ -164,7 +391,46 @@ void xml_parser_s_end_element(void *user,const xmlChar *name)
   // -----
 
   // - retrieve node name -
-  var_s name_var = xml_parser_s_get_string_var(parser,strlen((const char *)name),(const char *)name);
+  var_s name_var = NULL;
+  var_s ns_var = *var_array_s_pop(ns_stack);
+
+  const char *name_ptr = strchr((char *)name,':');
+  if (name_ptr != NULL)
+  {
+    string_map_s abbr_search = {{(name_ptr - (char *)name) + 1,(char *)name},};
+    unsigned abbr_ns_idx = string_map_tree_s_get_idx(&parser->abbr_ns_map,&abbr_search);
+    if (abbr_ns_idx != c_idx_not_exist)
+    {
+      string_map_s ns_search = {string_map_tree_s_at(&parser->abbr_ns_map,abbr_ns_idx)->value,};
+      unsigned ns_abbr_idx = string_map_tree_s_get_idx(&parser->ns_abbr_map,&ns_search);
+
+      if (ns_abbr_idx != c_idx_not_exist)
+      {
+        parser->buffer.used = 0;
+        bc_array_s_append_format(&parser->buffer,"%s:%s",
+            string_map_tree_s_at(&parser->ns_abbr_map,ns_abbr_idx)->value.data,
+            name_ptr + 1);
+        name_var = xml_parser_s_get_string_var(parser,parser->buffer.used,parser->buffer.data);
+      }
+    }
+  }
+  else
+  {
+    const string_s *ns_str = loc_s_string_value(ns_var);
+
+    if (ns_str->size > 1)
+    {
+      parser->buffer.used = 0;
+      bc_array_s_append_format(&parser->buffer,"%.*s:%s",
+          ns_str->size - 1,ns_str->data,(char *)name);
+      name_var = xml_parser_s_get_string_var(parser,parser->buffer.used,parser->buffer.data);
+    }
+  }
+
+  if (name_var == NULL)
+  {
+    name_var = xml_parser_s_get_string_var(parser,strlen((const char *)name),(const char *)name);
+  }
 
   // - create xml node -
   var_s xml_node_var = loc_s_xml_node(name_var);
@@ -254,7 +520,8 @@ var_s xml_parser_s_get_string_var(xml_parser_s *this,unsigned a_length,const cha
 
 // === global functions ========================================================
 
-int xml_parse(const string_s *a_src,var_s *a_trg)
+int xml_parse_ns(const string_s *a_src,
+    var_s *a_trg,string_map_tree_s *a_ns_abbr_map)
 {/*{{{*/
 
   // - create sax handler -
@@ -275,7 +542,14 @@ int xml_parse(const string_s *a_src,var_s *a_trg)
   // - create sax_parser object -
   CONT_INIT(xml_parser_s,parser);
 
+  // - copy namespace to abbreviation map -
+  if (a_ns_abbr_map != NULL)
+  {
+    string_map_tree_s_copy(&parser.ns_abbr_map,a_ns_abbr_map);
+  }
+
   // - initialize sax parser -
+  var_array_s_push_loc(&parser.ns_stack,loc_s_string_ptr(""));
   var_arrays_s_push_blank(&parser.node_array_stack);
   var_arrays_s_push_blank(&parser.cont_array_stack);
 
@@ -334,9 +608,6 @@ void xml_create_append_string(unsigned a_length,const char *a_data,bc_array_s *a
 
 void xml_create(var_s a_node,bc_array_s *a_trg)
 {/*{{{*/
-
-  // - reset target buffer -
-  a_trg->used = 0;
 
   // - initialize create stack -
   CONT_INIT(xml_create_stack_s,create_stack);
@@ -414,7 +685,15 @@ void xml_create(var_s a_node,bc_array_s *a_trg)
         else if (item_var->v_type == c_bi_type_string)
         {
           const string_s *string = loc_s_string_value(item_var);
-          xml_create_append_string(string->size - 1,string->data,a_trg);
+
+          if (node->escape_texts)
+          {
+            xml_create_append_string(string->size - 1,string->data,a_trg);
+          }
+          else
+          {
+            bc_array_s_append(a_trg,string->size - 1,string->data);
+          }
         }
         else
         {
@@ -565,7 +844,15 @@ void xml_create_nice(var_s a_node,const string_s *a_tabulator,
         else if (item_var->v_type == c_bi_type_string)
         {
           const string_s *string = loc_s_string_value(item_var);
-          xml_create_append_string(string->size - 1,string->data,a_trg);
+
+          if (node->escape_texts)
+          {
+            xml_create_append_string(string->size - 1,string->data,a_trg);
+          }
+          else
+          {
+            bc_array_s_append(a_trg,string->size - 1,string->data);
+          }
 
           cs_elm->after_node = 0;
         }
@@ -611,6 +898,12 @@ void libxml_cll_init()
 {/*{{{*/
   xmlInitParser();
 
+  // - init var strings -
+  var_s_copy_loc(&g_str_empty_var,loc_s_string_ptr(""));
+  var_s_copy_loc(&g_str_attrs_var,loc_s_string_ptr("attrs"));
+  var_s_copy_loc(&g_str_nodes_var,loc_s_string_ptr("nodes"));
+  var_s_copy_loc(&g_str_text_var,loc_s_string_ptr("text"));
+
   // - loc_s_register_type -
   g_type_xml_node = loc_s_register_type(
     loc_s_xml_node_clear,
@@ -628,11 +921,17 @@ void libxml_cll_init()
     NULL
 #endif
     );
-
 }/*}}}*/
 
 void libxml_cll_clear()
 {/*{{{*/
+
+  // - clear var strings -
+  var_s_clear(&g_str_empty_var);
+  var_s_clear(&g_str_attrs_var);
+  var_s_clear(&g_str_nodes_var);
+  var_s_clear(&g_str_text_var);
+
   xmlCleanupParser();
 }/*}}}*/
 

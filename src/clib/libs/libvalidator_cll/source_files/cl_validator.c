@@ -15,7 +15,7 @@ methods regex_array_s
 methods validator_s
 @end
 
-unsigned validator_s_recognize_property(const char *a_string)
+unsigned validator_s_recognize_property(const char *a_string) // NOLINT, lgtm [cpp/use-of-goto]
 {/*{{{*/
 #define VALIDATOR_GET_NEXT_CHAR() \
 {\
@@ -207,8 +207,8 @@ state_15_label:
 
 // - STATE 16 -
 state_16_label:
-   VALIDATOR_CLOSE_CHAR(20);
-   return 20;
+   VALIDATOR_CLOSE_CHAR(21);
+   return 21;
 
 // - STATE 17 -
 state_17_label:
@@ -353,11 +353,14 @@ state_31_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 105) {
+   if (in_char == 97) {
       goto state_38_label;
    }
-   if (in_char == 107) {
+   if (in_char == 105) {
       goto state_39_label;
+   }
+   if (in_char == 107) {
+      goto state_40_label;
    }
    return c_idx_not_exist;
 
@@ -367,7 +370,7 @@ state_32_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 115) {
-      goto state_40_label;
+      goto state_41_label;
    }
    return c_idx_not_exist;
 
@@ -377,7 +380,7 @@ state_33_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 116) {
-      goto state_41_label;
+      goto state_42_label;
    }
    return c_idx_not_exist;
 
@@ -387,7 +390,7 @@ state_34_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 105) {
-      goto state_42_label;
+      goto state_43_label;
    }
    return c_idx_not_exist;
 
@@ -397,7 +400,7 @@ state_35_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 120) {
-      goto state_43_label;
+      goto state_44_label;
    }
    return c_idx_not_exist;
 
@@ -416,8 +419,8 @@ state_38_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 116) {
-      goto state_44_label;
+   if (in_char == 114) {
+      goto state_45_label;
    }
    return c_idx_not_exist;
 
@@ -426,58 +429,58 @@ state_39_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 101) {
-      goto state_45_label;
+   if (in_char == 116) {
+      goto state_46_label;
    }
    return c_idx_not_exist;
 
 // - STATE 40 -
 state_40_label:
-   VALIDATOR_CLOSE_CHAR(16);
-   return 16;
-
-// - STATE 41 -
-state_41_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 104) {
-      goto state_46_label;
+   if (in_char == 101) {
+      goto state_47_label;
    }
    return c_idx_not_exist;
+
+// - STATE 41 -
+state_41_label:
+   VALIDATOR_CLOSE_CHAR(16);
+   return 16;
 
 // - STATE 42 -
 state_42_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 116) {
-      goto state_47_label;
+   if (in_char == 104) {
+      goto state_48_label;
    }
    return c_idx_not_exist;
 
 // - STATE 43 -
 state_43_label:
-   VALIDATOR_CLOSE_CHAR(14);
-   return 14;
-
-// - STATE 44 -
-state_44_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 101) {
-      goto state_48_label;
+   if (in_char == 116) {
+      goto state_49_label;
    }
    return c_idx_not_exist;
+
+// - STATE 44 -
+state_44_label:
+   VALIDATOR_CLOSE_CHAR(14);
+   return 14;
 
 // - STATE 45 -
 state_45_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 121) {
-      goto state_49_label;
+   if (in_char == 114) {
+      goto state_50_label;
    }
    return c_idx_not_exist;
 
@@ -486,8 +489,8 @@ state_46_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 32) {
-      goto state_50_label;
+   if (in_char == 101) {
+      goto state_51_label;
    }
    return c_idx_not_exist;
 
@@ -496,8 +499,8 @@ state_47_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 101) {
-      goto state_51_label;
+   if (in_char == 121) {
+      goto state_52_label;
    }
    return c_idx_not_exist;
 
@@ -506,8 +509,8 @@ state_48_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 109) {
-      goto state_52_label;
+   if (in_char == 32) {
+      goto state_53_label;
    }
    return c_idx_not_exist;
 
@@ -516,8 +519,8 @@ state_49_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 115) {
-      goto state_53_label;
+   if (in_char == 101) {
+      goto state_54_label;
    }
    return c_idx_not_exist;
 
@@ -526,17 +529,8 @@ state_50_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 33) {
-      goto state_54_label;
-   }
-   if (in_char == 60) {
+   if (in_char == 45) {
       goto state_55_label;
-   }
-   if (in_char == 61) {
-      goto state_56_label;
-   }
-   if (in_char == 62) {
-      goto state_57_label;
    }
    return c_idx_not_exist;
 
@@ -546,7 +540,7 @@ state_51_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 109) {
-      goto state_58_label;
+      goto state_56_label;
    }
    return c_idx_not_exist;
 
@@ -556,57 +550,51 @@ state_52_label:
    VALIDATOR_GET_NEXT_CHAR();
 
    if (in_char == 115) {
-      goto state_59_label;
+      goto state_57_label;
    }
    return c_idx_not_exist;
 
 // - STATE 53 -
 state_53_label:
-   VALIDATOR_CLOSE_CHAR(19);
-   return 19;
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 33) {
+      goto state_58_label;
+   }
+   if (in_char == 60) {
+      goto state_59_label;
+   }
+   if (in_char == 61) {
+      goto state_60_label;
+   }
+   if (in_char == 62) {
+      goto state_61_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 54 -
 state_54_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 61) {
-      goto state_60_label;
+   if (in_char == 109) {
+      goto state_62_label;
    }
    return c_idx_not_exist;
 
 // - STATE 55 -
 state_55_label:
-   VALIDATOR_CLOSE_CHAR(9);
-   VALIDATOR_GET_NEXT_CHAR();
-
-   if (in_char == 61) {
-      goto state_61_label;
-   }
-   return 9;
-
-// - STATE 56 -
-state_56_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
-   if (in_char == 61) {
-      goto state_62_label;
+   if (in_char == 105) {
+      goto state_63_label;
    }
    return c_idx_not_exist;
 
-// - STATE 57 -
-state_57_label:
-   VALIDATOR_CLOSE_CHAR(10);
-   VALIDATOR_GET_NEXT_CHAR();
-
-   if (in_char == 61) {
-      goto state_63_label;
-   }
-   return 10;
-
-// - STATE 58 -
-state_58_label:
+// - STATE 56 -
+state_56_label:
    VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
    VALIDATOR_GET_NEXT_CHAR();
 
@@ -615,35 +603,135 @@ state_58_label:
    }
    return c_idx_not_exist;
 
+// - STATE 57 -
+state_57_label:
+   VALIDATOR_CLOSE_CHAR(20);
+   return 20;
+
+// - STATE 58 -
+state_58_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 61) {
+      goto state_65_label;
+   }
+   return c_idx_not_exist;
+
 // - STATE 59 -
 state_59_label:
-   VALIDATOR_CLOSE_CHAR(18);
-   return 18;
+   VALIDATOR_CLOSE_CHAR(9);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 61) {
+      goto state_66_label;
+   }
+   return 9;
 
 // - STATE 60 -
 state_60_label:
-   VALIDATOR_CLOSE_CHAR(8);
-   return 8;
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 61) {
+      goto state_67_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 61 -
 state_61_label:
-   VALIDATOR_CLOSE_CHAR(11);
-   return 11;
+   VALIDATOR_CLOSE_CHAR(10);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 61) {
+      goto state_68_label;
+   }
+   return 10;
 
 // - STATE 62 -
 state_62_label:
-   VALIDATOR_CLOSE_CHAR(7);
-   return 7;
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 115) {
+      goto state_69_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 63 -
 state_63_label:
-   VALIDATOR_CLOSE_CHAR(12);
-   return 12;
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 116) {
+      goto state_70_label;
+   }
+   return c_idx_not_exist;
 
 // - STATE 64 -
 state_64_label:
+   VALIDATOR_CLOSE_CHAR(18);
+   return 18;
+
+// - STATE 65 -
+state_65_label:
+   VALIDATOR_CLOSE_CHAR(8);
+   return 8;
+
+// - STATE 66 -
+state_66_label:
+   VALIDATOR_CLOSE_CHAR(11);
+   return 11;
+
+// - STATE 67 -
+state_67_label:
+   VALIDATOR_CLOSE_CHAR(7);
+   return 7;
+
+// - STATE 68 -
+state_68_label:
+   VALIDATOR_CLOSE_CHAR(12);
+   return 12;
+
+// - STATE 69 -
+state_69_label:
    VALIDATOR_CLOSE_CHAR(17);
    return 17;
+
+// - STATE 70 -
+state_70_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 101) {
+      goto state_71_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 71 -
+state_71_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 109) {
+      goto state_72_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 72 -
+state_72_label:
+   VALIDATOR_CLOSE_CHAR(c_idx_not_exist);
+   VALIDATOR_GET_NEXT_CHAR();
+
+   if (in_char == 115) {
+      goto state_73_label;
+   }
+   return c_idx_not_exist;
+
+// - STATE 73 -
+state_73_label:
+   VALIDATOR_CLOSE_CHAR(19);
+   return 19;
 
 }/*}}}*/
 
@@ -1131,12 +1219,46 @@ int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
           }
         }/*}}}*/
         break;
-
-        // - ERROR -
         default:
-          VALIDATE_STACKS_PUSH_PROP_KEY();
+        {/*{{{*/
+          VALIDATE_PAIR_CALL(a_value,prop_value,
+            VALIDATE_STACKS_PUSH_PROP_KEY();
+          );
+        }/*}}}*/
+        }
+      }/*}}}*/
+      break;
+      case c_validator_prop_all_arr_items:
+      {/*{{{*/
+        switch (a_value->v_type)
+        {
+        case c_bi_type_array:
+        {/*{{{*/
+          var_array_s *value_array = loc_s_array_value(a_value);
 
-          throw_error(VALIDATOR_INVALID_VALUE);
+          if (value_array->used != 0)
+          {
+            var_s *ptr = value_array->data;
+            var_s *ptr_end = ptr + value_array->used;
+            do {
+              VALIDATE_PAIR_CALL(*ptr,prop_value,
+                var_s index = loc_s_int(ptr - value_array->data);
+
+                var_array_s_push_loc(&this->value_stack,index);
+                var_array_s_push_loc(&this->props_stack,index);
+
+                VALIDATE_STACKS_PUSH_PROP_KEY();
+              );
+            } while(++ptr < ptr_end);
+          }
+        }/*}}}*/
+        break;
+        default:
+        {/*{{{*/
+          VALIDATE_PAIR_CALL(a_value,prop_value,
+            VALIDATE_STACKS_PUSH_PROP_KEY();
+          );
+        }/*}}}*/
         }
       }/*}}}*/
       break;

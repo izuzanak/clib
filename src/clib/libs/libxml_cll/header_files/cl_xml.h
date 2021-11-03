@@ -24,8 +24,28 @@ include "cl_var.h"
 
 // - error codes -
 #define ERROR_XML_ERROR_PARSING_DATA 1
+#define ERROR_XML_NODE_NODE_DICT_TO_VAR_ERROR 2
+#define ERROR_XML_NODE_NODE_VALUE_TYPE_ERROR 3
 
 // === definition of generated structures ======================================
+
+// -- string_map_s --
+@begin
+struct
+<
+string_s:key
+string_s:value
+>
+string_map_s;
+@end
+
+// -- string_map_tree_s --
+@begin
+rb_tree<string_map_s> string_map_tree_s;
+@end
+
+static inline void string_map_tree_s_insert_map(string_map_tree_s *this,
+    const char *a_ns,const char *a_abbr);
 
 // -- xml_create_stack_element_s --
 @begin
@@ -53,6 +73,7 @@ var_s:node_dict
 var_s:nodes
 var_s:texts
 var_s:conts
+bi:escape_texts
 >
 xml_node_s;
 @end
@@ -74,6 +95,8 @@ static inline xml_node_s *loc_s_xml_node_value(var_s this);
 static inline void xml_node_s___update_conts_array(var_s *a_array,var_s a_value);
 void xml_node_s___add_node_to_node_dict(var_map_tree_s *a_tree,var_s a_name,var_s a_node);
 libxml_cll_EXPORT void xml_node_s_update_node_dict(var_s this);
+WUR int xml_node_s___node_dict_to_var(var_s this,var_s *a_trg);
+WUR libxml_cll_EXPORT int xml_node_s_node_dict_to_var(var_s this,var_s *a_trg);
 static inline void xml_node_s_attr(var_s this,var_s a_name,var_s a_value);
 static inline var_s xml_node_s_node(var_s this,var_s a_name);
 static inline var_s xml_node_s_node_text(var_s this,var_s a_name,var_s a_text);
@@ -86,10 +109,17 @@ struct
 string_tree_s:const_strings
 var_array_s:string_vars
 
+string_map_tree_s:ns_abbr_map
+string_map_tree_s:abbr_ns_map
+
+var_array_s:ns_stack
 var_array_s:attrs_stack
+
 var_arrays_s:node_array_stack
 var_arrays_s:text_array_stack
 var_arrays_s:cont_array_stack
+
+bc_array_s:buffer
 >
 xml_parser_s;
 @end
@@ -108,7 +138,9 @@ var_s xml_parser_s_get_string_var(xml_parser_s *this,unsigned a_length,const cha
 
 // === definition of global functions ==========================================
 
-WUR libxml_cll_EXPORT int xml_parse(const string_s *a_src,var_s *a_trg);
+WUR libxml_cll_EXPORT int xml_parse_ns(const string_s *a_src,
+    var_s *a_trg,string_map_tree_s *a_ns_abbr_map);
+static inline int xml_parse(const string_s *a_src,var_s *a_trg);
 void xml_create_append_string(unsigned a_length,const char *a_data,bc_array_s *a_trg);
 libxml_cll_EXPORT void xml_create(var_s a_node,bc_array_s *a_trg);
 libxml_cll_EXPORT void xml_create_nice(var_s a_node,
@@ -117,7 +149,46 @@ libxml_cll_EXPORT void xml_create_nice(var_s a_node,
 void libxml_cll_init();
 void libxml_cll_clear();
 
+// === constants and definitions ===============================================
+
+extern var_s g_str_empty_var;
+extern var_s g_str_attrs_var;
+extern var_s g_str_nodes_var;
+extern var_s g_str_text_var;
+
 // === inline methods of generated structures ==================================
+
+// -- string_map_s --
+@begin
+inlines string_map_s
+@end
+
+// -- string_map_tree_s --
+@begin
+inlines string_map_tree_s
+@end
+
+static inline int string_map_tree_s___compare_value(const string_map_tree_s *this,const string_map_s *a_first,const string_map_s *a_second)
+{/*{{{*/
+  (void)this;
+
+  const string_s *first = &a_first->key;
+  const string_s *second = &a_second->key;
+
+  if (first->size < second->size) { return -1; }
+  if (first->size > second->size) { return 1; }
+  return memcmp(first->data,second->data,first->size - 1);
+}/*}}}*/
+
+static inline void string_map_tree_s_insert_map(string_map_tree_s *this,
+    const char *a_ns,const char *a_abbr)
+{/*{{{*/
+  CONT_INIT_CLEAR(string_map_s,string_map);
+  string_s_set(&string_map.key,strlen(a_ns),a_ns);
+  string_s_set(&string_map.value,strlen(a_abbr),a_abbr);
+
+  string_map_tree_s_unique_swap_insert(this,&string_map);
+}/*}}}*/
 
 // -- xml_create_stack_element_s --
 @begin
@@ -140,6 +211,7 @@ static inline var_s loc_s_xml_node(var_s a_name)
   xml_node_s_init(xml_node);
 
   var_s_copy_loc(&xml_node->name,a_name);
+  xml_node->escape_texts = 1;
 
   var_s var = loc_s___new();
   var->v_type = g_type_xml_node;
@@ -300,6 +372,13 @@ static inline void xml_parser_s_error(void *user,const char *msg,...)
 
 static inline void xml_parser_s_fatal_error(void *user,const char *msg,...)
 {/*{{{*/
+}/*}}}*/
+
+// === inline global functions =================================================
+
+static inline int xml_parse(const string_s *a_src,var_s *a_trg)
+{/*{{{*/
+  return xml_parse_ns(a_src,a_trg,NULL);
 }/*}}}*/
 
 #endif

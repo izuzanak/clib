@@ -86,6 +86,7 @@ void test_xml_create()
   string_s_set_ptr(&indent,"--");
 
   VAR(root,loc_s_xml_node(loc_s_string_ptr("ROOT")));
+  buffer.used = 0;
   xml_create(root,&buffer);
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,"<ROOT></ROOT>") == 0);
@@ -118,6 +119,7 @@ void test_xml_create()
   cassert(file_s_read_close(&file,&data) == 0);
   cassert(strcmp(buffer.data,data.data) == 0);
 
+  buffer.used = 0;
   xml_create(root,&buffer);
   bc_array_s_push(&buffer,'\0');
   cassert(file_s_open(&file,"tests/libxml_cll_test/resources/xml_create_1.xml","r") == 0);

@@ -281,6 +281,7 @@ void test_var_array();
 void test_var_dict();
 void test_register_type();
 void test_from_var();
+void test_at_path();
 
 // === program entry function ==================================================
 

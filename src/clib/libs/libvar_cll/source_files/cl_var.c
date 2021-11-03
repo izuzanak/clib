@@ -3,7 +3,63 @@
 include "cl_var.h"
 @end
 
-// === of structure loc_s function maps ========================================
+// === methods of structure loc_s ==============================================
+
+var_s loc_s_at_path(var_s this,const char *a_path)
+{/*{{{*/
+  var_s data_var = this;
+
+  if (a_path != NULL && a_path[0] != '\0')
+  {
+    const char *key_ptr = a_path;
+    const char *key_end_ptr;
+    do {
+      key_end_ptr = strchrnul(key_ptr,'/');
+
+      switch (data_var->v_type)
+      {
+      case c_bi_type_dict:
+        {/*{{{*/
+          string_s key_str = {key_end_ptr - key_ptr + 1,(char *)key_ptr};
+          loc_s key_loc = {c_bi_type_string,{0},{.ptr = &key_str}};
+
+          if (loc_s_dict_has_key(data_var,&key_loc))
+          {
+            data_var = loc_s_dict_get(data_var,&key_loc);
+          }
+          else
+          {
+            return NULL;
+          }
+        }/*}}}*/
+        break;
+      case c_bi_type_array:
+        {/*{{{*/
+          char *end_ptr;
+          lli index = strtoll(key_ptr,&end_ptr,10);
+
+          if (end_ptr == key_end_ptr && index < loc_s_array_length(data_var))
+          {
+            data_var = *loc_s_array_at(data_var,index);
+          }
+          else
+          {
+            return NULL;
+          }
+        }/*}}}*/
+        break;
+      default:
+        return NULL;
+      }
+
+      key_ptr = key_end_ptr + 1;
+    } while(*key_end_ptr != '\0');
+  }
+
+  return data_var;
+}/*}}}*/
+
+// === structure loc_s function maps ===========================================
 
 unsigned g_loc_s_type_cnt = c_bi_type_count;
 

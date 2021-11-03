@@ -67,6 +67,7 @@ static inline void loc_s_to_string(var_s this,bc_array_s *a_trg);
 static inline void loc_s_to_json(var_s this,bc_array_s *a_trg);
 static inline void loc_s_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 #endif
+libvar_cll_EXPORT var_s loc_s_at_path(var_s this,const char *a_path);
 
 // === definition of structure loc_s function maps =============================
 
@@ -275,6 +276,7 @@ static inline var_map_tree_s *loc_s_dict_value(var_s this);
 static inline unsigned loc_s_dict_length(var_s this);
 static inline int loc_s_dict_has_key(var_s this,var_s a_key);
 static inline void loc_s_dict_remove_key(var_s this,var_s a_key);
+static inline var_s loc_s_dict_first_key(var_s this);
 static inline void loc_s_dict_set(var_s this,var_s a_key,var_s a_value);
 static inline void loc_s_dict_str_set(var_s this,const char *a_str_key,var_s a_value);
 static inline var_s loc_s_dict_get(var_s this,var_s a_key);
@@ -1019,6 +1021,22 @@ static inline void loc_s_dict_remove_key(var_s this,var_s a_key)
   debug_assert(index != c_idx_not_exist);
 
   var_map_tree_s_remove(tree,index);
+}/*}}}*/
+
+static inline var_s loc_s_dict_first_key(var_s this)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_dict)
+
+  var_map_tree_s *tree = (var_map_tree_s *)this->v_data.ptr;
+
+  if (tree->root_idx != c_idx_not_exist)
+  {
+    unsigned index = var_map_tree_s_get_min_value_idx(tree,tree->root_idx);
+
+    return (tree->data + index)->object.key;
+  }
+
+  return NULL;
 }/*}}}*/
 
 static inline void loc_s_dict_set(var_s this,var_s a_key,var_s a_value)

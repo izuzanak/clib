@@ -52,6 +52,7 @@ enum {
   c_validator_prop_items,
   c_validator_prop_opt_items,
   c_validator_prop_all_items,
+  c_validator_prop_all_arr_items,
   c_validator_prop_all_keys,
   c_validator_prop_in,
 };
