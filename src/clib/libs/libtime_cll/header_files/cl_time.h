@@ -36,6 +36,12 @@ include "cl_struct.h"
 #define c_days_in_100_years 36524
 #define c_days_in_4_years   1461
 
+// - nanosecond constants -
+#define CL_TIME_NANOSEC_IN_SECOND (1000000000ULL)
+#define CL_TIME_NANOSEC_IN_MINUTE (60*CL_TIME_NANOSEC_IN_SECOND)
+#define CL_TIME_NANOSEC_IN_HOUR   (60*CL_TIME_NANOSEC_IN_MINUTE)
+#define CL_TIME_NANOSEC_IN_DAY    (24*CL_TIME_NANOSEC_IN_HOUR)
+
 // === definition of generated structures ======================================
 
 // -- datetime_s --
