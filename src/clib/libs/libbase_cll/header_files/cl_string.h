@@ -23,9 +23,8 @@ typedef struct string_s
   char *data;
 } string_s;
 
-#define INIT_STRING \
-.size = 1,\
-.data = (char *)&c_string_terminating_char\
+#define STRING_S(CONST) \
+  {sizeof(CONST),CONST}
 
 #define STRING_S_FORMAT(NAME,FORMAT,...) \
   CONT_INIT(string_s,NAME);\
