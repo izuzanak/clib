@@ -300,5 +300,22 @@ int http_conn_s_queue_response(http_conn_s *this,unsigned a_status_code,http_res
   return 0;
 }/*}}}*/
 
+int http_conn_s_queue_digest_auth_fail_response(http_conn_s *this,
+    const char *a_realm,const char *a_opaque,http_resp_s *a_resp,int a_signal_stale)
+{/*{{{*/
+
+  // - queue response to be transmitted to client -
+  int result = MHD_queue_auth_fail_response(
+      this->connection,a_realm,a_opaque,a_resp->response,a_signal_stale);
+
+  // - ERROR -
+  if (result != MHD_YES)
+  {
+    throw_error(HTTP_CONN_CANNOT_QUEUE_RESPONSE);
+  }
+
+  return 0;
+}/*}}}*/
+
 // === methods of structure http_resp_s ========================================
 

@@ -767,7 +767,7 @@ int od_daemon_s_watchdog_channel_callback(void *a_od_daemon,unsigned a_index,uns
   {
   case wd_channel_cbreq_NEW:
     {/*{{{*/
-      
+
       // - enable watchdog monitor -
       this->buffer.used = 0;
       bc_array_s_append_format(&this->buffer,
@@ -801,7 +801,7 @@ int od_daemon_s_watchdog_channel_callback(void *a_od_daemon,unsigned a_index,uns
     break;
   case wd_channel_cbreq_DROP:
     {/*{{{*/
-      
+
       // - disable watchdog timer -
       struct itimerspec its_watchdog = {{0,0},{0,0}};
       if (epoll_timer_s_settime(&this->watchdog_timer,&its_watchdog,0))

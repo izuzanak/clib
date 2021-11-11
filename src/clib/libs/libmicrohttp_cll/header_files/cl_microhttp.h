@@ -164,8 +164,13 @@ void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_k
 WUR int http_conn_s_client_ip(http_conn_s *this,bc_array_s *a_trg);
 WUR static inline int http_conn_s_suspend(http_conn_s *this);
 WUR static inline int http_conn_s_resume(http_conn_s *this);
+static inline void http_conn_s_digest_auth_username(http_conn_s *this,string_s *a_user);
+static inline void http_conn_s_digest_auth_check(http_conn_s *this,
+  const char *a_realm,const char *a_user,const char *a_passwd,unsigned a_nonce_timeout,int *a_result);
 WUR libmicrohttp_cll_EXPORT int http_conn_s_queue_response(http_conn_s *this,
     unsigned a_status_code,http_resp_s *a_resp);
+WUR libmicrohttp_cll_EXPORT int http_conn_s_queue_digest_auth_fail_response(http_conn_s *this,
+    const char *a_realm,const char *a_opaque,http_resp_s *a_resp,int a_signal_stale);
 
 // === definition of structure http_resp_s =====================================
 
@@ -383,7 +388,7 @@ static inline void http_conn_s_to_string(const http_conn_s *this,bc_array_s *a_t
 }/*}}}*/
 #endif
 
-int http_conn_s_suspend(http_conn_s *this)
+static inline int http_conn_s_suspend(http_conn_s *this)
 {/*{{{*/
 
   // - ERROR -
@@ -401,7 +406,7 @@ int http_conn_s_suspend(http_conn_s *this)
   return 0;
 }/*}}}*/
 
-int http_conn_s_resume(http_conn_s *this)
+static inline int http_conn_s_resume(http_conn_s *this)
 {/*{{{*/
 
   // - ERROR -
@@ -418,6 +423,30 @@ int http_conn_s_resume(http_conn_s *this)
   this->suspend_idx = c_idx_not_exist;
 
   return 0;
+}/*}}}*/
+
+static inline void http_conn_s_digest_auth_username(http_conn_s *this,string_s *a_user)
+{/*{{{*/
+  char *user_name = MHD_digest_auth_get_username(this->connection);
+
+  if (user_name != NULL)
+  {
+    string_s_set_ptr(a_user,user_name);
+    free(user_name);
+  }
+  else
+  {
+    string_s_clear(a_user);
+  }
+}/*}}}*/
+
+static inline void http_conn_s_digest_auth_check(http_conn_s *this,
+  const char *a_realm,const char *a_user,const char *a_passwd,unsigned a_nonce_timeout,int *a_result)
+{/*{{{*/
+
+  // - check digest authentication -
+  *a_result = MHD_digest_auth_check(
+      this->connection,a_realm,a_user,a_passwd,a_nonce_timeout);
 }/*}}}*/
 
 // === inline methods of structure http_resp_s =================================
