@@ -1334,7 +1334,7 @@ void libvdv301_cll_clear();
 // - vdv301 operations -
 enum
 {/*{{{*/
-  c_oper_undefined = 0,
+  c_vdv301_oper_undefined = 0,
 };/*}}}*/
 
 // VDV301 GENERATED DECLARATIONS

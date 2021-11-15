@@ -1,6 +1,8 @@
 
 set(CONF_COMPONENTS
-  "src/clib/libs/libxsd_cll")
+  "src/clib/libs/libtime_cll"
+  "src/clib/libs/libxml_cll"
+  "src/clib/libs/libregex_cll")
 set(CONF_HEADER_DIRS)
 
 set(CONF_DO_BUILD TRUE)
