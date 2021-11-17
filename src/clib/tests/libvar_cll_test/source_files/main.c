@@ -40,6 +40,11 @@ test_function_t test_functions[] =
 methods basic_tree_s
 @end
 
+// -- basic_choice_s --
+@begin
+methods basic_choice_s
+@end
+
 // -- static_s --
 @begin
 methods static_s
@@ -88,6 +93,11 @@ methods dynamic_list_s
 // -- dynamic_tree_s --
 @begin
 methods dynamic_tree_s
+@end
+
+// -- dynamic_choice_s --
+@begin
+methods dynamic_choice_s
 @end
 
 // -- person_s --
@@ -650,6 +660,17 @@ void test_from_var()
   basic_tree_s_to_string(&basic_tree,&buffer);
   cassert(strncmp(buffer.data,"[0,1,2,3,4,5,6,7,8,9]",buffer.used) == 0);
 
+  // - basic_choice_s from_var -
+  VAR_CLEAR(basic_choice_var_0,loc_s_dict());
+  loc_s_dict_set(basic_choice_var_0,loc_s_string_ptr("integer"),loc_s_int(11));
+
+  CONT_INIT_CLEAR(basic_choice_s,basic_choice_0);
+  cassert(basic_choice_s_from_var(&basic_choice_0,basic_choice_var_0) == 0);
+
+  buffer.used = 0;
+  basic_choice_s_to_string(&basic_choice_0,&buffer);
+  cassert(strncmp(buffer.data,"{integer:11}",buffer.used) == 0);
+
   // - static_s_from_var -
   VAR_CLEAR(static_var,loc_s_dict());
   loc_s_dict_set(static_var,loc_s_string_ptr("first"),loc_s_int(11));
@@ -775,6 +796,18 @@ void test_from_var()
         "[{first:11,second:12,array:[{first:11,second:12,third:13}]},"
         "{first:11,second:12,array:[{first:11,second:12,third:13}]},"
         "{first:11,second:12,array:[{first:11,second:12,third:13}]}]",
+        buffer.used) == 0);
+
+  // - dynamic_choice_s from_var -
+  VAR_CLEAR(dynamic_choice_var_0,loc_s_dict());
+  loc_s_dict_set(dynamic_choice_var_0,loc_s_string_ptr("data"),dynamic_var);
+
+  CONT_INIT_CLEAR(dynamic_choice_s,dynamic_choice_0);
+  cassert(dynamic_choice_s_from_var(&dynamic_choice_0,dynamic_choice_var_0) == 0);
+
+  buffer.used = 0;
+  dynamic_choice_s_to_string(&dynamic_choice_0,&buffer);
+  cassert(strncmp(buffer.data,"{data:{first:11,second:12,array:[{first:11,second:12,third:13}]}}",
         buffer.used) == 0);
 #endif
 #endif

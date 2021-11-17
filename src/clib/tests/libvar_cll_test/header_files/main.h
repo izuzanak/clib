@@ -16,6 +16,18 @@ options ( from_var )
 basic_tree_s;
 @end
 
+// -- basic_choice_s --
+@begin
+choice
+<
+bi:integer
+bf:real
+lli:longint
+>
+options ( from_var )
+basic_choice_s;
+@end
+
 // -- static_s --
 @begin
 struct
@@ -96,6 +108,18 @@ options ( from_var )
 dynamic_tree_s;
 @end
 
+// -- dynamic_choice_s --
+@begin
+choice
+<
+bi:integer
+string_s:string
+dynamic_s:data
+>
+options ( from_var )
+dynamic_choice_s;
+@end
+
 // -- person_s --
 @begin
 struct
@@ -132,6 +156,11 @@ static inline int basic_tree_s___compare_value(const basic_tree_s *this,const ui
 
   return *a_first < *a_second ? -1 : *a_first > *a_second ? 1 : 0;
 }/*}}}*/
+
+// -- basic_choice_s --
+@begin
+inlines basic_choice_s
+@end
 
 // -- static_s --
 @begin
@@ -196,6 +225,11 @@ static inline int dynamic_tree_s___compare_value(const dynamic_tree_s *this,cons
 
   return a_first->first < a_second->first ? -1 : a_first->first > a_second->first ? 1 : 0;
 }/*}}}*/
+
+// -- dynamic_choice_s --
+@begin
+inlines dynamic_choice_s
+@end
 
 // -- person_s --
 @begin

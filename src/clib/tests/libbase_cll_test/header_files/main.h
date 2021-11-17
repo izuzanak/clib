@@ -79,6 +79,30 @@ queue<string_s> string_queue_s;
 list<string_s> string_list_s;
 @end
 
+// -- basic_choice_s --
+@begin
+choice
+<
+bi:integer
+bf:real
+lli:longint
+>
+options ( to_json to_json_nice )
+basic_choice_s;
+@end
+
+// -- dynamic_choice_s --
+@begin
+choice
+<
+bi:integer
+string_s:string
+ui_array_s:array
+>
+options ( to_json to_json_nice )
+dynamic_choice_s;
+@end
+
 // === inline methods of generated structures ==================================
 
 // -- static_s --
@@ -150,6 +174,16 @@ inlines string_queue_s
 inlines string_list_s
 @end
 
+// -- basic_choice_s --
+@begin
+inlines basic_choice_s
+@end
+
+// -- dynamic_choice_s --
+@begin
+inlines dynamic_choice_s
+@end
+
 // === test execution functions ================================================
 
 void test_bc_array();
@@ -168,6 +202,8 @@ void test_dynamic_type_list();
 void test_basic_type_tree();
 void test_static_type_tree();
 void test_dynamic_type_tree();
+void test_basic_type_choice();
+void test_dynamic_type_choice();
 void test_doc_examples();
 
 // === program entry function ==================================================

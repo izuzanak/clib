@@ -25,6 +25,8 @@ const char *test_names[] =
   "basic_type_tree",
   "static_type_tree",
   "dynamic_type_tree",
+  "basic_type_choice",
+  "dynamic_type_choice",
   "doc_examples",
 };/*}}}*/
 
@@ -46,6 +48,8 @@ test_function_t test_functions[] =
   test_basic_type_tree,
   test_static_type_tree,
   test_dynamic_type_tree,
+  test_basic_type_choice,
+  test_dynamic_type_choice,
   test_doc_examples,
 };/*}}}*/
 
@@ -104,6 +108,16 @@ methods string_queue_s
 // -- string_list_s --
 @begin
 methods string_list_s
+@end
+
+// -- basic_choice_s --
+@begin
+methods basic_choice_s
+@end
+
+// -- dynamic_choice_s --
+@begin
+methods dynamic_choice_s
 @end
 
 // === test execution functions ================================================
@@ -1055,6 +1069,179 @@ void test_dynamic_type_tree()
 
   string_tree_s_clear(&tree_0);
   bc_array_s_clear(&buffer);
+#endif
+}/*}}}*/
+
+void test_basic_type_choice()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+
+  CONT_INIT_CLEAR(json_nice_s,json_nice);
+  json_nice_s_create(&json_nice,"--","==",NULL);
+
+#define BASIC_CHOICE_S_TO_BUFFER(NAME) \
+{/*{{{*/\
+  buffer.used = 0;\
+  basic_choice_s_to_string(NAME,&buffer);\
+  bc_array_s_push(&buffer,'\0');\
+}/*}}}*/
+
+#define BASIC_CHOICE_S_TO_JSON(NAME) \
+{/*{{{*/\
+  buffer.used = 0;\
+  basic_choice_s_to_json(NAME,&buffer);\
+  bc_array_s_push(&buffer,'\0');\
+}/*}}}*/
+
+#define BASIC_CHOICE_S_TO_JSON_NICE(NAME) \
+{/*{{{*/\
+  buffer.used = 0;\
+  basic_choice_s_to_json_nice(NAME,&json_nice,&buffer);\
+  bc_array_s_push(&buffer,'\0');\
+}/*}}}*/
+
+  CONT_INIT_CLEAR(basic_choice_s,choice_0);
+  *basic_choice_s_integer(&choice_0) = 120;
+  BASIC_CHOICE_S_TO_BUFFER(&choice_0);
+  cassert(strcmp(buffer.data,"{integer:120}") == 0);
+
+#if OPTION_TO_JSON == ENABLED
+  BASIC_CHOICE_S_TO_JSON(&choice_0);
+  cassert(strcmp(buffer.data,"{\"integer\":120}") == 0);
+  BASIC_CHOICE_S_TO_JSON_NICE(&choice_0);
+  cassert(strcmp(buffer.data,
+"{\n"
+"==--\"integer\": 120\n"
+"==}"
+  ) == 0);
+#endif
+
+  *basic_choice_s_real(&choice_0) = 120.5;
+  BASIC_CHOICE_S_TO_BUFFER(&choice_0);
+  cassert(strcmp(buffer.data,"{real:120.500000}") == 0);
+
+#if OPTION_TO_JSON == ENABLED
+  BASIC_CHOICE_S_TO_JSON(&choice_0);
+  cassert(strcmp(buffer.data,"{\"real\":120.500000}") == 0);
+  BASIC_CHOICE_S_TO_JSON_NICE(&choice_0);
+  cassert(strcmp(buffer.data,
+"{\n"
+"==--\"real\": 120.500000\n"
+"==}"
+  ) == 0);
+#endif
+
+  *basic_choice_s_longint(&choice_0) = 120;
+  BASIC_CHOICE_S_TO_BUFFER(&choice_0);
+  cassert(strcmp(buffer.data,"{longint:120}") == 0);
+
+#if OPTION_TO_JSON == ENABLED
+  BASIC_CHOICE_S_TO_JSON(&choice_0);
+  cassert(strcmp(buffer.data,"{\"longint\":120}") == 0);
+  BASIC_CHOICE_S_TO_JSON_NICE(&choice_0);
+  cassert(strcmp(buffer.data,
+"{\n"
+"==--\"longint\": 120\n"
+"==}"
+  ) == 0);
+#endif
+
+#endif
+}/*}}}*/
+
+void test_dynamic_type_choice()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+
+  CONT_INIT_CLEAR(json_nice_s,json_nice);
+  json_nice_s_create(&json_nice,"--","==",NULL);
+
+#define DYNAMIC_CHOICE_S_TO_BUFFER(NAME) \
+{/*{{{*/\
+  buffer.used = 0;\
+  dynamic_choice_s_to_string(NAME,&buffer);\
+  bc_array_s_push(&buffer,'\0');\
+}/*}}}*/
+
+#define DYNAMIC_CHOICE_S_TO_JSON(NAME) \
+{/*{{{*/\
+  buffer.used = 0;\
+  dynamic_choice_s_to_json(NAME,&buffer);\
+  bc_array_s_push(&buffer,'\0');\
+}/*}}}*/
+
+#define DYNAMIC_CHOICE_S_TO_JSON_NICE(NAME) \
+{/*{{{*/\
+  buffer.used = 0;\
+  dynamic_choice_s_to_json_nice(NAME,&json_nice,&buffer);\
+  bc_array_s_push(&buffer,'\0');\
+}/*}}}*/
+
+  CONT_INIT_CLEAR(dynamic_choice_s,choice_0);
+  *dynamic_choice_s_integer(&choice_0) = 120;
+  DYNAMIC_CHOICE_S_TO_BUFFER(&choice_0);
+  cassert(strcmp(buffer.data,"{integer:120}") == 0);
+
+#if OPTION_TO_JSON == ENABLED
+  DYNAMIC_CHOICE_S_TO_JSON(&choice_0);
+  cassert(strcmp(buffer.data,"{\"integer\":120}") == 0);
+  DYNAMIC_CHOICE_S_TO_JSON_NICE(&choice_0);
+  cassert(strcmp(buffer.data,
+"{\n"
+"==--\"integer\": 120\n"
+"==}"
+  ) == 0);
+#endif
+
+  string_s_set_ptr(dynamic_choice_s_string(&choice_0),"Hello world!");
+  DYNAMIC_CHOICE_S_TO_BUFFER(&choice_0);
+  cassert(strcmp(buffer.data,"{string:Hello world!}") == 0);
+
+#if OPTION_TO_JSON == ENABLED
+  DYNAMIC_CHOICE_S_TO_JSON(&choice_0);
+  cassert(strcmp(buffer.data,"{\"string\":\"Hello world!\"}") == 0);
+  DYNAMIC_CHOICE_S_TO_JSON_NICE(&choice_0);
+  cassert(strcmp(buffer.data,
+"{\n"
+"==--\"string\": \"Hello world!\"\n"
+"==}"
+  ) == 0);
+#endif
+
+  ui_array_s *array = dynamic_choice_s_array(&choice_0);
+
+  unsigned idx = 0;
+  do {
+    ui_array_s_push(array,idx);
+  } while(++idx < 10);
+
+  DYNAMIC_CHOICE_S_TO_BUFFER(&choice_0);
+  cassert(strcmp(buffer.data,"{array:[0,1,2,3,4,5,6,7,8,9]}") == 0);
+
+#if OPTION_TO_JSON == ENABLED
+  DYNAMIC_CHOICE_S_TO_JSON(&choice_0);
+  cassert(strcmp(buffer.data,"{\"array\":[0,1,2,3,4,5,6,7,8,9]}") == 0);
+  DYNAMIC_CHOICE_S_TO_JSON_NICE(&choice_0);
+  cassert(strcmp(buffer.data,
+"{\n"
+"==--\"array\": [\n"
+"==----0,\n"
+"==----1,\n"
+"==----2,\n"
+"==----3,\n"
+"==----4,\n"
+"==----5,\n"
+"==----6,\n"
+"==----7,\n"
+"==----8,\n"
+"==----9\n"
+"==--]\n"
+"==}"
+  ) == 0);
+#endif
+
 #endif
 }/*}}}*/
 
