@@ -337,19 +337,19 @@ int CountingStateEnumeration_s_read(CountingStateEnumeration_s *this,var_s a_var
   return 0;
 }/*}}}*/
 
-// -- ErrorCodeEnumeration_array_s --
+// -- ErrorCodeEnumeration_option_s --
 @begin
-methods ErrorCodeEnumeration_array_s
+methods ErrorCodeEnumeration_option_s
 @end
 
-// -- ConnectionStateEnumeration_array_s --
+// -- ConnectionStateEnumeration_option_s --
 @begin
-methods ConnectionStateEnumeration_array_s
+methods ConnectionStateEnumeration_option_s
 @end
 
-// -- DoorCountingQualityEnumeration_array_s --
+// -- DoorCountingQualityEnumeration_option_s --
 @begin
-methods DoorCountingQualityEnumeration_array_s
+methods DoorCountingQualityEnumeration_option_s
 @end
 
 // -- TicketingService_SetRazziaRequestStructure_s --
@@ -397,10 +397,10 @@ int IBIS_IP_int_s_write(IBIS_IP_int_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -430,9 +430,7 @@ int IBIS_IP_int_s_read(IBIS_IP_int_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -440,13 +438,15 @@ int IBIS_IP_int_s_read(IBIS_IP_int_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -464,10 +464,10 @@ int IBIS_IP_byte_s_write(IBIS_IP_byte_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -497,9 +497,7 @@ int IBIS_IP_byte_s_read(IBIS_IP_byte_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -507,13 +505,15 @@ int IBIS_IP_byte_s_read(IBIS_IP_byte_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -531,10 +531,10 @@ int IBIS_IP_double_s_write(IBIS_IP_double_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -564,9 +564,7 @@ int IBIS_IP_double_s_read(IBIS_IP_double_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -574,13 +572,15 @@ int IBIS_IP_double_s_read(IBIS_IP_double_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -598,10 +598,10 @@ int IBIS_IP_string_s_write(IBIS_IP_string_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -631,9 +631,7 @@ int IBIS_IP_string_s_read(IBIS_IP_string_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -641,13 +639,15 @@ int IBIS_IP_string_s_read(IBIS_IP_string_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -665,10 +665,10 @@ int IBIS_IP_NMTOKEN_s_write(IBIS_IP_NMTOKEN_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -698,9 +698,7 @@ int IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -708,13 +706,15 @@ int IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -732,10 +732,10 @@ int DoorIdType_s_write(DoorIdType_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -765,9 +765,7 @@ int DoorIdType_s_read(DoorIdType_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -775,13 +773,15 @@ int DoorIdType_s_read(DoorIdType_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -799,10 +799,10 @@ int IBIS_IP_boolean_s_write(IBIS_IP_boolean_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -832,9 +832,7 @@ int IBIS_IP_boolean_s_read(IBIS_IP_boolean_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -842,13 +840,15 @@ int IBIS_IP_boolean_s_read(IBIS_IP_boolean_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -866,10 +866,10 @@ int IBIS_IP_dateTime_s_write(IBIS_IP_dateTime_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -899,9 +899,7 @@ int IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -909,13 +907,15 @@ int IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -933,10 +933,10 @@ int IBIS_IP_duration_s_write(IBIS_IP_duration_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -966,9 +966,7 @@ int IBIS_IP_duration_s_read(IBIS_IP_duration_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -976,13 +974,15 @@ int IBIS_IP_duration_s_read(IBIS_IP_duration_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -1000,10 +1000,10 @@ int IBIS_IP_language_s_write(IBIS_IP_language_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -1033,9 +1033,7 @@ int IBIS_IP_language_s_read(IBIS_IP_language_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -1043,13 +1041,15 @@ int IBIS_IP_language_s_read(IBIS_IP_language_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -1111,10 +1111,10 @@ int IBIS_IP_unsignedInt_s_write(IBIS_IP_unsignedInt_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -1144,9 +1144,7 @@ int IBIS_IP_unsignedInt_s_read(IBIS_IP_unsignedInt_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -1154,13 +1152,15 @@ int IBIS_IP_unsignedInt_s_read(IBIS_IP_unsignedInt_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -1178,10 +1178,10 @@ int IBIS_IP_unsignedLong_s_write(IBIS_IP_unsignedLong_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -1211,9 +1211,7 @@ int IBIS_IP_unsignedLong_s_read(IBIS_IP_unsignedLong_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -1221,13 +1219,15 @@ int IBIS_IP_unsignedLong_s_read(IBIS_IP_unsignedLong_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -1289,10 +1289,10 @@ int IBIS_IP_nonNegativeInteger_s_write(IBIS_IP_nonNegativeInteger_s *this,bc_arr
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -1322,9 +1322,7 @@ int IBIS_IP_nonNegativeInteger_s_read(IBIS_IP_nonNegativeInteger_s *this,var_s a
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -1332,13 +1330,15 @@ int IBIS_IP_nonNegativeInteger_s_read(IBIS_IP_nonNegativeInteger_s *this,var_s a
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -1356,10 +1356,10 @@ int DoorOpenStateStructure_s_write(DoorOpenStateStructure_s *this,bc_array_s *a_
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -1389,9 +1389,7 @@ int DoorOpenStateStructure_s_read(DoorOpenStateStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -1399,13 +1397,15 @@ int DoorOpenStateStructure_s_read(DoorOpenStateStructure_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -1423,10 +1423,10 @@ int DoorOperationStateStructure_s_write(DoorOperationStateStructure_s *this,bc_a
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Value>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -1456,9 +1456,7 @@ int DoorOperationStateStructure_s_read(DoorOperationStateStructure_s *this,var_s
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -1466,13 +1464,15 @@ int DoorOperationStateStructure_s_read(DoorOperationStateStructure_s *this,var_s
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -1496,10 +1496,10 @@ int InternationalTextType_s_write(InternationalTextType_s *this,bc_array_s *a_tr
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Language>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -1535,9 +1535,7 @@ int InternationalTextType_s_read(InternationalTextType_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -1545,13 +1543,15 @@ int InternationalTextType_s_read(InternationalTextType_s *this,var_s a_var)
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   return 0;
 }/*}}}*/
@@ -1581,10 +1581,10 @@ int DoorCountingStructure_s_write(DoorCountingStructure_s *this,bc_array_s *a_tr
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Out>");
-  if (this->CountQuality.used != 0)
+  if (this->CountQuality.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<CountQuality>");
-    if (DoorCountingQualityEnumeration_s_write(DoorCountingQualityEnumeration_array_s_last(&this->CountQuality),a_trg))
+    if (DoorCountingQualityEnumeration_s_write(DoorCountingQualityEnumeration_option_s_value(&this->CountQuality),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -1626,9 +1626,7 @@ int DoorCountingStructure_s_read(DoorCountingStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(CountQuality);
       if (array_ptr->used != 0)
       {
-        DoorCountingQualityEnumeration_array_s_copy_resize(&this->CountQuality,1);
-        DoorCountingQualityEnumeration_array_s_push_blank(&this->CountQuality);
-        if (DoorCountingQualityEnumeration_s_read(DoorCountingQualityEnumeration_array_s_last(&this->CountQuality),*array_ptr->data))
+        if (DoorCountingQualityEnumeration_s_read(DoorCountingQualityEnumeration_option_s_value(&this->CountQuality),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -1636,13 +1634,15 @@ int DoorCountingStructure_s_read(DoorCountingStructure_s *this,var_s a_var)
     }
     else
     {
-      DoorCountingQualityEnumeration_array_s_copy_resize(&this->CountQuality,1);
-      DoorCountingQualityEnumeration_array_s_push_blank(&this->CountQuality);
-      if (DoorCountingQualityEnumeration_s_read(DoorCountingQualityEnumeration_array_s_last(&this->CountQuality),CountQuality))
+      if (DoorCountingQualityEnumeration_s_read(DoorCountingQualityEnumeration_option_s_value(&this->CountQuality),CountQuality))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    DoorCountingQualityEnumeration_option_s_none(&this->CountQuality);
   }
   return 0;
 }/*}}}*/
@@ -1652,9 +1652,9 @@ int DoorCountingStructure_s_read(DoorCountingStructure_s *this,var_s a_var)
 methods DoorIdType_array_s
 @end
 
-// -- IBIS_IP_int_array_s --
+// -- IBIS_IP_int_option_s --
 @begin
-methods IBIS_IP_int_array_s
+methods IBIS_IP_int_option_s
 @end
 
 // -- IBIS_IP_byte_array_s --
@@ -1662,9 +1662,14 @@ methods IBIS_IP_int_array_s
 methods IBIS_IP_byte_array_s
 @end
 
-// -- IBIS_IP_double_array_s --
+// -- IBIS_IP_double_option_s --
 @begin
-methods IBIS_IP_double_array_s
+methods IBIS_IP_double_option_s
+@end
+
+// -- IBIS_IP_string_option_s --
+@begin
+methods IBIS_IP_string_option_s
 @end
 
 // -- IBIS_IP_string_array_s --
@@ -1672,9 +1677,9 @@ methods IBIS_IP_double_array_s
 methods IBIS_IP_string_array_s
 @end
 
-// -- IBIS_IP_NMTOKEN_array_s --
+// -- IBIS_IP_NMTOKEN_option_s --
 @begin
-methods IBIS_IP_NMTOKEN_array_s
+methods IBIS_IP_NMTOKEN_option_s
 @end
 
 // -- PassengerCountingService_RetrieveSpecificDoorDataRequestStructure_s --
@@ -1765,9 +1770,9 @@ int TicketingService_RetrieveTariffInformationRequestStructure_s_read(TicketingS
   return 0;
 }/*}}}*/
 
-// -- IBIS_IP_boolean_array_s --
+// -- IBIS_IP_boolean_option_s --
 @begin
-methods IBIS_IP_boolean_array_s
+methods IBIS_IP_boolean_option_s
 @end
 
 // -- DoorIdListType_s --
@@ -1833,19 +1838,24 @@ int DoorIdListType_s_read(DoorIdListType_s *this,var_s a_var)
   return 0;
 }/*}}}*/
 
-// -- IBIS_IP_dateTime_array_s --
+// -- IBIS_IP_dateTime_option_s --
 @begin
-methods IBIS_IP_dateTime_array_s
+methods IBIS_IP_dateTime_option_s
 @end
 
-// -- IBIS_IP_duration_array_s --
+// -- IBIS_IP_duration_option_s --
 @begin
-methods IBIS_IP_duration_array_s
+methods IBIS_IP_duration_option_s
 @end
 
-// -- IBIS_IP_unsignedInt_array_s --
+// -- IBIS_IP_unsignedInt_option_s --
 @begin
-methods IBIS_IP_unsignedInt_array_s
+methods IBIS_IP_unsignedInt_option_s
+@end
+
+// -- DoorCountingStructure_array_s --
+@begin
+methods DoorCountingStructure_array_s
 @end
 
 // -- BayAreaStructure_s --
@@ -1855,19 +1865,19 @@ methods BayAreaStructure_s
 
 int BayAreaStructure_s_write(BayAreaStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->BeforeBay.used != 0)
+  if (this->BeforeBay.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<BeforeBay>");
-    if (IBIS_IP_double_s_write(IBIS_IP_double_array_s_last(&this->BeforeBay),a_trg))
+    if (IBIS_IP_double_s_write(IBIS_IP_double_option_s_value(&this->BeforeBay),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</BeforeBay>");
   }
-  if (this->BehindBay.used != 0)
+  if (this->BehindBay.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<BehindBay>");
-    if (IBIS_IP_double_s_write(IBIS_IP_double_array_s_last(&this->BehindBay),a_trg))
+    if (IBIS_IP_double_s_write(IBIS_IP_double_option_s_value(&this->BehindBay),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -1891,9 +1901,7 @@ int BayAreaStructure_s_read(BayAreaStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(BeforeBay);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_double_array_s_copy_resize(&this->BeforeBay,1);
-        IBIS_IP_double_array_s_push_blank(&this->BeforeBay);
-        if (IBIS_IP_double_s_read(IBIS_IP_double_array_s_last(&this->BeforeBay),*array_ptr->data))
+        if (IBIS_IP_double_s_read(IBIS_IP_double_option_s_value(&this->BeforeBay),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -1901,13 +1909,15 @@ int BayAreaStructure_s_read(BayAreaStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_double_array_s_copy_resize(&this->BeforeBay,1);
-      IBIS_IP_double_array_s_push_blank(&this->BeforeBay);
-      if (IBIS_IP_double_s_read(IBIS_IP_double_array_s_last(&this->BeforeBay),BeforeBay))
+      if (IBIS_IP_double_s_read(IBIS_IP_double_option_s_value(&this->BeforeBay),BeforeBay))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_double_option_s_none(&this->BeforeBay);
   }
   var_s BehindBay = loc_s_dict_str_get(nodes_var,"BehindBay");
   if (BehindBay != NULL)
@@ -1917,9 +1927,7 @@ int BayAreaStructure_s_read(BayAreaStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(BehindBay);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_double_array_s_copy_resize(&this->BehindBay,1);
-        IBIS_IP_double_array_s_push_blank(&this->BehindBay);
-        if (IBIS_IP_double_s_read(IBIS_IP_double_array_s_last(&this->BehindBay),*array_ptr->data))
+        if (IBIS_IP_double_s_read(IBIS_IP_double_option_s_value(&this->BehindBay),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -1927,40 +1935,37 @@ int BayAreaStructure_s_read(BayAreaStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_double_array_s_copy_resize(&this->BehindBay,1);
-      IBIS_IP_double_array_s_push_blank(&this->BehindBay);
-      if (IBIS_IP_double_s_read(IBIS_IP_double_array_s_last(&this->BehindBay),BehindBay))
+      if (IBIS_IP_double_s_read(IBIS_IP_double_option_s_value(&this->BehindBay),BehindBay))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
   }
+  else
+  {
+    IBIS_IP_double_option_s_none(&this->BehindBay);
+  }
   return 0;
 }/*}}}*/
-
-// -- DoorCountingStructure_array_s --
-@begin
-methods DoorCountingStructure_array_s
-@end
 
 // -- InternationalTextType_array_s --
 @begin
 methods InternationalTextType_array_s
 @end
 
-// -- IBIS_IP_nonNegativeInteger_array_s --
+// -- IBIS_IP_nonNegativeInteger_option_s --
 @begin
-methods IBIS_IP_nonNegativeInteger_array_s
+methods IBIS_IP_nonNegativeInteger_option_s
 @end
 
-// -- DoorOperationStateStructure_array_s --
+// -- DoorOperationStateStructure_option_s --
 @begin
-methods DoorOperationStateStructure_array_s
+methods DoorOperationStateStructure_option_s
 @end
 
-// -- TicketingService_ValidationResultDataStructure_array_s --
+// -- TicketingService_ValidationResultDataStructure_option_s --
 @begin
-methods TicketingService_ValidationResultDataStructure_array_s
+methods TicketingService_ValidationResultDataStructure_option_s
 @end
 
 // -- CountingStateStructure_s --
@@ -2712,19 +2717,19 @@ methods SubscribeResponseStructure_s
 
 int SubscribeResponseStructure_s_write(SubscribeResponseStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->Active.used != 0)
+  if (this->Active.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<Active>");
-    if (IBIS_IP_boolean_s_write(IBIS_IP_boolean_array_s_last(&this->Active),a_trg))
+    if (IBIS_IP_boolean_s_write(IBIS_IP_boolean_option_s_value(&this->Active),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</Active>");
   }
-  if (this->OperationErrorMessage.used != 0)
+  if (this->OperationErrorMessage.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<OperationErrorMessage>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -2748,9 +2753,7 @@ int SubscribeResponseStructure_s_read(SubscribeResponseStructure_s *this,var_s a
       var_array_s *array_ptr = loc_s_array_value(Active);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_boolean_array_s_copy_resize(&this->Active,1);
-        IBIS_IP_boolean_array_s_push_blank(&this->Active);
-        if (IBIS_IP_boolean_s_read(IBIS_IP_boolean_array_s_last(&this->Active),*array_ptr->data))
+        if (IBIS_IP_boolean_s_read(IBIS_IP_boolean_option_s_value(&this->Active),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -2758,13 +2761,15 @@ int SubscribeResponseStructure_s_read(SubscribeResponseStructure_s *this,var_s a
     }
     else
     {
-      IBIS_IP_boolean_array_s_copy_resize(&this->Active,1);
-      IBIS_IP_boolean_array_s_push_blank(&this->Active);
-      if (IBIS_IP_boolean_s_read(IBIS_IP_boolean_array_s_last(&this->Active),Active))
+      if (IBIS_IP_boolean_s_read(IBIS_IP_boolean_option_s_value(&this->Active),Active))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_boolean_option_s_none(&this->Active);
   }
   var_s OperationErrorMessage = loc_s_dict_str_get(nodes_var,"OperationErrorMessage");
   if (OperationErrorMessage != NULL)
@@ -2774,9 +2779,7 @@ int SubscribeResponseStructure_s_read(SubscribeResponseStructure_s *this,var_s a
       var_array_s *array_ptr = loc_s_array_value(OperationErrorMessage);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-        IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -2784,13 +2787,15 @@ int SubscribeResponseStructure_s_read(SubscribeResponseStructure_s *this,var_s a
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-      IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),OperationErrorMessage))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),OperationErrorMessage))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->OperationErrorMessage);
   }
   return 0;
 }/*}}}*/
@@ -2802,19 +2807,19 @@ methods UnsubscribeResponseStructure_s
 
 int UnsubscribeResponseStructure_s_write(UnsubscribeResponseStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->Active.used != 0)
+  if (this->Active.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<Active>");
-    if (IBIS_IP_boolean_s_write(IBIS_IP_boolean_array_s_last(&this->Active),a_trg))
+    if (IBIS_IP_boolean_s_write(IBIS_IP_boolean_option_s_value(&this->Active),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</Active>");
   }
-  if (this->OperationErrorMessage.used != 0)
+  if (this->OperationErrorMessage.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<OperationErrorMessage>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -2838,9 +2843,7 @@ int UnsubscribeResponseStructure_s_read(UnsubscribeResponseStructure_s *this,var
       var_array_s *array_ptr = loc_s_array_value(Active);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_boolean_array_s_copy_resize(&this->Active,1);
-        IBIS_IP_boolean_array_s_push_blank(&this->Active);
-        if (IBIS_IP_boolean_s_read(IBIS_IP_boolean_array_s_last(&this->Active),*array_ptr->data))
+        if (IBIS_IP_boolean_s_read(IBIS_IP_boolean_option_s_value(&this->Active),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -2848,13 +2851,15 @@ int UnsubscribeResponseStructure_s_read(UnsubscribeResponseStructure_s *this,var
     }
     else
     {
-      IBIS_IP_boolean_array_s_copy_resize(&this->Active,1);
-      IBIS_IP_boolean_array_s_push_blank(&this->Active);
-      if (IBIS_IP_boolean_s_read(IBIS_IP_boolean_array_s_last(&this->Active),Active))
+      if (IBIS_IP_boolean_s_read(IBIS_IP_boolean_option_s_value(&this->Active),Active))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_boolean_option_s_none(&this->Active);
   }
   var_s OperationErrorMessage = loc_s_dict_str_get(nodes_var,"OperationErrorMessage");
   if (OperationErrorMessage != NULL)
@@ -2864,9 +2869,7 @@ int UnsubscribeResponseStructure_s_read(UnsubscribeResponseStructure_s *this,var
       var_array_s *array_ptr = loc_s_array_value(OperationErrorMessage);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-        IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -2874,13 +2877,15 @@ int UnsubscribeResponseStructure_s_read(UnsubscribeResponseStructure_s *this,var
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-      IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),OperationErrorMessage))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),OperationErrorMessage))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->OperationErrorMessage);
   }
   return 0;
 }/*}}}*/
@@ -2892,19 +2897,19 @@ methods TicketingService_GetValidationResultResponseStructure_s
 
 int TicketingService_GetValidationResultResponseStructure_s_write(TicketingService_GetValidationResultResponseStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->ValidationResultData.used != 0)
+  if (this->ValidationResultData.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ValidationResultData>");
-    if (TicketingService_ValidationResultDataStructure_s_write(TicketingService_ValidationResultDataStructure_array_s_last(&this->ValidationResultData),a_trg))
+    if (TicketingService_ValidationResultDataStructure_s_write(TicketingService_ValidationResultDataStructure_option_s_value(&this->ValidationResultData),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</ValidationResultData>");
   }
-  if (this->OperationErrorMessage.used != 0)
+  if (this->OperationErrorMessage.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<OperationErrorMessage>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -2928,9 +2933,7 @@ int TicketingService_GetValidationResultResponseStructure_s_read(TicketingServic
       var_array_s *array_ptr = loc_s_array_value(ValidationResultData);
       if (array_ptr->used != 0)
       {
-        TicketingService_ValidationResultDataStructure_array_s_copy_resize(&this->ValidationResultData,1);
-        TicketingService_ValidationResultDataStructure_array_s_push_blank(&this->ValidationResultData);
-        if (TicketingService_ValidationResultDataStructure_s_read(TicketingService_ValidationResultDataStructure_array_s_last(&this->ValidationResultData),*array_ptr->data))
+        if (TicketingService_ValidationResultDataStructure_s_read(TicketingService_ValidationResultDataStructure_option_s_value(&this->ValidationResultData),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -2938,13 +2941,15 @@ int TicketingService_GetValidationResultResponseStructure_s_read(TicketingServic
     }
     else
     {
-      TicketingService_ValidationResultDataStructure_array_s_copy_resize(&this->ValidationResultData,1);
-      TicketingService_ValidationResultDataStructure_array_s_push_blank(&this->ValidationResultData);
-      if (TicketingService_ValidationResultDataStructure_s_read(TicketingService_ValidationResultDataStructure_array_s_last(&this->ValidationResultData),ValidationResultData))
+      if (TicketingService_ValidationResultDataStructure_s_read(TicketingService_ValidationResultDataStructure_option_s_value(&this->ValidationResultData),ValidationResultData))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    TicketingService_ValidationResultDataStructure_option_s_none(&this->ValidationResultData);
   }
   var_s OperationErrorMessage = loc_s_dict_str_get(nodes_var,"OperationErrorMessage");
   if (OperationErrorMessage != NULL)
@@ -2954,9 +2959,7 @@ int TicketingService_GetValidationResultResponseStructure_s_read(TicketingServic
       var_array_s *array_ptr = loc_s_array_value(OperationErrorMessage);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-        IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -2964,13 +2967,15 @@ int TicketingService_GetValidationResultResponseStructure_s_read(TicketingServic
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-      IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),OperationErrorMessage))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),OperationErrorMessage))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->OperationErrorMessage);
   }
   return 0;
 }/*}}}*/
@@ -2988,10 +2993,10 @@ int DoorStateStructure_s_write(DoorStateStructure_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</OpenState>");
-  if (this->OperationState.used != 0)
+  if (this->OperationState.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<OperationState>");
-    if (DoorOperationStateStructure_s_write(DoorOperationStateStructure_array_s_last(&this->OperationState),a_trg))
+    if (DoorOperationStateStructure_s_write(DoorOperationStateStructure_option_s_value(&this->OperationState),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -3021,9 +3026,7 @@ int DoorStateStructure_s_read(DoorStateStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(OperationState);
       if (array_ptr->used != 0)
       {
-        DoorOperationStateStructure_array_s_copy_resize(&this->OperationState,1);
-        DoorOperationStateStructure_array_s_push_blank(&this->OperationState);
-        if (DoorOperationStateStructure_s_read(DoorOperationStateStructure_array_s_last(&this->OperationState),*array_ptr->data))
+        if (DoorOperationStateStructure_s_read(DoorOperationStateStructure_option_s_value(&this->OperationState),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3031,13 +3034,15 @@ int DoorStateStructure_s_read(DoorStateStructure_s *this,var_s a_var)
     }
     else
     {
-      DoorOperationStateStructure_array_s_copy_resize(&this->OperationState,1);
-      DoorOperationStateStructure_array_s_push_blank(&this->OperationState);
-      if (DoorOperationStateStructure_s_read(DoorOperationStateStructure_array_s_last(&this->OperationState),OperationState))
+      if (DoorOperationStateStructure_s_read(DoorOperationStateStructure_option_s_value(&this->OperationState),OperationState))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    DoorOperationStateStructure_option_s_none(&this->OperationState);
   }
   return 0;
 }/*}}}*/
@@ -3055,19 +3060,19 @@ int SubscribeRequestStructure_s_write(SubscribeRequestStructure_s *this,bc_array
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Client-IP-Address>");
-  if (this->ReplyPort.used != 0)
+  if (this->ReplyPort.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ReplyPort>");
-    if (IBIS_IP_int_s_write(IBIS_IP_int_array_s_last(&this->ReplyPort),a_trg))
+    if (IBIS_IP_int_s_write(IBIS_IP_int_option_s_value(&this->ReplyPort),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</ReplyPort>");
   }
-  if (this->ReplyPath.used != 0)
+  if (this->ReplyPath.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ReplyPath>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->ReplyPath),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->ReplyPath),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -3097,9 +3102,7 @@ int SubscribeRequestStructure_s_read(SubscribeRequestStructure_s *this,var_s a_v
       var_array_s *array_ptr = loc_s_array_value(ReplyPort);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_int_array_s_copy_resize(&this->ReplyPort,1);
-        IBIS_IP_int_array_s_push_blank(&this->ReplyPort);
-        if (IBIS_IP_int_s_read(IBIS_IP_int_array_s_last(&this->ReplyPort),*array_ptr->data))
+        if (IBIS_IP_int_s_read(IBIS_IP_int_option_s_value(&this->ReplyPort),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3107,13 +3110,15 @@ int SubscribeRequestStructure_s_read(SubscribeRequestStructure_s *this,var_s a_v
     }
     else
     {
-      IBIS_IP_int_array_s_copy_resize(&this->ReplyPort,1);
-      IBIS_IP_int_array_s_push_blank(&this->ReplyPort);
-      if (IBIS_IP_int_s_read(IBIS_IP_int_array_s_last(&this->ReplyPort),ReplyPort))
+      if (IBIS_IP_int_s_read(IBIS_IP_int_option_s_value(&this->ReplyPort),ReplyPort))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_int_option_s_none(&this->ReplyPort);
   }
   var_s ReplyPath = loc_s_dict_str_get(nodes_var,"ReplyPath");
   if (ReplyPath != NULL)
@@ -3123,9 +3128,7 @@ int SubscribeRequestStructure_s_read(SubscribeRequestStructure_s *this,var_s a_v
       var_array_s *array_ptr = loc_s_array_value(ReplyPath);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->ReplyPath,1);
-        IBIS_IP_string_array_s_push_blank(&this->ReplyPath);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->ReplyPath),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->ReplyPath),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3133,13 +3136,15 @@ int SubscribeRequestStructure_s_read(SubscribeRequestStructure_s *this,var_s a_v
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->ReplyPath,1);
-      IBIS_IP_string_array_s_push_blank(&this->ReplyPath);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->ReplyPath),ReplyPath))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->ReplyPath),ReplyPath))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->ReplyPath);
   }
   return 0;
 }/*}}}*/
@@ -3157,19 +3162,19 @@ int UnsubscribeRequestStructure_s_write(UnsubscribeRequestStructure_s *this,bc_a
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Client-IP-Address>");
-  if (this->ReplyPort.used != 0)
+  if (this->ReplyPort.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ReplyPort>");
-    if (IBIS_IP_int_s_write(IBIS_IP_int_array_s_last(&this->ReplyPort),a_trg))
+    if (IBIS_IP_int_s_write(IBIS_IP_int_option_s_value(&this->ReplyPort),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</ReplyPort>");
   }
-  if (this->ReplyPath.used != 0)
+  if (this->ReplyPath.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ReplyPath>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->ReplyPath),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->ReplyPath),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -3199,9 +3204,7 @@ int UnsubscribeRequestStructure_s_read(UnsubscribeRequestStructure_s *this,var_s
       var_array_s *array_ptr = loc_s_array_value(ReplyPort);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_int_array_s_copy_resize(&this->ReplyPort,1);
-        IBIS_IP_int_array_s_push_blank(&this->ReplyPort);
-        if (IBIS_IP_int_s_read(IBIS_IP_int_array_s_last(&this->ReplyPort),*array_ptr->data))
+        if (IBIS_IP_int_s_read(IBIS_IP_int_option_s_value(&this->ReplyPort),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3209,13 +3212,15 @@ int UnsubscribeRequestStructure_s_read(UnsubscribeRequestStructure_s *this,var_s
     }
     else
     {
-      IBIS_IP_int_array_s_copy_resize(&this->ReplyPort,1);
-      IBIS_IP_int_array_s_push_blank(&this->ReplyPort);
-      if (IBIS_IP_int_s_read(IBIS_IP_int_array_s_last(&this->ReplyPort),ReplyPort))
+      if (IBIS_IP_int_s_read(IBIS_IP_int_option_s_value(&this->ReplyPort),ReplyPort))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_int_option_s_none(&this->ReplyPort);
   }
   var_s ReplyPath = loc_s_dict_str_get(nodes_var,"ReplyPath");
   if (ReplyPath != NULL)
@@ -3225,9 +3230,7 @@ int UnsubscribeRequestStructure_s_read(UnsubscribeRequestStructure_s *this,var_s
       var_array_s *array_ptr = loc_s_array_value(ReplyPath);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->ReplyPath,1);
-        IBIS_IP_string_array_s_push_blank(&this->ReplyPath);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->ReplyPath),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->ReplyPath),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3235,13 +3238,15 @@ int UnsubscribeRequestStructure_s_read(UnsubscribeRequestStructure_s *this,var_s
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->ReplyPath,1);
-      IBIS_IP_string_array_s_push_blank(&this->ReplyPath);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->ReplyPath),ReplyPath))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->ReplyPath),ReplyPath))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->ReplyPath);
   }
   return 0;
 }/*}}}*/
@@ -3285,10 +3290,10 @@ int LineInformationStructure_s_write(LineInformationStructure_s *this,bc_array_s
       bc_array_s_append_ptr(a_trg,"</LineShortName>");
     } while(++ptr < ptr_end);
   }
-  if (this->LineNumber.used != 0)
+  if (this->LineNumber.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<LineNumber>");
-    if (IBIS_IP_int_s_write(IBIS_IP_int_array_s_last(&this->LineNumber),a_trg))
+    if (IBIS_IP_int_s_write(IBIS_IP_int_option_s_value(&this->LineNumber),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -3378,9 +3383,7 @@ int LineInformationStructure_s_read(LineInformationStructure_s *this,var_s a_var
       var_array_s *array_ptr = loc_s_array_value(LineNumber);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_int_array_s_copy_resize(&this->LineNumber,1);
-        IBIS_IP_int_array_s_push_blank(&this->LineNumber);
-        if (IBIS_IP_int_s_read(IBIS_IP_int_array_s_last(&this->LineNumber),*array_ptr->data))
+        if (IBIS_IP_int_s_read(IBIS_IP_int_option_s_value(&this->LineNumber),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3388,13 +3391,15 @@ int LineInformationStructure_s_read(LineInformationStructure_s *this,var_s a_var
     }
     else
     {
-      IBIS_IP_int_array_s_copy_resize(&this->LineNumber,1);
-      IBIS_IP_int_array_s_push_blank(&this->LineNumber);
-      if (IBIS_IP_int_s_read(IBIS_IP_int_array_s_last(&this->LineNumber),LineNumber))
+      if (IBIS_IP_int_s_read(IBIS_IP_int_option_s_value(&this->LineNumber),LineNumber))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_int_option_s_none(&this->LineNumber);
   }
   return 0;
 }/*}}}*/
@@ -3493,10 +3498,10 @@ methods GNSSPointStructure_s
 
 int GNSSPointStructure_s_write(GNSSPointStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->PointRef.used != 0)
+  if (this->PointRef.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<PointRef>");
-    if (IBIS_IP_NMTOKEN_s_write(IBIS_IP_NMTOKEN_array_s_last(&this->PointRef),a_trg))
+    if (IBIS_IP_NMTOKEN_s_write(IBIS_IP_NMTOKEN_option_s_value(&this->PointRef),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -3514,10 +3519,10 @@ int GNSSPointStructure_s_write(GNSSPointStructure_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</Latitude>");
-  if (this->Altitude.used != 0)
+  if (this->Altitude.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<Altitude>");
-    if (IBIS_IP_double_s_write(IBIS_IP_double_array_s_last(&this->Altitude),a_trg))
+    if (IBIS_IP_double_s_write(IBIS_IP_double_option_s_value(&this->Altitude),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -3541,9 +3546,7 @@ int GNSSPointStructure_s_read(GNSSPointStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(PointRef);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_NMTOKEN_array_s_copy_resize(&this->PointRef,1);
-        IBIS_IP_NMTOKEN_array_s_push_blank(&this->PointRef);
-        if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_array_s_last(&this->PointRef),*array_ptr->data))
+        if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_option_s_value(&this->PointRef),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3551,13 +3554,15 @@ int GNSSPointStructure_s_read(GNSSPointStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_NMTOKEN_array_s_copy_resize(&this->PointRef,1);
-      IBIS_IP_NMTOKEN_array_s_push_blank(&this->PointRef);
-      if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_array_s_last(&this->PointRef),PointRef))
+      if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_option_s_value(&this->PointRef),PointRef))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_NMTOKEN_option_s_none(&this->PointRef);
   }
   var_s Longitude = loc_s_dict_str_get(nodes_var,"Longitude");
   if (Longitude == NULL ||
@@ -3579,9 +3584,7 @@ int GNSSPointStructure_s_read(GNSSPointStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(Altitude);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_double_array_s_copy_resize(&this->Altitude,1);
-        IBIS_IP_double_array_s_push_blank(&this->Altitude);
-        if (IBIS_IP_double_s_read(IBIS_IP_double_array_s_last(&this->Altitude),*array_ptr->data))
+        if (IBIS_IP_double_s_read(IBIS_IP_double_option_s_value(&this->Altitude),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3589,13 +3592,15 @@ int GNSSPointStructure_s_read(GNSSPointStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_double_array_s_copy_resize(&this->Altitude,1);
-      IBIS_IP_double_array_s_push_blank(&this->Altitude);
-      if (IBIS_IP_double_s_read(IBIS_IP_double_array_s_last(&this->Altitude),Altitude))
+      if (IBIS_IP_double_s_read(IBIS_IP_double_option_s_value(&this->Altitude),Altitude))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_double_option_s_none(&this->Altitude);
   }
   return 0;
 }/*}}}*/
@@ -3613,10 +3618,10 @@ int ViaPointStructure_s_write(ViaPointStructure_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</ViaPointRef>");
-  if (this->PlaceRef.used != 0)
+  if (this->PlaceRef.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<PlaceRef>");
-    if (IBIS_IP_NMTOKEN_s_write(IBIS_IP_NMTOKEN_array_s_last(&this->PlaceRef),a_trg))
+    if (IBIS_IP_NMTOKEN_s_write(IBIS_IP_NMTOKEN_option_s_value(&this->PlaceRef),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -3648,10 +3653,10 @@ int ViaPointStructure_s_write(ViaPointStructure_s *this,bc_array_s *a_trg)
       bc_array_s_append_ptr(a_trg,"</PlaceShortName>");
     } while(++ptr < ptr_end);
   }
-  if (this->ViaPointDisplayPriority.used != 0)
+  if (this->ViaPointDisplayPriority.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ViaPointDisplayPriority>");
-    if (IBIS_IP_int_s_write(IBIS_IP_int_array_s_last(&this->ViaPointDisplayPriority),a_trg))
+    if (IBIS_IP_int_s_write(IBIS_IP_int_option_s_value(&this->ViaPointDisplayPriority),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -3681,9 +3686,7 @@ int ViaPointStructure_s_read(ViaPointStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(PlaceRef);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_NMTOKEN_array_s_copy_resize(&this->PlaceRef,1);
-        IBIS_IP_NMTOKEN_array_s_push_blank(&this->PlaceRef);
-        if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_array_s_last(&this->PlaceRef),*array_ptr->data))
+        if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_option_s_value(&this->PlaceRef),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3691,13 +3694,15 @@ int ViaPointStructure_s_read(ViaPointStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_NMTOKEN_array_s_copy_resize(&this->PlaceRef,1);
-      IBIS_IP_NMTOKEN_array_s_push_blank(&this->PlaceRef);
-      if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_array_s_last(&this->PlaceRef),PlaceRef))
+      if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_option_s_value(&this->PlaceRef),PlaceRef))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_NMTOKEN_option_s_none(&this->PlaceRef);
   }
   var_s PlaceName = loc_s_dict_str_get(nodes_var,"PlaceName");
   if (PlaceName != NULL)
@@ -3767,9 +3772,7 @@ int ViaPointStructure_s_read(ViaPointStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ViaPointDisplayPriority);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_int_array_s_copy_resize(&this->ViaPointDisplayPriority,1);
-        IBIS_IP_int_array_s_push_blank(&this->ViaPointDisplayPriority);
-        if (IBIS_IP_int_s_read(IBIS_IP_int_array_s_last(&this->ViaPointDisplayPriority),*array_ptr->data))
+        if (IBIS_IP_int_s_read(IBIS_IP_int_option_s_value(&this->ViaPointDisplayPriority),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3777,13 +3780,15 @@ int ViaPointStructure_s_read(ViaPointStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_int_array_s_copy_resize(&this->ViaPointDisplayPriority,1);
-      IBIS_IP_int_array_s_push_blank(&this->ViaPointDisplayPriority);
-      if (IBIS_IP_int_s_read(IBIS_IP_int_array_s_last(&this->ViaPointDisplayPriority),ViaPointDisplayPriority))
+      if (IBIS_IP_int_s_read(IBIS_IP_int_option_s_value(&this->ViaPointDisplayPriority),ViaPointDisplayPriority))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_int_option_s_none(&this->ViaPointDisplayPriority);
   }
   return 0;
 }/*}}}*/
@@ -3807,19 +3812,19 @@ int DataAcceptedResponseDataStructure_s_write(DataAcceptedResponseDataStructure_
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</DataAccepted>");
-  if (this->ErrorCode.used != 0)
+  if (this->ErrorCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorCode>");
-    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),a_trg))
+    if (ErrorCodeEnumeration_s_write(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</ErrorCode>");
   }
-  if (this->ErrorInformation.used != 0)
+  if (this->ErrorInformation.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorInformation>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->ErrorInformation),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->ErrorInformation),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -3855,9 +3860,7 @@ int DataAcceptedResponseDataStructure_s_read(DataAcceptedResponseDataStructure_s
       var_array_s *array_ptr = loc_s_array_value(ErrorCode);
       if (array_ptr->used != 0)
       {
-        ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-        ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),*array_ptr->data))
+        if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3865,13 +3868,15 @@ int DataAcceptedResponseDataStructure_s_read(DataAcceptedResponseDataStructure_s
     }
     else
     {
-      ErrorCodeEnumeration_array_s_copy_resize(&this->ErrorCode,1);
-      ErrorCodeEnumeration_array_s_push_blank(&this->ErrorCode);
-      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_array_s_last(&this->ErrorCode),ErrorCode))
+      if (ErrorCodeEnumeration_s_read(ErrorCodeEnumeration_option_s_value(&this->ErrorCode),ErrorCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ErrorCodeEnumeration_option_s_none(&this->ErrorCode);
   }
   var_s ErrorInformation = loc_s_dict_str_get(nodes_var,"ErrorInformation");
   if (ErrorInformation != NULL)
@@ -3881,9 +3886,7 @@ int DataAcceptedResponseDataStructure_s_read(DataAcceptedResponseDataStructure_s
       var_array_s *array_ptr = loc_s_array_value(ErrorInformation);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->ErrorInformation,1);
-        IBIS_IP_string_array_s_push_blank(&this->ErrorInformation);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->ErrorInformation),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->ErrorInformation),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -3891,20 +3894,22 @@ int DataAcceptedResponseDataStructure_s_read(DataAcceptedResponseDataStructure_s
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->ErrorInformation,1);
-      IBIS_IP_string_array_s_push_blank(&this->ErrorInformation);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->ErrorInformation),ErrorInformation))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->ErrorInformation),ErrorInformation))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
   }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->ErrorInformation);
+  }
   return 0;
 }/*}}}*/
 
-// -- ZoneType_array_s --
+// -- ZoneType_option_s --
 @begin
-methods ZoneType_array_s
+methods ZoneType_option_s
 @end
 
 // -- PassengerCountingService_StartCountingRequestStructure_s --
@@ -3971,14 +3976,14 @@ int PassengerCountingService_StopCountingRequestStructure_s_read(PassengerCounti
   return 0;
 }/*}}}*/
 
-// -- BayAreaStructure_array_s --
+// -- BayAreaStructure_option_s --
 @begin
-methods BayAreaStructure_array_s
+methods BayAreaStructure_option_s
 @end
 
-// -- VehicleStructure_array_s --
+// -- VehicleStructure_option_s --
 @begin
-methods VehicleStructure_array_s
+methods VehicleStructure_option_s
 @end
 
 // -- ViaPointStructure_array_s --
@@ -3986,24 +3991,24 @@ methods VehicleStructure_array_s
 methods ViaPointStructure_array_s
 @end
 
-// -- DoorStateStructure_array_s --
+// -- DoorStateStructure_option_s --
 @begin
-methods DoorStateStructure_array_s
+methods DoorStateStructure_option_s
 @end
 
-// -- GNSSPointStructure_array_s --
+// -- GNSSPointStructure_option_s --
 @begin
-methods GNSSPointStructure_array_s
+methods GNSSPointStructure_option_s
 @end
 
-// -- CardApplInformations_array_s --
+// -- CardApplInformations_option_s --
 @begin
-methods CardApplInformations_array_s
+methods CardApplInformations_option_s
 @end
 
-// -- AnnouncementStructure_array_s --
+// -- AnnouncementStructure_option_s --
 @begin
-methods AnnouncementStructure_array_s
+methods AnnouncementStructure_option_s
 @end
 
 // -- CountingStateStructure_array_s --
@@ -4079,9 +4084,9 @@ int PassengerCountingService_SetCounterDataRequestStructure_s_read(PassengerCoun
   return 0;
 }/*}}}*/
 
-// -- DataAcceptedResponseDataStructure_array_s --
+// -- DataAcceptedResponseDataStructure_option_s --
 @begin
-methods DataAcceptedResponseDataStructure_array_s
+methods DataAcceptedResponseDataStructure_option_s
 @end
 
 // -- PassengerCountingService_CountingStatesStructure_s --
@@ -4166,19 +4171,19 @@ methods DataAcceptedResponseStructure_s
 
 int DataAcceptedResponseStructure_s_write(DataAcceptedResponseStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->DataAcceptedResponseData.used != 0)
+  if (this->DataAcceptedResponseData.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<DataAcceptedResponseData>");
-    if (DataAcceptedResponseDataStructure_s_write(DataAcceptedResponseDataStructure_array_s_last(&this->DataAcceptedResponseData),a_trg))
+    if (DataAcceptedResponseDataStructure_s_write(DataAcceptedResponseDataStructure_option_s_value(&this->DataAcceptedResponseData),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</DataAcceptedResponseData>");
   }
-  if (this->OperationErrorMessage.used != 0)
+  if (this->OperationErrorMessage.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<OperationErrorMessage>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -4202,9 +4207,7 @@ int DataAcceptedResponseStructure_s_read(DataAcceptedResponseStructure_s *this,v
       var_array_s *array_ptr = loc_s_array_value(DataAcceptedResponseData);
       if (array_ptr->used != 0)
       {
-        DataAcceptedResponseDataStructure_array_s_copy_resize(&this->DataAcceptedResponseData,1);
-        DataAcceptedResponseDataStructure_array_s_push_blank(&this->DataAcceptedResponseData);
-        if (DataAcceptedResponseDataStructure_s_read(DataAcceptedResponseDataStructure_array_s_last(&this->DataAcceptedResponseData),*array_ptr->data))
+        if (DataAcceptedResponseDataStructure_s_read(DataAcceptedResponseDataStructure_option_s_value(&this->DataAcceptedResponseData),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -4212,13 +4215,15 @@ int DataAcceptedResponseStructure_s_read(DataAcceptedResponseStructure_s *this,v
     }
     else
     {
-      DataAcceptedResponseDataStructure_array_s_copy_resize(&this->DataAcceptedResponseData,1);
-      DataAcceptedResponseDataStructure_array_s_push_blank(&this->DataAcceptedResponseData);
-      if (DataAcceptedResponseDataStructure_s_read(DataAcceptedResponseDataStructure_array_s_last(&this->DataAcceptedResponseData),DataAcceptedResponseData))
+      if (DataAcceptedResponseDataStructure_s_read(DataAcceptedResponseDataStructure_option_s_value(&this->DataAcceptedResponseData),DataAcceptedResponseData))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    DataAcceptedResponseDataStructure_option_s_none(&this->DataAcceptedResponseData);
   }
   var_s OperationErrorMessage = loc_s_dict_str_get(nodes_var,"OperationErrorMessage");
   if (OperationErrorMessage != NULL)
@@ -4228,9 +4233,7 @@ int DataAcceptedResponseStructure_s_read(DataAcceptedResponseStructure_s *this,v
       var_array_s *array_ptr = loc_s_array_value(OperationErrorMessage);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-        IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -4238,13 +4241,15 @@ int DataAcceptedResponseStructure_s_read(DataAcceptedResponseStructure_s *this,v
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-      IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),OperationErrorMessage))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),OperationErrorMessage))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->OperationErrorMessage);
   }
   return 0;
 }/*}}}*/
@@ -4262,10 +4267,10 @@ int FareZoneInformationStructure_s_write(FareZoneInformationStructure_s *this,bc
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</FareZoneID>");
-  if (this->FareZoneType.used != 0)
+  if (this->FareZoneType.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<FareZoneType>");
-    if (ZoneType_s_write(ZoneType_array_s_last(&this->FareZoneType),a_trg))
+    if (ZoneType_s_write(ZoneType_option_s_value(&this->FareZoneType),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -4321,9 +4326,7 @@ int FareZoneInformationStructure_s_read(FareZoneInformationStructure_s *this,var
       var_array_s *array_ptr = loc_s_array_value(FareZoneType);
       if (array_ptr->used != 0)
       {
-        ZoneType_array_s_copy_resize(&this->FareZoneType,1);
-        ZoneType_array_s_push_blank(&this->FareZoneType);
-        if (ZoneType_s_read(ZoneType_array_s_last(&this->FareZoneType),*array_ptr->data))
+        if (ZoneType_s_read(ZoneType_option_s_value(&this->FareZoneType),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -4331,13 +4334,15 @@ int FareZoneInformationStructure_s_read(FareZoneInformationStructure_s *this,var
     }
     else
     {
-      ZoneType_array_s_copy_resize(&this->FareZoneType,1);
-      ZoneType_array_s_push_blank(&this->FareZoneType);
-      if (ZoneType_s_read(ZoneType_array_s_last(&this->FareZoneType),FareZoneType))
+      if (ZoneType_s_read(ZoneType_option_s_value(&this->FareZoneType),FareZoneType))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ZoneType_option_s_none(&this->FareZoneType);
   }
   var_s FareZoneLongName = loc_s_dict_str_get(nodes_var,"FareZoneLongName");
   if (FareZoneLongName != NULL)
@@ -4428,10 +4433,10 @@ int DoorInformationStructure_s_write(DoorInformationStructure_s *this,bc_array_s
       bc_array_s_append_ptr(a_trg,"</Count>");
     } while(++ptr < ptr_end);
   }
-  if (this->State.used != 0)
+  if (this->State.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<State>");
-    if (DoorStateStructure_s_write(DoorStateStructure_array_s_last(&this->State),a_trg))
+    if (DoorStateStructure_s_write(DoorStateStructure_option_s_value(&this->State),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -4491,9 +4496,7 @@ int DoorInformationStructure_s_read(DoorInformationStructure_s *this,var_s a_var
       var_array_s *array_ptr = loc_s_array_value(State);
       if (array_ptr->used != 0)
       {
-        DoorStateStructure_array_s_copy_resize(&this->State,1);
-        DoorStateStructure_array_s_push_blank(&this->State);
-        if (DoorStateStructure_s_read(DoorStateStructure_array_s_last(&this->State),*array_ptr->data))
+        if (DoorStateStructure_s_read(DoorStateStructure_option_s_value(&this->State),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -4501,13 +4504,15 @@ int DoorInformationStructure_s_read(DoorInformationStructure_s *this,var_s a_var
     }
     else
     {
-      DoorStateStructure_array_s_copy_resize(&this->State,1);
-      DoorStateStructure_array_s_push_blank(&this->State);
-      if (DoorStateStructure_s_read(DoorStateStructure_array_s_last(&this->State),State))
+      if (DoorStateStructure_s_read(DoorStateStructure_option_s_value(&this->State),State))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    DoorStateStructure_option_s_none(&this->State);
   }
   return 0;
 }/*}}}*/
@@ -4525,10 +4530,10 @@ int TicketingService_ValidateTicketRequestStructure_s_write(TicketingService_Val
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</CardType>");
-  if (this->CardApplInformation.used != 0)
+  if (this->CardApplInformation.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<CardApplInformation>");
-    if (CardApplInformations_s_write(CardApplInformations_array_s_last(&this->CardApplInformation),a_trg))
+    if (CardApplInformations_s_write(CardApplInformations_option_s_value(&this->CardApplInformation),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -4570,9 +4575,7 @@ int TicketingService_ValidateTicketRequestStructure_s_read(TicketingService_Vali
       var_array_s *array_ptr = loc_s_array_value(CardApplInformation);
       if (array_ptr->used != 0)
       {
-        CardApplInformations_array_s_copy_resize(&this->CardApplInformation,1);
-        CardApplInformations_array_s_push_blank(&this->CardApplInformation);
-        if (CardApplInformations_s_read(CardApplInformations_array_s_last(&this->CardApplInformation),*array_ptr->data))
+        if (CardApplInformations_s_read(CardApplInformations_option_s_value(&this->CardApplInformation),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -4580,13 +4583,15 @@ int TicketingService_ValidateTicketRequestStructure_s_read(TicketingService_Vali
     }
     else
     {
-      CardApplInformations_array_s_copy_resize(&this->CardApplInformation,1);
-      CardApplInformations_array_s_push_blank(&this->CardApplInformation);
-      if (CardApplInformations_s_read(CardApplInformations_array_s_last(&this->CardApplInformation),CardApplInformation))
+      if (CardApplInformations_s_read(CardApplInformations_option_s_value(&this->CardApplInformation),CardApplInformation))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    CardApplInformations_option_s_none(&this->CardApplInformation);
   }
   var_s NumberOfCardTicketDataBlocks = loc_s_dict_str_get(nodes_var,"NumberOfCardTicketDataBlocks");
   if (NumberOfCardTicketDataBlocks == NULL ||
@@ -4628,19 +4633,19 @@ int TicketingService_ValidateTicketResponseDataStructure_s_write(TicketingServic
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</CardType>");
-  if (this->CardApplStatusCode.used != 0)
+  if (this->CardApplStatusCode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<CardApplStatusCode>");
-    if (IBIS_IP_unsignedInt_s_write(IBIS_IP_unsignedInt_array_s_last(&this->CardApplStatusCode),a_trg))
+    if (IBIS_IP_unsignedInt_s_write(IBIS_IP_unsignedInt_option_s_value(&this->CardApplStatusCode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</CardApplStatusCode>");
   }
-  if (this->CardApplikationInformation.used != 0)
+  if (this->CardApplikationInformation.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<CardApplikationInformation>");
-    if (CardApplInformations_s_write(CardApplInformations_array_s_last(&this->CardApplikationInformation),a_trg))
+    if (CardApplInformations_s_write(CardApplInformations_option_s_value(&this->CardApplikationInformation),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -4694,9 +4699,7 @@ int TicketingService_ValidateTicketResponseDataStructure_s_read(TicketingService
       var_array_s *array_ptr = loc_s_array_value(CardApplStatusCode);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_unsignedInt_array_s_copy_resize(&this->CardApplStatusCode,1);
-        IBIS_IP_unsignedInt_array_s_push_blank(&this->CardApplStatusCode);
-        if (IBIS_IP_unsignedInt_s_read(IBIS_IP_unsignedInt_array_s_last(&this->CardApplStatusCode),*array_ptr->data))
+        if (IBIS_IP_unsignedInt_s_read(IBIS_IP_unsignedInt_option_s_value(&this->CardApplStatusCode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -4704,13 +4707,15 @@ int TicketingService_ValidateTicketResponseDataStructure_s_read(TicketingService
     }
     else
     {
-      IBIS_IP_unsignedInt_array_s_copy_resize(&this->CardApplStatusCode,1);
-      IBIS_IP_unsignedInt_array_s_push_blank(&this->CardApplStatusCode);
-      if (IBIS_IP_unsignedInt_s_read(IBIS_IP_unsignedInt_array_s_last(&this->CardApplStatusCode),CardApplStatusCode))
+      if (IBIS_IP_unsignedInt_s_read(IBIS_IP_unsignedInt_option_s_value(&this->CardApplStatusCode),CardApplStatusCode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_unsignedInt_option_s_none(&this->CardApplStatusCode);
   }
   var_s CardApplikationInformation = loc_s_dict_str_get(nodes_var,"CardApplikationInformation");
   if (CardApplikationInformation != NULL)
@@ -4720,9 +4725,7 @@ int TicketingService_ValidateTicketResponseDataStructure_s_read(TicketingService
       var_array_s *array_ptr = loc_s_array_value(CardApplikationInformation);
       if (array_ptr->used != 0)
       {
-        CardApplInformations_array_s_copy_resize(&this->CardApplikationInformation,1);
-        CardApplInformations_array_s_push_blank(&this->CardApplikationInformation);
-        if (CardApplInformations_s_read(CardApplInformations_array_s_last(&this->CardApplikationInformation),*array_ptr->data))
+        if (CardApplInformations_s_read(CardApplInformations_option_s_value(&this->CardApplikationInformation),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -4730,13 +4733,15 @@ int TicketingService_ValidateTicketResponseDataStructure_s_read(TicketingService
     }
     else
     {
-      CardApplInformations_array_s_copy_resize(&this->CardApplikationInformation,1);
-      CardApplInformations_array_s_push_blank(&this->CardApplikationInformation);
-      if (CardApplInformations_s_read(CardApplInformations_array_s_last(&this->CardApplikationInformation),CardApplikationInformation))
+      if (CardApplInformations_s_read(CardApplInformations_option_s_value(&this->CardApplikationInformation),CardApplikationInformation))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    CardApplInformations_option_s_none(&this->CardApplikationInformation);
   }
   var_s CardValidationCode = loc_s_dict_str_get(nodes_var,"CardValidationCode");
   if (CardValidationCode == NULL ||
@@ -4760,10 +4765,10 @@ methods DisplayContentStructure_s
 
 int DisplayContentStructure_s_write(DisplayContentStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->DisplayContentRef.used != 0)
+  if (this->DisplayContentRef.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<DisplayContentRef>");
-    if (IBIS_IP_NMTOKEN_s_write(IBIS_IP_NMTOKEN_array_s_last(&this->DisplayContentRef),a_trg))
+    if (IBIS_IP_NMTOKEN_s_write(IBIS_IP_NMTOKEN_option_s_value(&this->DisplayContentRef),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -4807,28 +4812,28 @@ int DisplayContentStructure_s_write(DisplayContentStructure_s *this,bc_array_s *
       bc_array_s_append_ptr(a_trg,"</AdditionalInformation>");
     } while(++ptr < ptr_end);
   }
-  if (this->Priority.used != 0)
+  if (this->Priority.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<Priority>");
-    if (IBIS_IP_nonNegativeInteger_s_write(IBIS_IP_nonNegativeInteger_array_s_last(&this->Priority),a_trg))
+    if (IBIS_IP_nonNegativeInteger_s_write(IBIS_IP_nonNegativeInteger_option_s_value(&this->Priority),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</Priority>");
   }
-  if (this->PeriodDuration.used != 0)
+  if (this->PeriodDuration.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<PeriodDuration>");
-    if (IBIS_IP_duration_s_write(IBIS_IP_duration_array_s_last(&this->PeriodDuration),a_trg))
+    if (IBIS_IP_duration_s_write(IBIS_IP_duration_option_s_value(&this->PeriodDuration),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</PeriodDuration>");
   }
-  if (this->Duration.used != 0)
+  if (this->Duration.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<Duration>");
-    if (IBIS_IP_duration_s_write(IBIS_IP_duration_array_s_last(&this->Duration),a_trg))
+    if (IBIS_IP_duration_s_write(IBIS_IP_duration_option_s_value(&this->Duration),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -4852,9 +4857,7 @@ int DisplayContentStructure_s_read(DisplayContentStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(DisplayContentRef);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_NMTOKEN_array_s_copy_resize(&this->DisplayContentRef,1);
-        IBIS_IP_NMTOKEN_array_s_push_blank(&this->DisplayContentRef);
-        if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_array_s_last(&this->DisplayContentRef),*array_ptr->data))
+        if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_option_s_value(&this->DisplayContentRef),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -4862,13 +4865,15 @@ int DisplayContentStructure_s_read(DisplayContentStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_NMTOKEN_array_s_copy_resize(&this->DisplayContentRef,1);
-      IBIS_IP_NMTOKEN_array_s_push_blank(&this->DisplayContentRef);
-      if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_array_s_last(&this->DisplayContentRef),DisplayContentRef))
+      if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_option_s_value(&this->DisplayContentRef),DisplayContentRef))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_NMTOKEN_option_s_none(&this->DisplayContentRef);
   }
   var_s LineInformation = loc_s_dict_str_get(nodes_var,"LineInformation");
   if (LineInformation == NULL ||
@@ -4950,9 +4955,7 @@ int DisplayContentStructure_s_read(DisplayContentStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(Priority);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_nonNegativeInteger_array_s_copy_resize(&this->Priority,1);
-        IBIS_IP_nonNegativeInteger_array_s_push_blank(&this->Priority);
-        if (IBIS_IP_nonNegativeInteger_s_read(IBIS_IP_nonNegativeInteger_array_s_last(&this->Priority),*array_ptr->data))
+        if (IBIS_IP_nonNegativeInteger_s_read(IBIS_IP_nonNegativeInteger_option_s_value(&this->Priority),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -4960,13 +4963,15 @@ int DisplayContentStructure_s_read(DisplayContentStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_nonNegativeInteger_array_s_copy_resize(&this->Priority,1);
-      IBIS_IP_nonNegativeInteger_array_s_push_blank(&this->Priority);
-      if (IBIS_IP_nonNegativeInteger_s_read(IBIS_IP_nonNegativeInteger_array_s_last(&this->Priority),Priority))
+      if (IBIS_IP_nonNegativeInteger_s_read(IBIS_IP_nonNegativeInteger_option_s_value(&this->Priority),Priority))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_nonNegativeInteger_option_s_none(&this->Priority);
   }
   var_s PeriodDuration = loc_s_dict_str_get(nodes_var,"PeriodDuration");
   if (PeriodDuration != NULL)
@@ -4976,9 +4981,7 @@ int DisplayContentStructure_s_read(DisplayContentStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(PeriodDuration);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_duration_array_s_copy_resize(&this->PeriodDuration,1);
-        IBIS_IP_duration_array_s_push_blank(&this->PeriodDuration);
-        if (IBIS_IP_duration_s_read(IBIS_IP_duration_array_s_last(&this->PeriodDuration),*array_ptr->data))
+        if (IBIS_IP_duration_s_read(IBIS_IP_duration_option_s_value(&this->PeriodDuration),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -4986,13 +4989,15 @@ int DisplayContentStructure_s_read(DisplayContentStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_duration_array_s_copy_resize(&this->PeriodDuration,1);
-      IBIS_IP_duration_array_s_push_blank(&this->PeriodDuration);
-      if (IBIS_IP_duration_s_read(IBIS_IP_duration_array_s_last(&this->PeriodDuration),PeriodDuration))
+      if (IBIS_IP_duration_s_read(IBIS_IP_duration_option_s_value(&this->PeriodDuration),PeriodDuration))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_duration_option_s_none(&this->PeriodDuration);
   }
   var_s Duration = loc_s_dict_str_get(nodes_var,"Duration");
   if (Duration != NULL)
@@ -5002,9 +5007,7 @@ int DisplayContentStructure_s_read(DisplayContentStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(Duration);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_duration_array_s_copy_resize(&this->Duration,1);
-        IBIS_IP_duration_array_s_push_blank(&this->Duration);
-        if (IBIS_IP_duration_s_read(IBIS_IP_duration_array_s_last(&this->Duration),*array_ptr->data))
+        if (IBIS_IP_duration_s_read(IBIS_IP_duration_option_s_value(&this->Duration),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5012,13 +5015,15 @@ int DisplayContentStructure_s_read(DisplayContentStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_duration_array_s_copy_resize(&this->Duration,1);
-      IBIS_IP_duration_array_s_push_blank(&this->Duration);
-      if (IBIS_IP_duration_s_read(IBIS_IP_duration_array_s_last(&this->Duration),Duration))
+      if (IBIS_IP_duration_s_read(IBIS_IP_duration_option_s_value(&this->Duration),Duration))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_duration_option_s_none(&this->Duration);
   }
   return 0;
 }/*}}}*/
@@ -5033,14 +5038,14 @@ methods DisplayContentStructure_array_s
 methods DoorInformationStructure_array_s
 @end
 
-// -- PassengerCountingService_CountingStatesStructure_array_s --
+// -- PassengerCountingService_CountingStatesStructure_option_s --
 @begin
-methods PassengerCountingService_CountingStatesStructure_array_s
+methods PassengerCountingService_CountingStatesStructure_option_s
 @end
 
-// -- TicketingService_ValidateTicketResponseDataStructure_array_s --
+// -- TicketingService_ValidateTicketResponseDataStructure_option_s --
 @begin
-methods TicketingService_ValidateTicketResponseDataStructure_array_s
+methods TicketingService_ValidateTicketResponseDataStructure_option_s
 @end
 
 // -- PassengerCountingService_SpecificDoorDataStructure_s --
@@ -5169,19 +5174,19 @@ methods PassengerCountingService_GetCountingStateResponseStructure_s
 
 int PassengerCountingService_GetCountingStateResponseStructure_s_write(PassengerCountingService_GetCountingStateResponseStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->Data.used != 0)
+  if (this->Data.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<Data>");
-    if (PassengerCountingService_CountingStatesStructure_s_write(PassengerCountingService_CountingStatesStructure_array_s_last(&this->Data),a_trg))
+    if (PassengerCountingService_CountingStatesStructure_s_write(PassengerCountingService_CountingStatesStructure_option_s_value(&this->Data),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</Data>");
   }
-  if (this->ErrorMessage.used != 0)
+  if (this->ErrorMessage.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ErrorMessage>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->ErrorMessage),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->ErrorMessage),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -5205,9 +5210,7 @@ int PassengerCountingService_GetCountingStateResponseStructure_s_read(PassengerC
       var_array_s *array_ptr = loc_s_array_value(Data);
       if (array_ptr->used != 0)
       {
-        PassengerCountingService_CountingStatesStructure_array_s_copy_resize(&this->Data,1);
-        PassengerCountingService_CountingStatesStructure_array_s_push_blank(&this->Data);
-        if (PassengerCountingService_CountingStatesStructure_s_read(PassengerCountingService_CountingStatesStructure_array_s_last(&this->Data),*array_ptr->data))
+        if (PassengerCountingService_CountingStatesStructure_s_read(PassengerCountingService_CountingStatesStructure_option_s_value(&this->Data),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5215,13 +5218,15 @@ int PassengerCountingService_GetCountingStateResponseStructure_s_read(PassengerC
     }
     else
     {
-      PassengerCountingService_CountingStatesStructure_array_s_copy_resize(&this->Data,1);
-      PassengerCountingService_CountingStatesStructure_array_s_push_blank(&this->Data);
-      if (PassengerCountingService_CountingStatesStructure_s_read(PassengerCountingService_CountingStatesStructure_array_s_last(&this->Data),Data))
+      if (PassengerCountingService_CountingStatesStructure_s_read(PassengerCountingService_CountingStatesStructure_option_s_value(&this->Data),Data))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    PassengerCountingService_CountingStatesStructure_option_s_none(&this->Data);
   }
   var_s ErrorMessage = loc_s_dict_str_get(nodes_var,"ErrorMessage");
   if (ErrorMessage != NULL)
@@ -5231,9 +5236,7 @@ int PassengerCountingService_GetCountingStateResponseStructure_s_read(PassengerC
       var_array_s *array_ptr = loc_s_array_value(ErrorMessage);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->ErrorMessage,1);
-        IBIS_IP_string_array_s_push_blank(&this->ErrorMessage);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->ErrorMessage),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->ErrorMessage),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5241,13 +5244,15 @@ int PassengerCountingService_GetCountingStateResponseStructure_s_read(PassengerC
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->ErrorMessage,1);
-      IBIS_IP_string_array_s_push_blank(&this->ErrorMessage);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->ErrorMessage),ErrorMessage))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->ErrorMessage),ErrorMessage))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->ErrorMessage);
   }
   return 0;
 }/*}}}*/
@@ -5259,19 +5264,19 @@ methods TicketingService_ValidateTicketResponseStructure_s
 
 int TicketingService_ValidateTicketResponseStructure_s_write(TicketingService_ValidateTicketResponseStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->TicketingService_ValidationResponseData.used != 0)
+  if (this->TicketingService_ValidationResponseData.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<TicketingService.ValidationResponseData>");
-    if (TicketingService_ValidateTicketResponseDataStructure_s_write(TicketingService_ValidateTicketResponseDataStructure_array_s_last(&this->TicketingService_ValidationResponseData),a_trg))
+    if (TicketingService_ValidateTicketResponseDataStructure_s_write(TicketingService_ValidateTicketResponseDataStructure_option_s_value(&this->TicketingService_ValidationResponseData),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</TicketingService.ValidationResponseData>");
   }
-  if (this->OperationErrorMessage.used != 0)
+  if (this->OperationErrorMessage.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<OperationErrorMessage>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -5295,9 +5300,7 @@ int TicketingService_ValidateTicketResponseStructure_s_read(TicketingService_Val
       var_array_s *array_ptr = loc_s_array_value(TicketingService_ValidationResponseData);
       if (array_ptr->used != 0)
       {
-        TicketingService_ValidateTicketResponseDataStructure_array_s_copy_resize(&this->TicketingService_ValidationResponseData,1);
-        TicketingService_ValidateTicketResponseDataStructure_array_s_push_blank(&this->TicketingService_ValidationResponseData);
-        if (TicketingService_ValidateTicketResponseDataStructure_s_read(TicketingService_ValidateTicketResponseDataStructure_array_s_last(&this->TicketingService_ValidationResponseData),*array_ptr->data))
+        if (TicketingService_ValidateTicketResponseDataStructure_s_read(TicketingService_ValidateTicketResponseDataStructure_option_s_value(&this->TicketingService_ValidationResponseData),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5305,13 +5308,15 @@ int TicketingService_ValidateTicketResponseStructure_s_read(TicketingService_Val
     }
     else
     {
-      TicketingService_ValidateTicketResponseDataStructure_array_s_copy_resize(&this->TicketingService_ValidationResponseData,1);
-      TicketingService_ValidateTicketResponseDataStructure_array_s_push_blank(&this->TicketingService_ValidationResponseData);
-      if (TicketingService_ValidateTicketResponseDataStructure_s_read(TicketingService_ValidateTicketResponseDataStructure_array_s_last(&this->TicketingService_ValidationResponseData),TicketingService_ValidationResponseData))
+      if (TicketingService_ValidateTicketResponseDataStructure_s_read(TicketingService_ValidateTicketResponseDataStructure_option_s_value(&this->TicketingService_ValidationResponseData),TicketingService_ValidationResponseData))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    TicketingService_ValidateTicketResponseDataStructure_option_s_none(&this->TicketingService_ValidationResponseData);
   }
   var_s OperationErrorMessage = loc_s_dict_str_get(nodes_var,"OperationErrorMessage");
   if (OperationErrorMessage != NULL)
@@ -5321,9 +5326,7 @@ int TicketingService_ValidateTicketResponseStructure_s_read(TicketingService_Val
       var_array_s *array_ptr = loc_s_array_value(OperationErrorMessage);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-        IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5331,13 +5334,15 @@ int TicketingService_ValidateTicketResponseStructure_s_read(TicketingService_Val
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-      IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),OperationErrorMessage))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),OperationErrorMessage))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->OperationErrorMessage);
   }
   return 0;
 }/*}}}*/
@@ -5373,37 +5378,37 @@ int ConnectionStructure_s_write(ConnectionStructure_s *this,bc_array_s *a_trg)
     throw_error(VDV301_WRITE_DATA_ERROR);
   }
   bc_array_s_append_ptr(a_trg,"</DisplayContent>");
-  if (this->Platform.used != 0)
+  if (this->Platform.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<Platform>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->Platform),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->Platform),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</Platform>");
   }
-  if (this->ConnectionState.used != 0)
+  if (this->ConnectionState.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ConnectionState>");
-    if (ConnectionStateEnumeration_s_write(ConnectionStateEnumeration_array_s_last(&this->ConnectionState),a_trg))
+    if (ConnectionStateEnumeration_s_write(ConnectionStateEnumeration_option_s_value(&this->ConnectionState),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</ConnectionState>");
   }
-  if (this->TransportMode.used != 0)
+  if (this->TransportMode.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<TransportMode>");
-    if (VehicleStructure_s_write(VehicleStructure_array_s_last(&this->TransportMode),a_trg))
+    if (VehicleStructure_s_write(VehicleStructure_option_s_value(&this->TransportMode),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</TransportMode>");
   }
-  if (this->ExpectedDepatureTime.used != 0)
+  if (this->ExpectedDepatureTime.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ExpectedDepatureTime>");
-    if (IBIS_IP_dateTime_s_write(IBIS_IP_dateTime_array_s_last(&this->ExpectedDepatureTime),a_trg))
+    if (IBIS_IP_dateTime_s_write(IBIS_IP_dateTime_option_s_value(&this->ExpectedDepatureTime),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -5451,9 +5456,7 @@ int ConnectionStructure_s_read(ConnectionStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(Platform);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->Platform,1);
-        IBIS_IP_string_array_s_push_blank(&this->Platform);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->Platform),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->Platform),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5461,13 +5464,15 @@ int ConnectionStructure_s_read(ConnectionStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->Platform,1);
-      IBIS_IP_string_array_s_push_blank(&this->Platform);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->Platform),Platform))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->Platform),Platform))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->Platform);
   }
   var_s ConnectionState = loc_s_dict_str_get(nodes_var,"ConnectionState");
   if (ConnectionState != NULL)
@@ -5477,9 +5482,7 @@ int ConnectionStructure_s_read(ConnectionStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ConnectionState);
       if (array_ptr->used != 0)
       {
-        ConnectionStateEnumeration_array_s_copy_resize(&this->ConnectionState,1);
-        ConnectionStateEnumeration_array_s_push_blank(&this->ConnectionState);
-        if (ConnectionStateEnumeration_s_read(ConnectionStateEnumeration_array_s_last(&this->ConnectionState),*array_ptr->data))
+        if (ConnectionStateEnumeration_s_read(ConnectionStateEnumeration_option_s_value(&this->ConnectionState),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5487,13 +5490,15 @@ int ConnectionStructure_s_read(ConnectionStructure_s *this,var_s a_var)
     }
     else
     {
-      ConnectionStateEnumeration_array_s_copy_resize(&this->ConnectionState,1);
-      ConnectionStateEnumeration_array_s_push_blank(&this->ConnectionState);
-      if (ConnectionStateEnumeration_s_read(ConnectionStateEnumeration_array_s_last(&this->ConnectionState),ConnectionState))
+      if (ConnectionStateEnumeration_s_read(ConnectionStateEnumeration_option_s_value(&this->ConnectionState),ConnectionState))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    ConnectionStateEnumeration_option_s_none(&this->ConnectionState);
   }
   var_s TransportMode = loc_s_dict_str_get(nodes_var,"TransportMode");
   if (TransportMode != NULL)
@@ -5503,9 +5508,7 @@ int ConnectionStructure_s_read(ConnectionStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(TransportMode);
       if (array_ptr->used != 0)
       {
-        VehicleStructure_array_s_copy_resize(&this->TransportMode,1);
-        VehicleStructure_array_s_push_blank(&this->TransportMode);
-        if (VehicleStructure_s_read(VehicleStructure_array_s_last(&this->TransportMode),*array_ptr->data))
+        if (VehicleStructure_s_read(VehicleStructure_option_s_value(&this->TransportMode),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5513,13 +5516,15 @@ int ConnectionStructure_s_read(ConnectionStructure_s *this,var_s a_var)
     }
     else
     {
-      VehicleStructure_array_s_copy_resize(&this->TransportMode,1);
-      VehicleStructure_array_s_push_blank(&this->TransportMode);
-      if (VehicleStructure_s_read(VehicleStructure_array_s_last(&this->TransportMode),TransportMode))
+      if (VehicleStructure_s_read(VehicleStructure_option_s_value(&this->TransportMode),TransportMode))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    VehicleStructure_option_s_none(&this->TransportMode);
   }
   var_s ExpectedDepatureTime = loc_s_dict_str_get(nodes_var,"ExpectedDepatureTime");
   if (ExpectedDepatureTime != NULL)
@@ -5529,9 +5534,7 @@ int ConnectionStructure_s_read(ConnectionStructure_s *this,var_s a_var)
       var_array_s *array_ptr = loc_s_array_value(ExpectedDepatureTime);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_dateTime_array_s_copy_resize(&this->ExpectedDepatureTime,1);
-        IBIS_IP_dateTime_array_s_push_blank(&this->ExpectedDepatureTime);
-        if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_array_s_last(&this->ExpectedDepatureTime),*array_ptr->data))
+        if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_option_s_value(&this->ExpectedDepatureTime),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5539,13 +5542,15 @@ int ConnectionStructure_s_read(ConnectionStructure_s *this,var_s a_var)
     }
     else
     {
-      IBIS_IP_dateTime_array_s_copy_resize(&this->ExpectedDepatureTime,1);
-      IBIS_IP_dateTime_array_s_push_blank(&this->ExpectedDepatureTime);
-      if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_array_s_last(&this->ExpectedDepatureTime),ExpectedDepatureTime))
+      if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_option_s_value(&this->ExpectedDepatureTime),ExpectedDepatureTime))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_dateTime_option_s_none(&this->ExpectedDepatureTime);
   }
   return 0;
 }/*}}}*/
@@ -5555,14 +5560,14 @@ int ConnectionStructure_s_read(ConnectionStructure_s *this,var_s a_var)
 methods ConnectionStructure_array_s
 @end
 
-// -- PassengerCountingService_AllDataStructure_array_s --
+// -- PassengerCountingService_AllDataStructure_option_s --
 @begin
-methods PassengerCountingService_AllDataStructure_array_s
+methods PassengerCountingService_AllDataStructure_option_s
 @end
 
-// -- PassengerCountingService_SpecificDoorDataStructure_array_s --
+// -- PassengerCountingService_SpecificDoorDataStructure_option_s --
 @begin
-methods PassengerCountingService_SpecificDoorDataStructure_array_s
+methods PassengerCountingService_SpecificDoorDataStructure_option_s
 @end
 
 // -- PassengerCountingService_GetAllDataResponseStructure_s --
@@ -5572,19 +5577,19 @@ methods PassengerCountingService_GetAllDataResponseStructure_s
 
 int PassengerCountingService_GetAllDataResponseStructure_s_write(PassengerCountingService_GetAllDataResponseStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->AllData.used != 0)
+  if (this->AllData.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<AllData>");
-    if (PassengerCountingService_AllDataStructure_s_write(PassengerCountingService_AllDataStructure_array_s_last(&this->AllData),a_trg))
+    if (PassengerCountingService_AllDataStructure_s_write(PassengerCountingService_AllDataStructure_option_s_value(&this->AllData),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</AllData>");
   }
-  if (this->OperationErrorMessage.used != 0)
+  if (this->OperationErrorMessage.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<OperationErrorMessage>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -5608,9 +5613,7 @@ int PassengerCountingService_GetAllDataResponseStructure_s_read(PassengerCountin
       var_array_s *array_ptr = loc_s_array_value(AllData);
       if (array_ptr->used != 0)
       {
-        PassengerCountingService_AllDataStructure_array_s_copy_resize(&this->AllData,1);
-        PassengerCountingService_AllDataStructure_array_s_push_blank(&this->AllData);
-        if (PassengerCountingService_AllDataStructure_s_read(PassengerCountingService_AllDataStructure_array_s_last(&this->AllData),*array_ptr->data))
+        if (PassengerCountingService_AllDataStructure_s_read(PassengerCountingService_AllDataStructure_option_s_value(&this->AllData),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5618,13 +5621,15 @@ int PassengerCountingService_GetAllDataResponseStructure_s_read(PassengerCountin
     }
     else
     {
-      PassengerCountingService_AllDataStructure_array_s_copy_resize(&this->AllData,1);
-      PassengerCountingService_AllDataStructure_array_s_push_blank(&this->AllData);
-      if (PassengerCountingService_AllDataStructure_s_read(PassengerCountingService_AllDataStructure_array_s_last(&this->AllData),AllData))
+      if (PassengerCountingService_AllDataStructure_s_read(PassengerCountingService_AllDataStructure_option_s_value(&this->AllData),AllData))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    PassengerCountingService_AllDataStructure_option_s_none(&this->AllData);
   }
   var_s OperationErrorMessage = loc_s_dict_str_get(nodes_var,"OperationErrorMessage");
   if (OperationErrorMessage != NULL)
@@ -5634,9 +5639,7 @@ int PassengerCountingService_GetAllDataResponseStructure_s_read(PassengerCountin
       var_array_s *array_ptr = loc_s_array_value(OperationErrorMessage);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-        IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5644,13 +5647,15 @@ int PassengerCountingService_GetAllDataResponseStructure_s_read(PassengerCountin
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-      IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),OperationErrorMessage))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),OperationErrorMessage))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->OperationErrorMessage);
   }
   return 0;
 }/*}}}*/
@@ -5662,19 +5667,19 @@ methods PassengerCountingService_RetrieveSpecificDoorDataResponseStructure_s
 
 int PassengerCountingService_RetrieveSpecificDoorDataResponseStructure_s_write(PassengerCountingService_RetrieveSpecificDoorDataResponseStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->SpecificDoorData.used != 0)
+  if (this->SpecificDoorData.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<SpecificDoorData>");
-    if (PassengerCountingService_SpecificDoorDataStructure_s_write(PassengerCountingService_SpecificDoorDataStructure_array_s_last(&this->SpecificDoorData),a_trg))
+    if (PassengerCountingService_SpecificDoorDataStructure_s_write(PassengerCountingService_SpecificDoorDataStructure_option_s_value(&this->SpecificDoorData),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</SpecificDoorData>");
   }
-  if (this->OperationErrorMessage.used != 0)
+  if (this->OperationErrorMessage.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<OperationErrorMessage>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -5698,9 +5703,7 @@ int PassengerCountingService_RetrieveSpecificDoorDataResponseStructure_s_read(Pa
       var_array_s *array_ptr = loc_s_array_value(SpecificDoorData);
       if (array_ptr->used != 0)
       {
-        PassengerCountingService_SpecificDoorDataStructure_array_s_copy_resize(&this->SpecificDoorData,1);
-        PassengerCountingService_SpecificDoorDataStructure_array_s_push_blank(&this->SpecificDoorData);
-        if (PassengerCountingService_SpecificDoorDataStructure_s_read(PassengerCountingService_SpecificDoorDataStructure_array_s_last(&this->SpecificDoorData),*array_ptr->data))
+        if (PassengerCountingService_SpecificDoorDataStructure_s_read(PassengerCountingService_SpecificDoorDataStructure_option_s_value(&this->SpecificDoorData),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5708,13 +5711,15 @@ int PassengerCountingService_RetrieveSpecificDoorDataResponseStructure_s_read(Pa
     }
     else
     {
-      PassengerCountingService_SpecificDoorDataStructure_array_s_copy_resize(&this->SpecificDoorData,1);
-      PassengerCountingService_SpecificDoorDataStructure_array_s_push_blank(&this->SpecificDoorData);
-      if (PassengerCountingService_SpecificDoorDataStructure_s_read(PassengerCountingService_SpecificDoorDataStructure_array_s_last(&this->SpecificDoorData),SpecificDoorData))
+      if (PassengerCountingService_SpecificDoorDataStructure_s_read(PassengerCountingService_SpecificDoorDataStructure_option_s_value(&this->SpecificDoorData),SpecificDoorData))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    PassengerCountingService_SpecificDoorDataStructure_option_s_none(&this->SpecificDoorData);
   }
   var_s OperationErrorMessage = loc_s_dict_str_get(nodes_var,"OperationErrorMessage");
   if (OperationErrorMessage != NULL)
@@ -5724,9 +5729,7 @@ int PassengerCountingService_RetrieveSpecificDoorDataResponseStructure_s_read(Pa
       var_array_s *array_ptr = loc_s_array_value(OperationErrorMessage);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-        IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5734,13 +5737,15 @@ int PassengerCountingService_RetrieveSpecificDoorDataResponseStructure_s_read(Pa
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-      IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),OperationErrorMessage))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),OperationErrorMessage))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->OperationErrorMessage);
   }
   return 0;
 }/*}}}*/
@@ -5784,10 +5789,10 @@ int JourneyStopInformationStructure_s_write(JourneyStopInformationStructure_s *t
       bc_array_s_append_ptr(a_trg,"</StopAlternativeName>");
     } while(++ptr < ptr_end);
   }
-  if (this->Platform.used != 0)
+  if (this->Platform.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<Platform>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->Platform),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->Platform),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -5806,28 +5811,28 @@ int JourneyStopInformationStructure_s_write(JourneyStopInformationStructure_s *t
       bc_array_s_append_ptr(a_trg,"</DisplayContent>");
     } while(++ptr < ptr_end);
   }
-  if (this->Announcement.used != 0)
+  if (this->Announcement.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<Announcement>");
-    if (AnnouncementStructure_s_write(AnnouncementStructure_array_s_last(&this->Announcement),a_trg))
+    if (AnnouncementStructure_s_write(AnnouncementStructure_option_s_value(&this->Announcement),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</Announcement>");
   }
-  if (this->ArrivalScheduled.used != 0)
+  if (this->ArrivalScheduled.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<ArrivalScheduled>");
-    if (IBIS_IP_dateTime_s_write(IBIS_IP_dateTime_array_s_last(&this->ArrivalScheduled),a_trg))
+    if (IBIS_IP_dateTime_s_write(IBIS_IP_dateTime_option_s_value(&this->ArrivalScheduled),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</ArrivalScheduled>");
   }
-  if (this->DepartureScheduled.used != 0)
+  if (this->DepartureScheduled.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<DepartureScheduled>");
-    if (IBIS_IP_dateTime_s_write(IBIS_IP_dateTime_array_s_last(&this->DepartureScheduled),a_trg))
+    if (IBIS_IP_dateTime_s_write(IBIS_IP_dateTime_option_s_value(&this->DepartureScheduled),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -5846,28 +5851,28 @@ int JourneyStopInformationStructure_s_write(JourneyStopInformationStructure_s *t
       bc_array_s_append_ptr(a_trg,"</Connection>");
     } while(++ptr < ptr_end);
   }
-  if (this->BayArea.used != 0)
+  if (this->BayArea.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<BayArea>");
-    if (BayAreaStructure_s_write(BayAreaStructure_array_s_last(&this->BayArea),a_trg))
+    if (BayAreaStructure_s_write(BayAreaStructure_option_s_value(&this->BayArea),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</BayArea>");
   }
-  if (this->GNSSPoint.used != 0)
+  if (this->GNSSPoint.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<GNSSPoint>");
-    if (GNSSPointStructure_s_write(GNSSPointStructure_array_s_last(&this->GNSSPoint),a_trg))
+    if (GNSSPointStructure_s_write(GNSSPointStructure_option_s_value(&this->GNSSPoint),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</GNSSPoint>");
   }
-  if (this->FareZone.used != 0)
+  if (this->FareZone.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<FareZone>");
-    if (IBIS_IP_NMTOKEN_s_write(IBIS_IP_NMTOKEN_array_s_last(&this->FareZone),a_trg))
+    if (IBIS_IP_NMTOKEN_s_write(IBIS_IP_NMTOKEN_option_s_value(&this->FareZone),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -5957,9 +5962,7 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
       var_array_s *array_ptr = loc_s_array_value(Platform);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->Platform,1);
-        IBIS_IP_string_array_s_push_blank(&this->Platform);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->Platform),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->Platform),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -5967,13 +5970,15 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->Platform,1);
-      IBIS_IP_string_array_s_push_blank(&this->Platform);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->Platform),Platform))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->Platform),Platform))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->Platform);
   }
   var_s DisplayContent = loc_s_dict_str_get(nodes_var,"DisplayContent");
   if (DisplayContent != NULL)
@@ -6013,9 +6018,7 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
       var_array_s *array_ptr = loc_s_array_value(Announcement);
       if (array_ptr->used != 0)
       {
-        AnnouncementStructure_array_s_copy_resize(&this->Announcement,1);
-        AnnouncementStructure_array_s_push_blank(&this->Announcement);
-        if (AnnouncementStructure_s_read(AnnouncementStructure_array_s_last(&this->Announcement),*array_ptr->data))
+        if (AnnouncementStructure_s_read(AnnouncementStructure_option_s_value(&this->Announcement),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -6023,13 +6026,15 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
     }
     else
     {
-      AnnouncementStructure_array_s_copy_resize(&this->Announcement,1);
-      AnnouncementStructure_array_s_push_blank(&this->Announcement);
-      if (AnnouncementStructure_s_read(AnnouncementStructure_array_s_last(&this->Announcement),Announcement))
+      if (AnnouncementStructure_s_read(AnnouncementStructure_option_s_value(&this->Announcement),Announcement))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    AnnouncementStructure_option_s_none(&this->Announcement);
   }
   var_s ArrivalScheduled = loc_s_dict_str_get(nodes_var,"ArrivalScheduled");
   if (ArrivalScheduled != NULL)
@@ -6039,9 +6044,7 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
       var_array_s *array_ptr = loc_s_array_value(ArrivalScheduled);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_dateTime_array_s_copy_resize(&this->ArrivalScheduled,1);
-        IBIS_IP_dateTime_array_s_push_blank(&this->ArrivalScheduled);
-        if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_array_s_last(&this->ArrivalScheduled),*array_ptr->data))
+        if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_option_s_value(&this->ArrivalScheduled),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -6049,13 +6052,15 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
     }
     else
     {
-      IBIS_IP_dateTime_array_s_copy_resize(&this->ArrivalScheduled,1);
-      IBIS_IP_dateTime_array_s_push_blank(&this->ArrivalScheduled);
-      if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_array_s_last(&this->ArrivalScheduled),ArrivalScheduled))
+      if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_option_s_value(&this->ArrivalScheduled),ArrivalScheduled))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_dateTime_option_s_none(&this->ArrivalScheduled);
   }
   var_s DepartureScheduled = loc_s_dict_str_get(nodes_var,"DepartureScheduled");
   if (DepartureScheduled != NULL)
@@ -6065,9 +6070,7 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
       var_array_s *array_ptr = loc_s_array_value(DepartureScheduled);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_dateTime_array_s_copy_resize(&this->DepartureScheduled,1);
-        IBIS_IP_dateTime_array_s_push_blank(&this->DepartureScheduled);
-        if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_array_s_last(&this->DepartureScheduled),*array_ptr->data))
+        if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_option_s_value(&this->DepartureScheduled),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -6075,13 +6078,15 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
     }
     else
     {
-      IBIS_IP_dateTime_array_s_copy_resize(&this->DepartureScheduled,1);
-      IBIS_IP_dateTime_array_s_push_blank(&this->DepartureScheduled);
-      if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_array_s_last(&this->DepartureScheduled),DepartureScheduled))
+      if (IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_option_s_value(&this->DepartureScheduled),DepartureScheduled))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_dateTime_option_s_none(&this->DepartureScheduled);
   }
   var_s Connection = loc_s_dict_str_get(nodes_var,"Connection");
   if (Connection != NULL)
@@ -6121,9 +6126,7 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
       var_array_s *array_ptr = loc_s_array_value(BayArea);
       if (array_ptr->used != 0)
       {
-        BayAreaStructure_array_s_copy_resize(&this->BayArea,1);
-        BayAreaStructure_array_s_push_blank(&this->BayArea);
-        if (BayAreaStructure_s_read(BayAreaStructure_array_s_last(&this->BayArea),*array_ptr->data))
+        if (BayAreaStructure_s_read(BayAreaStructure_option_s_value(&this->BayArea),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -6131,13 +6134,15 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
     }
     else
     {
-      BayAreaStructure_array_s_copy_resize(&this->BayArea,1);
-      BayAreaStructure_array_s_push_blank(&this->BayArea);
-      if (BayAreaStructure_s_read(BayAreaStructure_array_s_last(&this->BayArea),BayArea))
+      if (BayAreaStructure_s_read(BayAreaStructure_option_s_value(&this->BayArea),BayArea))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    BayAreaStructure_option_s_none(&this->BayArea);
   }
   var_s GNSSPoint = loc_s_dict_str_get(nodes_var,"GNSSPoint");
   if (GNSSPoint != NULL)
@@ -6147,9 +6152,7 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
       var_array_s *array_ptr = loc_s_array_value(GNSSPoint);
       if (array_ptr->used != 0)
       {
-        GNSSPointStructure_array_s_copy_resize(&this->GNSSPoint,1);
-        GNSSPointStructure_array_s_push_blank(&this->GNSSPoint);
-        if (GNSSPointStructure_s_read(GNSSPointStructure_array_s_last(&this->GNSSPoint),*array_ptr->data))
+        if (GNSSPointStructure_s_read(GNSSPointStructure_option_s_value(&this->GNSSPoint),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -6157,13 +6160,15 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
     }
     else
     {
-      GNSSPointStructure_array_s_copy_resize(&this->GNSSPoint,1);
-      GNSSPointStructure_array_s_push_blank(&this->GNSSPoint);
-      if (GNSSPointStructure_s_read(GNSSPointStructure_array_s_last(&this->GNSSPoint),GNSSPoint))
+      if (GNSSPointStructure_s_read(GNSSPointStructure_option_s_value(&this->GNSSPoint),GNSSPoint))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    GNSSPointStructure_option_s_none(&this->GNSSPoint);
   }
   var_s FareZone = loc_s_dict_str_get(nodes_var,"FareZone");
   if (FareZone != NULL)
@@ -6173,9 +6178,7 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
       var_array_s *array_ptr = loc_s_array_value(FareZone);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_NMTOKEN_array_s_copy_resize(&this->FareZone,1);
-        IBIS_IP_NMTOKEN_array_s_push_blank(&this->FareZone);
-        if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_array_s_last(&this->FareZone),*array_ptr->data))
+        if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_option_s_value(&this->FareZone),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -6183,13 +6186,15 @@ int JourneyStopInformationStructure_s_read(JourneyStopInformationStructure_s *th
     }
     else
     {
-      IBIS_IP_NMTOKEN_array_s_copy_resize(&this->FareZone,1);
-      IBIS_IP_NMTOKEN_array_s_push_blank(&this->FareZone);
-      if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_array_s_last(&this->FareZone),FareZone))
+      if (IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_option_s_value(&this->FareZone),FareZone))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_NMTOKEN_option_s_none(&this->FareZone);
   }
   return 0;
 }/*}}}*/
@@ -6442,9 +6447,9 @@ int TicketingService_GetTariffInformationResponseDataStructure_s_read(TicketingS
   return 0;
 }/*}}}*/
 
-// -- TicketingService_GetTariffInformationResponseDataStructure_array_s --
+// -- TicketingService_GetTariffInformationResponseDataStructure_option_s --
 @begin
-methods TicketingService_GetTariffInformationResponseDataStructure_array_s
+methods TicketingService_GetTariffInformationResponseDataStructure_option_s
 @end
 
 // -- TicketingService_GetTariffInformationResponseStructure_s --
@@ -6454,19 +6459,19 @@ methods TicketingService_GetTariffInformationResponseStructure_s
 
 int TicketingService_GetTariffInformationResponseStructure_s_write(TicketingService_GetTariffInformationResponseStructure_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (this->TicketingService_GetTariffInformationResponseData.used != 0)
+  if (this->TicketingService_GetTariffInformationResponseData.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<TicketingService.GetTariffInformationResponseData>");
-    if (TicketingService_GetTariffInformationResponseDataStructure_s_write(TicketingService_GetTariffInformationResponseDataStructure_array_s_last(&this->TicketingService_GetTariffInformationResponseData),a_trg))
+    if (TicketingService_GetTariffInformationResponseDataStructure_s_write(TicketingService_GetTariffInformationResponseDataStructure_option_s_value(&this->TicketingService_GetTariffInformationResponseData),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
     bc_array_s_append_ptr(a_trg,"</TicketingService.GetTariffInformationResponseData>");
   }
-  if (this->OperationErrorMessage.used != 0)
+  if (this->OperationErrorMessage.type != 0)
   {
     bc_array_s_append_ptr(a_trg,"<OperationErrorMessage>");
-    if (IBIS_IP_string_s_write(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),a_trg))
+    if (IBIS_IP_string_s_write(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),a_trg))
     {
       throw_error(VDV301_WRITE_DATA_ERROR);
     }
@@ -6490,9 +6495,7 @@ int TicketingService_GetTariffInformationResponseStructure_s_read(TicketingServi
       var_array_s *array_ptr = loc_s_array_value(TicketingService_GetTariffInformationResponseData);
       if (array_ptr->used != 0)
       {
-        TicketingService_GetTariffInformationResponseDataStructure_array_s_copy_resize(&this->TicketingService_GetTariffInformationResponseData,1);
-        TicketingService_GetTariffInformationResponseDataStructure_array_s_push_blank(&this->TicketingService_GetTariffInformationResponseData);
-        if (TicketingService_GetTariffInformationResponseDataStructure_s_read(TicketingService_GetTariffInformationResponseDataStructure_array_s_last(&this->TicketingService_GetTariffInformationResponseData),*array_ptr->data))
+        if (TicketingService_GetTariffInformationResponseDataStructure_s_read(TicketingService_GetTariffInformationResponseDataStructure_option_s_value(&this->TicketingService_GetTariffInformationResponseData),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -6500,13 +6503,15 @@ int TicketingService_GetTariffInformationResponseStructure_s_read(TicketingServi
     }
     else
     {
-      TicketingService_GetTariffInformationResponseDataStructure_array_s_copy_resize(&this->TicketingService_GetTariffInformationResponseData,1);
-      TicketingService_GetTariffInformationResponseDataStructure_array_s_push_blank(&this->TicketingService_GetTariffInformationResponseData);
-      if (TicketingService_GetTariffInformationResponseDataStructure_s_read(TicketingService_GetTariffInformationResponseDataStructure_array_s_last(&this->TicketingService_GetTariffInformationResponseData),TicketingService_GetTariffInformationResponseData))
+      if (TicketingService_GetTariffInformationResponseDataStructure_s_read(TicketingService_GetTariffInformationResponseDataStructure_option_s_value(&this->TicketingService_GetTariffInformationResponseData),TicketingService_GetTariffInformationResponseData))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    TicketingService_GetTariffInformationResponseDataStructure_option_s_none(&this->TicketingService_GetTariffInformationResponseData);
   }
   var_s OperationErrorMessage = loc_s_dict_str_get(nodes_var,"OperationErrorMessage");
   if (OperationErrorMessage != NULL)
@@ -6516,9 +6521,7 @@ int TicketingService_GetTariffInformationResponseStructure_s_read(TicketingServi
       var_array_s *array_ptr = loc_s_array_value(OperationErrorMessage);
       if (array_ptr->used != 0)
       {
-        IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-        IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-        if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),*array_ptr->data))
+        if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),*array_ptr->data))
         {
           throw_error(VDV301_READ_DATA_ERROR);
         }
@@ -6526,13 +6529,15 @@ int TicketingService_GetTariffInformationResponseStructure_s_read(TicketingServi
     }
     else
     {
-      IBIS_IP_string_array_s_copy_resize(&this->OperationErrorMessage,1);
-      IBIS_IP_string_array_s_push_blank(&this->OperationErrorMessage);
-      if (IBIS_IP_string_s_read(IBIS_IP_string_array_s_last(&this->OperationErrorMessage),OperationErrorMessage))
+      if (IBIS_IP_string_s_read(IBIS_IP_string_option_s_value(&this->OperationErrorMessage),OperationErrorMessage))
       {
         throw_error(VDV301_READ_DATA_ERROR);
       }
     }
+  }
+  else
+  {
+    IBIS_IP_string_option_s_none(&this->OperationErrorMessage);
   }
   return 0;
 }/*}}}*/

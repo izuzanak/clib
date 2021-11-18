@@ -219,19 +219,31 @@ extern string_tree_s g_CountingStateEnumeration_tree;
 WUR int CountingStateEnumeration_s_write(CountingStateEnumeration_s *this,bc_array_s *a_trg);
 WUR int CountingStateEnumeration_s_read(CountingStateEnumeration_s *this,var_s a_var);
 
-// -- ErrorCodeEnumeration_array_s --
+// -- ErrorCodeEnumeration_option_s --
 @begin
-array<ErrorCodeEnumeration_s> ErrorCodeEnumeration_array_s;
+choice
+<
+bi:none
+ErrorCodeEnumeration_s:value
+> ErrorCodeEnumeration_option_s;
 @end
 
-// -- ConnectionStateEnumeration_array_s --
+// -- ConnectionStateEnumeration_option_s --
 @begin
-array<ConnectionStateEnumeration_s> ConnectionStateEnumeration_array_s;
+choice
+<
+bi:none
+ConnectionStateEnumeration_s:value
+> ConnectionStateEnumeration_option_s;
 @end
 
-// -- DoorCountingQualityEnumeration_array_s --
+// -- DoorCountingQualityEnumeration_option_s --
 @begin
-array<DoorCountingQualityEnumeration_s> DoorCountingQualityEnumeration_array_s;
+choice
+<
+bi:none
+DoorCountingQualityEnumeration_s:value
+> DoorCountingQualityEnumeration_option_s;
 @end
 
 // -- TicketingService_SetRazziaRequestStructure_s --
@@ -251,7 +263,7 @@ WUR int TicketingService_SetRazziaRequestStructure_s_read(TicketingService_SetRa
 struct
 <
 xs_int_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_int_s;
 @end
@@ -264,7 +276,7 @@ WUR int IBIS_IP_int_s_read(IBIS_IP_int_s *this,var_s a_var);
 struct
 <
 xs_byte_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_byte_s;
 @end
@@ -277,7 +289,7 @@ WUR int IBIS_IP_byte_s_read(IBIS_IP_byte_s *this,var_s a_var);
 struct
 <
 xs_double_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_double_s;
 @end
@@ -290,7 +302,7 @@ WUR int IBIS_IP_double_s_read(IBIS_IP_double_s *this,var_s a_var);
 struct
 <
 xs_string_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_string_s;
 @end
@@ -303,7 +315,7 @@ WUR int IBIS_IP_string_s_read(IBIS_IP_string_s *this,var_s a_var);
 struct
 <
 xs_NMTOKEN_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_NMTOKEN_s;
 @end
@@ -316,7 +328,7 @@ WUR int IBIS_IP_NMTOKEN_s_read(IBIS_IP_NMTOKEN_s *this,var_s a_var);
 struct
 <
 xs_NMTOKEN_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 DoorIdType_s;
 @end
@@ -329,7 +341,7 @@ WUR int DoorIdType_s_read(DoorIdType_s *this,var_s a_var);
 struct
 <
 xs_boolean_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_boolean_s;
 @end
@@ -342,7 +354,7 @@ WUR int IBIS_IP_boolean_s_read(IBIS_IP_boolean_s *this,var_s a_var);
 struct
 <
 xs_dateTime_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_dateTime_s;
 @end
@@ -355,7 +367,7 @@ WUR int IBIS_IP_dateTime_s_read(IBIS_IP_dateTime_s *this,var_s a_var);
 struct
 <
 xs_duration_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_duration_s;
 @end
@@ -368,7 +380,7 @@ WUR int IBIS_IP_duration_s_read(IBIS_IP_duration_s *this,var_s a_var);
 struct
 <
 xs_language_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_language_s;
 @end
@@ -394,7 +406,7 @@ WUR int GNSSCoordinateStructure_s_read(GNSSCoordinateStructure_s *this,var_s a_v
 struct
 <
 xs_unsignedInt_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_unsignedInt_s;
 @end
@@ -407,7 +419,7 @@ WUR int IBIS_IP_unsignedInt_s_read(IBIS_IP_unsignedInt_s *this,var_s a_var);
 struct
 <
 xs_unsignedLong_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_unsignedLong_s;
 @end
@@ -433,7 +445,7 @@ WUR int TicketingService_ValidationResultDataStructure_s_read(TicketingService_V
 struct
 <
 xs_nonNegativeInteger_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 IBIS_IP_nonNegativeInteger_s;
 @end
@@ -446,7 +458,7 @@ WUR int IBIS_IP_nonNegativeInteger_s_read(IBIS_IP_nonNegativeInteger_s *this,var
 struct
 <
 DoorOpenStateEnumeration_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 DoorOpenStateStructure_s;
 @end
@@ -459,7 +471,7 @@ WUR int DoorOpenStateStructure_s_read(DoorOpenStateStructure_s *this,var_s a_var
 struct
 <
 DoorOperationStateEnumeration_s:Value
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 DoorOperationStateStructure_s;
 @end
@@ -473,7 +485,7 @@ struct
 <
 xs_string_s:Value
 xs_language_s:Language
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
 >
 InternationalTextType_s;
 @end
@@ -488,7 +500,7 @@ struct
 DoorCountingObjectClassEnumeration_s:ObjectClass
 IBIS_IP_int_s:In
 IBIS_IP_int_s:Out
-DoorCountingQualityEnumeration_array_s:CountQuality $// [0,1]
+DoorCountingQualityEnumeration_option_s:CountQuality $// [0,1]
 >
 DoorCountingStructure_s;
 @end
@@ -501,9 +513,13 @@ WUR int DoorCountingStructure_s_read(DoorCountingStructure_s *this,var_s a_var);
 array<DoorIdType_s> DoorIdType_array_s;
 @end
 
-// -- IBIS_IP_int_array_s --
+// -- IBIS_IP_int_option_s --
 @begin
-array<IBIS_IP_int_s> IBIS_IP_int_array_s;
+choice
+<
+bi:none
+IBIS_IP_int_s:value
+> IBIS_IP_int_option_s;
 @end
 
 // -- IBIS_IP_byte_array_s --
@@ -511,9 +527,22 @@ array<IBIS_IP_int_s> IBIS_IP_int_array_s;
 array<IBIS_IP_byte_s> IBIS_IP_byte_array_s;
 @end
 
-// -- IBIS_IP_double_array_s --
+// -- IBIS_IP_double_option_s --
 @begin
-array<IBIS_IP_double_s> IBIS_IP_double_array_s;
+choice
+<
+bi:none
+IBIS_IP_double_s:value
+> IBIS_IP_double_option_s;
+@end
+
+// -- IBIS_IP_string_option_s --
+@begin
+choice
+<
+bi:none
+IBIS_IP_string_s:value
+> IBIS_IP_string_option_s;
 @end
 
 // -- IBIS_IP_string_array_s --
@@ -521,9 +550,13 @@ array<IBIS_IP_double_s> IBIS_IP_double_array_s;
 array<IBIS_IP_string_s> IBIS_IP_string_array_s;
 @end
 
-// -- IBIS_IP_NMTOKEN_array_s --
+// -- IBIS_IP_NMTOKEN_option_s --
 @begin
-array<IBIS_IP_NMTOKEN_s> IBIS_IP_NMTOKEN_array_s;
+choice
+<
+bi:none
+IBIS_IP_NMTOKEN_s:value
+> IBIS_IP_NMTOKEN_option_s;
 @end
 
 // -- PassengerCountingService_RetrieveSpecificDoorDataRequestStructure_s --
@@ -552,9 +585,13 @@ TicketingService_RetrieveTariffInformationRequestStructure_s;
 WUR int TicketingService_RetrieveTariffInformationRequestStructure_s_write(TicketingService_RetrieveTariffInformationRequestStructure_s *this,bc_array_s *a_trg);
 WUR int TicketingService_RetrieveTariffInformationRequestStructure_s_read(TicketingService_RetrieveTariffInformationRequestStructure_s *this,var_s a_var);
 
-// -- IBIS_IP_boolean_array_s --
+// -- IBIS_IP_boolean_option_s --
 @begin
-array<IBIS_IP_boolean_s> IBIS_IP_boolean_array_s;
+choice
+<
+bi:none
+IBIS_IP_boolean_s:value
+> IBIS_IP_boolean_option_s;
 @end
 
 // -- DoorIdListType_s --
@@ -569,27 +606,44 @@ DoorIdListType_s;
 WUR int DoorIdListType_s_write(DoorIdListType_s *this,bc_array_s *a_trg);
 WUR int DoorIdListType_s_read(DoorIdListType_s *this,var_s a_var);
 
-// -- IBIS_IP_dateTime_array_s --
+// -- IBIS_IP_dateTime_option_s --
 @begin
-array<IBIS_IP_dateTime_s> IBIS_IP_dateTime_array_s;
+choice
+<
+bi:none
+IBIS_IP_dateTime_s:value
+> IBIS_IP_dateTime_option_s;
 @end
 
-// -- IBIS_IP_duration_array_s --
+// -- IBIS_IP_duration_option_s --
 @begin
-array<IBIS_IP_duration_s> IBIS_IP_duration_array_s;
+choice
+<
+bi:none
+IBIS_IP_duration_s:value
+> IBIS_IP_duration_option_s;
 @end
 
-// -- IBIS_IP_unsignedInt_array_s --
+// -- IBIS_IP_unsignedInt_option_s --
 @begin
-array<IBIS_IP_unsignedInt_s> IBIS_IP_unsignedInt_array_s;
+choice
+<
+bi:none
+IBIS_IP_unsignedInt_s:value
+> IBIS_IP_unsignedInt_option_s;
+@end
+
+// -- DoorCountingStructure_array_s --
+@begin
+array<DoorCountingStructure_s> DoorCountingStructure_array_s;
 @end
 
 // -- BayAreaStructure_s --
 @begin
 struct
 <
-IBIS_IP_double_array_s:BeforeBay $// [0,1]
-IBIS_IP_double_array_s:BehindBay $// [0,1]
+IBIS_IP_double_option_s:BeforeBay $// [0,1]
+IBIS_IP_double_option_s:BehindBay $// [0,1]
 >
 BayAreaStructure_s;
 @end
@@ -597,29 +651,36 @@ BayAreaStructure_s;
 WUR int BayAreaStructure_s_write(BayAreaStructure_s *this,bc_array_s *a_trg);
 WUR int BayAreaStructure_s_read(BayAreaStructure_s *this,var_s a_var);
 
-// -- DoorCountingStructure_array_s --
-@begin
-array<DoorCountingStructure_s> DoorCountingStructure_array_s;
-@end
-
 // -- InternationalTextType_array_s --
 @begin
 array<InternationalTextType_s> InternationalTextType_array_s;
 @end
 
-// -- IBIS_IP_nonNegativeInteger_array_s --
+// -- IBIS_IP_nonNegativeInteger_option_s --
 @begin
-array<IBIS_IP_nonNegativeInteger_s> IBIS_IP_nonNegativeInteger_array_s;
+choice
+<
+bi:none
+IBIS_IP_nonNegativeInteger_s:value
+> IBIS_IP_nonNegativeInteger_option_s;
 @end
 
-// -- DoorOperationStateStructure_array_s --
+// -- DoorOperationStateStructure_option_s --
 @begin
-array<DoorOperationStateStructure_s> DoorOperationStateStructure_array_s;
+choice
+<
+bi:none
+DoorOperationStateStructure_s:value
+> DoorOperationStateStructure_option_s;
 @end
 
-// -- TicketingService_ValidationResultDataStructure_array_s --
+// -- TicketingService_ValidationResultDataStructure_option_s --
 @begin
-array<TicketingService_ValidationResultDataStructure_s> TicketingService_ValidationResultDataStructure_array_s;
+choice
+<
+bi:none
+TicketingService_ValidationResultDataStructure_s:value
+> TicketingService_ValidationResultDataStructure_option_s;
 @end
 
 // -- CountingStateStructure_s --
@@ -746,8 +807,8 @@ WUR int GlobalCardStatus_s_read(GlobalCardStatus_s *this,var_s a_var);
 @begin
 struct
 <
-IBIS_IP_boolean_array_s:Active $// [0,1]
-IBIS_IP_string_array_s:OperationErrorMessage $// [0,1]
+IBIS_IP_boolean_option_s:Active $// [0,1]
+IBIS_IP_string_option_s:OperationErrorMessage $// [0,1]
 >
 SubscribeResponseStructure_s;
 @end
@@ -759,8 +820,8 @@ WUR int SubscribeResponseStructure_s_read(SubscribeResponseStructure_s *this,var
 @begin
 struct
 <
-IBIS_IP_boolean_array_s:Active $// [0,1]
-IBIS_IP_string_array_s:OperationErrorMessage $// [0,1]
+IBIS_IP_boolean_option_s:Active $// [0,1]
+IBIS_IP_string_option_s:OperationErrorMessage $// [0,1]
 >
 UnsubscribeResponseStructure_s;
 @end
@@ -772,8 +833,8 @@ WUR int UnsubscribeResponseStructure_s_read(UnsubscribeResponseStructure_s *this
 @begin
 struct
 <
-TicketingService_ValidationResultDataStructure_array_s:ValidationResultData $// [0,1]
-IBIS_IP_string_array_s:OperationErrorMessage $// [0,1]
+TicketingService_ValidationResultDataStructure_option_s:ValidationResultData $// [0,1]
+IBIS_IP_string_option_s:OperationErrorMessage $// [0,1]
 >
 TicketingService_GetValidationResultResponseStructure_s;
 @end
@@ -786,7 +847,7 @@ WUR int TicketingService_GetValidationResultResponseStructure_s_read(TicketingSe
 struct
 <
 DoorOpenStateStructure_s:OpenState
-DoorOperationStateStructure_array_s:OperationState $// [0,1]
+DoorOperationStateStructure_option_s:OperationState $// [0,1]
 >
 DoorStateStructure_s;
 @end
@@ -799,8 +860,8 @@ WUR int DoorStateStructure_s_read(DoorStateStructure_s *this,var_s a_var);
 struct
 <
 IBIS_IP_string_s:Client_IP_Address
-IBIS_IP_int_array_s:ReplyPort $// [0,1]
-IBIS_IP_string_array_s:ReplyPath $// [0,1]
+IBIS_IP_int_option_s:ReplyPort $// [0,1]
+IBIS_IP_string_option_s:ReplyPath $// [0,1]
 >
 SubscribeRequestStructure_s;
 @end
@@ -813,8 +874,8 @@ WUR int SubscribeRequestStructure_s_read(SubscribeRequestStructure_s *this,var_s
 struct
 <
 IBIS_IP_string_s:Client_IP_Address
-IBIS_IP_int_array_s:ReplyPort $// [0,1]
-IBIS_IP_string_array_s:ReplyPath $// [0,1]
+IBIS_IP_int_option_s:ReplyPort $// [0,1]
+IBIS_IP_string_option_s:ReplyPath $// [0,1]
 >
 UnsubscribeRequestStructure_s;
 @end
@@ -829,7 +890,7 @@ struct
 IBIS_IP_NMTOKEN_s:LineRef
 InternationalTextType_array_s:LineName $// [0,unbounded]
 InternationalTextType_array_s:LineShortName $// [0,unbounded]
-IBIS_IP_int_array_s:LineNumber $// [0,1]
+IBIS_IP_int_option_s:LineNumber $// [0,1]
 >
 LineInformationStructure_s;
 @end
@@ -855,10 +916,10 @@ WUR int CardTicketData_s_read(CardTicketData_s *this,var_s a_var);
 @begin
 struct
 <
-IBIS_IP_NMTOKEN_array_s:PointRef $// [0,1]
+IBIS_IP_NMTOKEN_option_s:PointRef $// [0,1]
 GNSSCoordinateStructure_s:Longitude
 GNSSCoordinateStructure_s:Latitude
-IBIS_IP_double_array_s:Altitude $// [0,1]
+IBIS_IP_double_option_s:Altitude $// [0,1]
 >
 GNSSPointStructure_s;
 @end
@@ -871,10 +932,10 @@ WUR int GNSSPointStructure_s_read(GNSSPointStructure_s *this,var_s a_var);
 struct
 <
 IBIS_IP_NMTOKEN_s:ViaPointRef
-IBIS_IP_NMTOKEN_array_s:PlaceRef $// [0,1]
+IBIS_IP_NMTOKEN_option_s:PlaceRef $// [0,1]
 InternationalTextType_array_s:PlaceName $// [0,unbounded]
 InternationalTextType_array_s:PlaceShortName $// [0,unbounded]
-IBIS_IP_int_array_s:ViaPointDisplayPriority $// [0,1]
+IBIS_IP_int_option_s:ViaPointDisplayPriority $// [0,1]
 >
 ViaPointStructure_s;
 @end
@@ -888,8 +949,8 @@ struct
 <
 IBIS_IP_dateTime_s:TimeStamp
 IBIS_IP_boolean_s:DataAccepted
-ErrorCodeEnumeration_array_s:ErrorCode $// [0,1]
-IBIS_IP_string_array_s:ErrorInformation $// [0,1]
+ErrorCodeEnumeration_option_s:ErrorCode $// [0,1]
+IBIS_IP_string_option_s:ErrorInformation $// [0,1]
 >
 DataAcceptedResponseDataStructure_s;
 @end
@@ -897,9 +958,13 @@ DataAcceptedResponseDataStructure_s;
 WUR int DataAcceptedResponseDataStructure_s_write(DataAcceptedResponseDataStructure_s *this,bc_array_s *a_trg);
 WUR int DataAcceptedResponseDataStructure_s_read(DataAcceptedResponseDataStructure_s *this,var_s a_var);
 
-// -- ZoneType_array_s --
+// -- ZoneType_option_s --
 @begin
-array<ZoneType_s> ZoneType_array_s;
+choice
+<
+bi:none
+ZoneType_s:value
+> ZoneType_option_s;
 @end
 
 // -- PassengerCountingService_StartCountingRequestStructure_s --
@@ -926,14 +991,22 @@ PassengerCountingService_StopCountingRequestStructure_s;
 WUR int PassengerCountingService_StopCountingRequestStructure_s_write(PassengerCountingService_StopCountingRequestStructure_s *this,bc_array_s *a_trg);
 WUR int PassengerCountingService_StopCountingRequestStructure_s_read(PassengerCountingService_StopCountingRequestStructure_s *this,var_s a_var);
 
-// -- BayAreaStructure_array_s --
+// -- BayAreaStructure_option_s --
 @begin
-array<BayAreaStructure_s> BayAreaStructure_array_s;
+choice
+<
+bi:none
+BayAreaStructure_s:value
+> BayAreaStructure_option_s;
 @end
 
-// -- VehicleStructure_array_s --
+// -- VehicleStructure_option_s --
 @begin
-array<VehicleStructure_s> VehicleStructure_array_s;
+choice
+<
+bi:none
+VehicleStructure_s:value
+> VehicleStructure_option_s;
 @end
 
 // -- ViaPointStructure_array_s --
@@ -941,24 +1014,40 @@ array<VehicleStructure_s> VehicleStructure_array_s;
 array<ViaPointStructure_s> ViaPointStructure_array_s;
 @end
 
-// -- DoorStateStructure_array_s --
+// -- DoorStateStructure_option_s --
 @begin
-array<DoorStateStructure_s> DoorStateStructure_array_s;
+choice
+<
+bi:none
+DoorStateStructure_s:value
+> DoorStateStructure_option_s;
 @end
 
-// -- GNSSPointStructure_array_s --
+// -- GNSSPointStructure_option_s --
 @begin
-array<GNSSPointStructure_s> GNSSPointStructure_array_s;
+choice
+<
+bi:none
+GNSSPointStructure_s:value
+> GNSSPointStructure_option_s;
 @end
 
-// -- CardApplInformations_array_s --
+// -- CardApplInformations_option_s --
 @begin
-array<CardApplInformations_s> CardApplInformations_array_s;
+choice
+<
+bi:none
+CardApplInformations_s:value
+> CardApplInformations_option_s;
 @end
 
-// -- AnnouncementStructure_array_s --
+// -- AnnouncementStructure_option_s --
 @begin
-array<AnnouncementStructure_s> AnnouncementStructure_array_s;
+choice
+<
+bi:none
+AnnouncementStructure_s:value
+> AnnouncementStructure_option_s;
 @end
 
 // -- CountingStateStructure_array_s --
@@ -983,9 +1072,13 @@ PassengerCountingService_SetCounterDataRequestStructure_s;
 WUR int PassengerCountingService_SetCounterDataRequestStructure_s_write(PassengerCountingService_SetCounterDataRequestStructure_s *this,bc_array_s *a_trg);
 WUR int PassengerCountingService_SetCounterDataRequestStructure_s_read(PassengerCountingService_SetCounterDataRequestStructure_s *this,var_s a_var);
 
-// -- DataAcceptedResponseDataStructure_array_s --
+// -- DataAcceptedResponseDataStructure_option_s --
 @begin
-array<DataAcceptedResponseDataStructure_s> DataAcceptedResponseDataStructure_array_s;
+choice
+<
+bi:none
+DataAcceptedResponseDataStructure_s:value
+> DataAcceptedResponseDataStructure_option_s;
 @end
 
 // -- PassengerCountingService_CountingStatesStructure_s --
@@ -1005,8 +1098,8 @@ WUR int PassengerCountingService_CountingStatesStructure_s_read(PassengerCountin
 @begin
 struct
 <
-DataAcceptedResponseDataStructure_array_s:DataAcceptedResponseData $// [0,1]
-IBIS_IP_string_array_s:OperationErrorMessage $// [0,1]
+DataAcceptedResponseDataStructure_option_s:DataAcceptedResponseData $// [0,1]
+IBIS_IP_string_option_s:OperationErrorMessage $// [0,1]
 >
 DataAcceptedResponseStructure_s;
 @end
@@ -1019,7 +1112,7 @@ WUR int DataAcceptedResponseStructure_s_read(DataAcceptedResponseStructure_s *th
 struct
 <
 IBIS_IP_NMTOKEN_s:FareZoneID
-ZoneType_array_s:FareZoneType $// [0,1]
+ZoneType_option_s:FareZoneType $// [0,1]
 InternationalTextType_array_s:FareZoneLongName $// [0,unbounded]
 InternationalTextType_array_s:FareZoneShortName $// [0,unbounded]
 >
@@ -1035,7 +1128,7 @@ struct
 <
 IBIS_IP_NMTOKEN_s:DoorID
 DoorCountingStructure_array_s:Count $// [1,unbounded]
-DoorStateStructure_array_s:State $// [0,1]
+DoorStateStructure_option_s:State $// [0,1]
 >
 DoorInformationStructure_s;
 @end
@@ -1048,7 +1141,7 @@ WUR int DoorInformationStructure_s_read(DoorInformationStructure_s *this,var_s a
 struct
 <
 CardType_s:CardType
-CardApplInformations_array_s:CardApplInformation $// [0,1]
+CardApplInformations_option_s:CardApplInformation $// [0,1]
 IBIS_IP_unsignedInt_s:NumberOfCardTicketDataBlocks
 CardTicketData_s:CardTicketDataBlock
 >
@@ -1065,8 +1158,8 @@ struct
 IBIS_IP_dateTime_s:TimeStamp
 GlobalCardStatus_s:GlobalCardStatus
 CardType_s:CardType
-IBIS_IP_unsignedInt_array_s:CardApplStatusCode $// [0,1]
-CardApplInformations_array_s:CardApplikationInformation $// [0,1]
+IBIS_IP_unsignedInt_option_s:CardApplStatusCode $// [0,1]
+CardApplInformations_option_s:CardApplikationInformation $// [0,1]
 IBIS_IP_unsignedInt_s:CardValidationCode
 CardTicketData_s:CardTicketData
 >
@@ -1080,14 +1173,14 @@ WUR int TicketingService_ValidateTicketResponseDataStructure_s_read(TicketingSer
 @begin
 struct
 <
-IBIS_IP_NMTOKEN_array_s:DisplayContentRef $// [0,1]
+IBIS_IP_NMTOKEN_option_s:DisplayContentRef $// [0,1]
 LineInformationStructure_s:LineInformation
 DestinationStructure_s:Destination
 ViaPointStructure_array_s:ViaPoint $// [0,unbounded]
 InternationalTextType_array_s:AdditionalInformation $// [0,unbounded]
-IBIS_IP_nonNegativeInteger_array_s:Priority $// [0,1]
-IBIS_IP_duration_array_s:PeriodDuration $// [0,1]
-IBIS_IP_duration_array_s:Duration $// [0,1]
+IBIS_IP_nonNegativeInteger_option_s:Priority $// [0,1]
+IBIS_IP_duration_option_s:PeriodDuration $// [0,1]
+IBIS_IP_duration_option_s:Duration $// [0,1]
 >
 DisplayContentStructure_s;
 @end
@@ -1105,14 +1198,22 @@ array<DisplayContentStructure_s> DisplayContentStructure_array_s;
 array<DoorInformationStructure_s> DoorInformationStructure_array_s;
 @end
 
-// -- PassengerCountingService_CountingStatesStructure_array_s --
+// -- PassengerCountingService_CountingStatesStructure_option_s --
 @begin
-array<PassengerCountingService_CountingStatesStructure_s> PassengerCountingService_CountingStatesStructure_array_s;
+choice
+<
+bi:none
+PassengerCountingService_CountingStatesStructure_s:value
+> PassengerCountingService_CountingStatesStructure_option_s;
 @end
 
-// -- TicketingService_ValidateTicketResponseDataStructure_array_s --
+// -- TicketingService_ValidateTicketResponseDataStructure_option_s --
 @begin
-array<TicketingService_ValidateTicketResponseDataStructure_s> TicketingService_ValidateTicketResponseDataStructure_array_s;
+choice
+<
+bi:none
+TicketingService_ValidateTicketResponseDataStructure_s:value
+> TicketingService_ValidateTicketResponseDataStructure_option_s;
 @end
 
 // -- PassengerCountingService_SpecificDoorDataStructure_s --
@@ -1145,8 +1246,8 @@ WUR int PassengerCountingService_AllDataStructure_s_read(PassengerCountingServic
 @begin
 struct
 <
-PassengerCountingService_CountingStatesStructure_array_s:Data $// [0,1]
-IBIS_IP_string_array_s:ErrorMessage $// [0,1]
+PassengerCountingService_CountingStatesStructure_option_s:Data $// [0,1]
+IBIS_IP_string_option_s:ErrorMessage $// [0,1]
 >
 PassengerCountingService_GetCountingStateResponseStructure_s;
 @end
@@ -1158,8 +1259,8 @@ WUR int PassengerCountingService_GetCountingStateResponseStructure_s_read(Passen
 @begin
 struct
 <
-TicketingService_ValidateTicketResponseDataStructure_array_s:TicketingService_ValidationResponseData $// [0,1]
-IBIS_IP_string_array_s:OperationErrorMessage $// [0,1]
+TicketingService_ValidateTicketResponseDataStructure_option_s:TicketingService_ValidationResponseData $// [0,1]
+IBIS_IP_string_option_s:OperationErrorMessage $// [0,1]
 >
 TicketingService_ValidateTicketResponseStructure_s;
 @end
@@ -1175,10 +1276,10 @@ IBIS_IP_NMTOKEN_s:StopRef
 IBIS_IP_NMTOKEN_s:ConnectionRef
 ConnectionTypeEnumeration_s:ConnectionType
 DisplayContentStructure_s:DisplayContent
-IBIS_IP_string_array_s:Platform $// [0,1]
-ConnectionStateEnumeration_array_s:ConnectionState $// [0,1]
-VehicleStructure_array_s:TransportMode $// [0,1]
-IBIS_IP_dateTime_array_s:ExpectedDepatureTime $// [0,1]
+IBIS_IP_string_option_s:Platform $// [0,1]
+ConnectionStateEnumeration_option_s:ConnectionState $// [0,1]
+VehicleStructure_option_s:TransportMode $// [0,1]
+IBIS_IP_dateTime_option_s:ExpectedDepatureTime $// [0,1]
 >
 ConnectionStructure_s;
 @end
@@ -1191,22 +1292,30 @@ WUR int ConnectionStructure_s_read(ConnectionStructure_s *this,var_s a_var);
 array<ConnectionStructure_s> ConnectionStructure_array_s;
 @end
 
-// -- PassengerCountingService_AllDataStructure_array_s --
+// -- PassengerCountingService_AllDataStructure_option_s --
 @begin
-array<PassengerCountingService_AllDataStructure_s> PassengerCountingService_AllDataStructure_array_s;
+choice
+<
+bi:none
+PassengerCountingService_AllDataStructure_s:value
+> PassengerCountingService_AllDataStructure_option_s;
 @end
 
-// -- PassengerCountingService_SpecificDoorDataStructure_array_s --
+// -- PassengerCountingService_SpecificDoorDataStructure_option_s --
 @begin
-array<PassengerCountingService_SpecificDoorDataStructure_s> PassengerCountingService_SpecificDoorDataStructure_array_s;
+choice
+<
+bi:none
+PassengerCountingService_SpecificDoorDataStructure_s:value
+> PassengerCountingService_SpecificDoorDataStructure_option_s;
 @end
 
 // -- PassengerCountingService_GetAllDataResponseStructure_s --
 @begin
 struct
 <
-PassengerCountingService_AllDataStructure_array_s:AllData $// [0,1]
-IBIS_IP_string_array_s:OperationErrorMessage $// [0,1]
+PassengerCountingService_AllDataStructure_option_s:AllData $// [0,1]
+IBIS_IP_string_option_s:OperationErrorMessage $// [0,1]
 >
 PassengerCountingService_GetAllDataResponseStructure_s;
 @end
@@ -1218,8 +1327,8 @@ WUR int PassengerCountingService_GetAllDataResponseStructure_s_read(PassengerCou
 @begin
 struct
 <
-PassengerCountingService_SpecificDoorDataStructure_array_s:SpecificDoorData $// [0,1]
-IBIS_IP_string_array_s:OperationErrorMessage $// [0,1]
+PassengerCountingService_SpecificDoorDataStructure_option_s:SpecificDoorData $// [0,1]
+IBIS_IP_string_option_s:OperationErrorMessage $// [0,1]
 >
 PassengerCountingService_RetrieveSpecificDoorDataResponseStructure_s;
 @end
@@ -1234,15 +1343,15 @@ struct
 IBIS_IP_NMTOKEN_s:StopRef
 InternationalTextType_array_s:StopName $// [1,unbounded]
 InternationalTextType_array_s:StopAlternativeName $// [0,unbounded]
-IBIS_IP_string_array_s:Platform $// [0,1]
+IBIS_IP_string_option_s:Platform $// [0,1]
 DisplayContentStructure_array_s:DisplayContent $// [1,unbounded]
-AnnouncementStructure_array_s:Announcement $// [0,1]
-IBIS_IP_dateTime_array_s:ArrivalScheduled $// [0,1]
-IBIS_IP_dateTime_array_s:DepartureScheduled $// [0,1]
+AnnouncementStructure_option_s:Announcement $// [0,1]
+IBIS_IP_dateTime_option_s:ArrivalScheduled $// [0,1]
+IBIS_IP_dateTime_option_s:DepartureScheduled $// [0,1]
 ConnectionStructure_array_s:Connection $// [0,unbounded]
-BayAreaStructure_array_s:BayArea $// [0,1]
-GNSSPointStructure_array_s:GNSSPoint $// [0,1]
-IBIS_IP_NMTOKEN_array_s:FareZone $// [0,1]
+BayAreaStructure_option_s:BayArea $// [0,1]
+GNSSPointStructure_option_s:GNSSPoint $// [0,1]
+IBIS_IP_NMTOKEN_option_s:FareZone $// [0,1]
 >
 JourneyStopInformationStructure_s;
 @end
@@ -1310,17 +1419,21 @@ TicketingService_GetTariffInformationResponseDataStructure_s;
 WUR int TicketingService_GetTariffInformationResponseDataStructure_s_write(TicketingService_GetTariffInformationResponseDataStructure_s *this,bc_array_s *a_trg);
 WUR int TicketingService_GetTariffInformationResponseDataStructure_s_read(TicketingService_GetTariffInformationResponseDataStructure_s *this,var_s a_var);
 
-// -- TicketingService_GetTariffInformationResponseDataStructure_array_s --
+// -- TicketingService_GetTariffInformationResponseDataStructure_option_s --
 @begin
-array<TicketingService_GetTariffInformationResponseDataStructure_s> TicketingService_GetTariffInformationResponseDataStructure_array_s;
+choice
+<
+bi:none
+TicketingService_GetTariffInformationResponseDataStructure_s:value
+> TicketingService_GetTariffInformationResponseDataStructure_option_s;
 @end
 
 // -- TicketingService_GetTariffInformationResponseStructure_s --
 @begin
 struct
 <
-TicketingService_GetTariffInformationResponseDataStructure_array_s:TicketingService_GetTariffInformationResponseData $// [0,1]
-IBIS_IP_string_array_s:OperationErrorMessage $// [0,1]
+TicketingService_GetTariffInformationResponseDataStructure_option_s:TicketingService_GetTariffInformationResponseData $// [0,1]
+IBIS_IP_string_option_s:OperationErrorMessage $// [0,1]
 >
 TicketingService_GetTariffInformationResponseStructure_s;
 @end
@@ -1393,19 +1506,19 @@ inlines TicketValidationEnumeration_s
 inlines CountingStateEnumeration_s
 @end
 
-// -- ErrorCodeEnumeration_array_s --
+// -- ErrorCodeEnumeration_option_s --
 @begin
-inlines ErrorCodeEnumeration_array_s
+inlines ErrorCodeEnumeration_option_s
 @end
 
-// -- ConnectionStateEnumeration_array_s --
+// -- ConnectionStateEnumeration_option_s --
 @begin
-inlines ConnectionStateEnumeration_array_s
+inlines ConnectionStateEnumeration_option_s
 @end
 
-// -- DoorCountingQualityEnumeration_array_s --
+// -- DoorCountingQualityEnumeration_option_s --
 @begin
-inlines DoorCountingQualityEnumeration_array_s
+inlines DoorCountingQualityEnumeration_option_s
 @end
 
 // -- TicketingService_SetRazziaRequestStructure_s --
@@ -1513,9 +1626,9 @@ inlines DoorCountingStructure_s
 inlines DoorIdType_array_s
 @end
 
-// -- IBIS_IP_int_array_s --
+// -- IBIS_IP_int_option_s --
 @begin
-inlines IBIS_IP_int_array_s
+inlines IBIS_IP_int_option_s
 @end
 
 // -- IBIS_IP_byte_array_s --
@@ -1523,9 +1636,14 @@ inlines IBIS_IP_int_array_s
 inlines IBIS_IP_byte_array_s
 @end
 
-// -- IBIS_IP_double_array_s --
+// -- IBIS_IP_double_option_s --
 @begin
-inlines IBIS_IP_double_array_s
+inlines IBIS_IP_double_option_s
+@end
+
+// -- IBIS_IP_string_option_s --
+@begin
+inlines IBIS_IP_string_option_s
 @end
 
 // -- IBIS_IP_string_array_s --
@@ -1533,9 +1651,9 @@ inlines IBIS_IP_double_array_s
 inlines IBIS_IP_string_array_s
 @end
 
-// -- IBIS_IP_NMTOKEN_array_s --
+// -- IBIS_IP_NMTOKEN_option_s --
 @begin
-inlines IBIS_IP_NMTOKEN_array_s
+inlines IBIS_IP_NMTOKEN_option_s
 @end
 
 // -- PassengerCountingService_RetrieveSpecificDoorDataRequestStructure_s --
@@ -1548,9 +1666,9 @@ inlines PassengerCountingService_RetrieveSpecificDoorDataRequestStructure_s
 inlines TicketingService_RetrieveTariffInformationRequestStructure_s
 @end
 
-// -- IBIS_IP_boolean_array_s --
+// -- IBIS_IP_boolean_option_s --
 @begin
-inlines IBIS_IP_boolean_array_s
+inlines IBIS_IP_boolean_option_s
 @end
 
 // -- DoorIdListType_s --
@@ -1558,24 +1676,19 @@ inlines IBIS_IP_boolean_array_s
 inlines DoorIdListType_s
 @end
 
-// -- IBIS_IP_dateTime_array_s --
+// -- IBIS_IP_dateTime_option_s --
 @begin
-inlines IBIS_IP_dateTime_array_s
+inlines IBIS_IP_dateTime_option_s
 @end
 
-// -- IBIS_IP_duration_array_s --
+// -- IBIS_IP_duration_option_s --
 @begin
-inlines IBIS_IP_duration_array_s
+inlines IBIS_IP_duration_option_s
 @end
 
-// -- IBIS_IP_unsignedInt_array_s --
+// -- IBIS_IP_unsignedInt_option_s --
 @begin
-inlines IBIS_IP_unsignedInt_array_s
-@end
-
-// -- BayAreaStructure_s --
-@begin
-inlines BayAreaStructure_s
+inlines IBIS_IP_unsignedInt_option_s
 @end
 
 // -- DoorCountingStructure_array_s --
@@ -1583,24 +1696,29 @@ inlines BayAreaStructure_s
 inlines DoorCountingStructure_array_s
 @end
 
+// -- BayAreaStructure_s --
+@begin
+inlines BayAreaStructure_s
+@end
+
 // -- InternationalTextType_array_s --
 @begin
 inlines InternationalTextType_array_s
 @end
 
-// -- IBIS_IP_nonNegativeInteger_array_s --
+// -- IBIS_IP_nonNegativeInteger_option_s --
 @begin
-inlines IBIS_IP_nonNegativeInteger_array_s
+inlines IBIS_IP_nonNegativeInteger_option_s
 @end
 
-// -- DoorOperationStateStructure_array_s --
+// -- DoorOperationStateStructure_option_s --
 @begin
-inlines DoorOperationStateStructure_array_s
+inlines DoorOperationStateStructure_option_s
 @end
 
-// -- TicketingService_ValidationResultDataStructure_array_s --
+// -- TicketingService_ValidationResultDataStructure_option_s --
 @begin
-inlines TicketingService_ValidationResultDataStructure_array_s
+inlines TicketingService_ValidationResultDataStructure_option_s
 @end
 
 // -- CountingStateStructure_s --
@@ -1703,9 +1821,9 @@ inlines ViaPointStructure_s
 inlines DataAcceptedResponseDataStructure_s
 @end
 
-// -- ZoneType_array_s --
+// -- ZoneType_option_s --
 @begin
-inlines ZoneType_array_s
+inlines ZoneType_option_s
 @end
 
 // -- PassengerCountingService_StartCountingRequestStructure_s --
@@ -1718,14 +1836,14 @@ inlines PassengerCountingService_StartCountingRequestStructure_s
 inlines PassengerCountingService_StopCountingRequestStructure_s
 @end
 
-// -- BayAreaStructure_array_s --
+// -- BayAreaStructure_option_s --
 @begin
-inlines BayAreaStructure_array_s
+inlines BayAreaStructure_option_s
 @end
 
-// -- VehicleStructure_array_s --
+// -- VehicleStructure_option_s --
 @begin
-inlines VehicleStructure_array_s
+inlines VehicleStructure_option_s
 @end
 
 // -- ViaPointStructure_array_s --
@@ -1733,24 +1851,24 @@ inlines VehicleStructure_array_s
 inlines ViaPointStructure_array_s
 @end
 
-// -- DoorStateStructure_array_s --
+// -- DoorStateStructure_option_s --
 @begin
-inlines DoorStateStructure_array_s
+inlines DoorStateStructure_option_s
 @end
 
-// -- GNSSPointStructure_array_s --
+// -- GNSSPointStructure_option_s --
 @begin
-inlines GNSSPointStructure_array_s
+inlines GNSSPointStructure_option_s
 @end
 
-// -- CardApplInformations_array_s --
+// -- CardApplInformations_option_s --
 @begin
-inlines CardApplInformations_array_s
+inlines CardApplInformations_option_s
 @end
 
-// -- AnnouncementStructure_array_s --
+// -- AnnouncementStructure_option_s --
 @begin
-inlines AnnouncementStructure_array_s
+inlines AnnouncementStructure_option_s
 @end
 
 // -- CountingStateStructure_array_s --
@@ -1768,9 +1886,9 @@ inlines DoorCountingListStructure_array_s
 inlines PassengerCountingService_SetCounterDataRequestStructure_s
 @end
 
-// -- DataAcceptedResponseDataStructure_array_s --
+// -- DataAcceptedResponseDataStructure_option_s --
 @begin
-inlines DataAcceptedResponseDataStructure_array_s
+inlines DataAcceptedResponseDataStructure_option_s
 @end
 
 // -- PassengerCountingService_CountingStatesStructure_s --
@@ -1818,14 +1936,14 @@ inlines DisplayContentStructure_array_s
 inlines DoorInformationStructure_array_s
 @end
 
-// -- PassengerCountingService_CountingStatesStructure_array_s --
+// -- PassengerCountingService_CountingStatesStructure_option_s --
 @begin
-inlines PassengerCountingService_CountingStatesStructure_array_s
+inlines PassengerCountingService_CountingStatesStructure_option_s
 @end
 
-// -- TicketingService_ValidateTicketResponseDataStructure_array_s --
+// -- TicketingService_ValidateTicketResponseDataStructure_option_s --
 @begin
-inlines TicketingService_ValidateTicketResponseDataStructure_array_s
+inlines TicketingService_ValidateTicketResponseDataStructure_option_s
 @end
 
 // -- PassengerCountingService_SpecificDoorDataStructure_s --
@@ -1858,14 +1976,14 @@ inlines ConnectionStructure_s
 inlines ConnectionStructure_array_s
 @end
 
-// -- PassengerCountingService_AllDataStructure_array_s --
+// -- PassengerCountingService_AllDataStructure_option_s --
 @begin
-inlines PassengerCountingService_AllDataStructure_array_s
+inlines PassengerCountingService_AllDataStructure_option_s
 @end
 
-// -- PassengerCountingService_SpecificDoorDataStructure_array_s --
+// -- PassengerCountingService_SpecificDoorDataStructure_option_s --
 @begin
-inlines PassengerCountingService_SpecificDoorDataStructure_array_s
+inlines PassengerCountingService_SpecificDoorDataStructure_option_s
 @end
 
 // -- PassengerCountingService_GetAllDataResponseStructure_s --
@@ -1908,9 +2026,9 @@ inlines ShortTripStopListStructure_s
 inlines TicketingService_GetTariffInformationResponseDataStructure_s
 @end
 
-// -- TicketingService_GetTariffInformationResponseDataStructure_array_s --
+// -- TicketingService_GetTariffInformationResponseDataStructure_option_s --
 @begin
-inlines TicketingService_GetTariffInformationResponseDataStructure_array_s
+inlines TicketingService_GetTariffInformationResponseDataStructure_option_s
 @end
 
 // -- TicketingService_GetTariffInformationResponseStructure_s --
