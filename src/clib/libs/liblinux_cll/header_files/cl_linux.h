@@ -77,7 +77,8 @@ include "cl_time.h"
 #define ERROR_EPOLL_GET_TIME_ERROR 7
 #define ERROR_EPOLL_TIMER_CREATE_ERROR 8
 #define ERROR_EPOLL_TIMER_SETTIME_ERROR 9
-#define ERROR_EPOLL_FD_CALLBACK_ERROR 10
+#define ERROR_EPOLL_TIMER_GETTIME_ERROR 10
+#define ERROR_EPOLL_FD_CALLBACK_ERROR 11
 
 #define ERROR_RTC_DEVICE_OPEN_ERROR 1
 #define ERROR_RTC_READ_TIME_ERROR 2
@@ -339,6 +340,8 @@ static inline void epoll_timer_s_to_string(const epoll_timer_s *this,bc_array_s 
 
 WUR static inline int epoll_timer_s_settime(const epoll_timer_s *this,
     struct itimerspec *a_itimerspec,int a_flags);
+WUR static inline int epoll_timer_s_gettime(const epoll_timer_s *this,
+    struct itimerspec *a_itimerspec);
 
 // === definition of structure rtc_s ===========================================
 
@@ -1060,6 +1063,19 @@ static inline int epoll_timer_s_settime(const epoll_timer_s *this,
   if (timerfd_settime(this->fd,a_flags,a_itimerspec,NULL))
   {
     throw_error(EPOLL_TIMER_SETTIME_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int epoll_timer_s_gettime(const epoll_timer_s *this,
+    struct itimerspec *a_itimerspec)
+{/*{{{*/
+
+  // - get timer values -
+  if (timerfd_gettime(this->fd,a_itimerspec))
+  {
+    throw_error(EPOLL_TIMER_GETTIME_ERROR);
   }
 
   return 0;
