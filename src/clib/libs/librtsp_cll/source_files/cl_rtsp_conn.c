@@ -120,8 +120,6 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this)
     debug_message_6(fprintf(stderr,"TCP: CONTROL PACKET\n"));
 
     bc_array_s_tail(msg,msg->used - pkt_size);
-
-    return 0;
   }
 
   // - parse command -
@@ -413,6 +411,7 @@ this->session);
       }/*}}}*/
       break;
 
+    case c_rtsp_command_SET_PARAMETER:
     case c_rtsp_command_GET_PARAMETER:
       {/*{{{*/
         this->out_msg.used = 0;

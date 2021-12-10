@@ -216,7 +216,9 @@ endforeach()
 
 # - process components -
 if(NOT DEFINED CS_COMPONENTS)
-  set(CS_COMPONENTS)
+  set(CS_COMPONENTS
+      "src/clib/libs/libvdv301_cll"
+    )
 endif()
 
 foreach(COMPONENT ${CS_COMPONENTS})
