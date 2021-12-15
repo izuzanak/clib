@@ -27,8 +27,10 @@ pointer:session
 ui:session_length
 ui:timeout
 bi:ping
+string_s:range
 bi:unicast
 bi:tcp
+bi:onvif_replay
 pointer:url_rtsp
 ui:inter_port_begin
 ui:inter_port_end
@@ -56,8 +58,9 @@ void pa_rtsp_header_ct_type(rtsp_parser_s *this);
 void pa_rtsp_header_ct_length(rtsp_parser_s *this);
 void pa_rtsp_header_transport_tcp(rtsp_parser_s *this);
 void pa_rtsp_header_transport_udp(rtsp_parser_s *this);
-void pa_rtsp_header_range(rtsp_parser_s *this);
 void pa_rtsp_header_ping(rtsp_parser_s *this);
+void pa_rtsp_header_range(rtsp_parser_s *this);
+void pa_rtsp_header_require(rtsp_parser_s *this);
 void pa_rtsp_header_ignore(rtsp_parser_s *this);
 void pa_rtsp_header_accept(rtsp_parser_s *this);
 void pa_rtsp_pubcmd_get(rtsp_parser_s *this);

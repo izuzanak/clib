@@ -774,7 +774,7 @@ state_73_label:
   }\
 }/*}}}*/
 
-int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props)
+int validator_s_validate_pair(validator_s *this,var_s a_value,var_s a_props) // NOLINT(misc-no-recursion)
 {/*{{{*/
 
   // - ERROR -

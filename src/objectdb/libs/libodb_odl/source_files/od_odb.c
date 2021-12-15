@@ -239,7 +239,7 @@ void odb_database_s_nodes_path(odb_database_s *this,var_array_s *a_nodes)
   }
 }/*}}}*/
 
-void odb_database_s_nodes_tree(var_s a_node_var,var_array_s *a_nodes)
+void odb_database_s_nodes_tree(var_s a_node_var,var_array_s *a_nodes) // NOLINT(misc-no-recursion)
 {/*{{{*/
   odb_node_s *node = loc_s_odb_node_value(a_node_var);
 

@@ -111,7 +111,7 @@ void xml_node_s_update_node_dict(var_s this)
   pointer_array_s_clear(&node_stack);
 }/*}}}*/
 
-int xml_node_s___node_dict_to_var(var_s this,var_s *a_trg)
+int xml_node_s___node_dict_to_var(var_s this,var_s *a_trg) // NOLINT(misc-no-recursion)
 {/*{{{*/
   xml_node_s *node = loc_s_xml_node_value(this);
 

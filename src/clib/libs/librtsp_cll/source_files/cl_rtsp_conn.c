@@ -342,9 +342,9 @@ this->session);
         rtsp_conn_s_append_time(&this->out_msg);
         bc_array_s_append_format(&this->out_msg,
 "\r\n"
-"Range: npt=0.000-\r\n"
+"%s\r\n"
 "Session: %" HOST_LL_FORMAT "u\r\n"
-"\r\n",this->session);
+"\r\n",this->parser.range.size > 1 ? this->parser.range.data : "Range: npt=0.000-",this->session);
 
         if (rtsp_conn_s_send_resp(this,&this->out_msg))
         {
