@@ -99,6 +99,11 @@ enum
   c_rtsp_command_GET_PARAMETER = 1 << 8,
 };/*}}}*/
 
+enum
+{/*{{{*/
+  c_rtsp_flag_ONVIF_REPLAY = 1 << 0,
+};/*}}}*/
+
 typedef unsigned rtsp_pkt_delay_t;
 
 #define RTSP_DELAY_TO_NANOSEC(DELAY) ((DELAY)*1000ULL)
@@ -115,7 +120,7 @@ typedef int (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_drop_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,const char *a_url,bc_array_s *a_trg);
 typedef int (*rtsp_conn_check_media_callback_t)(void *a_object,unsigned a_index,const char *a_url,unsigned *a_channel);
-typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session);
+typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session,unsigned a_flags);
 typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,ulli *a_delay,bc_block_s *a_trg);
 
 // === definition of generated structures ======================================

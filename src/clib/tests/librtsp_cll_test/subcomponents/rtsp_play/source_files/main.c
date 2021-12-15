@@ -156,11 +156,12 @@ int rtsp_player_s_conn_check_media(void *a_rtsp_player,unsigned a_index,const ch
   return 0;
 }/*}}}*/
 
-int rtsp_player_s_conn_playing(void *a_rtsp_player,unsigned a_index,ulli a_session)
+int rtsp_player_s_conn_playing(void *a_rtsp_player,unsigned a_index,ulli a_session,unsigned a_flags)
 {/*{{{*/
   (void)a_rtsp_player;
   (void)a_index;
   (void)a_session;
+  (void)a_flags;
 
   debug_message_6(fprintf(stderr,"rtsp_player_s_conn_playing: %u\n",a_index));
 

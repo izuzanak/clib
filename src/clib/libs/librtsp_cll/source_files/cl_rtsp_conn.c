@@ -373,7 +373,8 @@ this->session);
 
         // - call conn_playing_callback -
         if (((rtsp_conn_playing_callback_t)server->conn_playing_callback)(
-              server->cb_object,this->index,this->session))
+              server->cb_object,this->index,this->session,
+              this->parser.onvif_replay ? c_rtsp_flag_ONVIF_REPLAY : 0))
         {
           throw_error(RTSP_CONN_CALLBACK_ERROR);
         }
