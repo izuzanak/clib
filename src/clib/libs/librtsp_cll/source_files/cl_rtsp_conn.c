@@ -434,6 +434,22 @@ this->session);
       }/*}}}*/
       break;
 
+    case c_rtsp_command_TEARDOWN:
+      {/*{{{*/
+        this->out_msg.used = 0;
+        bc_array_s_append_format(&this->out_msg,
+"RTSP/1.0 200 OK\r\n"
+"CSeq: %u\r\n"
+"\r\n",this->parser.cseq);
+
+        if (rtsp_conn_s_send_resp(this,&this->out_msg))
+        {
+          this->state = c_rtsp_conn_state_ERROR;
+          throw_error(RTSP_CONN_SEND_ERROR);
+        }
+      }/*}}}*/
+      break;
+
     default:
       throw_error(RTSP_CONN_UNKNOWN_COMMAND);
   }
