@@ -224,10 +224,11 @@ int rtsp_conn_s_recv_cmd(rtsp_conn_s *this)
     case c_rtsp_command_SETUP:
       {/*{{{*/
 
-        // - check unicast -
+        // - check datacast -
         // - call conn_check_media_callback -
         unsigned channel = c_idx_not_exist;
-        if (this->parser.unicast == 0 ||
+        if (this->parser.datacast == c_cast_type_unknown ||
+            (this->parser.tcp && this->parser.datacast != c_cast_type_unicast) ||
             ((rtsp_conn_check_media_callback_t)server->conn_check_media_callback)(
               server->cb_object,this->index,this->parser.url_rtsp,&channel) ||
               channel == c_idx_not_exist)
@@ -301,26 +302,57 @@ this->session);
             throw_error(RTSP_CONN_UDP_SETUP_ERROR);
           }
 
-          usi udp_data_in_port = socket_address_s_port(&data_in_addr);
-          usi udp_ctrl_in_port = socket_address_s_port(&ctrl_in_addr);
+          bc_array_s_append_ptr(&this->out_msg,
+"\r\n");
 
-          // - setup udp data address -
-          setup->udp_data_addr = this->client_addr;
-          setup->udp_data_addr.sin_port = htons(this->parser.inter_port_begin);
+          switch (this->parser.datacast)
+          {
+          case c_cast_type_unicast:
+            {/*{{{*/
+              usi udp_data_in_port = socket_address_s_port(&data_in_addr);
+              usi udp_ctrl_in_port = socket_address_s_port(&ctrl_in_addr);
 
-          // - setup udp control address -
-          setup->udp_ctrl_addr = this->client_addr;
-          setup->udp_ctrl_addr.sin_port = htons(this->parser.inter_port_end);
+              // - setup udp data address -
+              setup->udp_data_addr = this->client_addr;
+              setup->udp_data_addr.sin_port = htons(this->parser.inter_port_begin);
 
-          bc_array_s_append_format(&this->out_msg,
-"\r\n"
-"Transport: RTP/AVP;unicast;client_port=%u-%u;server_port=%hu-%hu\r\n"
-"Session: %" HOST_LL_FORMAT "u;timeout=60\r\n"
-"\r\n",
+              // - setup udp control address -
+              setup->udp_ctrl_addr = this->client_addr;
+              setup->udp_ctrl_addr.sin_port = htons(this->parser.inter_port_end);
+
+              bc_array_s_append_format(&this->out_msg,
+"Transport: RTP/AVP;unicast;client_port=%u-%u;server_port=%hu-%hu\r\n",
 this->parser.inter_port_begin,
 this->parser.inter_port_end,
 udp_data_in_port,
-udp_ctrl_in_port,
+udp_ctrl_in_port);
+            }/*}}}*/
+            break;
+          case c_cast_type_multicast:
+            {/*{{{*/
+              
+              // FIXME TODO continue ...
+              const char *multicast_ip = "239.0.0.1";
+
+              // - setup udp data/control addresses -
+              if (socket_address_s_create(&setup->udp_data_addr,multicast_ip,this->parser.inter_port_begin) ||
+                  socket_address_s_create(&setup->udp_ctrl_addr,multicast_ip,this->parser.inter_port_end))
+              {
+                throw_error(RTSP_CONN_UDP_SETUP_ERROR);
+              }
+
+              bc_array_s_append_format(&this->out_msg,
+"Transport: RTP/AVP;multicast;destination=%s;port=%hu-%hu\r\n",
+multicast_ip,
+this->parser.inter_port_begin,
+this->parser.inter_port_end);
+            }/*}}}*/
+            break;
+          }
+
+          bc_array_s_append_format(&this->out_msg,
+"Session: %" HOST_LL_FORMAT "u;timeout=60\r\n"
+"\r\n",
 this->session);
         }
 

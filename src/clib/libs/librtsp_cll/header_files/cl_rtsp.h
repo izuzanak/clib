@@ -104,6 +104,13 @@ enum
   c_rtsp_flag_ONVIF_REPLAY = 1 << 0,
 };/*}}}*/
 
+enum
+{/*{{{*/
+  c_cast_type_unknown = 0,
+  c_cast_type_unicast,
+  c_cast_type_multicast,
+};/*}}}*/
+
 typedef unsigned rtsp_pkt_delay_t;
 
 #define RTSP_DELAY_TO_NANOSEC(DELAY) ((DELAY)*1000ULL)

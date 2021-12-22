@@ -28,7 +28,7 @@ ui:session_length
 ui:timeout
 bi:ping
 string_s:range
-bi:unicast
+ui:datacast
 bi:tcp
 bi:onvif_replay
 pointer:url_rtsp
@@ -77,7 +77,7 @@ void pa_rtsp_pubcmd_get_parameter(rtsp_parser_s *this);
 void pa_rtsp_header_session(rtsp_parser_s *this);
 void pa_rtsp_key_timeout(rtsp_parser_s *this);
 void pa_rtsp_key_npt(rtsp_parser_s *this);
-void pa_rtsp_key_unicast(rtsp_parser_s *this);
+void pa_rtsp_key_datacast(rtsp_parser_s *this);
 void pa_rtsp_key_inter_port(rtsp_parser_s *this);
 
 // === inline methods of generated structures ==================================
