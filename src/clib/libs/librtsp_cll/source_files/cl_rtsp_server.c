@@ -5,6 +5,16 @@ include "cl_rtsp.h"
 
 // === methods of generated structures =========================================
 
+// -- x_session_map_s --
+@begin
+methods x_session_map_s
+@end
+
+// -- x_session_map_tree_s --
+@begin
+methods x_session_map_tree_s
+@end
+
 // -- rtsp_server_s --
 @begin
 methods rtsp_server_s
@@ -155,6 +165,12 @@ int rtsp_server_s_conn_time_event(void *a_rtsp_server,unsigned a_index,epoll_eve
     // - call conn_drop_callback -
     (void)((rtsp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);
 
+    // - remove x session map -
+    if (conn->x_session_map_idx != c_idx_not_exist)
+    {
+      x_session_map_tree_s_remove(&this->x_session_map_tree,conn->x_session_map_idx);
+    }
+
     rtsp_conn_s_clear(conn);
     rtsp_conn_list_s_remove(&this->conn_list,a_index);
   }
@@ -171,6 +187,12 @@ int rtsp_server_s_conn_fd_event(void *a_rtsp_server,unsigned a_index,epoll_event
   {
     // - call conn_drop_callback -
     (void)((rtsp_conn_drop_callback_t)this->conn_drop_callback)(this->cb_object,a_index);
+
+    // - remove x session map -
+    if (conn->x_session_map_idx != c_idx_not_exist)
+    {
+      x_session_map_tree_s_remove(&this->x_session_map_tree,conn->x_session_map_idx);
+    }
 
     rtsp_conn_s_clear(conn);
     rtsp_conn_list_s_remove(&this->conn_list,a_index);

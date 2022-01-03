@@ -6,6 +6,7 @@
 include "cl_time.h"
 include "cl_linux.h"
 include "cl_openssl.h"
+include "cl_crypto.h"
 include "cl_rtsp_parser.h"
 include "cl_rtsp_sdp_parser.h"
 @end
@@ -42,22 +43,27 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CONN_INVALID_FD 2
 #define ERROR_RTSP_CONN_UNKNOWN_COMMAND 3
 #define ERROR_RTSP_CONN_READ_ERROR 4
-#define ERROR_RTSP_CONN_PARSE_ERROR 5
-#define ERROR_RTSP_CONN_CALLBACK_ERROR 6
-#define ERROR_RTSP_CONN_SEND_ERROR 7
-#define ERROR_RTSP_CONN_RECEIVE_ERROR 8
-#define ERROR_RTSP_CONN_GET_TIME_ERROR 9
-#define ERROR_RTSP_CONN_NEXT_PACKET_ERROR 10
-#define ERROR_RTSP_CONN_SEND_PACKET_ERROR 11
-#define ERROR_RTSP_CONN_PROCESS_PACKET_ERROR 12
-#define ERROR_RTSP_CONN_INVALID_PACKET_CHANNEL 13
-#define ERROR_RTSP_CONN_SETSOCKOPT_ERROR 14
-#define ERROR_RTSP_CONN_IOCTL_ERROR 15
-#define ERROR_RTSP_CONN_EPOLL_ERROR 16
-#define ERROR_RTSP_CONN_TIMER_CREATE_ERROR 17
-#define ERROR_RTSP_CONN_UPDATE_TCP_QUEUE_STATE_ERROR 18
-#define ERROR_RTSP_CONN_UDP_SETUP_ERROR 19
-#define ERROR_RTSP_CONN_MISMATCH_RTSP_TRANSPORT 20
+#define ERROR_RTSP_CONN_PARSE_AND_PROCESS_ERROR 5
+#define ERROR_RTSP_CONN_BASE64_DECODE_ERROR 6
+#define ERROR_RTSP_CONN_PARSE_ERROR 7
+#define ERROR_RTSP_CONN_CALLBACK_ERROR 8
+#define ERROR_RTSP_CONN_SEND_ERROR 9
+#define ERROR_RTSP_CONN_RECEIVE_ERROR 10
+#define ERROR_RTSP_CONN_GET_TIME_ERROR 11
+#define ERROR_RTSP_CONN_NEXT_PACKET_ERROR 12
+#define ERROR_RTSP_CONN_SEND_PACKET_ERROR 13
+#define ERROR_RTSP_CONN_PROCESS_PACKET_ERROR 14
+#define ERROR_RTSP_CONN_INVALID_PACKET_CHANNEL 15
+#define ERROR_RTSP_CONN_SETSOCKOPT_ERROR 16
+#define ERROR_RTSP_CONN_IOCTL_ERROR 17
+#define ERROR_RTSP_CONN_EPOLL_ERROR 18
+#define ERROR_RTSP_CONN_TIMER_CREATE_ERROR 19
+#define ERROR_RTSP_CONN_UPDATE_TCP_QUEUE_STATE_ERROR 20
+#define ERROR_RTSP_CONN_UDP_SETUP_ERROR 21
+#define ERROR_RTSP_CONN_MISMATCH_RTSP_TRANSPORT 22
+#define ERROR_RTSP_CONN_MISSING_X_SESSION_COOKIE 23
+#define ERROR_RTSP_CONN_DUPLICATE_X_SESSION_COOKIE 24
+#define ERROR_RTSP_CONN_INVALID_X_SESSION 25
 
 #define ERROR_RTSP_SERVER_INVALID_STATE 1
 #define ERROR_RTSP_SERVER_INVALID_FD 2
@@ -85,18 +91,19 @@ include "cl_rtsp_sdp_parser.h"
 
 enum
 {/*{{{*/
-  c_rtsp_command_RESPONSE      = 0,
-  c_rtsp_command_GET           = 1 << 0,
-  c_rtsp_command_OPTIONS       = 1 << 1,
-  c_rtsp_command_DESCRIBE      = 1 << 2,
-  c_rtsp_command_ANNOUNCE      = 1 << 2,
-  c_rtsp_command_RECORD        = 1 << 2,
-  c_rtsp_command_SETUP         = 1 << 3,
-  c_rtsp_command_TEARDOWN      = 1 << 4,
-  c_rtsp_command_PLAY          = 1 << 5,
-  c_rtsp_command_PAUSE         = 1 << 6,
-  c_rtsp_command_SET_PARAMETER = 1 << 7,
-  c_rtsp_command_GET_PARAMETER = 1 << 8,
+  c_rtsp_command_RESPONSE = 0,
+  c_rtsp_command_GET,
+  c_rtsp_command_POST,
+  c_rtsp_command_OPTIONS,
+  c_rtsp_command_DESCRIBE,
+  c_rtsp_command_ANNOUNCE,
+  c_rtsp_command_RECORD,
+  c_rtsp_command_SETUP,
+  c_rtsp_command_TEARDOWN,
+  c_rtsp_command_PLAY,
+  c_rtsp_command_PAUSE,
+  c_rtsp_command_SET_PARAMETER,
+  c_rtsp_command_GET_PARAMETER,
 };/*}}}*/
 
 enum
@@ -230,6 +237,7 @@ enum
   c_rtsp_conn_state_UNKNOWN = 0,
   c_rtsp_conn_state_ERROR,
   c_rtsp_conn_state_RECV_COMMAND,
+  c_rtsp_conn_state_RECV_HTTP_COMMAND,
 };/*}}}*/
 
 @begin
@@ -258,6 +266,8 @@ bc_array_s:pkt_buffer
 ui:state
 ui:sequence
 ulli:session
+string_s:x_session
+ui:x_session_map_idx
 rtsp_setups_s:setups
 ui_array_s:setup_map
 bi:tcp
@@ -269,7 +279,9 @@ librtsp_cll_EXPORT WUR int rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a
     unsigned a_index,epoll_fd_s *a_epoll_fd,socket_address_s *a_client_addr);
 void rtsp_conn_s_append_time(bc_array_s *a_trg);
 WUR int rtsp_conn_s_send_resp(rtsp_conn_s *this,bc_array_s *a_msg);
+WUR int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_parser,string_s *a_source);
 WUR int rtsp_conn_s_recv_cmd(rtsp_conn_s *this);
+WUR int rtsp_conn_s_recv_http_cmd(rtsp_conn_s *this,int a_read);
 WUR int rtsp_conn_s_next_packet(rtsp_conn_s *this);
 WUR int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send);
 WUR librtsp_cll_EXPORT int rtsp_conn_s_process_packet(rtsp_conn_s *this);
@@ -280,6 +292,21 @@ WUR static inline int rtsp_conn_s_write_pkt_buffer(rtsp_conn_s *this);
 // -- rtsp_conn_list_s --
 @begin
 list<rtsp_conn_s> rtsp_conn_list_s;
+@end
+
+// -- x_session_map_s --
+@begin
+struct
+<
+string_s:x_session
+ui:conn_idx
+>
+x_session_map_s;
+@end
+
+// -- x_session_map_tree_s --
+@begin
+rb_tree<x_session_map_s> x_session_map_tree_s;
 @end
 
 // -- rtsp_server_s --
@@ -308,6 +335,7 @@ pointer:cb_object
 ssl_context_s:ssl_ctx
 epoll_fd_s:epoll_fd
 rtsp_conn_list_s:conn_list
+x_session_map_tree_s:x_session_map_tree
 
 ui:state
 >
@@ -413,6 +441,28 @@ static inline int rtsp_conn_s_write_pkt_buffer(rtsp_conn_s *this)
 @begin
 inlines rtsp_conn_list_s
 @end
+
+// -- x_session_map_s --
+@begin
+inlines x_session_map_s
+@end
+
+// -- x_session_map_tree_s --
+@begin
+inlines x_session_map_tree_s
+@end
+
+static inline int x_session_map_tree_s___compare_value(const x_session_map_tree_s *this,const x_session_map_s *a_first,const x_session_map_s *a_second)
+{/*{{{*/
+  (void)this;
+
+  const string_s *first = &a_first->x_session;
+  const string_s *second = &a_second->x_session;
+
+  if (first->size < second->size) { return -1; }
+  if (first->size > second->size) { return 1; }
+  return memcmp(first->data,second->data,first->size - 1);
+}/*}}}*/
 
 // -- rtsp_server_s --
 @begin
