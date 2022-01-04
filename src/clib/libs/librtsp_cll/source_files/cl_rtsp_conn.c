@@ -390,10 +390,59 @@ this->session);
           throw_error(RTSP_CONN_GET_TIME_ERROR);
         }
 
+        // - retrieve seek and offset times -
+        time_s seek_time = 0;
+        lli offset_time = 0;
+
+        if (a_parser->range.size > 1)
+        {
+          unsigned npt_idx = string_s_get_idx(&a_parser->range,0,4,"npt=");
+          if (npt_idx != c_idx_not_exist)
+          {
+            char *ptr = a_parser->range.data + npt_idx + 4;
+            double offset = strtod(ptr,NULL);
+            offset_time = ((lli)offset*1000.0)*1000000ULL;
+          }
+
+          unsigned clock_idx = string_s_get_idx(&a_parser->range,0,6,"clock=");
+          if (clock_idx != c_idx_not_exist)
+          {
+            char *ptr = a_parser->range.data + clock_idx + 6;
+
+            char datetime[15];
+            char *dt_ptr = datetime;
+            char *dt_ptr_end = dt_ptr + sizeof(datetime);
+            do
+            {
+              if (isdigit(*ptr)) { *dt_ptr++ = *ptr; }
+              else if (*ptr != 'T') { break; }
+            } while(++ptr,dt_ptr < dt_ptr_end);
+
+            if (dt_ptr - datetime != 14)
+            {
+              throw_error(RTSP_CONN_INVALID_RANGE_TIME);
+            }
+
+            // - retrieve milliseconds -
+            ulli msec = 0;
+            if (*ptr == '.')
+            {
+              msec = strtoll(ptr + 1,NULL,10);
+            }
+
+            if (time_s_from_string(&seek_time,14,datetime))
+            {
+              throw_error(RTSP_CONN_INVALID_RANGE_TIME);
+            }
+
+            seek_time += msec*1000000ULL;
+          }
+        }
+
         // - call conn_playing_callback -
         if (((rtsp_conn_playing_callback_t)server->conn_playing_callback)(
               server->cb_object,this->index,this->session,
-              a_parser->onvif_replay ? c_rtsp_flag_ONVIF_REPLAY : 0))
+              a_parser->onvif_replay ? c_rtsp_flag_ONVIF_REPLAY : 0,seek_time,offset_time))
         {
           throw_error(RTSP_CONN_CALLBACK_ERROR);
         }

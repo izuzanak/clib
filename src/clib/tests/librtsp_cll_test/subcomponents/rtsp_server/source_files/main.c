@@ -70,12 +70,14 @@ int conn_check_media(void *a_rtsp_server,unsigned a_index,const char *a_url,unsi
   return 1;
 }/*}}}*/
 
-int conn_playing(void *a_rtsp_server,unsigned a_index,ulli a_session,unsigned a_flags)
+int conn_playing(void *a_rtsp_server,unsigned a_index,ulli a_session,unsigned a_flags,time_s a_seek_time,lli a_offset_time)
 {/*{{{*/
   (void)a_rtsp_server;
   (void)a_index;
   (void)a_session;
   (void)a_flags;
+  (void)a_seek_time;
+  (void)a_offset_time;
 
   return 0;
 }/*}}}*/

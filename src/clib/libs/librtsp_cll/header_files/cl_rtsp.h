@@ -64,6 +64,7 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CONN_MISSING_X_SESSION_COOKIE 23
 #define ERROR_RTSP_CONN_DUPLICATE_X_SESSION_COOKIE 24
 #define ERROR_RTSP_CONN_INVALID_X_SESSION 25
+#define ERROR_RTSP_CONN_INVALID_RANGE_TIME 26
 
 #define ERROR_RTSP_SERVER_INVALID_STATE 1
 #define ERROR_RTSP_SERVER_INVALID_FD 2
@@ -134,7 +135,7 @@ typedef int (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_drop_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,const char *a_url,bc_array_s *a_trg);
 typedef int (*rtsp_conn_check_media_callback_t)(void *a_object,unsigned a_index,const char *a_url,unsigned *a_channel);
-typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session,unsigned a_flags);
+typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session,unsigned a_flags,time_s a_seek_time,lli a_offset_time);
 typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,ulli *a_delay,bc_block_s *a_trg);
 
 // === definition of generated structures ======================================
