@@ -21,6 +21,11 @@ methods rtsp_setup_s
 methods rtsp_setups_s
 @end
 
+// -- rtsp_play_options_s --
+@begin
+methods rtsp_play_options_s
+@end
+
 // -- rtsp_conn_s --
 @begin
 methods rtsp_conn_s
@@ -67,6 +72,42 @@ void rtsp_conn_s_append_time(bc_array_s *a_trg)
 
   bc_array_s_append_format(a_trg,"%s, %s %2.2hhu %4.4hu %2.2hhu:%2.2hhu:%2.2hhu GMT",
     c_week_day_names[dt.wday - 1],c_month_names[dt.month - 1],dt.day,dt.year,dt.hour,dt.min,dt.sec);
+}/*}}}*/
+
+int rtsp_conn_s_parse_range_time(char **a_ptr,time_s *a_time)
+{/*{{{*/
+  char *ptr = *a_ptr;
+
+  char datetime[15];
+  char *dt_ptr = datetime;
+  char *dt_ptr_end = dt_ptr + sizeof(datetime);
+  do
+  {
+    if (isdigit(*ptr)) { *dt_ptr++ = *ptr; }
+    else if (*ptr != 'T') { break; }
+  } while(++ptr,dt_ptr < dt_ptr_end);
+
+  if (dt_ptr - datetime != 14)
+  {
+    throw_error(RTSP_CONN_INVALID_RANGE_TIME);
+  }
+
+  // - retrieve milliseconds -
+  ulli msec = 0;
+  if (*ptr == '.')
+  {
+    msec = strtoll(ptr + 1,&ptr,10);
+  }
+
+  if (time_s_from_string(a_time,14,datetime))
+  {
+    throw_error(RTSP_CONN_INVALID_RANGE_TIME);
+  }
+
+  *a_time += msec*1000000ULL;
+  *a_ptr = ptr;
+
+  return 0;
 }/*}}}*/
 
 int rtsp_conn_s_send_resp(rtsp_conn_s *this,bc_array_s *a_msg)
@@ -390,9 +431,14 @@ this->session);
           throw_error(RTSP_CONN_GET_TIME_ERROR);
         }
 
-        // - retrieve seek and offset times -
-        time_s seek_time = 0;
-        lli offset_time = 0;
+        // - prepare play options -
+        rtsp_play_options_s play_options = {0};
+
+        // - set onvif replay flag -
+        if (a_parser->onvif_replay)
+        {
+          play_options.flags |= c_rtsp_flag_ONVIF_REPLAY;
+        }
 
         if (a_parser->range.size > 1)
         {
@@ -401,7 +447,7 @@ this->session);
           {
             char *ptr = a_parser->range.data + npt_idx + 4;
             double offset = strtod(ptr,NULL);
-            offset_time = ((lli)offset*1000.0)*1000000ULL;
+            play_options.offset_time = ((lli)offset*1000.0)*1000000ULL;
           }
 
           unsigned clock_idx = string_s_get_idx(&a_parser->range,0,6,"clock=");
@@ -409,40 +455,27 @@ this->session);
           {
             char *ptr = a_parser->range.data + clock_idx + 6;
 
-            char datetime[15];
-            char *dt_ptr = datetime;
-            char *dt_ptr_end = dt_ptr + sizeof(datetime);
-            do
-            {
-              if (isdigit(*ptr)) { *dt_ptr++ = *ptr; }
-              else if (*ptr != 'T') { break; }
-            } while(++ptr,dt_ptr < dt_ptr_end);
-
-            if (dt_ptr - datetime != 14)
+            // - retrieve start time -
+            if (rtsp_conn_s_parse_range_time(&ptr,&play_options.start_time))
             {
               throw_error(RTSP_CONN_INVALID_RANGE_TIME);
             }
 
-            // - retrieve milliseconds -
-            ulli msec = 0;
-            if (*ptr == '.')
+            ptr = strchr(ptr,'-');
+            if (ptr != NULL && *++ptr != '\0')
             {
-              msec = strtoll(ptr + 1,NULL,10);
+              // - retrieve end time -
+              if (rtsp_conn_s_parse_range_time(&ptr,&play_options.end_time))
+              {
+                throw_error(RTSP_CONN_INVALID_RANGE_TIME);
+              }
             }
-
-            if (time_s_from_string(&seek_time,14,datetime))
-            {
-              throw_error(RTSP_CONN_INVALID_RANGE_TIME);
-            }
-
-            seek_time += msec*1000000ULL;
           }
         }
 
         // - call conn_playing_callback -
         if (((rtsp_conn_playing_callback_t)server->conn_playing_callback)(
-              server->cb_object,this->index,this->session,
-              a_parser->onvif_replay ? c_rtsp_flag_ONVIF_REPLAY : 0,seek_time,offset_time))
+              server->cb_object,this->index,this->session,&play_options))
         {
           throw_error(RTSP_CONN_CALLBACK_ERROR);
         }

@@ -156,14 +156,12 @@ int rtsp_player_s_conn_check_media(void *a_rtsp_player,unsigned a_index,const ch
   return 0;
 }/*}}}*/
 
-int rtsp_player_s_conn_playing(void *a_rtsp_player,unsigned a_index,ulli a_session,unsigned a_flags,time_s a_seek_time,lli a_offset_time)
+int rtsp_player_s_conn_playing(void *a_rtsp_player,unsigned a_index,ulli a_session,rtsp_play_options_s *a_options)
 {/*{{{*/
   (void)a_rtsp_player;
   (void)a_index;
   (void)a_session;
-  (void)a_flags;
-  (void)a_seek_time;
-  (void)a_offset_time;
+  (void)a_options;
 
   debug_message_6(fprintf(stderr,"rtsp_player_s_conn_playing: %u\n",a_index));
 

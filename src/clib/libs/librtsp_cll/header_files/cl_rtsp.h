@@ -127,6 +127,8 @@ typedef unsigned rtsp_pkt_delay_t;
 #define RTSP_HALF_SECOND_DELAY 500000ULL
 
 typedef struct rtsp_client_s rtsp_client_s;
+typedef struct rtsp_play_options_s rtsp_play_options_s;
+
 typedef int (*rtsp_recv_sdp_callback_t)(void *a_object,unsigned a_index,const string_s *a_server_ip,const bc_array_s *a_src);
 typedef int (*rtsp_recv_packet_callback_t)(void *a_object,unsigned a_index,time_s a_time,const bc_array_s *a_src);
 
@@ -135,7 +137,7 @@ typedef int (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_drop_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,const char *a_url,bc_array_s *a_trg);
 typedef int (*rtsp_conn_check_media_callback_t)(void *a_object,unsigned a_index,const char *a_url,unsigned *a_channel);
-typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session,unsigned a_flags,time_s a_seek_time,lli a_offset_time);
+typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session,rtsp_play_options_s *a_options);
 typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,ulli *a_delay,bc_block_s *a_trg);
 
 // === definition of generated structures ======================================
@@ -231,6 +233,18 @@ static inline void rtsp_setup_s_reset_sequences(rtsp_setup_s *this);
 array<rtsp_setup_s> rtsp_setups_s;
 @end
 
+// -- rtsp_play_options_s --
+@begin
+struct
+<
+ui:flags
+time_s:start_time
+time_s:end_time
+lli:offset_time
+>
+rtsp_play_options_s;
+@end
+
 // -- rtsp_conn_s --
 
 enum
@@ -279,6 +293,7 @@ rtsp_conn_s;
 librtsp_cll_EXPORT WUR int rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
     unsigned a_index,epoll_fd_s *a_epoll_fd,socket_address_s *a_client_addr);
 void rtsp_conn_s_append_time(bc_array_s *a_trg);
+WUR int rtsp_conn_s_parse_range_time(char **a_ptr,time_s *a_time);
 WUR int rtsp_conn_s_send_resp(rtsp_conn_s *this,bc_array_s *a_msg);
 WUR int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_parser,string_s *a_source);
 WUR int rtsp_conn_s_recv_cmd(rtsp_conn_s *this);
@@ -399,6 +414,11 @@ static inline void rtsp_setup_s_reset_sequences(rtsp_setup_s *this)
 // -- rtsp_setups_s --
 @begin
 inlines rtsp_setups_s
+@end
+
+// -- rtsp_play_options_s --
+@begin
+inlines rtsp_play_options_s
 @end
 
 // -- rtsp_conn_s --
