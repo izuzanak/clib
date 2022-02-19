@@ -26,6 +26,9 @@ typedef struct string_s
 #define STRING_S(CONST) \
   {sizeof(CONST),CONST}
 
+#define STRING_S_EMPTY \
+  {1,(char *)&c_string_terminating_char}
+
 #define STRING_S_FORMAT(NAME,FORMAT,...) \
   CONT_INIT(string_s,NAME);\
   string_s_set_format(&NAME,FORMAT,__VA_ARGS__)\
@@ -140,12 +143,11 @@ static inline void string_s_copy(string_s *this,const string_s *a_src)
 {/*{{{*/
   string_s_clear(this);
 
-  if (a_src->data == &c_string_terminating_char)
+  if (a_src->size <= 1)
   {
     return;
   }
 
-  debug_assert(a_src->size > 0);
   this->data = (char *)cmalloc(a_src->size*sizeof(char));
   memcpy(this->data,a_src->data,(a_src->size - 1)*sizeof(char));
 
@@ -156,7 +158,7 @@ static inline void string_s_copy(string_s *this,const string_s *a_src)
 static inline int string_s_compare(const string_s *this,const string_s *a_second)
 {/*{{{*/
   if (this->size != a_second->size) { return 0; }
-  if (this->data == &c_string_terminating_char) { return 1; }
+  if (this->size <= 1) { return 1; }
   return (memcmp(this->data,a_second->data,(this->size - 1)*sizeof(char)) == 0);
 }/*}}}*/
 
