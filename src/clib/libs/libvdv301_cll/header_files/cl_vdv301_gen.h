@@ -1,6 +1,6 @@
 
-#ifndef __CL_VDV301_GEN_H
-#define __CL_VDV301_GEN_H
+#ifndef CL_LIB_VDV301_GEN_H
+#define CL_LIB_VDV301_GEN_H
 
 @begin
 include "cl_vdv301_basic.h"

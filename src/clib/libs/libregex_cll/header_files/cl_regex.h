@@ -1,6 +1,6 @@
 
-#ifndef __CL_REGEX_H
-#define __CL_REGEX_H
+#ifndef CL_LIB_REGEX_H
+#define CL_LIB_REGEX_H
 
 @begin
 include "cl_struct.h"

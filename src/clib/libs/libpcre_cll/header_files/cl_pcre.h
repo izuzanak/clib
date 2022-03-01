@@ -1,6 +1,6 @@
 
-#ifndef __CL_PCRE_H
-#define __CL_PCRE_H
+#ifndef CL_LIB_PCRE_H
+#define CL_LIB_PCRE_H
 
 @begin
 include "cl_struct.h"

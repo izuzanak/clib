@@ -1,6 +1,6 @@
 
-#ifndef __OD_CHANNEL_H
-#define __OD_CHANNEL_H
+#ifndef OD_LIB_CHANNEL_H
+#define OD_LIB_CHANNEL_H
 
 @begin
 include "cl_json.h"

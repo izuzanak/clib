@@ -1,6 +1,6 @@
 
-#ifndef __CL_RTSP_SDP_PARSER_H
-#define __CL_RTSP_SDP_PARSER_H
+#ifndef CL_LIB_RTSP_SDP_PARSER_H
+#define CL_LIB_RTSP_SDP_PARSER_H
 
 @begin
 include "cl_linux.h"

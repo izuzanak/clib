@@ -1,6 +1,6 @@
 
-#ifndef __CL_MICROHTTP_H
-#define __CL_MICROHTTP_H
+#ifndef CL_LIB_MICROHTTP_H
+#define CL_LIB_MICROHTTP_H
 
 @begin
 include "cl_sys.h"

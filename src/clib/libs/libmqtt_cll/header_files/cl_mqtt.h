@@ -1,6 +1,6 @@
 
-#ifndef __CL_MQTT_H
-#define __CL_MQTT_H
+#ifndef CL_LIB_MQTT_H
+#define CL_LIB_MQTT_H
 
 @begin
 include "cl_logger.h"

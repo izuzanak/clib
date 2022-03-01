@@ -1,6 +1,6 @@
 
-#ifndef __GPSD_H
-#define __GPSD_H
+#ifndef CL_LIB_GPSD_H
+#define CL_LIB_GPSD_H
 
 @begin
 include "cl_json.h"

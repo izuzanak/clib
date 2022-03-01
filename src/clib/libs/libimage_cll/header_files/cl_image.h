@@ -1,6 +1,6 @@
 
-#ifndef __CL_IMAGE_H
-#define __CL_IMAGE_H
+#ifndef CL_LIB_IMAGE_H
+#define CL_LIB_IMAGE_H
 
 @begin
 include "cl_struct.h"

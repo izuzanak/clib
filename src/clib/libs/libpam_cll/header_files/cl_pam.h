@@ -1,6 +1,6 @@
 
-#ifndef __CL_PAM_H
-#define __CL_PAM_H
+#ifndef CL_LIB_PAM_H
+#define CL_LIB_PAM_H
 
 @begin
 include "cl_struct.h"

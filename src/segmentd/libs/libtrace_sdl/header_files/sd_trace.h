@@ -1,6 +1,6 @@
 
-#ifndef __SD_TRACE_H
-#define __SD_TRACE_H
+#ifndef SD_LIB_TRACE_H
+#define SD_LIB_TRACE_H
 
 @begin
 include "sd_segment.h"

@@ -1,6 +1,6 @@
 
-#ifndef __CL_OPENGL_H
-#define __CL_OPENGL_H
+#ifndef CL_LIB_OPENGL_H
+#define CL_LIB_OPENGL_H
 
 @begin
 include "cl_struct.h"

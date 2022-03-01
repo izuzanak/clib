@@ -1,6 +1,6 @@
 
-#ifndef __CL_PROCESS_H
-#define __CL_PROCESS_H
+#ifndef CL_LIB_PROCESS_H
+#define CL_LIB_PROCESS_H
 
 @begin
 include "cl_logger.h"

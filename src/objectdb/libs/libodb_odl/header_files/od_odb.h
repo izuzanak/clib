@@ -1,6 +1,6 @@
 
-#ifndef __OD_ODB_H
-#define __OD_ODB_H
+#ifndef OD_LIB_ODB_H
+#define OD_LIB_ODB_H
 
 @begin
 include "cl_var.h"

@@ -1,6 +1,6 @@
 
-#ifndef __CL_TEST_H
-#define __CL_TEST_H
+#ifndef CL_LIB_TEST_H
+#define CL_LIB_TEST_H
 
 @begin
 include "cl_struct.h"

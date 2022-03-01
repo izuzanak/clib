@@ -1,6 +1,6 @@
 
-#ifndef __SD_SEGFILES_H
-#define __SD_SEGFILES_H
+#ifndef SD_LIB_SEGFILES_H
+#define SD_LIB_SEGFILES_H
 
 @begin
 include "sd_record.h"

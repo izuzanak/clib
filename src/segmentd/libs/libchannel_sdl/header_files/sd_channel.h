@@ -1,6 +1,6 @@
 
-#ifndef __SD_CHANNEL_H
-#define __SD_CHANNEL_H
+#ifndef SD_LIB_CHANNEL_H
+#define SD_LIB_CHANNEL_H
 
 @begin
 include "cl_logger.h"

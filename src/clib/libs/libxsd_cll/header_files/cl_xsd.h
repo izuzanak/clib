@@ -1,6 +1,6 @@
 
-#ifndef __CL_XSD_BASIC_H
-#define __CL_XSD_BASIC_H
+#ifndef CL_LIB_XSD_BASIC_H
+#define CL_LIB_XSD_BASIC_H
 
 @begin
 include "cl_time.h"

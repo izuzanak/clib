@@ -1,6 +1,6 @@
 
-#ifndef __CL_VALIDATOR_H
-#define __CL_VALIDATOR_H
+#ifndef CL_LIB_VALIDATOR_H
+#define CL_LIB_VALIDATOR_H
 
 @begin
 include "cl_var.h"

@@ -1,6 +1,6 @@
 
-#ifndef __CL_VDV301_BASIC_H
-#define __CL_VDV301_BASIC_H
+#ifndef CL_LIB_VDV301_BASIC_H
+#define CL_LIB_VDV301_BASIC_H
 
 @begin
 include "cl_xsd.h"

@@ -1,6 +1,6 @@
 
-#ifndef __CL_SRTP_H
-#define __CL_SRTP_H
+#ifndef CL_LIB_SRTP_H
+#define CL_LIB_SRTP_H
 
 @begin
 include "cl_struct.h"

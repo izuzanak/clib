@@ -1,6 +1,6 @@
 
-#ifndef __CL_TCP_H
-#define __CL_TCP_H
+#ifndef CL_LIB_TCP_H
+#define CL_LIB_TCP_H
 
 @begin
 include "cl_linux.h"

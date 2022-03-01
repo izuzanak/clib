@@ -1,6 +1,6 @@
 
-#ifndef __SD_RECORD_H // NOLINT
-#define __SD_RECORD_H
+#ifndef SD_LIB_RECORD_H // NOLINT
+#define SD_LIB_RECORD_H
 
 @begin
 include "cl_time.h"

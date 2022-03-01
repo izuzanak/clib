@@ -1,6 +1,6 @@
 
-#ifndef __CL_CHANNEL_H
-#define __CL_CHANNEL_H
+#ifndef CL_LIB_CHANNEL_H
+#define CL_LIB_CHANNEL_H
 
 @begin
 include "cl_linux.h"

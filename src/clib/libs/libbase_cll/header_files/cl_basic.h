@@ -1,6 +1,6 @@
 
-#ifndef __CL_BASIC_H
-#define __CL_BASIC_H
+#ifndef CL_LIB_BASIC_H
+#define CL_LIB_BASIC_H
 
 // - basic data types -
 typedef char bc;
@@ -36,7 +36,7 @@ typedef long double ld;
 #endif
 
 // - define gnu source -
-#define _GNU_SOURCE
+#define _GNU_SOURCE // NOLINT(cert-dcl37-c,cert-dcl51-cpp)
 
 #define ENABLED 1
 #define MP_COMMA ,

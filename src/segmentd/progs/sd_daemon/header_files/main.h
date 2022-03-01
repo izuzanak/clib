@@ -1,6 +1,6 @@
 
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef SD_PROG_MAIN_H
+#define SD_PROG_MAIN_H
 
 @begin
 include "cl_process.h"

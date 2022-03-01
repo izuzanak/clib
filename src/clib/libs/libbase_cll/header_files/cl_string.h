@@ -1,6 +1,6 @@
 
-#ifndef __CL_STRING_H
-#define __CL_STRING_H
+#ifndef CL_LIB_STRING_H
+#define CL_LIB_STRING_H
 
 @begin
 include "cl_cont.h"

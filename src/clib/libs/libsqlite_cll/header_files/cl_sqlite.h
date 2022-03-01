@@ -1,6 +1,6 @@
 
-#ifndef __CL_SQLITE_H // NOLINT
-#define __CL_SQLITE_H
+#ifndef CL_LIB_SQLITE_H // NOLINT
+#define CL_LIB_SQLITE_H
 
 @begin
 include "cl_var.h"

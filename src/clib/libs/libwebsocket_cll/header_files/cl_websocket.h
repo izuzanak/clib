@@ -1,6 +1,6 @@
 
-#ifndef __CL_WEBSOCKETS_H
-#define __CL_WEBSOCKETS_H
+#ifndef CL_LIB_WEBSOCKETS_H
+#define CL_LIB_WEBSOCKETS_H
 
 @begin
 include "cl_struct.h"

@@ -1,6 +1,6 @@
 
-#ifndef __CL_CRYPTO_H
-#define __CL_CRYPTO_H
+#ifndef CL_LIB_CRYPTO_H
+#define CL_LIB_CRYPTO_H
 
 @begin
 include "cl_struct.h"

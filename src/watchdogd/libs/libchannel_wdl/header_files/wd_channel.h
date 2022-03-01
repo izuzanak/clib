@@ -1,6 +1,6 @@
 
-#ifndef __WD_CHANNEL_H
-#define __WD_CHANNEL_H
+#ifndef WD_LIB_CHANNEL_H
+#define WD_LIB_CHANNEL_H
 
 @begin
 include "cl_json.h"

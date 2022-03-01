@@ -1,6 +1,6 @@
 
-#ifndef __CL_JSON_PARSE_ACTIONS_H
-#define __CL_JSON_PARSE_ACTIONS_H
+#ifndef CL_LIB_JSON_PARSE_ACTIONS_H
+#define CL_LIB_JSON_PARSE_ACTIONS_H
 
 // === json parse actions access ===============================================
 

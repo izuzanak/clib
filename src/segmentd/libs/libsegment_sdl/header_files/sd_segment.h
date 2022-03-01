@@ -1,6 +1,6 @@
 
-#ifndef __SD_SEGMENT_H
-#define __SD_SEGMENT_H
+#ifndef SD_LIB_SEGMENT_H
+#define SD_LIB_SEGMENT_H
 
 @begin
 include "sd_segfile.h"

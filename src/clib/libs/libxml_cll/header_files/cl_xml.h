@@ -1,6 +1,6 @@
 
-#ifndef __CL_XML_H
-#define __CL_XML_H
+#ifndef CL_LIB_XML_H
+#define CL_LIB_XML_H
 
 @begin
 include "cl_var.h"

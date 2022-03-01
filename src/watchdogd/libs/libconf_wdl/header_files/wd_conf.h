@@ -1,6 +1,6 @@
 
-#ifndef __WD_CONF_H
-#define __WD_CONF_H
+#ifndef WD_LIB_CONF_H
+#define WD_LIB_CONF_H
 
 @begin
 include "cl_sys.h"

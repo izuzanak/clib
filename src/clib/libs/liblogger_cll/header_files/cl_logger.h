@@ -1,6 +1,6 @@
 
-#ifndef __CL_LOGGER_H
-#define __CL_LOGGER_H
+#ifndef CL_LIB_LOGGER_H
+#define CL_LIB_LOGGER_H
 
 @begin
 include "cl_sys.h"

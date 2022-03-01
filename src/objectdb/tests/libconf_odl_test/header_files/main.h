@@ -1,6 +1,6 @@
 
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef OD_TEST_MAIN_H
+#define OD_TEST_MAIN_H
 
 @begin
 include "cl_test.h"

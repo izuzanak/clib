@@ -1,6 +1,6 @@
 
-#ifndef __CL_ATOMIC_H
-#define __CL_ATOMIC_H
+#ifndef CL_LIB_ATOMIC_H
+#define CL_LIB_ATOMIC_H
 
 @begin
 include "cl_cont.h"

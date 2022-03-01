@@ -1,6 +1,6 @@
 
-#ifndef __CL_GLFW_H
-#define __CL_GLFW_H
+#ifndef CL_LIB_GLFW_H
+#define CL_LIB_GLFW_H
 
 @begin
 include "cl_struct.h"

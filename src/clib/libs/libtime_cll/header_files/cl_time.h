@@ -1,6 +1,6 @@
 
-#ifndef __CL_TIME_H
-#define __CL_TIME_H
+#ifndef CL_LIB_TIME_H
+#define CL_LIB_TIME_H
 
 @begin
 include "cl_struct.h"

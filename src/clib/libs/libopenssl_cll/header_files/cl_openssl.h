@@ -1,6 +1,6 @@
 
-#ifndef __CL_OPENSSL_H
-#define __CL_OPENSSL_H
+#ifndef CL_LIB_OPENSSL_H
+#define CL_LIB_OPENSSL_H
 
 @begin
 include "cl_struct.h"

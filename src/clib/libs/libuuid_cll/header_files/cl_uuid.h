@@ -1,6 +1,6 @@
 
-#ifndef __CL_UUID_H // NOLINT
-#define __CL_UUID_H
+#ifndef CL_LIB_UUID_H // NOLINT
+#define CL_LIB_UUID_H
 
 @begin
 include "cl_struct.h"

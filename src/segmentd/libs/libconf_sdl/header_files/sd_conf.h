@@ -1,6 +1,6 @@
 
-#ifndef __SD_CONF_H
-#define __SD_CONF_H
+#ifndef SD_LIB_CONF_H
+#define SD_LIB_CONF_H
 
 @begin
 include "cl_sys.h"

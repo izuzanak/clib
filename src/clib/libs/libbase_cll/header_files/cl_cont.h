@@ -1,6 +1,6 @@
 
-#ifndef __CL_CONT_H
-#define __CL_CONT_H
+#ifndef CL_LIB_CONT_H
+#define CL_LIB_CONT_H
 
 @begin
 include "cl_basic.h"

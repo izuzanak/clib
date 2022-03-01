@@ -1,6 +1,6 @@
 
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef WD_TEST_MAIN_H
+#define WD_TEST_MAIN_H
 
 @begin
 include "cl_test.h"

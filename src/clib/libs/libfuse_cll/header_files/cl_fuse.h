@@ -1,6 +1,6 @@
 
-#ifndef __CL_FUSE_H
-#define __CL_FUSE_H
+#ifndef CL_LIB_FUSE_H
+#define CL_LIB_FUSE_H
 
 @begin
 include "cl_struct.h"

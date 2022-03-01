@@ -1,6 +1,6 @@
 
-#ifndef __CL_SNAPPY_H
-#define __CL_SNAPPY_H
+#ifndef CL_LIB_SNAPPY_H
+#define CL_LIB_SNAPPY_H
 
 @begin
 include "cl_struct.h"

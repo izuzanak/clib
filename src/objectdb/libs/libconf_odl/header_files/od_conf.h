@@ -1,6 +1,6 @@
 
-#ifndef __OD_CONF_H
-#define __OD_CONF_H
+#ifndef OD_LIB_CONF_H
+#define OD_LIB_CONF_H
 
 @begin
 include "cl_sys.h"

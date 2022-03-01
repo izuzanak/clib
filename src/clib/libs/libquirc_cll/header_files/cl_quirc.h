@@ -1,6 +1,6 @@
 
-#ifndef __CL_QUIRC_H
-#define __CL_QUIRC_H
+#ifndef CL_LIB_QUIRC_H
+#define CL_LIB_QUIRC_H
 
 @begin
 include "cl_struct.h"
