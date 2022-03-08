@@ -16,6 +16,8 @@ include "cl_struct.h"
 #include <GL/glext.h>
 #endif
 
+#include <cglm/cglm.h>
+
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
 #define libopengl_cll_EXPORT
@@ -145,10 +147,14 @@ bi:type
 gl_uniform_s;
 @end
 
+static inline void gl_uniform_s_write_mat4(gl_uniform_s *this,mat4 a_value);
+
 // -- gl_uniform_tree_s --
 @begin
 rb_tree<gl_uniform_s> gl_uniform_tree_s;
 @end
+
+static inline gl_uniform_s *gl_uniform_tree_s_get(gl_uniform_tree_s *this,const char *a_name);
 
 // === inline methods of structure gl_shader_s =================================
 
@@ -340,6 +346,13 @@ static inline int gl_attribute_tree_s___compare_value(const gl_attribute_tree_s 
 inlines gl_uniform_s
 @end
 
+static inline void gl_uniform_s_write_mat4(gl_uniform_s *this,mat4 a_value)
+{/*{{{*/
+  debug_assert(this->type == GL_FLOAT_MAT4);
+
+  glUniformMatrix4fv(this->index,1,0,(float *)a_value);
+}/*}}}*/
+
 // -- gl_uniform_tree_s --
 @begin
 inlines gl_uniform_tree_s
@@ -355,6 +368,14 @@ static inline int gl_uniform_tree_s___compare_value(const gl_uniform_tree_s *thi
   if (first->size < second->size) { return -1; }
   if (first->size > second->size) { return 1; }
   return memcmp(first->data,second->data,first->size - 1);
+}/*}}}*/
+
+static inline gl_uniform_s *gl_uniform_tree_s_get(gl_uniform_tree_s *this,const char *a_name)
+{/*{{{*/
+  gl_uniform_s search_uniform = {{strlen(a_name) + 1,(char *)a_name},};
+  unsigned idx = gl_uniform_tree_s_get_idx(this,&search_uniform);
+  debug_assert(idx != c_idx_not_exist);
+  return &this->data[idx].object;
 }/*}}}*/
 
 #endif
