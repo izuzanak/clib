@@ -58,6 +58,7 @@ int rtsp_conn_s_create(rtsp_conn_s *this,rtsp_server_s *a_server,
   this->session = 0;
   this->x_session_map_idx = c_idx_not_exist;
   this->tcp = -1;
+  this->auth = 0;
 
   return 0;
 }/*}}}*/
@@ -222,37 +223,72 @@ int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_par
 
         // - call conn_get_sdp_callback -
         this->buffer.used = 0;
-        if (((rtsp_conn_get_sdp_callback_t)server->conn_get_sdp_callback)(
-              server->cb_object,this->index,a_parser->url_rtsp,&this->buffer) ||
+
+        int get_sdp_result = 0;
+        if ((get_sdp_result = ((rtsp_conn_get_sdp_callback_t)server->conn_get_sdp_callback)(
+              server->cb_object,this->index,a_parser,&this->buffer)) ||
               this->buffer.used == 0)
         {
-          throw_error(RTSP_CONN_CALLBACK_ERROR);
-        }
+          if (get_sdp_result != ERROR_RTSP_CONN_AUTHENTICATE_ERROR)
+          {
+            throw_error(RTSP_CONN_CALLBACK_ERROR);
+          }
+          else
+          {
+            // FIXME TODO
+            // - realm from configuration
+            // - random nonce
 
-        this->out_msg.used = 0;
-        bc_array_s_append_format(&this->out_msg,
+            this->out_msg.used = 0;
+            bc_array_s_append_format(&this->out_msg,
+"RTSP/1.0 401 Unauthorized\r\n"
+"WWW-Authenticate: Digest realm=\"NVR Streaming Server\",  nonce=\"76bfe6986d3e766424de9bd6e7d3ccc1\"\r\n"
+"CSeq: %u\r\n"
+"\r\n",a_parser->cseq);
+
+            if (rtsp_conn_s_send_resp(this,&this->out_msg))
+            {
+              this->state = c_rtsp_conn_state_ERROR;
+              throw_error(RTSP_CONN_SEND_ERROR);
+            }
+          }
+        }
+        else
+        {
+          // - authentication was successfull -
+          this->auth = 1;
+
+          this->out_msg.used = 0;
+          bc_array_s_append_format(&this->out_msg,
 "RTSP/1.0 200 OK\r\n"
 "CSeq: %u\r\n"
 "Date: ",a_parser->cseq);
-        rtsp_conn_s_append_time(&this->out_msg);
-        bc_array_s_append_format(&this->out_msg,
+          rtsp_conn_s_append_time(&this->out_msg);
+          bc_array_s_append_format(&this->out_msg,
 "\r\n"
 "Content-Base: %s/\r\n"
 "Content-Type: application/sdp\r\n"
 "Content-Length: %u\r\n"
 "\r\n",(char *)a_parser->url_rtsp,this->buffer.used);
 
-        if (rtsp_conn_s_send_resp(this,&this->out_msg) ||
-            rtsp_conn_s_send_resp(this,&this->buffer))
-        {
-          this->state = c_rtsp_conn_state_ERROR;
-          throw_error(RTSP_CONN_SEND_ERROR);
+          if (rtsp_conn_s_send_resp(this,&this->out_msg) ||
+              rtsp_conn_s_send_resp(this,&this->buffer))
+          {
+            this->state = c_rtsp_conn_state_ERROR;
+            throw_error(RTSP_CONN_SEND_ERROR);
+          }
         }
       }/*}}}*/
       break;
 
     case c_rtsp_command_SETUP:
       {/*{{{*/
+
+        // - check authentication -
+        if (!this->auth)
+        {
+          throw_error(RTSP_CONN_CALLBACK_ERROR);
+        }
 
         // - check datacast -
         // - call conn_check_media_callback -
@@ -394,6 +430,13 @@ this->session);
 
     case c_rtsp_command_PLAY:
       {/*{{{*/
+
+        // - check authentication -
+        if (!this->auth)
+        {
+          throw_error(RTSP_CONN_CALLBACK_ERROR);
+        }
+
         this->out_msg.used = 0;
         bc_array_s_append_format(&this->out_msg,
 "RTSP/1.0 200 OK\r\n"
@@ -491,6 +534,12 @@ this->session);
     case c_rtsp_command_PAUSE:
       {/*{{{*/
 
+        // - check authentication -
+        if (!this->auth)
+        {
+          throw_error(RTSP_CONN_CALLBACK_ERROR);
+        }
+
         // - cancel send timer -
         epoll_timer_s_clear(&this->epoll_send_timer);
 
@@ -516,6 +565,13 @@ this->session);
     case c_rtsp_command_SET_PARAMETER:
     case c_rtsp_command_GET_PARAMETER:
       {/*{{{*/
+
+        // - check authentication -
+        if (!this->auth)
+        {
+          throw_error(RTSP_CONN_CALLBACK_ERROR);
+        }
+
         this->out_msg.used = 0;
         bc_array_s_append_format(&this->out_msg,
 "RTSP/1.0 200 OK\r\n"
@@ -537,6 +593,13 @@ this->session);
 
     case c_rtsp_command_TEARDOWN:
       {/*{{{*/
+
+        // - check authentication -
+        if (!this->auth)
+        {
+          throw_error(RTSP_CONN_CALLBACK_ERROR);
+        }
+
         this->out_msg.used = 0;
         bc_array_s_append_format(&this->out_msg,
 "RTSP/1.0 200 OK\r\n"

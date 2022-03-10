@@ -47,24 +47,25 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CONN_BASE64_DECODE_ERROR 6
 #define ERROR_RTSP_CONN_PARSE_ERROR 7
 #define ERROR_RTSP_CONN_CALLBACK_ERROR 8
-#define ERROR_RTSP_CONN_SEND_ERROR 9
-#define ERROR_RTSP_CONN_RECEIVE_ERROR 10
-#define ERROR_RTSP_CONN_GET_TIME_ERROR 11
-#define ERROR_RTSP_CONN_NEXT_PACKET_ERROR 12
-#define ERROR_RTSP_CONN_SEND_PACKET_ERROR 13
-#define ERROR_RTSP_CONN_PROCESS_PACKET_ERROR 14
-#define ERROR_RTSP_CONN_INVALID_PACKET_CHANNEL 15
-#define ERROR_RTSP_CONN_SETSOCKOPT_ERROR 16
-#define ERROR_RTSP_CONN_IOCTL_ERROR 17
-#define ERROR_RTSP_CONN_EPOLL_ERROR 18
-#define ERROR_RTSP_CONN_TIMER_CREATE_ERROR 19
-#define ERROR_RTSP_CONN_UPDATE_TCP_QUEUE_STATE_ERROR 20
-#define ERROR_RTSP_CONN_UDP_SETUP_ERROR 21
-#define ERROR_RTSP_CONN_MISMATCH_RTSP_TRANSPORT 22
-#define ERROR_RTSP_CONN_MISSING_X_SESSION_COOKIE 23
-#define ERROR_RTSP_CONN_DUPLICATE_X_SESSION_COOKIE 24
-#define ERROR_RTSP_CONN_INVALID_X_SESSION 25
-#define ERROR_RTSP_CONN_INVALID_RANGE_TIME 26
+#define ERROR_RTSP_CONN_AUTHENTICATE_ERROR 9
+#define ERROR_RTSP_CONN_SEND_ERROR 10
+#define ERROR_RTSP_CONN_RECEIVE_ERROR 11
+#define ERROR_RTSP_CONN_GET_TIME_ERROR 12
+#define ERROR_RTSP_CONN_NEXT_PACKET_ERROR 13
+#define ERROR_RTSP_CONN_SEND_PACKET_ERROR 14
+#define ERROR_RTSP_CONN_PROCESS_PACKET_ERROR 15
+#define ERROR_RTSP_CONN_INVALID_PACKET_CHANNEL 16
+#define ERROR_RTSP_CONN_SETSOCKOPT_ERROR 17
+#define ERROR_RTSP_CONN_IOCTL_ERROR 18
+#define ERROR_RTSP_CONN_EPOLL_ERROR 19
+#define ERROR_RTSP_CONN_TIMER_CREATE_ERROR 20
+#define ERROR_RTSP_CONN_UPDATE_TCP_QUEUE_STATE_ERROR 21
+#define ERROR_RTSP_CONN_UDP_SETUP_ERROR 22
+#define ERROR_RTSP_CONN_MISMATCH_RTSP_TRANSPORT 23
+#define ERROR_RTSP_CONN_MISSING_X_SESSION_COOKIE 24
+#define ERROR_RTSP_CONN_DUPLICATE_X_SESSION_COOKIE 25
+#define ERROR_RTSP_CONN_INVALID_X_SESSION 26
+#define ERROR_RTSP_CONN_INVALID_RANGE_TIME 27
 
 #define ERROR_RTSP_SERVER_INVALID_STATE 1
 #define ERROR_RTSP_SERVER_INVALID_FD 2
@@ -135,7 +136,7 @@ typedef int (*rtsp_recv_packet_callback_t)(void *a_object,unsigned a_index,time_
 typedef struct rtsp_server_s rtsp_server_s;
 typedef int (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_drop_callback_t)(void *a_object,unsigned a_index);
-typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,const char *a_url,bc_array_s *a_trg);
+typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,const rtsp_parser_s *a_parser,bc_array_s *a_trg);
 typedef int (*rtsp_conn_check_media_callback_t)(void *a_object,unsigned a_index,const char *a_url,unsigned *a_channel);
 typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session,rtsp_play_options_s *a_options);
 typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,ulli *a_delay,bc_block_s *a_trg);
@@ -286,6 +287,7 @@ ui:x_session_map_idx
 rtsp_setups_s:setups
 ui_array_s:setup_map
 bi:tcp
+bi:auth
 >
 rtsp_conn_s;
 @end

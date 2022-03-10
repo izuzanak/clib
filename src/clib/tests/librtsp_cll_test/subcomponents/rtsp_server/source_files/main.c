@@ -27,7 +27,7 @@ int conn_drop(void *a_rtsp_server,unsigned a_index)
   return 0;
 }/*}}}*/
 
-int conn_get_sdp(void *a_rtsp_server,unsigned a_index,const char *a_url,bc_array_s *a_trg)
+int conn_get_sdp(void *a_rtsp_server,unsigned a_index,const rtsp_parser_s *a_parser,bc_array_s *a_trg)
 {/*{{{*/
   (void)a_index;
 
@@ -55,7 +55,7 @@ int conn_get_sdp(void *a_rtsp_server,unsigned a_index,const char *a_url,bc_array
 "c=IN IP4 0.0.0.0\r\n"
 "a=rtpmap:0 PCMU/8035/1\r\n"
 "a=control:%s/audio\r\n"
-"a=recvonly\r\n",server->ip.data,a_url,a_url);
+"a=recvonly\r\n",server->ip.data,a_parser->url_rtsp,a_parser->url_rtsp);
 
   return 0;
 }/*}}}*/

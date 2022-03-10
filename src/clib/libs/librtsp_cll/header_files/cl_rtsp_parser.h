@@ -12,6 +12,19 @@ include "cl_linux.h"
 
 // === definition of generated structures ======================================
 
+// -- rtsp_digest_s --
+@begin
+struct
+<
+string_s:username
+string_s:realm
+string_s:nonce
+string_s:uri
+string_s:response
+>
+rtsp_digest_s;
+@end
+
 // -- rtsp_parser_s --
 @begin
 struct
@@ -36,6 +49,8 @@ bi:onvif_replay
 pointer:url_rtsp
 ui:inter_port_begin
 ui:inter_port_end
+rtsp_digest_s:digest
+bi:digest_auth
 
 lalr_stack_s:lalr_stack
 >
@@ -64,6 +79,7 @@ void pa_rtsp_header_ping(rtsp_parser_s *this);
 void pa_rtsp_header_range(rtsp_parser_s *this);
 void pa_rtsp_header_require(rtsp_parser_s *this);
 void pa_rtsp_header_xscookie(rtsp_parser_s *this);
+void pa_rtsp_header_digest_auth(rtsp_parser_s *this);
 void pa_rtsp_header_ignore(rtsp_parser_s *this);
 void pa_rtsp_header_accept(rtsp_parser_s *this);
 void pa_rtsp_pubcmd_get(rtsp_parser_s *this);
@@ -83,8 +99,18 @@ void pa_rtsp_key_timeout(rtsp_parser_s *this);
 void pa_rtsp_key_npt(rtsp_parser_s *this);
 void pa_rtsp_key_datacast(rtsp_parser_s *this);
 void pa_rtsp_key_inter_port(rtsp_parser_s *this);
+void pa_rtsp_auth_username(rtsp_parser_s *this);
+void pa_rtsp_auth_realm(rtsp_parser_s *this);
+void pa_rtsp_auth_nonce(rtsp_parser_s *this);
+void pa_rtsp_auth_uri(rtsp_parser_s *this);
+void pa_rtsp_auth_response(rtsp_parser_s *this);
 
 // === inline methods of generated structures ==================================
+
+// -- rtsp_digest_s --
+@begin
+inlines rtsp_digest_s
+@end
 
 // -- rtsp_parser_s --
 @begin

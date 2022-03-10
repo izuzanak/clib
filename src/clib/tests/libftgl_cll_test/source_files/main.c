@@ -175,7 +175,7 @@ void test_vertex_buffer()
   // FIXME TODO view
   gl_uniform_s_write_mat4(gl_uniform_tree_s_get(&uniforms,"projection"),projection);
 
-  while (!glfwWindowShouldClose(window.window))
+  //while (!glfwWindowShouldClose(window.window))
   {
     glClear(GL_COLOR_BUFFER_BIT);
 
