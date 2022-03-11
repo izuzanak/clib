@@ -200,7 +200,7 @@ void pa_rtsp_command(rtsp_parser_s *this)
   // - retrieve rtsp url -
   lalr_stack_element_s *lse = lalr_stack->data + lalr_stack->used - 2;
   source_string->data[lse->terminal_end] = '\0';
-  this->url_rtsp = source_string->data + lse->terminal_start;
+  this->rtsp_url = source_string->data + lse->terminal_start;
 }/*}}}*/
 
 void pa_rtsp_response(rtsp_parser_s *this)
@@ -6501,7 +6501,7 @@ int rtsp_parser_s_parse(rtsp_parser_s *this,string_s *a_src,int a_no_check)
   this->datacast = c_cast_type_unknown;
   this->tcp = 0;
   this->onvif_replay = 0;
-  this->url_rtsp = NULL;
+  this->rtsp_url = NULL;
   this->inter_port_begin = 0;
   this->inter_port_end = 0;
   rtsp_digest_s_clear(&this->digest);

@@ -46,7 +46,7 @@ string_s:range
 ui:datacast
 bi:tcp
 bi:onvif_replay
-pointer:url_rtsp
+pointer:rtsp_url
 ui:inter_port_begin
 ui:inter_port_end
 rtsp_digest_s:digest

@@ -226,7 +226,7 @@ int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_par
 
         int get_sdp_result = 0;
         if ((get_sdp_result = ((rtsp_conn_get_sdp_callback_t)server->conn_get_sdp_callback)(
-              server->cb_object,this->index,a_parser,&this->buffer)) ||
+              server->cb_object,this->index,&this->buffer)) ||
               this->buffer.used == 0)
         {
           if (get_sdp_result != ERROR_RTSP_CONN_AUTHENTICATE_ERROR)
@@ -235,16 +235,12 @@ int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_par
           }
           else
           {
-            // FIXME TODO
-            // - realm from configuration
-            // - random nonce
-
             this->out_msg.used = 0;
             bc_array_s_append_format(&this->out_msg,
 "RTSP/1.0 401 Unauthorized\r\n"
-"WWW-Authenticate: Digest realm=\"NVR Streaming Server\",  nonce=\"76bfe6986d3e766424de9bd6e7d3ccc1\"\r\n"
+"WWW-Authenticate: Digest realm=\"%s\",  nonce=\"%s\"\r\n"
 "CSeq: %u\r\n"
-"\r\n",a_parser->cseq);
+"\r\n",a_parser->digest.realm.data,a_parser->digest.nonce.data,a_parser->cseq);
 
             if (rtsp_conn_s_send_resp(this,&this->out_msg))
             {
@@ -269,7 +265,7 @@ int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_par
 "Content-Base: %s/\r\n"
 "Content-Type: application/sdp\r\n"
 "Content-Length: %u\r\n"
-"\r\n",(char *)a_parser->url_rtsp,this->buffer.used);
+"\r\n",(char *)a_parser->rtsp_url,this->buffer.used);
 
           if (rtsp_conn_s_send_resp(this,&this->out_msg) ||
               rtsp_conn_s_send_resp(this,&this->buffer))
@@ -296,7 +292,7 @@ int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_par
         if (a_parser->datacast == c_cast_type_unknown ||
             (a_parser->tcp && a_parser->datacast != c_cast_type_unicast) ||
             ((rtsp_conn_check_media_callback_t)server->conn_check_media_callback)(
-              server->cb_object,this->index,a_parser->url_rtsp,&channel) ||
+              server->cb_object,this->index,a_parser->rtsp_url,&channel) ||
               channel == c_idx_not_exist)
         {
           throw_error(RTSP_CONN_CALLBACK_ERROR);
@@ -313,7 +309,7 @@ int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_par
         // - store setup -
         rtsp_setups_s_push_blank(&this->setups);
         rtsp_setup_s *setup = rtsp_setups_s_last(&this->setups);
-        string_s_set_ptr(&setup->media_url,a_parser->url_rtsp);
+        string_s_set_ptr(&setup->media_url,a_parser->rtsp_url);
         setup->inter_port_begin = a_parser->inter_port_begin;
         setup->inter_port_end = a_parser->inter_port_end;
 
