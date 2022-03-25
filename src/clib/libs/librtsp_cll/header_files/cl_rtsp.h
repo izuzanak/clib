@@ -38,6 +38,7 @@ include "cl_rtsp_sdp_parser.h"
 #define ERROR_RTSP_CLIENT_RETRIEVE_SERVER_IP_ERROR 11
 #define ERROR_RTSP_CLIENT_SSL_INIT_ERROR 12
 #define ERROR_RTSP_CLIENT_GET_TIME_ERROR 13
+#define ERROR_RTSP_CLIENT_AUTHENTICATE_ERROR 14
 
 #define ERROR_RTSP_CONN_INVALID_STATE 1
 #define ERROR_RTSP_CONN_INVALID_FD 2
@@ -130,6 +131,7 @@ typedef unsigned rtsp_pkt_delay_t;
 typedef struct rtsp_client_s rtsp_client_s;
 typedef struct rtsp_play_options_s rtsp_play_options_s;
 
+typedef int (*rtsp_authenticate_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_recv_sdp_callback_t)(void *a_object,unsigned a_index,const string_s *a_server_ip,const bc_array_s *a_src);
 typedef int (*rtsp_recv_packet_callback_t)(void *a_object,unsigned a_index,time_s a_time,const bc_array_s *a_src);
 
@@ -151,13 +153,21 @@ enum
   c_rtsp_client_state_ERROR,
   c_rtsp_client_state_CONN_HTTP,
   c_rtsp_client_state_CONN_RTSP,
+  c_rtsp_client_state_SEND_HTTP,
   c_rtsp_client_state_RECV_HTTP,
+  c_rtsp_client_state_SEND_OPTIONS,
   c_rtsp_client_state_RECV_OPTIONS,
+  c_rtsp_client_state_SEND_DESCRIBE,
   c_rtsp_client_state_RECV_DESCRIBE,
   c_rtsp_client_state_RECV_SDP,
+  c_rtsp_client_state_SEND_SETUP_VIDEO,
   c_rtsp_client_state_RECV_SETUP_VIDEO,
+  c_rtsp_client_state_SEND_SETUP_AUDIO_OR_PLAY,
   c_rtsp_client_state_RECV_SETUP_AUDIO,
+  c_rtsp_client_state_SEND_PLAY,
   c_rtsp_client_state_RECV_PLAY_OR_DATA,
+  c_rtsp_client_state_SEND_GET_PARAMETER,
+  c_rtsp_client_state_RECV_GET_PARAMETER_OR_DATA,
 };/*}}}*/
 
 @begin
@@ -168,6 +178,7 @@ string_s:server_num_ip
 usi:server_port
 string_s:media_url
 
+pointer:authenticate_callback
 pointer:recv_sdp_callback
 pointer:recv_packet_callback
 pointer:cb_object
@@ -178,6 +189,8 @@ epoll_fd_s:epoll_fd
 bc_array_s:in_msg
 bc_array_s:out_msg
 rtsp_parser_s:parser
+rtsp_digest_s:digest
+bi:digest_first_auth
 
 string_s:video_control
 string_s:audio_control
@@ -192,13 +205,14 @@ rtsp_client_s;
 
 WUR librtsp_cll_EXPORT int rtsp_client_s_create(rtsp_client_s *this,
     const string_s *a_server_ip,unsigned short a_server_port,const string_s *a_media,
+    rtsp_authenticate_callback_t a_authenticate_callback,
     rtsp_recv_sdp_callback_t a_recv_sdp_callback,
     rtsp_recv_packet_callback_t a_recv_packet_callback,
     void *a_cb_object,unsigned a_cb_index);
 #ifdef CLIB_WITH_OPENSSL
 WUR int rtsp_client_s_init_ssl(rtsp_client_s *this);
 #endif
-WUR int rtsp_client_s_send_cmd(rtsp_client_s *this);
+WUR int rtsp_client_s_send_cmd(rtsp_client_s *this,const char *a_method,const string_s *a_uri);
 WUR int rtsp_client_s_recv_cmd_resp(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this);
 WUR int rtsp_client_s_recv_sdp(rtsp_client_s *this);

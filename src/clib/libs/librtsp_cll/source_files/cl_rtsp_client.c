@@ -12,6 +12,7 @@ methods rtsp_client_s
 
 int rtsp_client_s_create(rtsp_client_s *this,
     const string_s *a_server_ip,unsigned short a_server_port,const string_s *a_media,
+    rtsp_authenticate_callback_t a_authenticate_callback,
     rtsp_recv_sdp_callback_t a_recv_sdp_callback,
     rtsp_recv_packet_callback_t a_recv_packet_callback,
     void *a_cb_object,unsigned a_cb_index)
@@ -23,6 +24,7 @@ int rtsp_client_s_create(rtsp_client_s *this,
   string_s_copy(&this->server_ip,a_server_ip);
   this->server_port = a_server_port;
   string_s_set_format(&this->media_url,"rtsp://%s:%d/%s",a_server_ip->data,a_server_port,a_media->data);
+  this->authenticate_callback = a_authenticate_callback;
   this->recv_sdp_callback = a_recv_sdp_callback;
   this->recv_packet_callback = a_recv_packet_callback;
   this->cb_object = a_cb_object;
@@ -50,6 +52,12 @@ int rtsp_client_s_create(rtsp_client_s *this,
     }
   }
 
+  // - initialize parser state -
+  this->parser.digest_authenticate = 0;
+
+  // - initialize first authorization flag -
+  this->digest_first_auth = 0;
+
   // - connect in progress -
   this->state = c_rtsp_client_state_CONN_RTSP;
   return 0;
@@ -73,8 +81,32 @@ int rtsp_client_s_init_ssl(rtsp_client_s *this)
 }/*}}}*/
 #endif
 
-int rtsp_client_s_send_cmd(rtsp_client_s *this)
+int rtsp_client_s_send_cmd(rtsp_client_s *this,const char *a_method,const string_s *a_uri)
 {/*{{{*/
+  if (this->digest.nonce.size > 1 && a_method != NULL && a_uri != NULL)
+  {
+    // - set digest method and uri -
+    string_s_set_ptr(&this->digest.method,a_method);
+    string_s_copy(&this->digest.uri,a_uri);
+
+    // - call authenticate_callback -
+    if (((rtsp_authenticate_callback_t)this->authenticate_callback)(this->cb_object,this->cb_index))
+    {
+      throw_error(RTSP_CLIENT_CALLBACK_ERROR);
+    }
+
+    // - remove end of line -
+    this->out_msg.used -= 2;
+    bc_array_s_append_format(&this->out_msg,
+"Authorization: Digest username=\"%s\", realm=\"%s\", nonce=\"%s\", uri=\"%s\", response=\"%s\"\r\n"
+"\r\n"
+,this->digest.username.data
+,this->digest.realm.data
+,this->digest.nonce.data
+,this->digest.uri.data
+,this->digest.response.data);
+  }
+
   debug_message_6(fprintf(stderr,"rtsp_client_s >>>>>\n%.*s",this->out_msg.used,this->out_msg.data));
 
 #ifdef CLIB_WITH_OPENSSL
@@ -193,7 +225,7 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
 "Session: %s\r\n"
 "\r\n",this->media_url.data,this->sequence++,this->session.data);
 
-          if (rtsp_client_s_send_cmd(this))
+          if (rtsp_client_s_send_cmd(this,"GET_PARAMETER",&this->media_url))
           {
             this->state = c_rtsp_client_state_ERROR;
             throw_error(RTSP_CLIENT_SEND_ERROR);
@@ -241,7 +273,7 @@ int rtsp_client_s_recv_cmd_resp_or_data(rtsp_client_s *this)
 "CSeq: %u\r\n"
 "\r\n",this->parser.cseq);
 
-            if (rtsp_client_s_send_cmd(this))
+            if (rtsp_client_s_send_cmd(this,NULL,NULL))
             {
               this->state = c_rtsp_client_state_ERROR;
               throw_error(RTSP_CLIENT_SEND_ERROR);
@@ -331,7 +363,7 @@ int rtsp_client_s_recv_sdp(rtsp_client_s *this)
 }/*}}}*/
 
 int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a_epoll_event)
-{/*{{{*/
+{
   (void)a_index;
 
   if (a_epoll_event->data.fd != this->epoll_fd.fd)
@@ -378,119 +410,21 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 
         // - reset sequence -
         this->sequence = 0;
-
-        switch (this->state)
-        {
-        case c_rtsp_client_state_CONN_HTTP:
-          {/*{{{*/
-            time_s time;
-            if (clock_s_gettime(CLOCK_MONOTONIC,&time))
-            {
-              throw_error(RTSP_CLIENT_GET_TIME_ERROR);
-            }
-
-            this->out_msg.used = 0;
-            bc_array_s_append_format(&this->out_msg,
-"GET %s HTTP/1.0\r\n"
-"x-sessioncookie: %llu\r\n"
-"Proxy-Connection: Keep-Alive\r\n"
-"Pragma: no-cache\r\n"
-"\r\n",this->media_url.data,time);
-
-            if (rtsp_client_s_send_cmd(this))
-            {
-              this->state = c_rtsp_client_state_ERROR;
-              throw_error(RTSP_CLIENT_SEND_ERROR);
-            }
-
-            this->state = c_rtsp_client_state_RECV_HTTP;
-          }/*}}}*/
-          break;
-        case c_rtsp_client_state_CONN_RTSP:
-          {/*{{{*/
-            this->out_msg.used = 0;
-            bc_array_s_append_format(&this->out_msg,
-"OPTIONS %s RTSP/1.0\r\n"
-"CSeq: %u\r\n"
-"\r\n",this->media_url.data,this->sequence++);
-
-            if (rtsp_client_s_send_cmd(this))
-            {
-              this->state = c_rtsp_client_state_ERROR;
-              throw_error(RTSP_CLIENT_SEND_ERROR);
-            }
-
-            this->state = c_rtsp_client_state_RECV_OPTIONS;
-          }/*}}}*/
-          break;
-        }
       }/*}}}*/
       break;
-
     case c_rtsp_client_state_RECV_HTTP:
-      {/*{{{*/
-        if (rtsp_client_s_recv_cmd_resp(this))
-        {
-          this->state = c_rtsp_client_state_ERROR;
-          throw_error(RTSP_CLIENT_RECEIVE_ERROR);
-        }
-
-        this->out_msg.used = 0;
-        bc_array_s_append_format(&this->out_msg,
-"OPTIONS %s RTSP/1.0\r\n"
-"CSeq: %u\r\n"
-"\r\n",this->media_url.data,this->sequence++);
-
-        if (rtsp_client_s_send_cmd(this))
-        {
-          this->state = c_rtsp_client_state_ERROR;
-          throw_error(RTSP_CLIENT_SEND_ERROR);
-        }
-
-        this->state = c_rtsp_client_state_RECV_OPTIONS;
-      }/*}}}*/
-      break;
-
     case c_rtsp_client_state_RECV_OPTIONS:
+    case c_rtsp_client_state_RECV_DESCRIBE:
+    case c_rtsp_client_state_RECV_SETUP_VIDEO:
+    case c_rtsp_client_state_RECV_SETUP_AUDIO:
       {/*{{{*/
         if (rtsp_client_s_recv_cmd_resp(this))
         {
           this->state = c_rtsp_client_state_ERROR;
           throw_error(RTSP_CLIENT_RECEIVE_ERROR);
         }
-
-        this->out_msg.used = 0;
-        bc_array_s_append_format(&this->out_msg,
-"DESCRIBE %s RTSP/1.0\r\n"
-"CSeq: %u\r\n"
-"\r\n",this->media_url.data,this->sequence++);
-
-        if (rtsp_client_s_send_cmd(this))
-        {
-          this->state = c_rtsp_client_state_ERROR;
-          throw_error(RTSP_CLIENT_SEND_ERROR);
-        }
-
-        this->state = c_rtsp_client_state_RECV_DESCRIBE;
       }/*}}}*/
       break;
-
-    case c_rtsp_client_state_RECV_DESCRIBE:
-      {/*{{{*/
-        if (rtsp_client_s_recv_cmd_resp(this))
-        {
-          this->state = c_rtsp_client_state_ERROR;
-          throw_error(RTSP_CLIENT_RECEIVE_ERROR);
-        }
-
-        this->state = c_rtsp_client_state_RECV_SDP;
-
-        if (this->in_msg.used == 0)
-        {
-          break;
-        }
-      }/*}}}*/
-
     case c_rtsp_client_state_RECV_SDP:
       {/*{{{*/
         if (rtsp_client_s_recv_sdp(this))
@@ -505,7 +439,189 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
           this->state = c_rtsp_client_state_ERROR;
           throw_error(RTSP_CLIENT_RECEIVE_ERROR);
         }
+      }/*}}}*/
+      break;
+    case c_rtsp_client_state_RECV_PLAY_OR_DATA:
+    case c_rtsp_client_state_RECV_GET_PARAMETER_OR_DATA:
+      {/*{{{*/
+        if (rtsp_client_s_recv_cmd_resp_or_data(this))
+        {
+          this->state = c_rtsp_client_state_ERROR;
+          throw_error(RTSP_CLIENT_RECEIVE_ERROR);
+        }
+      }/*}}}*/
+      break;
 
+    default:
+      throw_error(RTSP_CLIENT_INVALID_STATE);
+  }
+
+  // - authentication is required -
+  if (this->parser.digest_authenticate)
+  {
+    // - first authorization failed -
+    if (this->digest_first_auth)
+    {
+      throw_error(RTSP_CLIENT_AUTHENTICATE_ERROR);
+    }
+
+    switch (this->state)
+    {
+      case c_rtsp_client_state_RECV_HTTP:
+      case c_rtsp_client_state_RECV_OPTIONS:
+      case c_rtsp_client_state_RECV_DESCRIBE:
+      case c_rtsp_client_state_RECV_SETUP_VIDEO:
+      case c_rtsp_client_state_RECV_SETUP_AUDIO:
+      case c_rtsp_client_state_RECV_PLAY_OR_DATA:
+      case c_rtsp_client_state_RECV_GET_PARAMETER_OR_DATA:
+        --this->state;
+        break;
+
+      default:
+        throw_error(RTSP_CLIENT_INVALID_STATE);
+    }
+
+    rtsp_digest_s_swap(&this->digest,&this->parser.digest);
+    this->parser.digest_authenticate = 0;
+
+    // - set first authorization flag -
+    this->digest_first_auth = 1;
+  }
+  else
+  {
+    switch (this->state)
+    {
+      case c_rtsp_client_state_CONN_HTTP:
+        this->state = c_rtsp_client_state_SEND_HTTP;
+        break;
+      case c_rtsp_client_state_CONN_RTSP:
+        this->state = c_rtsp_client_state_SEND_OPTIONS;
+        break;
+      case c_rtsp_client_state_RECV_HTTP:
+        this->state = c_rtsp_client_state_SEND_OPTIONS;
+        break;
+      case c_rtsp_client_state_RECV_OPTIONS:
+        this->state = c_rtsp_client_state_SEND_DESCRIBE;
+        break;
+      case c_rtsp_client_state_RECV_DESCRIBE:
+        {/*{{{*/
+          this->state = c_rtsp_client_state_RECV_SDP;
+
+          if (this->in_msg.used != 0)
+          {
+            if (rtsp_client_s_recv_sdp(this))
+            {
+              this->state = c_rtsp_client_state_ERROR;
+              throw_error(RTSP_CLIENT_RECEIVE_ERROR);
+            }
+
+            // - no video control was retrieved from sdp -
+            if (this->video_control.size <= 1)
+            {
+              this->state = c_rtsp_client_state_ERROR;
+              throw_error(RTSP_CLIENT_RECEIVE_ERROR);
+            }
+
+            this->state = c_rtsp_client_state_SEND_SETUP_VIDEO;
+          }
+        }/*}}}*/
+        break;
+      case c_rtsp_client_state_RECV_SDP:
+        this->state = c_rtsp_client_state_SEND_SETUP_VIDEO;
+        break;
+      case c_rtsp_client_state_RECV_SETUP_VIDEO:
+        {/*{{{*/
+          if (this->parser.session == NULL)
+          {
+            throw_error(RTSP_CLIENT_SESSION_ERROR);
+          }
+
+          // - set session -
+          string_s_set(&this->session,this->parser.session_length,(char *)this->parser.session);
+
+          this->state = c_rtsp_client_state_SEND_SETUP_AUDIO_OR_PLAY;
+        }/*}}}*/
+        break;
+      case c_rtsp_client_state_RECV_SETUP_AUDIO:
+        this->state = c_rtsp_client_state_SEND_PLAY;
+        break;
+      case c_rtsp_client_state_RECV_PLAY_OR_DATA:
+        this->state = c_rtsp_client_state_RECV_GET_PARAMETER_OR_DATA;
+        break;
+      case c_rtsp_client_state_RECV_GET_PARAMETER_OR_DATA:
+        break;
+
+      default:
+        throw_error(RTSP_CLIENT_INVALID_STATE);
+    }
+
+    // - reset first authorization flag -
+    this->digest_first_auth = 0;
+  }
+
+  switch (this->state)
+  {
+    case c_rtsp_client_state_SEND_HTTP:
+      {/*{{{*/
+        time_s time;
+        if (clock_s_gettime(CLOCK_MONOTONIC,&time))
+        {
+          throw_error(RTSP_CLIENT_GET_TIME_ERROR);
+        }
+
+        this->out_msg.used = 0;
+        bc_array_s_append_format(&this->out_msg,
+"GET %s HTTP/1.0\r\n"
+"x-sessioncookie: %llu\r\n"
+"Proxy-Connection: Keep-Alive\r\n"
+"Pragma: no-cache\r\n"
+"\r\n",this->media_url.data,time);
+
+        if (rtsp_client_s_send_cmd(this,"GET",&this->media_url))
+        {
+          this->state = c_rtsp_client_state_ERROR;
+          throw_error(RTSP_CLIENT_SEND_ERROR);
+        }
+
+        this->state = c_rtsp_client_state_RECV_HTTP;
+      }/*}}}*/
+      break;
+    case c_rtsp_client_state_SEND_OPTIONS:
+      {/*{{{*/
+        this->out_msg.used = 0;
+        bc_array_s_append_format(&this->out_msg,
+"OPTIONS %s RTSP/1.0\r\n"
+"CSeq: %u\r\n"
+"\r\n",this->media_url.data,this->sequence++);
+
+        if (rtsp_client_s_send_cmd(this,"OPTIONS",&this->media_url))
+        {
+          this->state = c_rtsp_client_state_ERROR;
+          throw_error(RTSP_CLIENT_SEND_ERROR);
+        }
+
+        this->state = c_rtsp_client_state_RECV_OPTIONS;
+      }/*}}}*/
+      break;
+    case c_rtsp_client_state_SEND_DESCRIBE:
+      {/*{{{*/
+        this->out_msg.used = 0;
+        bc_array_s_append_format(&this->out_msg,
+"DESCRIBE %s RTSP/1.0\r\n"
+"CSeq: %u\r\n"
+"\r\n",this->media_url.data,this->sequence++);
+
+        if (rtsp_client_s_send_cmd(this,"DESCRIBE",&this->media_url))
+        {
+          this->state = c_rtsp_client_state_ERROR;
+          throw_error(RTSP_CLIENT_SEND_ERROR);
+        }
+
+        this->state = c_rtsp_client_state_RECV_DESCRIBE;
+      }/*}}}*/
+      break;
+    case c_rtsp_client_state_SEND_SETUP_VIDEO:
+      {/*{{{*/
         this->out_msg.used = 0;
         bc_array_s_append_format(&this->out_msg,
 "SETUP %s RTSP/1.0\r\n"
@@ -513,7 +629,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 "Transport: RTP/AVP/TCP;unicast;interleaved=0-1\r\n"
 "\r\n",this->video_control.data,this->sequence++);
 
-        if (rtsp_client_s_send_cmd(this))
+        if (rtsp_client_s_send_cmd(this,"SETUP",&this->video_control))
         {
           this->state = c_rtsp_client_state_ERROR;
           throw_error(RTSP_CLIENT_SEND_ERROR);
@@ -522,22 +638,8 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
         this->state = c_rtsp_client_state_RECV_SETUP_VIDEO;
       }/*}}}*/
       break;
-
-    case c_rtsp_client_state_RECV_SETUP_VIDEO:
+    case c_rtsp_client_state_SEND_SETUP_AUDIO_OR_PLAY:
       {/*{{{*/
-        if (rtsp_client_s_recv_cmd_resp(this))
-        {
-          this->state = c_rtsp_client_state_ERROR;
-          throw_error(RTSP_CLIENT_RECEIVE_ERROR);
-        }
-
-        if (this->parser.session == NULL)
-        {
-          throw_error(RTSP_CLIENT_SESSION_ERROR);
-        }
-
-        // - set session -
-        string_s_set(&this->session,this->parser.session_length,(char *)this->parser.session);
 
         // - no audio control was retrieved from sdp -
         if (this->audio_control.size <= 1)
@@ -549,7 +651,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 "Session: %s\r\n"
 "\r\n",this->media_url.data,this->sequence++,this->session.data);
 
-          if (rtsp_client_s_send_cmd(this))
+          if (rtsp_client_s_send_cmd(this,"PLAY",&this->media_url))
           {
             this->state = c_rtsp_client_state_ERROR;
             throw_error(RTSP_CLIENT_SEND_ERROR);
@@ -568,7 +670,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 "Session: %s\r\n"
 "\r\n",this->audio_control.data,this->sequence++,this->session.data);
 
-          if (rtsp_client_s_send_cmd(this))
+          if (rtsp_client_s_send_cmd(this,"SETUP",&this->audio_control))
           {
             this->state = c_rtsp_client_state_ERROR;
             throw_error(RTSP_CLIENT_SEND_ERROR);
@@ -578,15 +680,8 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
         }
       }/*}}}*/
       break;
-
-    case c_rtsp_client_state_RECV_SETUP_AUDIO:
+    case c_rtsp_client_state_SEND_PLAY:
       {/*{{{*/
-        if (rtsp_client_s_recv_cmd_resp(this))
-        {
-          this->state = c_rtsp_client_state_ERROR;
-          throw_error(RTSP_CLIENT_RECEIVE_ERROR);
-        }
-
         this->out_msg.used = 0;
         bc_array_s_append_format(&this->out_msg,
 "PLAY %s RTSP/1.0\r\n"
@@ -594,7 +689,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 "Session: %s\r\n"
 "\r\n",this->media_url.data,this->sequence++,this->session.data);
 
-        if (rtsp_client_s_send_cmd(this))
+        if (rtsp_client_s_send_cmd(this,"PLAY",&this->media_url))
         {
           this->state = c_rtsp_client_state_ERROR;
           throw_error(RTSP_CLIENT_SEND_ERROR);
@@ -604,15 +699,27 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
         this->ping_time = 0;
       }/*}}}*/
       break;
-
-    case c_rtsp_client_state_RECV_PLAY_OR_DATA:
+    case c_rtsp_client_state_RECV_SDP:
+      break;
+    case c_rtsp_client_state_SEND_GET_PARAMETER:
       {/*{{{*/
-        if (rtsp_client_s_recv_cmd_resp_or_data(this))
+        this->out_msg.used = 0;
+        bc_array_s_append_format(&this->out_msg,
+"GET_PARAMETER %s RTSP/1.0\r\n"
+"CSeq: %u\r\n"
+"Session: %s\r\n"
+"\r\n",this->media_url.data,this->sequence++,this->session.data);
+
+        if (rtsp_client_s_send_cmd(this,"GET_PARAMETER",&this->media_url))
         {
           this->state = c_rtsp_client_state_ERROR;
-          throw_error(RTSP_CLIENT_RECEIVE_ERROR);
+          throw_error(RTSP_CLIENT_SEND_ERROR);
         }
+
+        this->state = c_rtsp_client_state_RECV_GET_PARAMETER_OR_DATA;
       }/*}}}*/
+      break;
+    case c_rtsp_client_state_RECV_GET_PARAMETER_OR_DATA:
       break;
 
     default:
@@ -620,5 +727,5 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
   }
 
   return 0;
-}/*}}}*/
+}
 

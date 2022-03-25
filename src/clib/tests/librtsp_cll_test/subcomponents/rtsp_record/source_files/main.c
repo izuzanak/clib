@@ -104,6 +104,7 @@ int rtsp_recorder_s_record_time_event(void *a_rtsp_recorder,unsigned a_index,epo
     rtsp_client_s *client = &this->client_list.data[client_idx].object;
 
     if (rtsp_client_s_create(client,&record->server_ip,record->server_port,&record->media,
+        rtsp_recorder_s_authenticate,
         rtsp_recorder_s_recv_sdp,
         rtsp_recorder_s_recv_packet,
         this,a_index))
@@ -161,6 +162,14 @@ int rtsp_recorder_s_client_fd_event(void *a_rtsp_recorder,unsigned a_index,epoll
       throw_error(RECORDER_EPOLL_ERROR);
     }
   }
+
+  return 0;
+}/*}}}*/
+
+int rtsp_recorder_s_authenticate(void *a_rtsp_recorder,unsigned a_index)
+{/*{{{*/
+  (void)a_rtsp_recorder;
+  (void)a_index;
 
   return 0;
 }/*}}}*/

@@ -5,7 +5,11 @@
 @begin
 include "cl_test.h"
 include "cl_rtsp.h"
+include "cl_crypto.h"
 @end
+
+// - error codes -
+#define ERROR_RTSP_CLIENT_DIGEST_ERROR 1
 
 // === definition of generated structures ======================================
 

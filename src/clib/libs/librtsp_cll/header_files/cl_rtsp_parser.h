@@ -16,6 +16,7 @@ include "cl_linux.h"
 @begin
 struct
 <
+string_s:method
 string_s:username
 string_s:realm
 string_s:nonce
@@ -50,7 +51,8 @@ pointer:rtsp_url
 ui:inter_port_begin
 ui:inter_port_end
 rtsp_digest_s:digest
-bi:digest_auth
+bi:digest_authorization
+bi:digest_authenticate
 
 lalr_stack_s:lalr_stack
 >
@@ -79,7 +81,8 @@ void pa_rtsp_header_ping(rtsp_parser_s *this);
 void pa_rtsp_header_range(rtsp_parser_s *this);
 void pa_rtsp_header_require(rtsp_parser_s *this);
 void pa_rtsp_header_xscookie(rtsp_parser_s *this);
-void pa_rtsp_header_digest_auth(rtsp_parser_s *this);
+void pa_rtsp_header_digest_authorization(rtsp_parser_s *this);
+void pa_rtsp_header_digest_authenticate(rtsp_parser_s *this);
 void pa_rtsp_header_ignore(rtsp_parser_s *this);
 void pa_rtsp_header_accept(rtsp_parser_s *this);
 void pa_rtsp_pubcmd_get(rtsp_parser_s *this);
@@ -104,6 +107,7 @@ void pa_rtsp_auth_realm(rtsp_parser_s *this);
 void pa_rtsp_auth_nonce(rtsp_parser_s *this);
 void pa_rtsp_auth_uri(rtsp_parser_s *this);
 void pa_rtsp_auth_response(rtsp_parser_s *this);
+void pa_rtsp_auth_stale(rtsp_parser_s *this);
 
 // === inline methods of generated structures ==================================
 

@@ -1,7 +1,8 @@
 
 set(CONF_COMPONENTS
   "src/clib/libs/libtest_cll"
-  "src/clib/libs/librtsp_cll")
+  "src/clib/libs/librtsp_cll"
+  "src/clib/libs/libcrypto_cll")
 set(CONF_HEADER_DIRS)
 
 set(CONF_DO_BUILD TRUE)

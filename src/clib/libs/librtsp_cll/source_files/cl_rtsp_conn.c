@@ -238,7 +238,7 @@ int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_par
             this->out_msg.used = 0;
             bc_array_s_append_format(&this->out_msg,
 "RTSP/1.0 401 Unauthorized\r\n"
-"WWW-Authenticate: Digest realm=\"%s\",  nonce=\"%s\"\r\n"
+"WWW-Authenticate: Digest realm=\"%s\", nonce=\"%s\"\r\n"
 "CSeq: %u\r\n"
 "\r\n",a_parser->digest.realm.data,a_parser->digest.nonce.data,a_parser->cseq);
 

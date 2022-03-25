@@ -14,6 +14,68 @@ methods rtsp_client_list_s
 
 // === program entry function ==================================================
 
+int client_authenticate(void *a_client_list,unsigned a_index)
+{/*{{{*/
+  debug_message_1(fprintf(stderr,"client_authenticate\n"));
+
+  rtsp_client_list_s *client_list = (rtsp_client_list_s *)a_client_list;
+  rtsp_client_s *client = rtsp_client_list_s_at(client_list,a_index);
+  rtsp_digest_s *digest = &client->digest;
+
+  //const char *user = "jirka";
+  //const char *pass = "heslo";
+  ////const char *pass = "test";
+
+  const char *user = "root";
+  const char *pass = "kolotoc";
+  //const char *pass = "test";
+
+  // - verify digest authentication -
+  char separator = ':';
+
+  CONT_INIT_CLEAR(crypto_digest_info_s,digest_info);
+  CONT_INIT_CLEAR(crypto_digest_s,ha1);
+  CONT_INIT_CLEAR(crypto_digest_s,ha2);
+  CONT_INIT_CLEAR(crypto_digest_s,response);
+  CONT_INIT_CLEAR(bc_array_s,md5_data);
+  CONT_INIT_CLEAR(bc_array_s,md5_hexa);
+
+  if (crypto_digest_info_s_get_by_name(&digest_info,"MD5") ||
+      crypto_digest_s_create(&ha1,&digest_info) ||
+      crypto_digest_s_update(&ha1,user,strlen(user)) ||
+      crypto_digest_s_update(&ha1,&separator,1) ||
+      crypto_digest_s_update(&ha1,digest->realm.data,digest->realm.size - 1) ||
+      crypto_digest_s_update(&ha1,&separator,1) ||
+      crypto_digest_s_update(&ha1,pass,strlen(pass)) ||
+      crypto_digest_s_create(&ha2,&digest_info) ||
+      crypto_digest_s_update(&ha2,digest->method.data,digest->method.size - 1) ||
+      crypto_digest_s_update(&ha2,&separator,1) ||
+      crypto_digest_s_update(&ha2,digest->uri.data,digest->uri.size - 1) ||
+      crypto_digest_s_create(&response,&digest_info) ||
+      crypto_digest_s_value(&ha1,&md5_data) ||
+      (crypto_encode_base16(md5_data.data,md5_data.used,&md5_hexa),0) ||
+      crypto_digest_s_update(&response,md5_hexa.data,md5_hexa.used) ||
+      crypto_digest_s_update(&response,&separator,1) ||
+      crypto_digest_s_update(&response,digest->nonce.data,digest->nonce.size - 1) ||
+      crypto_digest_s_update(&response,&separator,1) ||
+      (md5_data.used = 0,md5_hexa.used = 0,0) ||
+      crypto_digest_s_value(&ha2,&md5_data) ||
+      (crypto_encode_base16(md5_data.data,md5_data.used,&md5_hexa),0) ||
+      crypto_digest_s_update(&response,md5_hexa.data,md5_hexa.used) ||
+      (md5_data.used = 0,md5_hexa.used = 0,0) ||
+      crypto_digest_s_value(&response,&md5_data) ||
+      (crypto_encode_base16(md5_data.data,md5_data.used,&md5_hexa),0))
+  {
+    throw_error(RTSP_CLIENT_DIGEST_ERROR);
+  }
+
+  // - set digest username and response -
+  string_s_set_ptr(&digest->username,user);
+  string_s_set(&digest->response,md5_hexa.used,md5_hexa.data);
+
+  return 0;
+}/*}}}*/
+
 int client_recv_sdp(void *a_client_list,unsigned a_index,const string_s *a_server_ip,const bc_array_s *a_src)
 {/*{{{*/
   (void)a_client_list;
@@ -96,9 +158,13 @@ int main(int argc,char **argv)
     //const unsigned short port = 554;
     //const char *media = "h264";
 
-    const char *server_ip = "10.177.3.107";
+    //const char *server_ip = "127.0.0.1";
+    //const unsigned short port = 8006;
+    //const char *media = "onvif/http_0/56043006/last/all/single";
+
+    const char *server_ip = "10.2.1.174";
     const unsigned short port = 554;
-    const char *media = "v1";
+    const char *media = "axis-media/media.amp";
 
     //const char *server_ip = "10.2.1.18";
     //const unsigned short port = 554;
@@ -139,6 +205,7 @@ int main(int argc,char **argv)
       unsigned client_idx = rtsp_client_list_s_append_blank(&client_list);
       rtsp_client_s *client = &client_list.data[client_idx].object;
       cassert(rtsp_client_s_create(client,&server_ip_str,port,&media_str,
+          client_authenticate,
           client_recv_sdp,
           client_recv_packet,
           &client_list,client_idx) == 0);
