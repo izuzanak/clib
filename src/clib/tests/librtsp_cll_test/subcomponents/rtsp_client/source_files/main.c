@@ -19,59 +19,15 @@ int client_authenticate(void *a_client_list,unsigned a_index)
   debug_message_1(fprintf(stderr,"client_authenticate\n"));
 
   rtsp_client_list_s *client_list = (rtsp_client_list_s *)a_client_list;
-  rtsp_client_s *client = rtsp_client_list_s_at(client_list,a_index);
-  rtsp_digest_s *digest = &client->digest;
+  rtsp_digest_s *digest = &rtsp_client_list_s_at(client_list,a_index)->digest;
 
-  //const char *user = "jirka";
-  //const char *pass = "heslo";
-  ////const char *pass = "test";
+  string_s_set_ptr(&digest->username,"root");
+  string_s pass = STRING_S("kolotoc");
 
-  const char *user = "root";
-  const char *pass = "kolotoc";
-  //const char *pass = "test";
-
-  // - verify digest authentication -
-  char separator = ':';
-
-  CONT_INIT_CLEAR(crypto_digest_info_s,digest_info);
-  CONT_INIT_CLEAR(crypto_digest_s,ha1);
-  CONT_INIT_CLEAR(crypto_digest_s,ha2);
-  CONT_INIT_CLEAR(crypto_digest_s,response);
-  CONT_INIT_CLEAR(bc_array_s,md5_data);
-  CONT_INIT_CLEAR(bc_array_s,md5_hexa);
-
-  if (crypto_digest_info_s_get_by_name(&digest_info,"MD5") ||
-      crypto_digest_s_create(&ha1,&digest_info) ||
-      crypto_digest_s_update(&ha1,user,strlen(user)) ||
-      crypto_digest_s_update(&ha1,&separator,1) ||
-      crypto_digest_s_update(&ha1,digest->realm.data,digest->realm.size - 1) ||
-      crypto_digest_s_update(&ha1,&separator,1) ||
-      crypto_digest_s_update(&ha1,pass,strlen(pass)) ||
-      crypto_digest_s_create(&ha2,&digest_info) ||
-      crypto_digest_s_update(&ha2,digest->method.data,digest->method.size - 1) ||
-      crypto_digest_s_update(&ha2,&separator,1) ||
-      crypto_digest_s_update(&ha2,digest->uri.data,digest->uri.size - 1) ||
-      crypto_digest_s_create(&response,&digest_info) ||
-      crypto_digest_s_value(&ha1,&md5_data) ||
-      (crypto_encode_base16(md5_data.data,md5_data.used,&md5_hexa),0) ||
-      crypto_digest_s_update(&response,md5_hexa.data,md5_hexa.used) ||
-      crypto_digest_s_update(&response,&separator,1) ||
-      crypto_digest_s_update(&response,digest->nonce.data,digest->nonce.size - 1) ||
-      crypto_digest_s_update(&response,&separator,1) ||
-      (md5_data.used = 0,md5_hexa.used = 0,0) ||
-      crypto_digest_s_value(&ha2,&md5_data) ||
-      (crypto_encode_base16(md5_data.data,md5_data.used,&md5_hexa),0) ||
-      crypto_digest_s_update(&response,md5_hexa.data,md5_hexa.used) ||
-      (md5_data.used = 0,md5_hexa.used = 0,0) ||
-      crypto_digest_s_value(&response,&md5_data) ||
-      (crypto_encode_base16(md5_data.data,md5_data.used,&md5_hexa),0))
+  if (rtsp_digest_s_authenticate(digest,&pass,0))
   {
     throw_error(RTSP_CLIENT_DIGEST_ERROR);
   }
-
-  // - set digest username and response -
-  string_s_set_ptr(&digest->username,user);
-  string_s_set(&digest->response,md5_hexa.used,md5_hexa.data);
 
   return 0;
 }/*}}}*/

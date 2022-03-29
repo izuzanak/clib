@@ -538,6 +538,66 @@ void pa_rtsp_auth_stale(rtsp_parser_s *this)
 methods rtsp_digest_s
 @end
 
+int rtsp_digest_s_authenticate(rtsp_digest_s *this,
+    const string_s *a_pass,bi a_verify)
+{/*{{{*/
+
+  // - verify digest authentication -
+  char separator = ':';
+
+  CONT_INIT_CLEAR(crypto_digest_info_s,digest_info);
+  CONT_INIT_CLEAR(crypto_digest_s,ha1);
+  CONT_INIT_CLEAR(crypto_digest_s,ha2);
+  CONT_INIT_CLEAR(crypto_digest_s,response);
+  CONT_INIT_CLEAR(bc_array_s,md5_data);
+  CONT_INIT_CLEAR(bc_array_s,md5_hexa);
+
+  if (crypto_digest_info_s_get_by_name(&digest_info,"MD5") ||
+      crypto_digest_s_create(&ha1,&digest_info) ||
+      crypto_digest_s_update(&ha1,this->username.data,this->username.size - 1) ||
+      crypto_digest_s_update(&ha1,&separator,1) ||
+      crypto_digest_s_update(&ha1,this->realm.data,this->realm.size - 1) ||
+      crypto_digest_s_update(&ha1,&separator,1) ||
+      crypto_digest_s_update(&ha1,a_pass->data,a_pass->size - 1) ||
+      crypto_digest_s_create(&ha2,&digest_info) ||
+      crypto_digest_s_update(&ha2,this->method.data,this->method.size - 1) ||
+      crypto_digest_s_update(&ha2,&separator,1) ||
+      crypto_digest_s_update(&ha2,this->uri.data,this->uri.size - 1) ||
+      crypto_digest_s_create(&response,&digest_info) ||
+      crypto_digest_s_value(&ha1,&md5_data) ||
+      (crypto_encode_base16(md5_data.data,md5_data.used,&md5_hexa),0) ||
+      crypto_digest_s_update(&response,md5_hexa.data,md5_hexa.used) ||
+      crypto_digest_s_update(&response,&separator,1) ||
+      crypto_digest_s_update(&response,this->nonce.data,this->nonce.size - 1) ||
+      crypto_digest_s_update(&response,&separator,1) ||
+      (md5_data.used = 0,md5_hexa.used = 0,0) ||
+      crypto_digest_s_value(&ha2,&md5_data) ||
+      (crypto_encode_base16(md5_data.data,md5_data.used,&md5_hexa),0) ||
+      crypto_digest_s_update(&response,md5_hexa.data,md5_hexa.used) ||
+      (md5_data.used = 0,md5_hexa.used = 0,0) ||
+      crypto_digest_s_value(&response,&md5_data) ||
+      (crypto_encode_base16(md5_data.data,md5_data.used,&md5_hexa),0))
+  {
+    throw_error(RTSP_DIGEST_AUTHENTICATE_ERROR);
+  }
+
+  if (a_verify)
+  {
+    // - verify digest response -
+    if (strncmp(this->response.data,md5_hexa.data,md5_hexa.used) != 0)
+    {
+      throw_error(RTSP_DIGEST_AUTHENTICATE_ERROR);
+    }
+  }
+  else
+  {
+    // - set digest response -
+    string_s_set(&this->response,md5_hexa.used,md5_hexa.data);
+  }
+
+  return 0;
+}/*}}}*/
+
 // -- rtsp_parser_s --
 @begin
 methods rtsp_parser_s

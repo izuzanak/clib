@@ -7,6 +7,8 @@ include "cl_linux.h"
 @end
 
 // - error codes -
+#define ERROR_RTSP_DIGEST_AUTHENTICATE_ERROR 1
+
 #define ERROR_RTSP_RESP_PARSE_UNRECOGNIZED_TERMINAL 1
 #define ERROR_RTSP_RESP_PARSE_INVALID_SYNTAX 2
 
@@ -25,6 +27,9 @@ string_s:response
 >
 rtsp_digest_s;
 @end
+
+WUR int rtsp_digest_s_authenticate(rtsp_digest_s *this,
+    const string_s *a_pass,bi a_verify);
 
 // -- rtsp_parser_s --
 @begin
