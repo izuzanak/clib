@@ -156,6 +156,14 @@ unsigned loc_s_register_type(
 methods var_array_s
 @end
 
+void var_array_s_push_locs_ap(var_array_s *this,unsigned a_count,va_list a_ap)
+{/*{{{*/
+  while (a_count-- > 0)
+  {
+    var_array_s_push_loc(this,va_arg(a_ap,var_s));
+  }
+}/*}}}*/
+
 // -- var_arrays_s --
 @begin
 methods var_arrays_s

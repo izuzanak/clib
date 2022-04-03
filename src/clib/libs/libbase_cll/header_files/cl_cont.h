@@ -175,6 +175,10 @@ BASIC_TYPE_TO_STRING_DEFINE(cbc_pointer);
 
 #endif
 
+// === definition of memory manipulation methods ===============================
+
+static inline void memcpy_bo(void *a_dst,const void *a_src,size_t a_cnt,int a_ob);
+
 // === inline methods of generated structures ==================================
 
 // -- bc_array_s --
@@ -445,6 +449,44 @@ BASIC_TYPE_TO_STRING_INLINE(bd,"%f");
 BASIC_TYPE_TO_STRING_INLINE(pointer,"%p");
 BASIC_TYPE_TO_STRING_INLINE(bc_pointer,"%p");
 BASIC_TYPE_TO_STRING_INLINE(cbc_pointer,"%p");
+
+// === inline memory manipulation methods ======================================
+
+static inline void memcpy_bo(void *a_dst,const void *a_src,size_t a_cnt,int a_ob)
+{/*{{{*/
+  if (a_cnt <= 0)
+  {
+    return;
+  }
+
+  if (a_ob)
+  {
+    char *d_ptr = (char *)a_dst;
+    char *d_ptr_end = d_ptr + a_cnt;
+    const char *s_ptr = ((const char *)a_src) + a_cnt - 1;
+
+    switch (a_cnt)
+    {
+    case 8: *d_ptr++ = *s_ptr--;
+    case 7: *d_ptr++ = *s_ptr--;
+    case 6: *d_ptr++ = *s_ptr--;
+    case 5: *d_ptr++ = *s_ptr--;
+    case 4: *d_ptr++ = *s_ptr--;
+    case 3: *d_ptr++ = *s_ptr--;
+    case 2: *d_ptr++ = *s_ptr--;
+    case 1: *d_ptr++ = *s_ptr--;
+      break;
+    default:
+      do {
+        *d_ptr = *s_ptr;
+      } while(--s_ptr,++d_ptr < d_ptr_end);
+    }
+  }
+  else
+  {
+    memcpy(a_dst,a_src,a_cnt);
+  }
+}/*}}}*/
 
 #endif
 

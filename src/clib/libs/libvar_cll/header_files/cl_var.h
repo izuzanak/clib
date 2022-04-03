@@ -144,6 +144,8 @@ var_array_s;
 @end
 
 static inline void var_array_s_push_loc(var_array_s *this,var_s a_value);
+static inline void var_array_s_push_locs(var_array_s *this,unsigned a_count,...);
+libvar_cll_EXPORT void var_array_s_push_locs_ap(var_array_s *this,unsigned a_count,va_list a_ap);
 
 // -- var_arrays_s --
 @begin
@@ -244,6 +246,7 @@ static inline const string_s *loc_s_string_value(var_s this);
 
 // - type ARRAY -
 static inline var_s loc_s_array(void);
+static inline var_s loc_s_array_locs(unsigned a_count,...);
 static inline void loc_s_array_clear(var_s this);
 static inline int loc_s_array_order(var_s a_first,var_s a_second);
 libvar_cll_EXPORT int loc_s_array___order(const var_array_s *a_first,const var_array_s *a_second);
@@ -474,6 +477,14 @@ inlines var_array_s
 static inline void var_array_s_push_loc(var_array_s *this,var_s a_value)
 {/*{{{*/
   var_array_s_push(this,&a_value);
+}/*}}}*/
+
+static inline void var_array_s_push_locs(var_array_s *this,unsigned a_count,...)
+{/*{{{*/
+  va_list ap;
+  va_start(ap,a_count);
+  var_array_s_push_locs_ap(this,a_count,ap);
+  va_end(ap);
 }/*}}}*/
 
 // -- var_arrays_s --
@@ -810,6 +821,24 @@ static inline var_s loc_s_array(void)
 {/*{{{*/
   var_array_s *array = (var_array_s *)cmalloc(sizeof(var_array_s));
   var_array_s_init(array);
+
+  var_s var = loc_s___new();
+  var->v_type = c_bi_type_array;
+  atomic_s_set(&var->v_ref_cnt,0);
+  var->v_data.ptr = array;
+
+  return var;
+}/*}}}*/
+
+static inline var_s loc_s_array_locs(unsigned a_count,...)
+{/*{{{*/
+  var_array_s *array = (var_array_s *)cmalloc(sizeof(var_array_s));
+  var_array_s_init(array);
+
+  va_list ap;
+  va_start(ap,a_count);
+  var_array_s_push_locs_ap(array,a_count,ap);
+  va_end(ap);
 
   var_s var = loc_s___new();
   var->v_type = c_bi_type_array;

@@ -379,6 +379,36 @@ void test_var_array()
     loc_s_array_order(array_2,array_3) < 0 &&
     loc_s_array_order(array_3,array_2) > 0);
 
+  // - var_array_s_push_locs -
+  VAR(array_4,loc_s_array());
+  var_array_s_push_locs(loc_s_array_value(array_4),5,
+    loc_s_blank(),
+    loc_s_int(1),
+    loc_s_float(1.23),
+    loc_s_string_ptr("Hello world!"),
+    loc_s_array());
+
+  ARRAY_TO_STRING(array_4);
+  cassert(strcmp(buffer.data,"[<blank>,1,1.230000,Hello world!,[]]") == 0);
+
+  // - loc_s_array_locs -
+  var_s_copy_loc(&array_4,loc_s_array_locs(7,
+    loc_s_int(1),
+    loc_s_int(2),
+    loc_s_int(3),
+    loc_s_array_locs(3,
+      loc_s_string_ptr("Hello"),
+      loc_s_string_ptr("world"),
+      loc_s_string_ptr("!")),
+    loc_s_float(1.0),
+    loc_s_float(2.0),
+    loc_s_float(3.0)
+    ));
+
+  ARRAY_TO_STRING(array_4);
+  cassert(strcmp(buffer.data,"[1,2,3,[Hello,world,!],1.000000,2.000000,3.000000]") == 0);
+
+  var_s_clear(&array_4);
   var_s_clear(&array_3);
   var_s_clear(&array_2);
   var_s_clear(&array_1);
