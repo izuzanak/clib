@@ -268,6 +268,30 @@ void var_map_tree_s_to_json_nice(const var_map_tree_s *this,json_nice_s *a_json_
 }/*}}}*/
 #endif
 
+void var_map_tree_s_set_locs_ap(var_map_tree_s *this,unsigned a_count,va_list a_ap)
+{/*{{{*/
+  debug_assert(!(a_count & 0x01));
+
+  while (a_count > 0)
+  {
+    var_s key_var = va_arg(a_ap,var_s);
+    var_s value_var = va_arg(a_ap,var_s);
+
+    unsigned index = var_map_tree_s_unique_insert(this,
+        &(var_map_s){key_var,value_var});
+
+    var_map_s *map = &(this->data + index)->object;
+
+    if (map->value != value_var)
+    {
+      VAR_CLEAR(temp,key_var);
+      var_s_copy_loc(&map->value,value_var);
+    }
+
+    a_count -= 2;
+  }
+}/*}}}*/
+
 // === methods of loc_s types ==================================================
 
 // - type ARRAY -

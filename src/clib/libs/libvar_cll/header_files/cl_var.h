@@ -144,7 +144,8 @@ var_array_s;
 @end
 
 static inline void var_array_s_push_loc(var_array_s *this,var_s a_value);
-static inline void var_array_s_push_locs(var_array_s *this,unsigned a_count,...);
+static inline void var_array_s_push___locs(var_array_s *this,unsigned a_count,...);
+#define var_array_s_push_locs(THIS,...) var_array_s_push___locs(THIS,VAR_LIST(__VA_ARGS__))
 libvar_cll_EXPORT void var_array_s_push_locs_ap(var_array_s *this,unsigned a_count,va_list a_ap);
 
 // -- var_arrays_s --
@@ -187,6 +188,10 @@ safe_rb_tree<var_map_s> var_map_tree_s;
 void var_map_tree_s_to_json(const var_map_tree_s *this,bc_array_s *a_trg);
 void var_map_tree_s_to_json_nice(const var_map_tree_s *this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 #endif
+
+static inline void var_map_tree_s_set___locs(var_map_tree_s *this,unsigned a_count,...);
+#define var_map_tree_s_set_locs(THIS,...) var_map_tree_s_set___locs(THIS,VAR_LIST(__VA_ARGS__))
+libvar_cll_EXPORT void var_map_tree_s_set_locs_ap(var_map_tree_s *this,unsigned a_count,va_list a_ap);
 
 // === definition of loc_s types ===============================================
 
@@ -246,7 +251,8 @@ static inline const string_s *loc_s_string_value(var_s this);
 
 // - type ARRAY -
 static inline var_s loc_s_array(void);
-static inline var_s loc_s_array_locs(unsigned a_count,...);
+static inline var_s loc_s_array___locs(unsigned a_count,...);
+#define loc_s_array_locs(...) loc_s_array___locs(VAR_LIST(__VA_ARGS__))
 static inline void loc_s_array_clear(var_s this);
 static inline int loc_s_array_order(var_s a_first,var_s a_second);
 libvar_cll_EXPORT int loc_s_array___order(const var_array_s *a_first,const var_array_s *a_second);
@@ -265,6 +271,8 @@ static inline var_s *loc_s_array_at(var_s this,unsigned a_idx);
 
 // - type DICT -
 static inline var_s loc_s_dict(void);
+static inline var_s loc_s_dict___locs(unsigned a_count,...);
+#define loc_s_dict_locs(...) loc_s_dict___locs(VAR_LIST(__VA_ARGS__))
 static inline void loc_s_dict_clear(var_s this);
 static inline int loc_s_dict_order(var_s a_first,var_s a_second);
 libvar_cll_EXPORT int loc_s_dict___order(const var_map_tree_s *a_first,const var_map_tree_s *a_second);
@@ -445,6 +453,9 @@ static inline int var_s_from_var(var_s *this,var_s a_var)
   CONT_INIT_CLEAR(var_s,NAME);\
   var_s_copy_loc(&NAME,VALUE)
 
+#define VAR_LIST_LENGTH(...) (sizeof((var_s[]){__VA_ARGS__})/sizeof(var_s))
+#define VAR_LIST(...) VAR_LIST_LENGTH(__VA_ARGS__),__VA_ARGS__
+
 // === definition of from_var methods for basic data types =====================
 
 #if OPTION_FROM_VAR == ENABLED
@@ -479,7 +490,7 @@ static inline void var_array_s_push_loc(var_array_s *this,var_s a_value)
   var_array_s_push(this,&a_value);
 }/*}}}*/
 
-static inline void var_array_s_push_locs(var_array_s *this,unsigned a_count,...)
+static inline void var_array_s_push___locs(var_array_s *this,unsigned a_count,...)
 {/*{{{*/
   va_list ap;
   va_start(ap,a_count);
@@ -552,6 +563,14 @@ static inline int var_map_tree_s___compare_value(const var_map_tree_s *this,cons
   (void)this;
 
   return loc_s_order(a_first->key,a_second->key);
+}/*}}}*/
+
+static inline void var_map_tree_s_set___locs(var_map_tree_s *this,unsigned a_count,...)
+{/*{{{*/
+  va_list ap;
+  va_start(ap,a_count);
+  var_map_tree_s_set_locs_ap(this,a_count,ap);
+  va_end(ap);
 }/*}}}*/
 
 // === inline methods of loc_s types ===========================================
@@ -830,7 +849,7 @@ static inline var_s loc_s_array(void)
   return var;
 }/*}}}*/
 
-static inline var_s loc_s_array_locs(unsigned a_count,...)
+static inline var_s loc_s_array___locs(unsigned a_count,...)
 {/*{{{*/
   var_array_s *array = (var_array_s *)cmalloc(sizeof(var_array_s));
   var_array_s_init(array);
@@ -950,6 +969,24 @@ static inline var_s loc_s_dict(void)
 {/*{{{*/
   var_map_tree_s *tree = (var_map_tree_s *)cmalloc(sizeof(var_map_tree_s));
   var_map_tree_s_init(tree);
+
+  var_s var = loc_s___new();
+  var->v_type = c_bi_type_dict;
+  atomic_s_set(&var->v_ref_cnt,0);
+  var->v_data.ptr = tree;
+
+  return var;
+}/*}}}*/
+
+static inline var_s loc_s_dict___locs(unsigned a_count,...)
+{/*{{{*/
+  var_map_tree_s *tree = (var_map_tree_s *)cmalloc(sizeof(var_map_tree_s));
+  var_map_tree_s_init(tree);
+
+  va_list ap;
+  va_start(ap,a_count);
+  var_map_tree_s_set_locs_ap(tree,a_count,ap);
+  va_end(ap);
 
   var_s var = loc_s___new();
   var->v_type = c_bi_type_dict;

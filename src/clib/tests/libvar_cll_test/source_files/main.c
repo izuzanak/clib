@@ -381,7 +381,7 @@ void test_var_array()
 
   // - var_array_s_push_locs -
   VAR(array_4,loc_s_array());
-  var_array_s_push_locs(loc_s_array_value(array_4),5,
+  var_array_s_push_locs(loc_s_array_value(array_4),
     loc_s_blank(),
     loc_s_int(1),
     loc_s_float(1.23),
@@ -392,11 +392,11 @@ void test_var_array()
   cassert(strcmp(buffer.data,"[<blank>,1,1.230000,Hello world!,[]]") == 0);
 
   // - loc_s_array_locs -
-  var_s_copy_loc(&array_4,loc_s_array_locs(7,
+  var_s_copy_loc(&array_4,loc_s_array_locs(
     loc_s_int(1),
     loc_s_int(2),
     loc_s_int(3),
-    loc_s_array_locs(3,
+    loc_s_array_locs(
       loc_s_string_ptr("Hello"),
       loc_s_string_ptr("world"),
       loc_s_string_ptr("!")),
@@ -534,6 +534,38 @@ void test_var_dict()
 
   json_nice_s_clear(&json_nice);
 #endif
+
+  // - var_map_tree_s_set_locs -
+  VAR_CLEAR(dict_3,loc_s_dict());
+
+  var_map_tree_s_set_locs(loc_s_dict_value(dict_3),
+    loc_s_string_ptr("first" ),loc_s_int(1),
+    loc_s_string_ptr("second"),loc_s_int(2),
+    loc_s_string_ptr("third" ),loc_s_int(3),
+    loc_s_string_ptr("first" ),loc_s_int(10),
+    loc_s_string_ptr("second"),loc_s_int(20),
+    loc_s_string_ptr("third" ),loc_s_int(30));
+
+  DICT_TO_STRING(dict_3);
+  cassert(strcmp(buffer.data,"[first:10,third:30,second:20]") == 0);
+
+  // - loc_s_dict_locs -
+  VAR_CLEAR(dict_4,loc_s_dict_locs(
+    loc_s_string_ptr("first" ),loc_s_int(1),
+    loc_s_string_ptr("second" ),loc_s_array_locs(
+      loc_s_int(1),
+      loc_s_int(2),
+      loc_s_int(3)
+    ),
+    loc_s_string_ptr("third"),loc_s_dict_locs(
+      loc_s_string_ptr("first" ),loc_s_int(1),
+      loc_s_string_ptr("second"),loc_s_int(2),
+      loc_s_string_ptr("third" ),loc_s_int(3)
+    )
+  ));
+
+  DICT_TO_STRING(dict_4);
+  cassert(strcmp(buffer.data,"[first:1,third:[first:1,third:3,second:2],second:[1,2,3]]") == 0);
 
   var_s_clear(&dict_0);
   bc_array_s_clear(&buffer);
