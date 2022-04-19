@@ -147,6 +147,7 @@ bi:type
 gl_uniform_s;
 @end
 
+static inline void gl_uniform_s_write_vec4(gl_uniform_s *this,vec4 a_value);
 static inline void gl_uniform_s_write_mat4(gl_uniform_s *this,mat4 a_value);
 
 // -- gl_uniform_tree_s --
@@ -345,6 +346,13 @@ static inline int gl_attribute_tree_s___compare_value(const gl_attribute_tree_s 
 @begin
 inlines gl_uniform_s
 @end
+
+static inline void gl_uniform_s_write_vec4(gl_uniform_s *this,vec4 a_value)
+{/*{{{*/
+  debug_assert(this->type == GL_FLOAT_VEC4);
+
+  glUniform4fv(this->index,1,(float *)a_value);
+}/*}}}*/
 
 static inline void gl_uniform_s_write_mat4(gl_uniform_s *this,mat4 a_value)
 {/*{{{*/

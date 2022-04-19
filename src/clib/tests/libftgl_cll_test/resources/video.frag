@@ -4,7 +4,8 @@ uniform vec4 borders;
 
 void main()
 {
-  vec4 color = texture2D(texture, gl_TexCoord[0].xy);
+  //vec4 color = texture2D(texture, gl_TexCoord[0].xy);
+  vec4 color = vec4(gl_Color.rgb, 1.0);
 
   float x = gl_FragCoord.x;
   float y = gl_FragCoord.y;

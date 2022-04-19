@@ -157,12 +157,16 @@ void test_vertex_buffer()
   glfwGetFramebufferSize(window.window,&width,&height);
   glViewport(0,0,width,height);
 
+  // - enable blending -
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
   // - compute field of view and camera distance -
   float fov = M_PI/3.0;
   float distance = 2.0/(2.0*tan(fov/2.0));
 
-  mat4 projection;
-  glm_perspective(fov,(float)width/height,1.0,10.0,projection);
+  mat4 model;
+  glm_mat4_identity(model);
 
   mat4 view;
   glm_lookat(
@@ -171,13 +175,20 @@ void test_vertex_buffer()
     (vec3){0.0,1.0,0.0},
     view);
 
-  // FIXME TODO model
-  // FIXME TODO view
+  mat4 projection;
+  glm_perspective(fov,(float)width/height,1.0,10.0,projection);
+
+  gl_uniform_s_write_mat4(gl_uniform_tree_s_get(&uniforms,"model"),model);
+  gl_uniform_s_write_mat4(gl_uniform_tree_s_get(&uniforms,"view"),view);
   gl_uniform_s_write_mat4(gl_uniform_tree_s_get(&uniforms,"projection"),projection);
+
+  // uniform sampler2D texture;
+  vec4 borders = {10,width - 10,10,height - 10};
+  gl_uniform_s_write_vec4(gl_uniform_tree_s_get(&uniforms,"borders"),borders);
 
   //while (!glfwWindowShouldClose(window.window))
   {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     gl_vertex_buffer_s_render(&vertex_buffer,GL_TRIANGLES);
 
