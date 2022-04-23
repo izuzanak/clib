@@ -230,6 +230,7 @@ bc_array_s:pubrec
 usi:packet_id
 mqtt_buffer_s:topic
 mqtt_buffer_s:payload
+bi:retained
 mqtt_buffer_s:properties
 
 mqtt_prop_array_s:prop_refs

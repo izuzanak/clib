@@ -12,7 +12,8 @@ include "cl_ftgl.h"
 
 // === test execution functions ================================================
 
-void prepare_shader_program(gl_program_s *a_program);
+void prepare_shader_program(gl_program_s *a_program,
+    const char *a_vertex_file,const char *a_fragment_file);
 
 void test_shader();
 void test_vertex_buffer();

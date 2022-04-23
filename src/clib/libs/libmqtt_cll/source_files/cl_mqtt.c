@@ -388,11 +388,12 @@ int mqtt_conn_s_process_packet(mqtt_conn_s *this,uint8_t pkt_type,uint32_t size,
     } /*}}}*/
     break;
     case MQTT_PACKET_TYPE_PUBLISH:
-    {
-      uint8_t dup    = (pkt_type & 0x04) >> 3;
-      uint8_t qos    = (pkt_type & 0x06) >> 1;
-      uint8_t retain = pkt_type & 0x01;
-      (void)retain;
+    {/*{{{*/
+      uint8_t dup = (pkt_type & 0x04) >> 3;
+      uint8_t qos = (pkt_type & 0x06) >> 1;
+
+      // - retrieve retained flag -
+      this->retained = pkt_type & 0x01;
 
       uint32_t topic_length;
       if (data_end - data < 2
@@ -509,7 +510,7 @@ int mqtt_conn_s_process_packet(mqtt_conn_s *this,uint8_t pkt_type,uint32_t size,
         }
         break;
       }
-    }
+    }/*}}}*/
     break;
     case MQTT_PACKET_TYPE_PUBACK:
     {/*{{{*/

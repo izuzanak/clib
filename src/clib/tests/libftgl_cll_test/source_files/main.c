@@ -21,12 +21,13 @@ test_function_t test_functions[] =
 
 // === test execution functions ================================================
 
-void prepare_shader_program(gl_program_s *a_program)
+void prepare_shader_program(gl_program_s *a_program,
+    const char *a_vertex_file,const char *a_fragment_file)
 {/*{{{*/
 
   // - read vertex shader -
   CONT_INIT_CLEAR(file_s,file);
-  cassert(file_s_open(&file,"tests/libftgl_cll_test/resources/video.vert","r") == 0);
+  cassert(file_s_open(&file,a_vertex_file,"r") == 0);
 
   CONT_INIT_CLEAR(bc_array_s,data);
   cassert(file_s_read_close(&file,&data) == 0);
@@ -38,7 +39,7 @@ void prepare_shader_program(gl_program_s *a_program)
   cassert(gl_shader_s_create(&vertex_sh,GL_VERTEX_SHADER,&vertex_code) == 0);
 
   // - read fragment shader -
-  cassert(file_s_open(&file,"tests/libftgl_cll_test/resources/video.frag","r") == 0);
+  cassert(file_s_open(&file,a_fragment_file,"r") == 0);
 
   data.used = 0;
   cassert(file_s_read_close(&file,&data) == 0);
@@ -113,7 +114,9 @@ void test_vertex_buffer()
 
   // - prepare shader program -
   CONT_INIT_CLEAR(gl_program_s,shader_program);
-  prepare_shader_program(&shader_program);
+  prepare_shader_program(&shader_program,
+      "tests/libftgl_cll_test/resources/video.vert",
+      "tests/libftgl_cll_test/resources/video.frag");
   gl_program_s_use(&shader_program);
 
   // - retrieve attributes -
