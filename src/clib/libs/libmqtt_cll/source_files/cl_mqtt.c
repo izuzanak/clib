@@ -967,6 +967,9 @@ int mqtt_conn_s_conn_recv(void *a_mqtt_conn,unsigned a_index,bc_array_s *a_messa
       // - whole control packet was received -
       buff_size >= (packet_size = remain_size + (remain - packet)))
     {
+      // - log message -
+      log_info_2("mqtt conn, <-- %u",packet_size);
+
       if (mqtt_conn_s_process_packet(a_mqtt_conn,packet[0],remain_size,remain))
       {
         throw_error(MQTT_CONN_PROCESS_PACKET_ERROR);

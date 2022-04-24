@@ -21,7 +21,6 @@ include "cl_mqtt.h"
 struct
 <
 mqtt_conn_s:connection
-bc_array_s:buffer
 >
 mqtt_client_s;
 @end
