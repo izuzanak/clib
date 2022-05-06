@@ -219,6 +219,7 @@ static inline void loc_s_int_to_json(var_s this,bc_array_s *a_trg);
 static inline void loc_s_int_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 #endif
 static inline long long int loc_s_int_value(var_s this);
+static inline long long int *loc_s_int_value_ptr(var_s this);
 
 // - type FLOAT -
 static inline var_s loc_s_float(double a_value);
@@ -232,6 +233,7 @@ static inline void loc_s_float_to_json(var_s this,bc_array_s *a_trg);
 static inline void loc_s_float_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 #endif
 static inline double loc_s_float_value(var_s this);
+static inline double *loc_s_float_value_ptr(var_s this);
 
 // - type STRING -
 static inline var_s loc_s_string(unsigned a_length,const char *a_data);
@@ -680,6 +682,13 @@ static inline long long int loc_s_int_value(var_s this)
   return this->v_data.lli;
 }/*}}}*/
 
+static inline long long int *loc_s_int_value_ptr(var_s this)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_integer);
+
+  return &this->v_data.lli;
+}/*}}}*/
+
 // - type FLOAT -
 static inline var_s loc_s_float(double a_value)
 {/*{{{*/
@@ -736,6 +745,13 @@ static inline double loc_s_float_value(var_s this)
   debug_assert(this->v_type == c_bi_type_float);
 
   return this->v_data.bd;
+}/*}}}*/
+
+static inline double *loc_s_float_value_ptr(var_s this)
+{/*{{{*/
+  debug_assert(this->v_type == c_bi_type_float);
+
+  return &this->v_data.bd;
 }/*}}}*/
 
 // - type STRING -

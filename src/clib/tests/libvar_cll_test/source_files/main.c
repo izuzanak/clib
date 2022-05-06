@@ -178,6 +178,12 @@ void test_var_integer()
   // - loc_s_int_value -
   cassert(loc_s_int_value(integer_0) == 10);
 
+  // - loc_s_int_value_ptr -
+  lli *integer_ptr = loc_s_int_value_ptr(integer_0);
+  *integer_ptr = 120;
+  cassert(loc_s_int_value(integer_0) == 120);
+  *integer_ptr = 10;
+
   // - loc_s_int_order -
   VAR(integer_2,loc_s_int(9));
   VAR(integer_3,loc_s_int(11));
@@ -222,6 +228,12 @@ void test_var_float()
 
   // - loc_s_float_value -
   cassert(loc_s_float_value(float_0) == 1.234);
+
+  // - loc_s_float_value_ptr -
+  double *float_ptr = loc_s_float_value_ptr(float_0);
+  *float_ptr = 1.0;
+  cassert(loc_s_float_value(float_0) == 1.0);
+  *float_ptr = 1.234;
 
   // - loc_s_float_order -
   VAR(float_2,loc_s_float(1.230));
