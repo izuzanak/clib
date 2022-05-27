@@ -17,7 +17,8 @@ if(FORCE_CLIB_LIBMICROHTTPD)
 endif()
 
 set(CONF_COMPONENTS
-  "src/clib/libs/libsys_cll")
+  "src/clib/libs/libsys_cll"
+  "src/clib/libs/liblinux_cll")
 set(CONF_HEADER_DIRS)
 
 if(LIBMICROHTTPD_FOUND)

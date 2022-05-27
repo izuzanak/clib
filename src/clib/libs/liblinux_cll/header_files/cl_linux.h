@@ -35,8 +35,6 @@ include "cl_time.h"
 #endif
 
 // - error codes -
-#define ERROR_LINUX_DUMMY_ERROR 1
-
 #define ERROR_SOCKET_ADDRESS_RESOLVE_ERROR 1
 #define ERROR_SOCKET_ADDRESS_NAME_ERROR 2
 

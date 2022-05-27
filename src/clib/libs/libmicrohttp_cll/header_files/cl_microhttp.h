@@ -4,6 +4,7 @@
 
 @begin
 include "cl_sys.h"
+include "cl_linux.h"
 @end
 
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
@@ -38,6 +39,7 @@ include "cl_sys.h"
 // - error codes -
 #define ERROR_HTTP_SERVER_CANNOT_START_DAEMON 1
 #define ERROR_HTTP_SERVER_INTERNAL_ERROR 2
+#define ERROR_HTTP_SERVER_UPDATE_FDS_ERROR 3
 
 #define ERROR_HTTP_CONN_CANNOT_QUEUE_RESPONSE 1
 #define ERROR_HTTP_CONN_ALREADY_SUSPENDED 2
@@ -45,6 +47,12 @@ include "cl_sys.h"
 #define ERROR_HTTP_CONN_CANNOT_RETRIEVE_CLIENT_IP 4
 
 #define ERROR_HTTP_RESP_CREATE_ERROR 1
+
+#define ERROR_HTTP_EPOLL_CREATE_ERROR 1
+#define ERROR_HTTP_EPOLL_PROCESS_ERROR 2
+#define ERROR_HTTP_EPOLL_UPDATE_FDS_ERROR 3
+#define ERROR_HTTP_EPOLL_EPOLL_ERROR 4
+#define ERROR_HTTP_EPOLL_TIMER_READ_ERROR 5
 
 typedef struct http_server_s http_server_s;
 typedef struct http_conn_s http_conn_s;
@@ -161,7 +169,7 @@ static inline void http_conn_s_to_string(const http_conn_s *this,bc_array_s *a_t
 #endif
 
 void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_key_value_tree_s *a_trg);
-WUR int http_conn_s_client_ip(http_conn_s *this,bc_array_s *a_trg);
+WUR libmicrohttp_cll_EXPORT int http_conn_s_client_ip(http_conn_s *this,bc_array_s *a_trg);
 WUR static inline int http_conn_s_suspend(http_conn_s *this);
 WUR static inline int http_conn_s_resume(http_conn_s *this);
 static inline void http_conn_s_digest_auth_username(http_conn_s *this,string_s *a_user);
@@ -198,6 +206,49 @@ static inline int http_resp_s_create_from_buffer(http_resp_s *this,
 static inline int http_resp_s_create_from_fd(http_resp_s *this,uint64_t a_size,int a_fd);
 static inline int http_resp_s_create_from_callback(http_resp_s *this,uint64_t a_size,size_t a_block_size,
     MHD_ContentReaderCallback a_crc,void *a_crc_cls,MHD_ContentReaderFreeCallback a_crfc);
+
+// === second definition of generated structures ===============================
+
+// -- http_borrow_fd_s --
+@begin
+struct
+<
+epoll_borrow_fd_s:epoll_fd
+ui:evts
+ui:sequence
+>
+http_borrow_fd_s;
+@end
+
+// -- http_borrow_fds_s --
+@begin
+array<http_borrow_fd_s> http_borrow_fds_s;
+@end
+
+// -- http_epoll_s --
+@begin
+struct
+<
+ui:epoll_sequence
+pollfd_array_s:pollfds
+http_borrow_fds_s:epoll_fds
+epoll_timer_s:epoll_timer
+
+bi:process
+http_server_s:server
+>
+http_epoll_s;
+@end
+
+WUR libmicrohttp_cll_EXPORT int http_epoll_s_create(http_epoll_s *this,usi a_port,
+    http_connection_cb_t a_connection_cb,
+    http_completed_cb_t a_completed_cb,
+    void *a_user_data);
+WUR static inline int http_epoll_s_check(http_epoll_s *this);
+WUR libmicrohttp_cll_EXPORT int http_epoll_s_process(http_epoll_s *this);
+WUR libmicrohttp_cll_EXPORT int http_epoll_s_update_epoll_fds(http_epoll_s *this);
+WUR libmicrohttp_cll_EXPORT int http_epoll_s_fd_event(void *a_http_epoll,unsigned a_index,epoll_event_s *a_epoll_event);
+WUR libmicrohttp_cll_EXPORT int http_epoll_s_time_event(void *a_http_epoll,unsigned a_index,epoll_event_s *a_epoll_event);
 
 // === inline methods of generated structures ==================================
 
@@ -537,6 +588,42 @@ static inline int http_resp_s_create_from_callback(http_resp_s *this,uint64_t a_
           a_size,a_block_size,a_crc,a_crc_cls,a_crfc)) == NULL)
   {
     throw_error(HTTP_RESP_CREATE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+// === second inline methods of generated structures ===========================
+
+// -- http_borrow_fd_s --
+@begin
+inlines http_borrow_fd_s
+@end
+
+// -- http_borrow_fds_s --
+@begin
+inlines http_borrow_fds_s
+@end
+
+// -- http_epoll_s --
+@begin
+inlines http_epoll_s
+@end
+
+static inline int http_epoll_s_check(http_epoll_s *this)
+{/*{{{*/
+
+  // - http process flag is set -
+  if (this->process)
+  {
+    // - process http requests -
+    if (http_epoll_s_process(this))
+    {
+      throw_error(HTTP_EPOLL_PROCESS_ERROR);
+    }
+
+    // - reset http process flag -
+    this->process = 0;
   }
 
   return 0;

@@ -319,3 +319,189 @@ int http_conn_s_queue_digest_auth_fail_response(http_conn_s *this,
 
 // === methods of structure http_resp_s ========================================
 
+// === second methods of generated structures ==================================
+
+// -- http_borrow_fd_s --
+@begin
+methods http_borrow_fd_s
+@end
+
+// -- http_borrow_fds_s --
+@begin
+methods http_borrow_fds_s
+@end
+
+// -- http_epoll_s --
+@begin
+methods http_epoll_s
+@end
+
+int http_epoll_s_create(http_epoll_s *this,usi a_port,
+    http_connection_cb_t a_connection_cb,
+    http_completed_cb_t a_completed_cb,
+    void *a_user_data)
+{/*{{{*/
+  http_epoll_s_clear(this);
+
+  // - initialize http epoll sequence -
+  this->epoll_sequence = 0;
+
+  // - create http server -
+  if (http_server_s_create(&this->server,
+        a_port,
+        a_connection_cb,
+        a_completed_cb,
+        a_user_data))
+  {
+    throw_error(HTTP_EPOLL_CREATE_ERROR);
+  }
+
+  // - update http epoll fds -
+  if (http_epoll_s_update_epoll_fds(this))
+  {
+    throw_error(HTTP_EPOLL_UPDATE_FDS_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+int http_epoll_s_process(http_epoll_s *this)
+{/*{{{*/
+
+  // - process http server work -
+  if (http_server_s_process(&this->server))
+  {
+    throw_error(HTTP_EPOLL_PROCESS_ERROR);
+  }
+
+  // - update http epoll fds -
+  if (http_epoll_s_update_epoll_fds(this))
+  {
+    throw_error(HTTP_EPOLL_UPDATE_FDS_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+int http_epoll_s_update_epoll_fds(http_epoll_s *this)
+{/*{{{*/
+
+  // - increase http epoll sequence -
+  ++this->epoll_sequence;
+
+  // - retrieve http server poll fds -
+  this->pollfds.used = 0;
+  if (http_server_s_fds(&this->server,&this->pollfds))
+  {
+    throw_error(HTTP_SERVER_UPDATE_FDS_ERROR);
+  }
+
+  // - process poll fds received from http server -
+  if (this->pollfds.used != 0)
+  {
+    pollfd_s *pfd_ptr = this->pollfds.data;
+    pollfd_s *pfd_ptr_end = pfd_ptr + this->pollfds.used;
+    do {
+
+      // - insert fds to http epoll fds -
+      while (pfd_ptr->fd >= this->epoll_fds.used)
+      {
+        CONT_INIT_CLEAR(http_borrow_fd_s,insert_borrow_fd)
+        insert_borrow_fd.evts     = 0;
+        insert_borrow_fd.sequence = 0;
+
+        http_borrow_fds_s_push_blank(&this->epoll_fds);
+        http_borrow_fd_s_swap(http_borrow_fds_s_last(&this->epoll_fds),&insert_borrow_fd);
+      }
+
+      http_borrow_fd_s *borrow_fd = this->epoll_fds.data + pfd_ptr->fd;
+
+      // - requested events were changed -
+      if (borrow_fd->evts != pfd_ptr->events)
+      {
+        borrow_fd->epoll_fd.fd = pfd_ptr->fd;
+
+        // - update epoll callback -
+        if (epoll_s_fd_callback(&borrow_fd->epoll_fd,pfd_ptr->events,
+              http_epoll_s_fd_event,this,0))
+        {
+          throw_error(HTTP_EPOLL_EPOLL_ERROR);
+        }
+
+        // - update fd events -
+        borrow_fd->evts = pfd_ptr->events;
+      }
+
+      // - update fd sequence -
+      borrow_fd->sequence = this->epoll_sequence;
+
+    } while(++pfd_ptr < pfd_ptr_end);
+  }
+
+  // - remove epoll fds with old sequence -
+  if (this->epoll_fds.used != 0)
+  {
+    http_borrow_fd_s *bf_ptr = this->epoll_fds.data;
+    http_borrow_fd_s *bf_ptr_end = bf_ptr + this->epoll_fds.used;
+    do {
+
+      // - events are not empty and sequence differs -
+      if (bf_ptr->evts != 0 && bf_ptr->sequence != this->epoll_sequence)
+      {
+        // - remove epoll callback -
+        epoll_borrow_fd_s_clear(&bf_ptr->epoll_fd);
+
+        bf_ptr->evts     = 0;
+        bf_ptr->sequence = 0;
+      }
+    } while(++bf_ptr < bf_ptr_end);
+  }
+
+  // - schedule http timer -
+  ulli timeout = http_server_s_timeout(&this->server);
+
+  struct itimerspec itimerspec = {{0,0},{timeout/1000000000ULL,timeout%1000000000ULL}};
+  if (epoll_s_timer_callback(&this->epoll_timer,&itimerspec,0,http_epoll_s_time_event,this,0))
+  {
+    throw_error(HTTP_EPOLL_EPOLL_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+int http_epoll_s_fd_event(void *a_http_epoll,unsigned a_index,epoll_event_s *a_epoll_event)
+{/*{{{*/
+  (void)a_index;
+  (void)a_epoll_event;
+
+  debug_message_7(fprintf(stderr,"http_epoll_s_fd_event\n"));
+
+  http_epoll_s *this = (http_epoll_s *)a_http_epoll;
+
+  // - set http process flag -
+  this->process = 1;
+
+  return 0;
+}/*}}}*/
+
+int http_epoll_s_time_event(void *a_http_epoll,unsigned a_index,epoll_event_s *a_epoll_event)
+{/*{{{*/
+  (void)a_index;
+
+  debug_message_7(fprintf(stderr,"http_epoll_s_time_event\n"));
+
+  // - read timer expiration counter -
+  uint64_t timer_exps;
+  if (read(a_epoll_event->data.fd,&timer_exps,sizeof(timer_exps)) != sizeof(timer_exps))
+  {
+    throw_error(HTTP_EPOLL_TIMER_READ_ERROR);
+  }
+
+  http_epoll_s *this = (http_epoll_s *)a_http_epoll;
+
+  // - set http process flag -
+  this->process = 1;
+
+  return 0;
+}/*}}}*/
+
