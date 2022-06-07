@@ -132,6 +132,12 @@ typedef long double ld;
   return ERROR_ ## ERROR_ID;\
 }/*}}}*/
 
+#define throw_warning(ERROR_ID)\
+{/*{{{*/\
+  debug_message_1(fprintf(stderr,"ERROR: " #ERROR_ID ", %s +%d, function: %s\n",__FILE__,__LINE__,__FUNCTION__));\
+  return 0;\
+}/*}}}*/
+
 // - asserts macros -
 #define cassert(A_COND)\
 {/*{{{*/\
