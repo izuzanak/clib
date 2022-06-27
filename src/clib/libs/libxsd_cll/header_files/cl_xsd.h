@@ -245,6 +245,28 @@ abbreviation string_s xs_dateTime_value_s
 WUR int xs_dateTime_value_s_write(const xs_dateTime_value_s *this,bc_array_s *a_trg);
 WUR int xs_dateTime_value_s_read(xs_dateTime_value_s *this,var_s a_var);
 
+// -- xs_date_s --
+@begin
+abbreviation string_s xs_date_s
+@end
+
+WUR int xs_date_s_write(const xs_date_s *this,bc_array_s *a_trg);
+WUR int xs_date_s_read(xs_date_s *this,var_s a_var);
+
+void xs_date_s_create(xs_date_s *this,time_s a_time);
+WUR int xs_date_s_parse(xs_date_s *this,time_s *a_time);
+
+// -- xs_time_s --
+@begin
+abbreviation string_s xs_time_s
+@end
+
+WUR int xs_time_s_write(const xs_time_s *this,bc_array_s *a_trg);
+WUR int xs_time_s_read(xs_time_s *this,var_s a_var);
+
+void xs_time_s_create(xs_time_s *this,time_s a_time);
+WUR int xs_time_s_parse(xs_time_s *this,time_s *a_time);
+
 // -- xs_dateTime_s --
 @begin
 abbreviation string_s xs_dateTime_s

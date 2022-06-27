@@ -548,6 +548,176 @@ int xs_dateTime_value_s_read(xs_dateTime_value_s *this,var_s a_var)
   return 0;
 }/*}}}*/
 
+// -- xs_date_s --
+int xs_date_s_write(const xs_date_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  xml_create_append_string(this->size - 1,this->data,a_trg);
+
+  return 0;
+}/*}}}*/
+
+int xs_date_s_read(xs_date_s *this,var_s a_var)
+{/*{{{*/
+  var_s value_var = loc_s_dict_get(a_var,g_str_text_var);
+  string_s_copy(this,loc_s_string_value(value_var));
+
+  return 0;
+}/*}}}*/
+
+void xs_date_s_create(xs_date_s *this,time_s a_time)
+{/*{{{*/
+  datetime_s dt;
+  datetime_s_from_nanosec(&dt,a_time);
+  string_s_set_format(this,
+      "%4.4hu-%2.2hhu-%2.2hhu",dt.year,dt.month,dt.day);
+}/*}}}*/
+
+int xs_date_s_parse(xs_date_s *this,time_s *a_time)
+{/*{{{*/
+  char *ptr = this->data;
+  char *end_ptr;
+
+  do {
+    datetime_s dt = {};
+
+    dt.year = strtoll(ptr,&end_ptr,10);
+    if (end_ptr - ptr != 4 || *end_ptr != '-') { break; }
+
+    ptr = end_ptr + 1;
+    dt.month = strtoll(ptr,&end_ptr,10);
+    if (end_ptr - ptr != 2 || *end_ptr != '-') { break; }
+
+    ptr = end_ptr + 1;
+    dt.day = strtoll(ptr,&end_ptr,10);
+
+    if (datetime_s_to_nanosec(&dt,a_time))
+    {
+      break;
+    }
+
+    char mod = *end_ptr;
+    switch (mod)
+    {
+    case '\0':
+    case 'Z':
+      return 0;
+    case '-':
+    case '+':
+      do {
+        ptr = end_ptr + 1;
+        dt.hour = strtoll(ptr,&end_ptr,10);
+        if (end_ptr - ptr != 2 || *end_ptr != ':') { break; }
+
+        ptr = end_ptr + 1;
+        dt.min = strtoll(ptr,&end_ptr,10);
+        if (end_ptr - ptr != 2 || *end_ptr != '\0') { break; }
+
+        ulli mod_value = (dt.hour*60ULL + dt.min)*60000000000ULL;
+
+        if (mod == '-')
+        {
+          *a_time -= mod_value;
+        }
+        else
+        {
+          *a_time += mod_value;
+        }
+
+        return 0;
+      } while(0);
+      break;
+    }
+  } while(0);
+
+  throw_error(XSD_DATE_TIME_PARSE_ERROR);
+}/*}}}*/
+
+// -- xs_time_s --
+int xs_time_s_write(const xs_time_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  xml_create_append_string(this->size - 1,this->data,a_trg);
+
+  return 0;
+}/*}}}*/
+
+int xs_time_s_read(xs_time_s *this,var_s a_var)
+{/*{{{*/
+  var_s value_var = loc_s_dict_get(a_var,g_str_text_var);
+  string_s_copy(this,loc_s_string_value(value_var));
+
+  return 0;
+}/*}}}*/
+
+void xs_time_s_create(xs_time_s *this,time_s a_time)
+{/*{{{*/
+  datetime_s dt;
+  datetime_s_from_nanosec(&dt,a_time);
+  string_s_set_format(this,
+      "%2.2hhu:%2.2hhu:%2.2hhu.%3.3hu",dt.hour,dt.min,dt.sec,dt.msec);
+}/*}}}*/
+
+int xs_time_s_parse(xs_time_s *this,time_s *a_time)
+{/*{{{*/
+  char *ptr = this->data;
+  char *end_ptr;
+
+  do {
+    datetime_s dt = { .year = 1970, .month = 1, .day = 1, };
+
+    dt.hour = strtoll(ptr,&end_ptr,10);
+    if (end_ptr - ptr != 2 || *end_ptr != ':') { break; }
+
+    ptr = end_ptr + 1;
+    dt.min = strtoll(ptr,&end_ptr,10);
+    if (end_ptr - ptr != 2 || *end_ptr != ':') { break; }
+
+    ptr = end_ptr + 1;
+    double sec = strtod(ptr,&end_ptr) + 0.0005;
+    dt.sec = sec;
+    dt.msec = (sec - dt.sec)*1000;
+
+    if (datetime_s_to_nanosec(&dt,a_time))
+    {
+      break;
+    }
+
+    char mod = *end_ptr;
+    switch (mod)
+    {
+    case '\0':
+    case 'Z':
+      return 0;
+    case '-':
+    case '+':
+      do {
+        ptr = end_ptr + 1;
+        dt.hour = strtoll(ptr,&end_ptr,10);
+        if (end_ptr - ptr != 2 || *end_ptr != ':') { break; }
+
+        ptr = end_ptr + 1;
+        dt.min = strtoll(ptr,&end_ptr,10);
+        if (end_ptr - ptr != 2 || *end_ptr != '\0') { break; }
+
+        ulli mod_value = (dt.hour*60ULL + dt.min)*60000000000ULL;
+
+        if (mod == '-')
+        {
+          *a_time -= mod_value;
+        }
+        else
+        {
+          *a_time += mod_value;
+        }
+
+        return 0;
+      } while(0);
+      break;
+    }
+  } while(0);
+
+  throw_error(XSD_DATE_TIME_PARSE_ERROR);
+}/*}}}*/
+
 // -- xs_dateTime_s --
 int xs_dateTime_s_write(const xs_dateTime_s *this,bc_array_s *a_trg)
 {/*{{{*/
@@ -601,7 +771,7 @@ int xs_dateTime_s_parse(xs_dateTime_s *this,time_s *a_time)
     if (end_ptr - ptr != 2 || *end_ptr != ':') { break; }
 
     ptr = end_ptr + 1;
-    double sec = strtod(ptr,&end_ptr);
+    double sec = strtod(ptr,&end_ptr) + 0.0005;
     dt.sec = sec;
     dt.msec = (sec - dt.sec)*1000;
 
