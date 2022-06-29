@@ -11,6 +11,7 @@ include "cl_time.h"
 #include <fcntl.h>
 #include <linux/fs.h>
 #include <linux/rtc.h>
+#include <net/if.h>
 #include <netdb.h>
 #include <signal.h>
 #include <sys/epoll.h>
