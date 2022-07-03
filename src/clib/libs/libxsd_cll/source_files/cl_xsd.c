@@ -199,11 +199,6 @@ int xs_unsignedInt_s_read(xs_unsignedInt_s *this,var_s a_var)
 // -- xs_unsignedLong_s --
 int xs_unsignedLong_s_write(const xs_unsignedLong_s *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (*this < 0)
-  {
-    throw_error(XSD_INVALID_DATA_ERROR);
-  }
-
   bc_array_s_append_format(a_trg,"%llu",*this);
 
   return 0;
@@ -217,8 +212,7 @@ int xs_unsignedLong_s_read(xs_unsignedLong_s *this,var_s a_var)
   char *end_ptr;
   *this = strtoll(value_str->data,&end_ptr,10);
 
-  if (end_ptr != (value_str->data + value_str->size - 1) ||
-      *this < 0)
+  if (end_ptr != (value_str->data + value_str->size - 1))
   {
     throw_error(XSD_INVALID_DATA_ERROR);
   }
