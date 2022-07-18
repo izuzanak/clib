@@ -7,8 +7,10 @@ set(CONF_COMPONENTS
   "src/clib/libs/libftgl_cll")
 set(CONF_HEADER_DIRS)
 
-set(CONF_DO_BUILD FALSE)
-set(CONF_INCLUDE_DIRS)
-set(CONF_COMP_DEFS)
-set(CONF_LINK_LIBS)
+if(DEFINED ENV{DISPLAY})
+  set(CONF_DO_BUILD TRUE)
+  set(CONF_INCLUDE_DIRS)
+  set(CONF_COMP_DEFS)
+  set(CONF_LINK_LIBS)
+endif()
 
