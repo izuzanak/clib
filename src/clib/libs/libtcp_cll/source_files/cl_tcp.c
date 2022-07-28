@@ -14,7 +14,9 @@ unsigned g_type_tcp_message = c_idx_not_exist;
 methods tcp_conn_s
 @end
 
-void tcp_conn_s_create(tcp_conn_s *this,epoll_fd_s *a_epoll_fd,
+void tcp_conn_s_create(tcp_conn_s *this,
+    socket_address_s *a_address,
+    epoll_fd_s *a_epoll_fd,
     tcp_conn_recv_callback_t a_conn_recv_callback,
     tcp_conn_send_callback_t a_conn_send_callback,
     void *a_cb_object,unsigned a_cb_index)
@@ -28,6 +30,7 @@ void tcp_conn_s_create(tcp_conn_s *this,epoll_fd_s *a_epoll_fd,
 #endif
 
   epoll_fd_s_swap(&this->epoll_fd,a_epoll_fd);
+  this->address = *a_address;
   this->conn_recv_callback = a_conn_recv_callback;
   this->conn_send_callback = a_conn_send_callback;
   this->cb_object = a_cb_object;
@@ -61,8 +64,7 @@ int tcp_conn_s_create_client(tcp_conn_s *this,
   int nonblock_io = 1;
 
   // - connect to server -
-  socket_address_s address;
-  if (socket_address_s_create(&address,a_server_ip,a_server_port) ||
+  if (socket_address_s_create(&this->address,a_server_ip,a_server_port) ||
       socket_s_create(&this->epoll_fd.fd,AF_INET,SOCK_STREAM) ||
       ioctl(this->epoll_fd.fd,FIONBIO,&nonblock_io))
   {
@@ -76,7 +78,7 @@ int tcp_conn_s_create_client(tcp_conn_s *this,
   }
 
   // - connect to server -
-  if (connect(this->epoll_fd.fd,(struct sockaddr *)&address,sizeof(struct sockaddr_in)) != 0)
+  if (connect(this->epoll_fd.fd,(struct sockaddr *)&this->address,sizeof(struct sockaddr_in)) != 0)
   {
     if (errno != EINPROGRESS)
     {
@@ -502,7 +504,7 @@ int tcp_server_s_fd_event(tcp_server_s *this,unsigned a_index,epoll_event_s *a_e
     throw_error(TCP_SERVER_ACCEPT_ERROR);
   }
 
-  tcp_conn_s_create(&this->conn_list.data[conn_idx].object,
+  tcp_conn_s_create(&this->conn_list.data[conn_idx].object,&address,
       &epoll_fd,this->conn_recv_callback,this->conn_send_callback,this->cb_object,conn_idx);
 
 #ifdef CLIB_WITH_OPENSSL

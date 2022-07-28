@@ -72,6 +72,7 @@ ssl_conn_s:ssl
 ui:ssl_action
 
 epoll_fd_s:epoll_fd
+socket_address_s:address
 bi:connecting
 
 pointer:conn_recv_callback
@@ -87,7 +88,9 @@ ui:out_msg_offset
 tcp_conn_s;
 @end
 
-libtcp_cll_EXPORT void tcp_conn_s_create(tcp_conn_s *this,epoll_fd_s *a_epoll_fd,
+libtcp_cll_EXPORT void tcp_conn_s_create(tcp_conn_s *this,
+    socket_address_s *a_address,
+    epoll_fd_s *a_epoll_fd,
     tcp_conn_recv_callback_t a_conn_recv_callback,
     tcp_conn_send_callback_t a_conn_send_callback,
     void *a_cb_object,unsigned a_cb_index);
