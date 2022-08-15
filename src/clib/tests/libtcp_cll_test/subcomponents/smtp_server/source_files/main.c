@@ -62,7 +62,7 @@ int smtp_comm_s_run(smtp_comm_s *this)
   return 0;
 }/*}}}*/
 
-unsigned smtp_conn_s_recognize_terminal(const bc_array_s *a_source,unsigned *a_input_idx) // NOLINT
+unsigned smtp_conn_s_recognize_terminal(const bc_array_s *a_source,unsigned *a_input_idx) // NOLINT, lgtm [cpp/use-of-goto]
 {/*{{{*/
 #define SMTP_CONN_GET_NEXT_CHAR() \
 {\
