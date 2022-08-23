@@ -105,7 +105,6 @@ MHD_RESULT http_server_s_connection_func(void *cls,struct MHD_Connection *connec
 
   if (res)
   {
-    server->ret_code = 1;
     return MHD_NO;
   }
 
