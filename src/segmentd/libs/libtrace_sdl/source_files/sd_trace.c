@@ -677,11 +677,13 @@ int sd_trace_s_write_header(sd_trace_s *this,time_s a_time)
       // - compute record crc -
       header_record->header.crc = sd_record_s_compute_crc(header_record,this->header_queue.rec_size);
 
+#ifndef CLIB_SEGMENTD_NOSYNC
       // - sync data to storage -
       if (sd_record_s_msync(header_record,this->header_queue.rec_size))
       {
         throw_error(SD_TRACE_RECORD_MSYNC_ERROR);
       }
+#endif
     }/*}}}*/
     break;
   case c_sd_trace_data_type_SEGMENT:
@@ -735,11 +737,13 @@ int sd_trace_s_write_timestamp_queue(sd_trace_s *this,time_s a_time)
       // - compute record crc -
       ts_trace_record->header.crc = sd_record_s_compute_crc(ts_trace_record,this->ts_trace_queue.rec_size);
 
+#ifndef CLIB_SEGMENTD_NOSYNC
       // - sync data to storage -
       if (sd_record_s_msync(ts_trace_record,this->ts_trace_queue.rec_size))
       {
         throw_error(SD_TRACE_RECORD_MSYNC_ERROR);
       }
+#endif
     }/*}}}*/
     break;
   case c_sd_trace_data_type_SEGMENT:
@@ -878,11 +882,13 @@ int sd_trace_s_write_record(sd_trace_s *this,time_s a_time,unsigned a_size,const
   // - compute record crc -
   trace_record->header.crc = sd_record_s_compute_crc(trace_record,this->trace_queue.rec_size);
 
+#ifndef CLIB_SEGMENTD_NOSYNC
   // - sync data to storage -
   if (sd_record_s_msync(trace_record,this->trace_queue.rec_size))
   {
     throw_error(SD_TRACE_RECORD_MSYNC_ERROR);
   }
+#endif
 
   // - write trace header to storage -
   if (sd_trace_s_write_header(this,a_time))

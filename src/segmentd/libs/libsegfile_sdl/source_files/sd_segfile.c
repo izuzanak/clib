@@ -138,11 +138,13 @@ int sd_segment_file_s_write_record(sd_segment_file_s *this,
     throw_error(SD_SEGFILE_RECORD_WRITE_ERROR);
   }
 
+#ifndef CLIB_SEGMENTD_NOSYNC
   // - sync data to file -
   if (fsync(this->fd) == -1)
   {
     throw_error(SD_SEGFILE_FILE_SYNC_ERROR);
   }
+#endif
 
   return 0;
 }/*}}}*/

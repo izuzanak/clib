@@ -105,8 +105,11 @@ int sd_segment_files_s_write_record(sd_segment_files_s *this,
   CONT_INIT_CLEAR(fd_s,fd);
 
   if ((fd = open(this->path_tmp.data,O_WRONLY | O_CREAT,0666)) == -1 ||
-      fd_s_write(&fd,this->rec_data.data,this->rec_data.used) ||
-      fsync(fd))
+      fd_s_write(&fd,this->rec_data.data,this->rec_data.used)
+#ifndef CLIB_SEGMENTD_NOSYNC
+      || fsync(fd)
+#endif
+     )
   {
     throw_error(SD_SEGFILES_RECORD_WRITE_ERROR);
   }
@@ -114,9 +117,12 @@ int sd_segment_files_s_write_record(sd_segment_files_s *this,
   fd_s_clear(&fd);
 
   // - syncfs is used to asure, that directory entry is also synced -
-  if (rename(this->path_tmp.data,this->path.data) ||
-      (fd = open(this->path.data,O_WRONLY)) == -1 ||
-      syncfs(fd))
+  if (rename(this->path_tmp.data,this->path.data)
+#ifndef CLIB_SEGMENTD_NOSYNC
+      || (fd = open(this->path.data,O_WRONLY)) == -1
+      || syncfs(fd)
+#endif
+     )
   {
     throw_error(SD_SEGFILES_RECORD_WRITE_ERROR);
   }

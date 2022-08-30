@@ -6,6 +6,16 @@ find_package(PkgConfig)
 project(clib)
 #set(CMAKE_C_CPPCHECK "cppcheck")
 
+if(NOT DEFINED PROJECT_DEFS)
+  set(PROJECT_DEFS
+      #"-DCLIB_OBJECTDB_NOSYNC"
+      #"-DCLIB_SEGMENTD_NOSYNC"
+     )
+endif()
+
+string(REPLACE ";" " " C_PROJECT_DEFS "${PROJECT_DEFS}")
+string(REPLACE "-D" "--def=" CONT_PROJECT_DEFS "${PROJECT_DEFS}")
+
 set(EXT_LIBS "${CMAKE_CURRENT_SOURCE_DIR}/ext_libs")
 set(PROC_DIR "${CMAKE_CURRENT_BINARY_DIR}/proc_files")
 set(TESTS_DIR "${CMAKE_CURRENT_BINARY_DIR}/tests")
@@ -22,23 +32,24 @@ define_property(GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS
     BRIEF_DOCS "Global include components header directories"
     FULL_DOCS "Global include components header directories")
 
+set_property(GLOBAL PROPERTY TARGET_MESSAGES OFF)
 set_property(GLOBAL PROPERTY GP_INCLUDE_COMP_REL_DIRS)
 set_property(GLOBAL PROPERTY GP_INCLUDE_COMP_HEADER_DIRS)
 
 # - update compilation flags -
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wfatal-errors -DLINUX")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wfatal-errors -DLINUX ${C_PROJECT_DEFS}")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined -fprofile-arcs -ftest-coverage")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 
 # - process target source file -
 function(process_source TARGET)
 # {{{
-  execute_process(COMMAND ${PROCESS_BIN} --deps "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS}
+  execute_process(COMMAND ${PROCESS_BIN} ${CONT_PROJECT_DEFS} --deps "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS}
       OUTPUT_VARIABLE DEPS
       ERROR_QUIET)
   add_custom_command(OUTPUT "${PROC_DIR}/p.${TARGET}.c"
       DEPENDS ${DEPS}
-      COMMAND ${PROCESS_BIN} --geninc "--output" "${PROC_DIR}/p.${TARGET}.c" "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS})
+      COMMAND ${PROCESS_BIN} ${CONT_PROJECT_DEFS} --geninc "--output" "${PROC_DIR}/p.${TARGET}.c" "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS})
 # }}}
 endfunction()
 
@@ -218,7 +229,7 @@ endforeach()
 if(NOT DEFINED CS_COMPONENTS)
   set(CS_COMPONENTS
       "src/clib/libs/libvdv301_cll"
-    )
+      )
 endif()
 
 foreach(COMPONENT ${CS_COMPONENTS})

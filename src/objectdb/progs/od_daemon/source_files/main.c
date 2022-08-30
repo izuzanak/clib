@@ -287,7 +287,11 @@ int od_daemon_s_storage_write(od_daemon_s *this,const string_s *a_path,var_s a_d
     // - create temporary storage file -
     if (file_s_open(&tmp_storage,tmp_path.data,"wb") ||
         stream_s_write(&tmp_storage,this->buffer.data,this->buffer.used) ||
-        stream_s_fflush(&tmp_storage) || fsync(fileno(tmp_storage)))
+        stream_s_fflush(&tmp_storage)
+#ifndef CLIB_OBJECTDB_NOSYNC
+        || fsync(fileno(tmp_storage))
+#endif
+        )
     {
       throw_error(OD_STORAGE_FILE_WRITE_ERROR);
     }
@@ -305,7 +309,11 @@ int od_daemon_s_storage_write(od_daemon_s *this,const string_s *a_path,var_s a_d
   {
     // - write record to file -
     if (stream_s_write(&this->storage,this->buffer.data,this->buffer.used) ||
-        stream_s_fflush(&this->storage) || fsync(fileno(this->storage)))
+        stream_s_fflush(&this->storage)
+#ifndef CLIB_OBJECTDB_NOSYNC
+        || fsync(fileno(this->storage))
+#endif
+       )
     {
       throw_error(OD_STORAGE_FILE_WRITE_ERROR);
     }
