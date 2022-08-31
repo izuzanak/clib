@@ -1375,7 +1375,7 @@ int main(int argc,char **argv)
   }
 
   // - create process directories -
-  cassert(system("mkdir -p " PROCESS_RUN_DIR_PATH " " PROCESS_LOG_DIR_PATH) == 0); // NOLINT
+  cassert(system("mkdir -p -m 777 " PROCESS_RUN_DIR_PATH " " PROCESS_LOG_DIR_PATH) == 0); // NOLINT
 
   // - create process -
   {
