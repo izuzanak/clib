@@ -192,7 +192,7 @@ static inline void bc_array_s_append(bc_array_s *this,unsigned a_count,const cha
   {
     unsigned old_used = this->used;
     bc_array_s_push_blanks(this,a_count);
-    memcpy(this->data + old_used,a_data,a_count);
+    memcpy(this->data + old_used,a_data,a_count); // NOLINT(clang-analyzer-core.NonNullParamChecker)
   }
 }/*}}}*/
 
