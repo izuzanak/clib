@@ -21,8 +21,8 @@ int client_authenticate(void *a_client_list,unsigned a_index)
   rtsp_client_list_s *client_list = (rtsp_client_list_s *)a_client_list;
   rtsp_digest_s *digest = &rtsp_client_list_s_at(client_list,a_index)->digest;
 
-  string_s_set_ptr(&digest->username,"root");
-  string_s pass = STRING_S("kolotoc");
+  string_s_set_ptr(&digest->username,"jirka");
+  string_s pass = STRING_S("heslo");
 
   if (rtsp_digest_s_authenticate(digest,&pass,0))
   {
@@ -52,7 +52,30 @@ int client_recv_packet(void *a_client_list,unsigned a_index,time_s a_time,const 
   (void)a_src;
 
   // - packet received indication -
+#if 1
   fputc('.',stderr);
+#endif
+
+  // - ntp timestamp -
+#if 0
+  const char *onvif = a_src->data + RTP_TCP_PKT_HEADER_SIZE;
+
+  unsigned seconds;
+  unsigned fraction;
+
+  memcpy(&seconds,onvif + 4,sizeof(unsigned));
+  memcpy(&fraction,onvif + 8,sizeof(unsigned));
+
+  seconds = ntohl(seconds);
+  fraction = ntohl(fraction);
+
+  time_s time = (seconds - 2208988800U)*1000000000ULL + fraction*1000000000ULL/UINT_MAX;
+
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+  time_s_to_string(&time,&buffer);
+  bc_array_s_append_format(&buffer,".%3.3llu",time_s_milli(&time) % 1000);
+  fprintf(stderr,"NTP time: %.*s\n",buffer.used,buffer.data);
+#endif
 
   return 0;
 }/*}}}*/
@@ -114,13 +137,13 @@ int main(int argc,char **argv)
     //const unsigned short port = 554;
     //const char *media = "h264";
 
-    //const char *server_ip = "127.0.0.1";
-    //const unsigned short port = 8006;
-    //const char *media = "onvif/http_0/56043006/last/all/single";
+    const char *server_ip = "127.0.0.1";
+    const unsigned short port = 8006;
+    const char *media = "onvif/mpv/56043004/20221102100530/all/single";
 
-    const char *server_ip = "10.2.1.174";
-    const unsigned short port = 554;
-    const char *media = "axis-media/media.amp";
+    //const char *server_ip = "10.2.1.174";
+    //const unsigned short port = 554;
+    //const char *media = "axis-media/media.amp";
 
     //const char *server_ip = "10.2.1.18";
     //const unsigned short port = 554;
