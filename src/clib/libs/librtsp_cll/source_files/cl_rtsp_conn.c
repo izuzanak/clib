@@ -226,7 +226,7 @@ int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_par
 
         int get_sdp_result = 0;
         if ((get_sdp_result = ((rtsp_conn_get_sdp_callback_t)server->conn_get_sdp_callback)(
-              server->cb_object,this->index,&this->buffer)) ||
+              server->cb_object,this->index,a_parser,&this->buffer)) ||
               this->buffer.used == 0)
         {
           if (get_sdp_result != ERROR_RTSP_CONN_AUTHENTICATE_ERROR)

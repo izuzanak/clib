@@ -138,7 +138,7 @@ typedef int (*rtsp_recv_packet_callback_t)(void *a_object,unsigned a_index,time_
 typedef struct rtsp_server_s rtsp_server_s;
 typedef int (*rtsp_conn_new_callback_t)(void *a_object,unsigned a_index);
 typedef int (*rtsp_conn_drop_callback_t)(void *a_object,unsigned a_index);
-typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,bc_array_s *a_trg);
+typedef int (*rtsp_conn_get_sdp_callback_t)(void *a_object,unsigned a_index,rtsp_parser_s *a_parser,bc_array_s *a_trg);
 typedef int (*rtsp_conn_check_media_callback_t)(void *a_object,unsigned a_index,const char *a_url,unsigned *a_channel);
 typedef int (*rtsp_conn_playing_callback_t)(void *a_object,unsigned a_index,ulli a_session,rtsp_play_options_s *a_options);
 typedef int (*rtsp_conn_get_packet_callback_t)(void *a_object,unsigned a_index,ulli *a_delay,bc_block_s *a_trg);

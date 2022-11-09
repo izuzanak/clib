@@ -103,7 +103,7 @@ int rtsp_player_s_conn_drop(void *a_rtsp_player,unsigned a_index)
   return 0;
 }/*}}}*/
 
-int rtsp_player_s_conn_get_sdp(void *a_rtsp_player,unsigned a_index,bc_array_s *a_trg)
+int rtsp_player_s_conn_get_sdp(void *a_rtsp_player,unsigned a_index,rtsp_parser_s *a_parser,bc_array_s *a_trg)
 {/*{{{*/
   (void)a_index;
 
@@ -111,19 +111,15 @@ int rtsp_player_s_conn_get_sdp(void *a_rtsp_player,unsigned a_index,bc_array_s *
 
   rtsp_player_s *this = (rtsp_player_s *)a_rtsp_player;
 
-  // - retrieve rtsp connection -
-  rtsp_conn_s *conn = rtsp_conn_list_s_at(&this->server.conn_list,a_index);
-  const char *rtsp_url = conn->parser.rtsp_url;
-
   // - retrieve media name from url -
-  if (!regex_s_match_n(&this->url_path_regex,rtsp_url,2,&this->match_array) ||
+  if (!regex_s_match_n(&this->url_path_regex,a_parser->rtsp_url,2,&this->match_array) ||
       this->match_array.used != 2)
   {
     throw_error(PLAYER_INVALID_MEDIA_URL);
   }
 
   this->buffer.used = 0;
-  bc_array_s_append_format(&this->buffer,"%s/%s.sdp",this->base_dir.data,rtsp_url + this->match_array.data[1].rm_so);
+  bc_array_s_append_format(&this->buffer,"%s/%s.sdp",this->base_dir.data,a_parser->rtsp_url + this->match_array.data[1].rm_so);
   bc_array_s_push(&this->buffer,'\0');
 
   struct stat statbuf;
