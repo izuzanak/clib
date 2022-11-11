@@ -624,8 +624,8 @@ int mqtt_conn_s_process_packet(mqtt_conn_s *this,uint8_t pkt_type,uint32_t size,
       mqtt_publish_s *publish;
 
       // - packet id is ok and qos matches -
-      if (this->packet_id < this->pubrec.used
-          && (publish = mqtt_publish_array_s_at(&this->published,this->packet_id))->packet_id != this->packet_id
+      if (this->packet_id < this->published.used
+          && (publish = mqtt_publish_array_s_at(&this->published,this->packet_id))->packet_id == this->packet_id
           && publish->qos == 2)
       {
         // - reason code: Success -

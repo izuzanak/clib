@@ -113,6 +113,7 @@ void pa_rtsp_auth_nonce(rtsp_parser_s *this);
 void pa_rtsp_auth_uri(rtsp_parser_s *this);
 void pa_rtsp_auth_response(rtsp_parser_s *this);
 void pa_rtsp_auth_stale(rtsp_parser_s *this);
+void pa_rtsp_auth_qop(rtsp_parser_s *this);
 
 // === inline methods of generated structures ==================================
 
