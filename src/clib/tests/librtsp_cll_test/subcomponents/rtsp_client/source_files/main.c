@@ -19,12 +19,12 @@ int client_authenticate(void *a_client_list,unsigned a_index)
   debug_message_1(fprintf(stderr,"client_authenticate\n"));
 
   rtsp_client_list_s *client_list = (rtsp_client_list_s *)a_client_list;
-  rtsp_digest_s *digest = &rtsp_client_list_s_at(client_list,a_index)->digest;
+  rtsp_auth_s *digest = &rtsp_client_list_s_at(client_list,a_index)->digest;
 
   string_s_set_ptr(&digest->username,"jirka");
   string_s pass = STRING_S("heslo");
 
-  if (rtsp_digest_s_authenticate(digest,&pass,0))
+  if (rtsp_auth_s_digest_authenticate(digest,&pass,0))
   {
     throw_error(RTSP_CLIENT_DIGEST_ERROR);
   }

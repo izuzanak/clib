@@ -481,7 +481,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
         throw_error(RTSP_CLIENT_INVALID_STATE);
     }
 
-    rtsp_digest_s_swap(&this->digest,&this->parser.digest);
+    rtsp_auth_s_swap(&this->digest,&this->parser.digest_auth);
     this->parser.digest_authenticate = 0;
 
     // - set first authorization flag -

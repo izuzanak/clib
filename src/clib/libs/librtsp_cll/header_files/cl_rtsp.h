@@ -189,7 +189,7 @@ epoll_fd_s:epoll_fd
 bc_array_s:in_msg
 bc_array_s:out_msg
 rtsp_parser_s:parser
-rtsp_digest_s:digest
+rtsp_auth_s:digest
 bi:digest_first_auth
 
 string_s:video_control

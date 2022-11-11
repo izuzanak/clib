@@ -14,7 +14,7 @@ include "cl_linux.h"
 
 // === definition of generated structures ======================================
 
-// -- rtsp_digest_s --
+// -- rtsp_auth_s --
 @begin
 struct
 <
@@ -25,10 +25,10 @@ string_s:nonce
 string_s:uri
 string_s:response
 >
-rtsp_digest_s;
+rtsp_auth_s;
 @end
 
-WUR int rtsp_digest_s_authenticate(rtsp_digest_s *this,
+WUR int rtsp_auth_s_digest_authenticate(rtsp_auth_s *this,
     const string_s *a_pass,bi a_verify);
 
 // -- rtsp_parser_s --
@@ -55,7 +55,9 @@ bi:onvif_replay
 pointer:rtsp_url
 ui:inter_port_begin
 ui:inter_port_end
-rtsp_digest_s:digest
+rtsp_auth_s:auth
+rtsp_auth_s:basic_auth
+rtsp_auth_s:digest_auth
 bi:digest_authorization
 bi:digest_authenticate
 
@@ -88,6 +90,7 @@ void pa_rtsp_header_require(rtsp_parser_s *this);
 void pa_rtsp_header_xscookie(rtsp_parser_s *this);
 void pa_rtsp_header_digest_authorization(rtsp_parser_s *this);
 void pa_rtsp_header_digest_authenticate(rtsp_parser_s *this);
+void pa_rtsp_header_basic_authenticate(rtsp_parser_s *this);
 void pa_rtsp_header_ignore(rtsp_parser_s *this);
 void pa_rtsp_header_accept(rtsp_parser_s *this);
 void pa_rtsp_pubcmd_get(rtsp_parser_s *this);
@@ -117,9 +120,9 @@ void pa_rtsp_auth_qop(rtsp_parser_s *this);
 
 // === inline methods of generated structures ==================================
 
-// -- rtsp_digest_s --
+// -- rtsp_auth_s --
 @begin
-inlines rtsp_digest_s
+inlines rtsp_auth_s
 @end
 
 // -- rtsp_parser_s --

@@ -240,7 +240,7 @@ int rtsp_conn_s_parse_and_process_command(rtsp_conn_s *this,rtsp_parser_s *a_par
 "RTSP/1.0 401 Unauthorized\r\n"
 "WWW-Authenticate: Digest realm=\"%s\", nonce=\"%s\"\r\n"
 "CSeq: %u\r\n"
-"\r\n",a_parser->digest.realm.data,a_parser->digest.nonce.data,a_parser->cseq);
+"\r\n",a_parser->digest_auth.realm.data,a_parser->digest_auth.nonce.data,a_parser->cseq);
 
             if (rtsp_conn_s_send_resp(this,&this->out_msg))
             {
