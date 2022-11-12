@@ -110,16 +110,17 @@ int rtsp_player_s_conn_get_sdp(void *a_rtsp_player,unsigned a_index,rtsp_parser_
   debug_message_6(fprintf(stderr,"rtsp_player_s_conn_get_sdp: %u\n",a_index));
 
   rtsp_player_s *this = (rtsp_player_s *)a_rtsp_player;
+  char *rtsp_url = a_parser->rtsp_url;
 
   // - retrieve media name from url -
-  if (!regex_s_match_n(&this->url_path_regex,a_parser->rtsp_url,2,&this->match_array) ||
+  if (!regex_s_match_n(&this->url_path_regex,rtsp_url,2,&this->match_array) ||
       this->match_array.used != 2)
   {
     throw_error(PLAYER_INVALID_MEDIA_URL);
   }
 
   this->buffer.used = 0;
-  bc_array_s_append_format(&this->buffer,"%s/%s.sdp",this->base_dir.data,a_parser->rtsp_url + this->match_array.data[1].rm_so);
+  bc_array_s_append_format(&this->buffer,"%s/%s.sdp",this->base_dir.data,rtsp_url + this->match_array.data[1].rm_so);
   bc_array_s_push(&this->buffer,'\0');
 
   struct stat statbuf;
