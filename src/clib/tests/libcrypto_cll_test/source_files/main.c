@@ -14,6 +14,7 @@ const char *test_names[] =
   "base64",
   "pkey",
   "digest",
+  "sign",
   "cipher",
   "seal",
 };/*}}}*/
@@ -25,6 +26,7 @@ test_function_t test_functions[] =
   test_base64,
   test_pkey,
   test_digest,
+  test_sign,
   test_cipher,
   test_seal,
 };/*}}}*/
@@ -101,6 +103,53 @@ void test_digest()
   bc_array_s_push(&data,'\0');
   printf("digest: %.*s\n",data.used,data.data);
   cassert(strcmp(data.data,"1bd5ec15650c4dc0c3b1cf48c8d32cc05664aa807a8d11651133a9fe3e6076be") == 0);
+}/*}}}*/
+
+void test_sign()
+{/*{{{*/
+  CONT_INIT_CLEAR(crypto_pkey_s,private);
+  cassert(crypto_pkey_s_load_private(&private,"tests/libcrypto_cll_test/resources/private.pem","password") == 0);
+
+  CONT_INIT_CLEAR(crypto_pkey_s,public);
+  cassert(crypto_pkey_s_load_public(&public,"tests/libcrypto_cll_test/resources/public.pem","password") == 0);
+
+  CONT_INIT_CLEAR(file_s,file);
+  cassert(file_s_open(&file,"tests/libcrypto_cll_test/resources/file.xml","r") == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,data);
+  cassert(file_s_read_close(&file,&data) == 0);
+
+  CONT_INIT_CLEAR(crypto_digest_info_s,digest_info);
+  cassert(crypto_digest_info_s_get_by_name(&digest_info,"RSA-SHA256") == 0);
+
+  printf("digest name: %s\n",crypto_digest_info_s_name(&digest_info));
+
+  // - create signature -
+  CONT_INIT_CLEAR(crypto_sign_s,sign);
+  cassert(crypto_sign_s_create(&sign,&digest_info,&private) == 0);
+  cassert(crypto_sign_s_update(&sign,data.data,data.used) == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,signature);
+  cassert(crypto_sign_s_value(&sign,&signature) == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,signature_base16);
+  crypto_encode_base16(signature.data,signature.used,&signature_base16);
+  bc_array_s_push(&signature_base16,'\0');
+  printf("singature: %.*s\n",signature_base16.used,signature_base16.data);
+  cassert(strcmp(signature_base16.data,
+"15476b81b7da6fac5a3bd341266c37f4e7f9179efec5a5454d8d5b93fae02194f34b08b94af713b12e09baab4b43b39d14826"
+"0fd348ad983ada3cafec39ad49860a72c69e1947ced821780548b3592a473af2a1142865af6d9400933e93ca564d55e7fff5c"
+"0e27990db365b93e4dcfd98a2375a32656c41ad525394d1e64920a") == 0);
+
+  // - verify signature -
+  CONT_INIT_CLEAR(crypto_verify_s,verify);
+  cassert(crypto_verify_s_create(&verify,&digest_info,&public) == 0);
+  cassert(crypto_verify_s_update(&verify,data.data,data.used) == 0);
+
+  int result;
+  cassert(crypto_verify_s_verify(&verify,signature.data,signature.used,&result) == 0);
+  printf("verification result: %d\n",result);
+  cassert(result);
 }/*}}}*/
 
 void test_cipher()

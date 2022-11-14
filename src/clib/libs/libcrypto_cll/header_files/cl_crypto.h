@@ -33,6 +33,14 @@ include "cl_struct.h"
 #define ERROR_CRYPTO_DIGEST_UPDATE_ERROR 3
 #define ERROR_CRYPTO_DIGEST_VALUE_ERROR 4
 
+#define ERROR_CRYPTO_SIGN_CREATE_INIT_ERROR 1
+#define ERROR_CRYPTO_SIGN_UPDATE_ERROR 2
+#define ERROR_CRYPTO_SIGN_VALUE_ERROR 3
+
+#define ERROR_CRYPTO_VERIFY_CREATE_INIT_ERROR 1
+#define ERROR_CRYPTO_VERIFY_UPDATE_ERROR 2
+#define ERROR_CRYPTO_VERIFY_VERIFY_ERROR 3
+
 #define ERROR_CRYPTO_CIPHER_INVALID_ALGORITHM_NAME 1
 #define ERROR_CRYPTO_CIPHER_INVALID_KEY_LENGTH 2
 #define ERROR_CRYPTO_CIPHER_INVALID_INIT_VECTOR_LENGTH 3
@@ -112,6 +120,61 @@ WUR libcrypto_cll_EXPORT int crypto_digest_s_create(crypto_digest_s *this,crypto
 WUR static inline int crypto_digest_s_update(crypto_digest_s *this,const char *a_data,unsigned a_size);
 WUR libcrypto_cll_EXPORT int crypto_digest_s_value(crypto_digest_s *this,bc_array_s *a_trg);
 
+// === definition of structure crypto_sign_s ===================================
+
+typedef struct crypto_sign_s
+{
+  EVP_MD_CTX *context;
+  EVP_PKEY *pkey;
+} crypto_sign_s;
+
+@begin
+define crypto_sign_s dynamic
+@end
+
+static inline void crypto_sign_s_init(crypto_sign_s *this);
+static inline void crypto_sign_s_clear(crypto_sign_s *this);
+static inline void crypto_sign_s_flush_all(crypto_sign_s *this);
+static inline void crypto_sign_s_swap(crypto_sign_s *this,crypto_sign_s *a_second);
+static inline void crypto_sign_s_copy(const crypto_sign_s *this,const crypto_sign_s *a_src);
+static inline int crypto_sign_s_compare(const crypto_sign_s *this,const crypto_sign_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void crypto_sign_s_to_string(const crypto_sign_s *this,bc_array_s *a_trg);
+#endif
+
+WUR libcrypto_cll_EXPORT int crypto_sign_s_create(crypto_sign_s *this,
+    crypto_digest_info_s *a_digest_info,crypto_pkey_s *a_pkey);
+WUR static inline int crypto_sign_s_update(crypto_sign_s *this,const char *a_data,unsigned a_size);
+WUR libcrypto_cll_EXPORT int crypto_sign_s_value(crypto_sign_s *this,bc_array_s *a_trg);
+
+// === definition of structure crypto_verify_s =================================
+
+typedef struct crypto_verify_s
+{
+  EVP_MD_CTX *context;
+  EVP_PKEY *pkey;
+} crypto_verify_s;
+
+@begin
+define crypto_verify_s dynamic
+@end
+
+static inline void crypto_verify_s_init(crypto_verify_s *this);
+static inline void crypto_verify_s_clear(crypto_verify_s *this);
+static inline void crypto_verify_s_flush_all(crypto_verify_s *this);
+static inline void crypto_verify_s_swap(crypto_verify_s *this,crypto_verify_s *a_second);
+static inline void crypto_verify_s_copy(const crypto_verify_s *this,const crypto_verify_s *a_src);
+static inline int crypto_verify_s_compare(const crypto_verify_s *this,const crypto_verify_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void crypto_verify_s_to_string(const crypto_verify_s *this,bc_array_s *a_trg);
+#endif
+
+WUR libcrypto_cll_EXPORT int crypto_verify_s_create(crypto_verify_s *this,
+    crypto_digest_info_s *a_digest_info,crypto_pkey_s *a_pkey);
+WUR static inline int crypto_verify_s_update(crypto_verify_s *this,const char *a_data,unsigned a_size);
+WUR libcrypto_cll_EXPORT int crypto_verify_s_verify(crypto_verify_s *this,
+    const char *a_data,unsigned a_size,int *a_result);
+
 // === definition of structure crypto_cipher_info_s ============================
 
 typedef const EVP_CIPHER *crypto_cipher_info_s;
@@ -124,7 +187,8 @@ static inline void crypto_cipher_info_s_clear(crypto_cipher_info_s *this);
 static inline void crypto_cipher_info_s_flush_all(crypto_cipher_info_s *this);
 static inline void crypto_cipher_info_s_swap(crypto_cipher_info_s *this,crypto_cipher_info_s *a_second);
 static inline void crypto_cipher_info_s_copy(crypto_cipher_info_s *this,const crypto_cipher_info_s *a_src);
-static inline int crypto_cipher_info_s_compare(const crypto_cipher_info_s *this,const crypto_cipher_info_s *a_second);
+static inline int crypto_cipher_info_s_compare(const crypto_cipher_info_s *this,
+    const crypto_cipher_info_s *a_second);
 #if OPTION_TO_STRING == ENABLED
 static inline void crypto_cipher_info_s_to_string(const crypto_cipher_info_s *this,bc_array_s *a_trg);
 #endif
@@ -432,6 +496,134 @@ static inline int crypto_digest_s_update(crypto_digest_s *this,const char *a_dat
   if (EVP_DigestUpdate(this->context,a_data,a_size) != 1)
   {
     throw_error(CRYPTO_DIGEST_UPDATE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+// === inline methods of structure crypto_sign_s ===============================
+
+static inline void crypto_sign_s_init(crypto_sign_s *this)
+{/*{{{*/
+  this->context = NULL;
+  this->pkey = NULL;
+}/*}}}*/
+
+static inline void crypto_sign_s_clear(crypto_sign_s *this)
+{/*{{{*/
+  if (this->context != NULL)
+  {
+    EVP_MD_CTX_destroy(this->context);
+  }
+
+  crypto_sign_s_init(this);
+}/*}}}*/
+
+static inline void crypto_sign_s_flush_all(crypto_sign_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void crypto_sign_s_swap(crypto_sign_s *this,crypto_sign_s *a_second)
+{/*{{{*/
+  crypto_sign_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void crypto_sign_s_copy(const crypto_sign_s *this,const crypto_sign_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int crypto_sign_s_compare(const crypto_sign_s *this,const crypto_sign_s *a_second)
+{/*{{{*/
+  (void)this;
+  (void)a_second;
+
+  cassert(0);
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void crypto_sign_s_to_string(const crypto_sign_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"crypto_sign_s{%p}",this);
+}/*}}}*/
+#endif
+
+static inline int crypto_sign_s_update(crypto_sign_s *this,const char *a_data,unsigned a_size)
+{/*{{{*/
+
+  // - ERROR -
+  if (EVP_DigestSignUpdate(this->context,a_data,a_size) != 1)
+  {
+    throw_error(CRYPTO_SIGN_UPDATE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+// === inline methods of structure crypto_verify_s =============================
+
+static inline void crypto_verify_s_init(crypto_verify_s *this)
+{/*{{{*/
+  this->context = NULL;
+  this->pkey = NULL;
+}/*}}}*/
+
+static inline void crypto_verify_s_clear(crypto_verify_s *this)
+{/*{{{*/
+  if (this->context != NULL)
+  {
+    EVP_MD_CTX_destroy(this->context);
+  }
+
+  crypto_verify_s_init(this);
+}/*}}}*/
+
+static inline void crypto_verify_s_flush_all(crypto_verify_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void crypto_verify_s_swap(crypto_verify_s *this,crypto_verify_s *a_second)
+{/*{{{*/
+  crypto_verify_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void crypto_verify_s_copy(const crypto_verify_s *this,const crypto_verify_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int crypto_verify_s_compare(const crypto_verify_s *this,const crypto_verify_s *a_second)
+{/*{{{*/
+  (void)this;
+  (void)a_second;
+
+  cassert(0);
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void crypto_verify_s_to_string(const crypto_verify_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"crypto_verify_s{%p}",this);
+}/*}}}*/
+#endif
+
+static inline int crypto_verify_s_update(crypto_verify_s *this,const char *a_data,unsigned a_size)
+{/*{{{*/
+
+  // - ERROR -
+  if (EVP_DigestVerifyUpdate(this->context,a_data,a_size) != 1)
+  {
+    throw_error(CRYPTO_VERIFY_UPDATE_ERROR);
   }
 
   return 0;

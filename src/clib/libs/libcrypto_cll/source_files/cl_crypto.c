@@ -141,6 +141,149 @@ int crypto_digest_s_value(crypto_digest_s *this,bc_array_s *a_trg)
   return 0;
 }/*}}}*/
 
+// === methods of structure crypto_sign_s ======================================
+
+int crypto_sign_s_create(crypto_sign_s *this,
+    crypto_digest_info_s *a_digest_info,crypto_pkey_s *a_pkey)
+{/*{{{*/
+  crypto_sign_s_clear(this);
+
+  // - ERROR -
+  if ((this->context = EVP_MD_CTX_create()) == NULL)
+  {
+    throw_error(CRYPTO_SIGN_CREATE_INIT_ERROR);
+  }
+
+  /* - ERROR - */
+  if (EVP_DigestSignInit(this->context,NULL,*a_digest_info,NULL,a_pkey->pkey) != 1)
+  {
+    throw_error(CRYPTO_SIGN_CREATE_INIT_ERROR);
+  }
+
+  this->pkey = a_pkey->pkey;
+
+  return 0;
+}/*}}}*/
+
+int crypto_sign_s_value(crypto_sign_s *this,bc_array_s *a_trg)
+{/*{{{*/
+
+  // - ERROR -
+  EVP_MD_CTX *context_copy;
+  if ((context_copy = EVP_MD_CTX_create()) == NULL)
+  {
+    throw_error(CRYPTO_SIGN_VALUE_ERROR);
+  }
+
+  // - ERROR -
+  if (EVP_DigestSignInit(context_copy,NULL,EVP_MD_CTX_md(this->context),NULL,this->pkey) != 1)
+  {
+    EVP_MD_CTX_destroy(context_copy);
+
+    throw_error(CRYPTO_DIGEST_VALUE_ERROR);
+  }
+
+  // - ERROR -
+  if (EVP_MD_CTX_copy_ex(context_copy,this->context) != 1)
+  {
+    EVP_MD_CTX_destroy(context_copy);
+
+    throw_error(CRYPTO_DIGEST_VALUE_ERROR);
+  }
+
+  // - ERROR -
+  size_t dg_length = 0;
+  if (EVP_DigestSignFinal(context_copy,NULL,&dg_length) != 1)
+  {
+    EVP_MD_CTX_destroy(context_copy);
+
+    throw_error(CRYPTO_DIGEST_VALUE_ERROR);
+  }
+
+  // - prepare result buffer -
+  bc_array_s_reserve(a_trg,dg_length);
+
+  // - ERROR -
+  if (EVP_DigestSignFinal(context_copy,(unsigned char *)a_trg->data + a_trg->used,&dg_length) != 1)
+  {
+    EVP_MD_CTX_destroy(context_copy);
+
+    throw_error(CRYPTO_DIGEST_VALUE_ERROR);
+  }
+
+  EVP_MD_CTX_destroy(context_copy);
+
+  // - adjust result buffer size -
+  a_trg->used += dg_length;
+
+  return 0;
+}/*}}}*/
+
+// === methods of structure crypto_verify_s ====================================
+
+int crypto_verify_s_create(crypto_verify_s *this,
+    crypto_digest_info_s *a_digest_info,crypto_pkey_s *a_pkey)
+{/*{{{*/
+  crypto_verify_s_clear(this);
+
+  // - ERROR -
+  if ((this->context = EVP_MD_CTX_create()) == NULL)
+  {
+    throw_error(CRYPTO_VERIFY_CREATE_INIT_ERROR);
+  }
+
+  /* - ERROR - */
+  if (EVP_DigestVerifyInit(this->context,NULL,*a_digest_info,NULL,a_pkey->pkey) != 1)
+  {
+    throw_error(CRYPTO_VERIFY_CREATE_INIT_ERROR);
+  }
+
+  this->pkey = a_pkey->pkey;
+
+  return 0;
+}/*}}}*/
+
+int crypto_verify_s_verify(crypto_verify_s *this,const char *a_data,unsigned a_size,int *a_result)
+{/*{{{*/
+
+  // - ERROR -
+  EVP_MD_CTX *context_copy;
+  if ((context_copy = EVP_MD_CTX_create()) == NULL)
+  {
+    throw_error(CRYPTO_VERIFY_VERIFY_ERROR);
+  }
+
+  // - ERROR -
+  if (EVP_DigestVerifyInit(context_copy,NULL,EVP_MD_CTX_md(this->context),NULL,this->pkey) != 1)
+  {
+    EVP_MD_CTX_destroy(context_copy);
+
+    throw_error(CRYPTO_VERIFY_VERIFY_ERROR);
+  }
+
+  // - ERROR -
+  if (EVP_MD_CTX_copy_ex(context_copy,this->context) != 1)
+  {
+    EVP_MD_CTX_destroy(context_copy);
+
+    throw_error(CRYPTO_VERIFY_VERIFY_ERROR);
+  }
+
+  long long result = EVP_DigestVerifyFinal(context_copy,(unsigned char *)a_data,a_size);
+
+  EVP_MD_CTX_destroy(context_copy);
+
+  // - ERROR -
+  if (result & ~0x01)
+  {
+    throw_error(CRYPTO_VERIFY_VERIFY_ERROR);
+  }
+
+  *a_result = !!result;
+
+  return 0;
+}/*}}}*/
+
 // === methods of structure crypto_cipher_info_s ===============================
 
 // === methods of structure crypto_encrypt_s ===================================
