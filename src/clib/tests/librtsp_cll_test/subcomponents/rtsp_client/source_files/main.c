@@ -139,7 +139,7 @@ int main(int argc,char **argv)
 
     const char *server_ip = "127.0.0.1";
     const unsigned short port = 8006;
-    const char *media = "onvif/mpv/56043004/20221102100530/all/single";
+    const char *media = "onvif/mpv/57043003/last/all/single";
 
     //const char *server_ip = "10.2.1.174";
     //const unsigned short port = 554;

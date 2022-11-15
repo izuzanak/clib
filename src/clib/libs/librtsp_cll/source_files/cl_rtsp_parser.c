@@ -321,6 +321,7 @@ void pa_rtsp_header_xscookie(rtsp_parser_s *this)
 
 void pa_rtsp_header_digest_authorization(rtsp_parser_s *this)
 {/*{{{*/
+  rtsp_auth_s_swap(&this->digest_auth,&this->auth);
   this->digest_authorization = 1;
 }/*}}}*/
 
