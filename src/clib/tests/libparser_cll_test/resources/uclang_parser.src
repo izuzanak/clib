@@ -1,0 +1,73 @@
+
+import sys;
+import containers;
+
+namespace First->Second->Third
+{
+  namespace Second
+  {
+    namespace Fourth {}
+
+    private public class Main
+    {
+      static public main(argv)
+      {
+        return "String" + a + b + c;
+      }
+    }
+  }
+  using namespace First->Second->Third
+  {
+    private public class Main extends First->Second->Test
+    {
+      static public main(argv)
+      {
+        file = new File();
+        file = new Sys->Data->File("hello.txt","w");
+
+        Test = First->Second->b[::];
+
+        Sys.Data.File("Hello");
+
+        arr = [1,2,3,4,5];
+        for (val <- arr) {}
+        for (val in arr) {}
+
+        set = new Set([1,2,3,4,5]);
+        if (2 in set)
+        {
+          ("set %s contain value 2\n" % $set).print();
+        }
+
+        :() return 10;.call([]);
+        :(a) return 10;.call([100]);
+        x = :(a) return 10*a;;
+        x = :(a) { return 10; };
+        x = :(a,b) {
+          res = 0;
+          while (a > b)
+          {
+            res += a;
+            ++a;
+          }
+        };
+
+        for (val <- new Range(0,100,10))
+        {
+        }
+
+        str = "Hello" " " "world";
+
+        a = 1 ? 1 : 0;
+        0 and (0 and 0 or 0) or 0 and 1;
+
+        value = 10;
+        ("result: %s" % $(value + 10)).print();
+        ("arr: %s" % $arr).print();
+
+        test = 0b10 & 0B01;
+      }
+    }
+  }
+}
+
