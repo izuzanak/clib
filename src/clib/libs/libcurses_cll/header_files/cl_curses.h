@@ -44,7 +44,7 @@ WUR static inline int curses_s_nl(int a_value);
 WUR static inline int curses_s_raw(int a_value);
 WUR static inline int curses_s_movexy(int a_x,int a_y);
 static inline void curses_s_curxy(int *a_x,int *a_y);
-static inline void curses_s_maxxy(int *a_x,int *a_y);
+static inline void curses_s_sizexy(int *a_x,int *a_y);
 WUR static inline int curses_s_addch(chtype a_char);
 WUR static inline int curses_s_addstr(const char *a_data,int a_length);
 WUR static inline int curses_s_attr(int a_offon,int a_attrs);
@@ -140,7 +140,7 @@ static inline void curses_s_curxy(int *a_x,int *a_y)
   getyx(stdscr,(*a_y),(*a_x));
 }/*}}}*/
 
-static inline void curses_s_maxxy(int *a_x,int *a_y)
+static inline void curses_s_sizexy(int *a_x,int *a_y)
 {/*{{{*/
   getmaxyx(stdscr,(*a_y),(*a_x));
 }/*}}}*/
