@@ -106,7 +106,7 @@ int crypto_digest_s_value(crypto_digest_s *this,bc_array_s *a_trg)
   }
 
   // - ERROR -
-  if (EVP_DigestInit_ex(context_copy,EVP_MD_CTX_md(this->context),NULL) != 1)
+  if (EVP_DigestInit_ex(context_copy,EVP_MD_CTX_MD(this->context),NULL) != 1)
   {
     EVP_MD_CTX_destroy(context_copy);
 
@@ -176,7 +176,7 @@ int crypto_sign_s_value(crypto_sign_s *this,bc_array_s *a_trg)
   }
 
   // - ERROR -
-  if (EVP_DigestSignInit(context_copy,NULL,EVP_MD_CTX_md(this->context),NULL,this->pkey) != 1)
+  if (EVP_DigestSignInit(context_copy,NULL,EVP_MD_CTX_MD(this->context),NULL,this->pkey) != 1)
   {
     EVP_MD_CTX_destroy(context_copy);
 
@@ -254,7 +254,7 @@ int crypto_verify_s_verify(crypto_verify_s *this,const char *a_data,unsigned a_s
   }
 
   // - ERROR -
-  if (EVP_DigestVerifyInit(context_copy,NULL,EVP_MD_CTX_md(this->context),NULL,this->pkey) != 1)
+  if (EVP_DigestVerifyInit(context_copy,NULL,EVP_MD_CTX_MD(this->context),NULL,this->pkey) != 1)
   {
     EVP_MD_CTX_destroy(context_copy);
 
