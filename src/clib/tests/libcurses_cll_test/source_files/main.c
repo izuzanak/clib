@@ -21,7 +21,6 @@ test_function_t test_functions[] =
 
 void test_create()
 {/*{{{*/
-#if 0
   CONT_INIT_CLEAR(bc_array_s,buffer);
 
   cassert(!(
@@ -54,7 +53,6 @@ void test_create()
 
   int ch;
   cassert(curses_s_getch(&ch) == 0);
-#endif
 }/*}}}*/
 
 // === program entry function ==================================================
