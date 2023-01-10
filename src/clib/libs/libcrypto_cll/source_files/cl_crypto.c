@@ -143,8 +143,8 @@ int crypto_digest_s_value(crypto_digest_s *this,bc_array_s *a_trg)
 
 // === methods of structure crypto_sign_s ======================================
 
-int crypto_sign_s_create(crypto_sign_s *this,
-    crypto_digest_info_s *a_digest_info,crypto_pkey_s *a_pkey)
+int crypto_sign_s_create_pkey_ctx(crypto_sign_s *this,
+    crypto_digest_info_s *a_digest_info,crypto_pkey_s *a_pkey,EVP_PKEY_CTX **a_pkey_ctx)
 {/*{{{*/
   crypto_sign_s_clear(this);
 
@@ -155,7 +155,7 @@ int crypto_sign_s_create(crypto_sign_s *this,
   }
 
   /* - ERROR - */
-  if (EVP_DigestSignInit(this->context,NULL,*a_digest_info,NULL,a_pkey->pkey) != 1)
+  if (EVP_DigestSignInit(this->context,a_pkey_ctx,*a_digest_info,NULL,a_pkey->pkey) != 1)
   {
     throw_error(CRYPTO_SIGN_CREATE_INIT_ERROR);
   }

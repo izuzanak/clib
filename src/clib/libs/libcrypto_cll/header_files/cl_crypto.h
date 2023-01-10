@@ -150,8 +150,10 @@ static inline int crypto_sign_s_compare(const crypto_sign_s *this,const crypto_s
 static inline void crypto_sign_s_to_string(const crypto_sign_s *this,bc_array_s *a_trg);
 #endif
 
-WUR libcrypto_cll_EXPORT int crypto_sign_s_create(crypto_sign_s *this,
+WUR static inline int crypto_sign_s_create(crypto_sign_s *this,
     crypto_digest_info_s *a_digest_info,crypto_pkey_s *a_pkey);
+WUR libcrypto_cll_EXPORT int crypto_sign_s_create_pkey_ctx(crypto_sign_s *this,
+    crypto_digest_info_s *a_digest_info,crypto_pkey_s *a_pkey,EVP_PKEY_CTX **a_pkey_ctx);
 WUR static inline int crypto_sign_s_update(crypto_sign_s *this,const char *a_data,unsigned a_size);
 WUR libcrypto_cll_EXPORT int crypto_sign_s_value(crypto_sign_s *this,bc_array_s *a_trg);
 
@@ -560,6 +562,12 @@ static inline void crypto_sign_s_to_string(const crypto_sign_s *this,bc_array_s 
   bc_array_s_append_format(a_trg,"crypto_sign_s{%p}",this);
 }/*}}}*/
 #endif
+
+static inline int crypto_sign_s_create(crypto_sign_s *this,
+    crypto_digest_info_s *a_digest_info,crypto_pkey_s *a_pkey)
+{/*{{{*/
+  return crypto_sign_s_create_pkey_ctx(this,a_digest_info,a_pkey,NULL);
+}/*}}}*/
 
 static inline int crypto_sign_s_update(crypto_sign_s *this,const char *a_data,unsigned a_size)
 {/*{{{*/
