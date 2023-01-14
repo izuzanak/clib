@@ -6,7 +6,9 @@
 include "cl_struct.h"
 @end
 
+#ifndef DISABLE_PAM_AUTH
 #include <security/pam_appl.h>
+#endif
 
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
@@ -26,8 +28,11 @@ include "cl_struct.h"
 
 // === definition of global functions ==========================================
 
+#ifndef DISABLE_PAM_AUTH
 WUR libpam_cll_EXPORT int pam_conv_fun(int num_msg,const struct pam_message **msg,
     struct pam_response **resp,void *appdata_ptr);
+#endif
+
 WUR libpam_cll_EXPORT int pam_user_auth(const char *a_service_name,
     const char *a_user,const char *a_pass);
 

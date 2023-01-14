@@ -51,7 +51,7 @@ void test_regex()
 
   // - regex_s_create -
   CONT_INIT(regex_s,regex_0);
-  cassert(regex_s_create(&regex_0,"^\\[\\(regex_s{.*},\\)\\{4,4\\}\\(regex_s{.*}\\)\\]$") == 0);
+  cassert(regex_s_create(&regex_0,"^\\[(regex_s\\{.*\\},){4,4}(regex_s\\{.*\\})\\]$") == 0);
   cassert(regex_s_compare(&regex_0,&regex_0));
 
   buffer.used = 0;

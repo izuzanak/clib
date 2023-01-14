@@ -421,7 +421,7 @@ static inline void check_free(pointer a_location)
 
 static inline void bc_to_string(const bc *this,bc_array_s *a_trg)
 {/*{{{*/
-  if (isprint(*this))
+  if (isprint((unsigned char)*this))
   {
     bc_array_s_push(a_trg,*this);
   }

@@ -25,7 +25,7 @@ methods rtsp_player_s
 
 int rtsp_player_s_create(rtsp_player_s *this,const char *a_base_dir,const char *a_ip,usi a_port)
 {/*{{{*/
-  cassert(regex_s_create(&this->url_path_regex,"^rtsp://[0-9.]\\+:[0-9]\\+/\\(.*\\)$") == 0);
+  cassert(regex_s_create(&this->url_path_regex,"^rtsp://[0-9.]+:[0-9]+/(.*)$") == 0);
 
   string_s_set_ptr(&this->base_dir,a_base_dir);
   string_s_set_ptr(&this->ip,a_ip);

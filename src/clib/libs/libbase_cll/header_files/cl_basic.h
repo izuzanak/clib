@@ -47,6 +47,12 @@ typedef long double ld;
 #define SYSTEM_TYPE_DSP     3 // - target platform is DSP processor
 // --
 
+// - subsystem type selection -
+#define SUBSYSTEM_TYPE_LINUX   1
+#define SUBSYSTEM_TYPE_WINDOWS 2
+#define SUBSYSTEM_TYPE_MSYS2   3
+// --
+
 // - atomic subsystem selection -
 #define ATOMIC_TYPE_GCC     1 // - for atomic structure implementation use GCC compiler functions
 #define ATOMIC_TYPE_WINDOWS 2 // - for atomic structure implementation use win32 library
@@ -55,6 +61,7 @@ typedef long double ld;
 // - basic system configuration -
 #ifdef LINUX
 #define SYSTEM_TYPE SYSTEM_TYPE_UNIX
+#define SUBSYSTEM_TYPE SUBSYSTEM_TYPE_LINUX
 #define ATOMIC_TYPE ATOMIC_TYPE_GCC
 #define WUR __attribute__((warn_unused_result))
 #endif
@@ -62,7 +69,15 @@ typedef long double ld;
 #ifdef WINDOWS
 #define WUR _Check_return_
 #define SYSTEM_TYPE SYSTEM_TYPE_WINDOWS
+#define SUBSYSTEM_TYPE SUBSYSTEM_TYPE_WINDOWS
 #define ATOMIC_TYPE ATOMIC_TYPE_WINDOWS
+#endif
+
+#ifdef MSYS2
+#define SYSTEM_TYPE SYSTEM_TYPE_UNIX
+#define SUBSYSTEM_TYPE SUBSYSTEM_TYPE_MSYS2
+#define ATOMIC_TYPE ATOMIC_TYPE_GCC
+#define WUR __attribute__((warn_unused_result))
 #endif
 
 // - function export definitions -
@@ -93,6 +108,7 @@ typedef long double ld;
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <sys/stat.h>

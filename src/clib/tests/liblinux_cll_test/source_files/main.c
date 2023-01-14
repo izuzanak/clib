@@ -68,7 +68,7 @@ void test_fd()
 
   fd_s fd = creat("tests/liblinux_cll_test/fd/test.file",0666);
   FD_S_TO_BUFFER(&fd);
-  cassert(regex_s_create(&regex,"^fd_s{[0-9]\\+}$") == 0);
+  cassert(regex_s_create(&regex,"^fd_s\\{[0-9]+\\}$") == 0);
   cassert(regex_s_match(&regex,buffer.data,&match));
 
   CONT_INIT(fd_array_s,fd_array);
@@ -221,6 +221,7 @@ void test_socket_tcp()
 
 void test_aio()
 {/*{{{*/
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_LINUX
 #if OPTION_TO_STRING == ENABLED
   CONT_INIT(bc_array_s,buffer);
 
@@ -291,6 +292,7 @@ void test_aio()
   cassert(strcmp(write_data,read_data) == 0);
 
   bc_array_s_clear(&buffer);
+#endif
 #endif
 }/*}}}*/
 

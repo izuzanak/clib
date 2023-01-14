@@ -75,7 +75,7 @@ int ssl_conn_s_read(ssl_conn_s *this,int a_fd,bc_array_s *a_trg)
     a_trg->used += read_cnt;
 
     // - ERROR -
-    if (ioctl(a_fd,TIOCINQ,&inq_cnt) == -1)
+    if (ioctl(a_fd,FIONREAD,&inq_cnt) == -1)
     {
       throw_error(SSL_CONN_READ_ERROR);
     }

@@ -143,7 +143,7 @@ static inline int regex_s_create(regex_s *this,const char *a_data)
   regex_t *re = (regex_t *)cmalloc(sizeof(regex_t));
 
   // - ERROR -
-  if (regcomp(re,a_data,0) != 0)
+  if (regcomp(re,a_data,REG_EXTENDED) != 0)
   {
     cfree(re);
 

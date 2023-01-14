@@ -4,17 +4,33 @@
 
 @begin
 include "cl_time.h"
+include "cl_sys.h"
 @end
 
 #include <aio.h>
 #include <errno.h>
 #include <fcntl.h>
+
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_MSYS2
+#include <cygwin/fs.h>
+#else
 #include <linux/fs.h>
 #include <linux/rtc.h>
+#endif
+
 #include <net/if.h>
 #include <netdb.h>
 #include <signal.h>
+
+#ifndef DISABLE_EPOLL
 #include <sys/epoll.h>
+#else
+#define EPOLLIN  POLLIN
+#define EPOLLOUT POLLOUT
+#define EPOLLPRI POLLPRI
+#define EPOLL_CLOEXEC 0
+#endif
+
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -174,6 +190,7 @@ WUR liblinux_cll_EXPORT int socket_s_sendto(const socket_s *this,const socket_ad
 WUR liblinux_cll_EXPORT int socket_s_recvfrom(const socket_s *this,bc_array_s *a_trg,socket_address_s *a_addr);
 WUR static inline int socket_s_address(const socket_s *this,socket_address_s *a_addr);
 
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_LINUX
 // === definition of structure aio_s ===========================================
 
 typedef struct aiocb aio_s;
@@ -195,6 +212,7 @@ WUR static inline int aio_s_write(aio_s *this,int a_fd,off_t a_offset,const void
 WUR static inline int aio_s_read(aio_s *this,int a_fd,off_t a_offset,void *a_src,size_t a_size);
 WUR static inline int aio_s_return(aio_s *this,ssize_t *a_return);
 WUR static inline int aio_s_is_done(aio_s *this,int *a_done);
+#endif
 
 // === definition of structure pid_s ===========================================
 
@@ -224,7 +242,27 @@ WUR liblinux_cll_EXPORT int signal_s_simple_handler(signal_callback_t a_handler)
 // === definition of generated structures ======================================
 
 typedef struct epoll_s epoll_s;
+
+#ifndef DISABLE_EPOLL
 typedef struct epoll_event epoll_event_s;
+#else
+typedef union epoll_data
+{/*{{{*/
+  void *ptr;
+  int fd;
+  uint32_t u32;
+  uint64_t u64;
+}/*}}}*/
+epoll_data_t;
+
+typedef struct epoll_event_s
+{/*{{{*/
+  uint32_t events;
+  epoll_data_t data;
+}/*}}}*/
+epoll_event_s;
+#endif
+
 typedef int (*epoll_fd_callback_t)(void *a_object,unsigned a_index,epoll_event_s *a_event);
 
 // -- epoll_callback_s --
@@ -260,7 +298,11 @@ typedef epoll_fd_s epoll_timer_s;
 @begin
 struct
 <
+#ifndef DISABLE_EPOLL
 fd_s:fd
+#else
+pollfd_array_s:pollfd_array
+#endif
 epoll_fd_events_s:fd_events
 >
 epoll_s;
@@ -342,6 +384,7 @@ WUR static inline int epoll_timer_s_settime(const epoll_timer_s *this,
 WUR static inline int epoll_timer_s_gettime(const epoll_timer_s *this,
     struct itimerspec *a_itimerspec);
 
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_LINUX
 // === definition of structure rtc_s ===========================================
 
 typedef int rtc_s;
@@ -362,6 +405,7 @@ static inline void rtc_s_to_string(const rtc_s *this,bc_array_s *a_trg);
 WUR static inline int rtc_s_open(rtc_s *this,const char *a_path);
 WUR static inline int rtc_s_read_time(const rtc_s *this,time_s *a_trg);
 WUR static inline int rtc_s_write_time(const rtc_s *this,time_s a_time);
+#endif
 
 // === inline methods of structure socket_address_s ============================
 
@@ -625,6 +669,7 @@ static inline int socket_s_address(const socket_s *this,socket_address_s *a_addr
   return 0;
 }/*}}}*/
 
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_LINUX
 // === inline methods of structure aio_s =======================================
 
 static inline void aio_s_init(aio_s *this)
@@ -755,6 +800,7 @@ static inline int aio_s_is_done(aio_s *this,int *a_done)
 
   return 0;
 }/*}}}*/
+#endif
 
 // === inline methods of structure pid_s =======================================
 
@@ -852,6 +898,7 @@ static inline int epoll_s_create(epoll_s *this,int a_flags)
 {/*{{{*/
   epoll_s_clear(this);
 
+#ifndef DISABLE_EPOLL
   this->fd = epoll_create1(a_flags);
 
   // - ERROR -
@@ -859,6 +906,7 @@ static inline int epoll_s_create(epoll_s *this,int a_flags)
   {
     throw_error(EPOLL_CREATE_ERROR);
   }
+#endif
 
   return 0;
 }/*}}}*/
@@ -1080,6 +1128,7 @@ static inline int epoll_timer_s_gettime(const epoll_timer_s *this,
   return 0;
 }/*}}}*/
 
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_LINUX
 // === definition of structure rtc_s ===========================================
 
 static inline void rtc_s_init(rtc_s *this)
@@ -1203,6 +1252,7 @@ static inline int rtc_s_write_time(const rtc_s *this,time_s a_time)
 
   return 0;
 }/*}}}*/
+#endif
 
 #endif
 

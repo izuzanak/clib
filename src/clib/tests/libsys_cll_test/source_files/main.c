@@ -101,7 +101,11 @@ void test_file()
   FILE_ARRAY_S_TO_BUFFER(&file_array);
 
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_MSYS2
+  cassert(strcmp(buffer.data,"[file_s{0x0},file_s{0x0},file_s{0x0}]") == 0);
+#else
   cassert(strcmp(buffer.data,"[file_s{(nil)},file_s{(nil)},file_s{(nil)}]") == 0);
+#endif
 #elif SYSTEM_TYPE == SYSTEM_TYPE_WINDOWS
   cassert(strcmp(buffer.data,"[file_s{00000000},file_s{00000000},file_s{00000000}]") == 0);
 #endif
@@ -189,7 +193,11 @@ void test_pipe()
   PIPE_ARRAY_S_TO_BUFFER(&pipe_array);
 
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_MSYS2
+  cassert(strcmp(buffer.data,"[pipe_s{0x0},pipe_s{0x0},pipe_s{0x0}]") == 0);
+#else
   cassert(strcmp(buffer.data,"[pipe_s{(nil)},pipe_s{(nil)},pipe_s{(nil)}]") == 0);
+#endif
 #elif SYSTEM_TYPE == SYSTEM_TYPE_WINDOWS
   cassert(strcmp(buffer.data,"[pipe_s{00000000},pipe_s{00000000},pipe_s{00000000}]") == 0);
 #endif

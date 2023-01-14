@@ -11,6 +11,6 @@ if(OPENSSL_FOUND)
       ${OPENSSL_INCLUDE_DIR})
   set(CONF_COMP_DEFS)
   set(CONF_LINK_LIBS
-      ${OPENSSL_LIBRARIES})
+      ${OPENSSL_LIBRARIES} z)
 endif()
 

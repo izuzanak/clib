@@ -5,6 +5,7 @@ include "cl_pam.h"
 
 // === global functions ========================================================
 
+#ifndef DISABLE_PAM_AUTH
 int pam_conv_fun(int num_msg,const struct pam_message **msg,
     struct pam_response **resp,void *appdata_ptr)
 {/*{{{*/
@@ -15,10 +16,12 @@ int pam_conv_fun(int num_msg,const struct pam_message **msg,
 
   return PAM_SUCCESS;
 }/*}}}*/
+#endif
 
 int pam_user_auth(const char *a_service_name,
     const char *a_user,const char *a_pass)
 {/*{{{*/
+#ifndef DISABLE_PAM_AUTH
   struct pam_response *response;
   const struct pam_conv conversation = {pam_conv_fun,&response};
 
@@ -43,6 +46,7 @@ int pam_user_auth(const char *a_service_name,
   {
     throw_error(PAM_AUTHENTICATION_ERROR);
   }
+#endif
 
   return 0;
 }/*}}}*/

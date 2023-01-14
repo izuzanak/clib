@@ -173,7 +173,7 @@ int tcp_conn_s_recv_msg(tcp_conn_s *this)
 
       // - ERROR -
       int inq_cnt;
-      if (ioctl(this->epoll_fd.fd,TIOCINQ,&inq_cnt) == -1)
+      if (ioctl(this->epoll_fd.fd,FIONREAD,&inq_cnt) == -1)
       {
         throw_error(TCP_CONN_READ_ERROR);
       }

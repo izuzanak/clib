@@ -91,7 +91,7 @@ int fd_s_read(const fd_s *this,bc_array_s *a_trg)
     a_trg->used += read_cnt;
 
     // - ERROR -
-    if (ioctl(*this,TIOCINQ,&inq_cnt) == -1)
+    if (ioctl(*this,FIONREAD,&inq_cnt) == -1)
     {
       throw_error(FD_READ_ERROR);
     }
@@ -521,10 +521,25 @@ int epoll_s_fd_update(epoll_s *this,
 
   unsigned evts = fd_event->evts;
 
+#ifdef DISABLE_EPOLL
+  pollfd_array_s *pollfd_array = &this->pollfd_array;
+
+  // - resize pollfd array if needed -
+  if (pollfd_array->used <= a_fd)
+  {
+    unsigned old_used = pollfd_array->used;
+    pollfd_array_s_push_blanks(pollfd_array,a_fd + 1 - pollfd_array->used);
+    memset(pollfd_array->data + old_used,0,(pollfd_array->used - old_used)*sizeof(pollfd_s));
+  }
+
+  pollfd_s *pollfd = pollfd_array->data + a_fd;
+#endif
+
   // - adjust epoll fd events -
   if (evts != a_evts)
   {
-    struct epoll_event epoll_event = {
+#ifndef DISABLE_EPOLL
+    epoll_event_s epoll_event = {
       .events = a_evts,
       .data.fd = a_fd
     };
@@ -567,6 +582,24 @@ int epoll_s_fd_update(epoll_s *this,
         }
       }
     }
+#else
+    if (evts == 0)
+    {
+      // - add -
+      pollfd->fd = a_fd;
+      pollfd->events = a_evts;
+    }
+    else if (a_evts == 0)
+    {
+      // - del -
+      pollfd->fd = -1;
+    }
+    else
+    {
+      // - mod -
+      pollfd->events = a_evts;
+    }
+#endif
 
     // - update fd events -
     fd_events->data[a_fd].evts = a_evts;
@@ -577,10 +610,14 @@ int epoll_s_fd_update(epoll_s *this,
 
 int epoll_s_wait(epoll_s *this,int a_timeout)
 {/*{{{*/
-  struct epoll_event event;
+#ifndef DISABLE_EPOLL
+  epoll_event_s event;
 
   // - call epoll_wait -
   int count = epoll_wait(this->fd,&event,1,a_timeout);
+#else
+  int count = poll(this->pollfd_array.data,this->pollfd_array.used,-1);
+#endif
 
   // - ERROR -
   if (count == -1)
@@ -597,6 +634,23 @@ int epoll_s_wait(epoll_s *this,int a_timeout)
   // - process fd event -
   if (count > 0)
   {
+#ifdef DISABLE_EPOLL
+    pollfd_s *pfd_ptr = this->pollfd_array.data;
+    pollfd_s *pfd_ptr_end = pfd_ptr + this->pollfd_array.used;
+    do {
+      if (pfd_ptr->revents != 0)
+      {
+        break;
+      }
+    } while(++pfd_ptr < pfd_ptr_end);
+
+    debug_assert(pfd_ptr < pfd_ptr_end);
+
+    epoll_event_s event = {
+      .events = pfd_ptr->revents,
+      .data.fd = pfd_ptr->fd
+    };
+#endif
     unsigned fd = event.data.fd;
 
     // - check event callback -
