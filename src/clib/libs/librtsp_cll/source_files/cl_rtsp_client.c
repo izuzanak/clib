@@ -399,7 +399,7 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
           socket_address_s addr;
           socklen_t addr_length = sizeof(addr);
 
-          if (getpeername(this->epoll_fd.fd,&addr,&addr_length) ||
+          if (getpeername(this->epoll_fd.fd,(struct sockaddr *)&addr,&addr_length) ||
               socket_address_s_name(&addr,&buffer))
           {
             throw_error(RTSP_CLIENT_RETRIEVE_SERVER_IP_ERROR);

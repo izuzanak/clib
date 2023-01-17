@@ -37,6 +37,14 @@ abbreviation bi xs_boolean_value_s
 WUR int xs_boolean_value_s_write(const xs_boolean_value_s *this,bc_array_s *a_trg);
 WUR int xs_boolean_value_s_read(xs_boolean_value_s *this,var_s a_var);
 
+// -- xs_bool_s --
+@begin
+abbreviation bi xs_bool_s
+@end
+
+WUR int xs_bool_s_write(const xs_bool_s *this,bc_array_s *a_trg);
+WUR int xs_bool_s_read(xs_bool_s *this,var_s a_var);
+
 // -- xs_boolean_s --
 @begin
 abbreviation bi xs_boolean_s
@@ -141,6 +149,14 @@ abbreviation bd xs_double_s
 WUR int xs_double_s_write(const xs_double_s *this,bc_array_s *a_trg);
 WUR int xs_double_s_read(xs_double_s *this,var_s a_var);
 
+// -- xs_decimal_s --
+@begin
+abbreviation bd xs_decimal_s
+@end
+
+WUR int xs_decimal_s_write(const xs_decimal_s *this,bc_array_s *a_trg);
+WUR int xs_decimal_s_read(xs_decimal_s *this,var_s a_var);
+
 // -- xs_token_s --
 @begin
 abbreviation string_s xs_token_s
@@ -204,6 +220,14 @@ abbreviation string_s xs_anySimpleType_value_s
 
 WUR int xs_anySimpleType_value_s_write(const xs_anySimpleType_value_s *this,bc_array_s *a_trg);
 WUR int xs_anySimpleType_value_s_read(xs_anySimpleType_value_s *this,var_s a_var);
+
+// -- xs_anyType_s --
+@begin
+abbreviation var_s xs_anyType_s
+@end
+
+WUR int xs_anyType_s_write(const xs_anyType_s *this,bc_array_s *a_trg);
+WUR int xs_anyType_s_read(xs_anyType_s *this,var_s a_var);
 
 // -- xs_QName_value_s --
 @begin

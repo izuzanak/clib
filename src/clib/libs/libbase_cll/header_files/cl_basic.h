@@ -78,6 +78,7 @@ typedef long double ld;
 #define SUBSYSTEM_TYPE SUBSYSTEM_TYPE_MSYS2
 #define ATOMIC_TYPE ATOMIC_TYPE_GCC
 #define WUR __attribute__((warn_unused_result))
+#define lseek64 lseek
 #endif
 
 // - function export definitions -

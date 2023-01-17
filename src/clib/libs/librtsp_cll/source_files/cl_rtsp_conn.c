@@ -84,7 +84,7 @@ int rtsp_conn_s_parse_range_time(char **a_ptr,time_s *a_time)
   char *dt_ptr_end = dt_ptr + sizeof(datetime);
   do
   {
-    if (isdigit(*ptr)) { *dt_ptr++ = *ptr; }
+    if (isdigit((int)*ptr)) { *dt_ptr++ = *ptr; }
     else if (*ptr != 'T') { break; }
   } while(++ptr,dt_ptr < dt_ptr_end);
 

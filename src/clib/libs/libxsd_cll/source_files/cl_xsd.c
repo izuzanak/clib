@@ -33,6 +33,21 @@ int xs_boolean_value_s_read(xs_boolean_value_s *this,var_s a_var)
   return 0;
 }/*}}}*/
 
+// -- xs_bool_s --
+int xs_bool_s_write(const xs_bool_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_ptr(a_trg,*this ? "true" : "false");
+
+  return 0;
+}/*}}}*/
+
+int xs_bool_s_read(xs_bool_s *this,var_s a_var)
+{/*{{{*/
+  var_s value_var = loc_s_dict_get(a_var,g_str_text_var);
+  *this = strcmp(loc_s_string_value(value_var)->data,"true") == 0;
+  return 0;
+}/*}}}*/
+
 // -- xs_boolean_s --
 int xs_boolean_s_write(const xs_boolean_s *this,bc_array_s *a_trg)
 {/*{{{*/
@@ -340,6 +355,29 @@ int xs_double_s_read(xs_double_s *this,var_s a_var)
   return 0;
 }/*}}}*/
 
+// -- xs_decimal_s --
+int xs_decimal_s_write(const xs_decimal_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"%f",*this);
+
+  return 0;
+}/*}}}*/
+
+int xs_decimal_s_read(xs_decimal_s *this,var_s a_var)
+{/*{{{*/
+  var_s value_var = loc_s_dict_get(a_var,g_str_text_var);
+  const string_s *value_str = loc_s_string_value(value_var);
+  char *end_ptr;
+  *this = strtod(value_str->data,&end_ptr);
+
+  if (end_ptr != (value_str->data + value_str->size - 1))
+  {
+    throw_error(XSD_INVALID_DATA_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
 // -- xs_token_s --
 int xs_token_s_write(const xs_token_s *this,bc_array_s *a_trg)
 {/*{{{*/
@@ -461,6 +499,23 @@ int xs_anySimpleType_value_s_write(const xs_anySimpleType_value_s *this,bc_array
 int xs_anySimpleType_value_s_read(xs_anySimpleType_value_s *this,var_s a_var)
 {/*{{{*/
   string_s_copy(this,loc_s_string_value(a_var));
+
+  return 0;
+}/*}}}*/
+
+// -- xs_anyType_s --
+int xs_anyType_s_write(const xs_anyType_s *this,bc_array_s *a_trg)
+{/*{{{*/
+
+  // FIXME TODO continue ...
+  cassert(0);
+
+  return 0;
+}/*}}}*/
+
+int xs_anyType_s_read(xs_anyType_s *this,var_s a_var)
+{/*{{{*/
+  var_s_copy(this,&a_var);
 
   return 0;
 }/*}}}*/

@@ -10,6 +10,7 @@ include "cl_struct.h"
 #include <openssl/ssl.h>
 
 #include <sys/ioctl.h>
+#include <sys/socket.h>
 
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX

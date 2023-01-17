@@ -404,7 +404,7 @@ inlines rtsp_setup_s
 
 static inline int rtsp_setup_s_update_tcp_outq(rtsp_setup_s *this,int a_fd)
 {/*{{{*/
-
+#ifndef DISABLE_TIOCOUTQ
   // - retrieve count of bytes in outq -
   int outq_count;
   if (ioctl(a_fd,TIOCOUTQ,&outq_count))
@@ -414,6 +414,13 @@ static inline int rtsp_setup_s_update_tcp_outq(rtsp_setup_s *this,int a_fd)
 
   // - compute space in outq -
   this->tcp_outq_space = RTSP_TCP_OUTPUT_QUEUE_SIZE - outq_count;
+#else
+  // - slowly increase space in outq -
+  if ((this->tcp_outq_space += 1024) >= RTSP_TCP_OUTPUT_QUEUE_SIZE)
+  {
+    this->tcp_outq_space = RTSP_TCP_OUTPUT_QUEUE_SIZE;
+  }
+#endif
 
   return 0;
 }/*}}}*/
