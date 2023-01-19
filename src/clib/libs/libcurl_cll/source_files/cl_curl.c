@@ -209,9 +209,9 @@ int curl_multi_s_response_actions(curl_multi_s *this)
       result.curl_ptr = curl_ptr;
       curl_props->curl_ptr = NULL;
 
-      // - set result form pointer -
-      result.form_ptr = curl_props->form_ptr;
-      curl_props->form_ptr = NULL;
+      // - set result mime pointer -
+      result.mime_ptr = curl_props->mime_ptr;
+      curl_props->mime_ptr = NULL;
 
       // - set result data -
       bc_array_s_swap(&result.data,&curl_props->write_buffer);

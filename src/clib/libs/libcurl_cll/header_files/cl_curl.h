@@ -86,7 +86,7 @@ WUR libcurl_cll_EXPORT int curl_multi_s_response_actions(curl_multi_s *this);
 typedef struct curl_props_s
 {
   CURL *curl_ptr;
-  struct curl_httppost *form_ptr;
+  curl_mime *mime_ptr;
   struct curl_slist *headers;
   unsigned index;
   long long int unique_id;
@@ -114,7 +114,7 @@ static inline void curl_props_s_to_string(const curl_props_s *this,bc_array_s *a
 typedef struct curl_result_s
 {
   CURL *curl_ptr;
-  struct curl_httppost *form_ptr;
+  curl_mime *mime_ptr;
   bc_array_s data;
   void *user_data;
 } curl_result_s;
@@ -268,7 +268,7 @@ static inline int curl_multi_s_socket_action(curl_multi_s *this,
 static inline void curl_props_s_init(curl_props_s *this)
 {/*{{{*/
   this->curl_ptr = NULL;
-  this->form_ptr = NULL;
+  this->mime_ptr = NULL;
   this->headers = NULL;
   bc_array_s_init(&this->write_buffer);
   bc_array_s_init(&this->read_buffer);
@@ -282,9 +282,9 @@ static inline void curl_props_s_clear(curl_props_s *this)
     curl_easy_cleanup(this->curl_ptr);
   }
 
-  if (this->form_ptr != NULL)
+  if (this->mime_ptr != NULL)
   {
-    curl_formfree(this->form_ptr);
+    curl_mime_free(this->mime_ptr);
   }
 
   if (this->headers != NULL)
@@ -337,7 +337,7 @@ static inline void curl_props_s_to_string(const curl_props_s *this,bc_array_s *a
 static inline void curl_result_s_init(curl_result_s *this)
 {/*{{{*/
   this->curl_ptr = NULL;
-  this->form_ptr = NULL;
+  this->mime_ptr = NULL;
   bc_array_s_init(&this->data);
   this->user_data = NULL;
 }/*}}}*/
@@ -349,9 +349,9 @@ static inline void curl_result_s_clear(curl_result_s *this)
     curl_easy_cleanup(this->curl_ptr);
   }
 
-  if (this->form_ptr != NULL)
+  if (this->mime_ptr != NULL)
   {
-    curl_formfree(this->form_ptr);
+    curl_mime_free(this->mime_ptr);
   }
 
   bc_array_s_clear(&this->data);

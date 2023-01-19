@@ -157,8 +157,8 @@ WUR libchannel_odl_EXPORT int od_channel_client_s_create(od_channel_client_s *th
 WUR static inline int od_channel_client_s_message_call(od_channel_client_s *this,unsigned a_type,...);
 WUR static inline int od_channel_client_s_send_message(od_channel_client_s *this,bc_array_s *a_message);
 
+WUR static inline int od_channel_client_s_set_path(od_channel_client_s *this,const char *a_path,var_s a_data_var);
 WUR static inline int od_channel_client_s_watch_path(od_channel_client_s *this,const char *a_path);
-WUR static inline int od_channel_client_s_set_path(od_channel_client_s *this,const char *a_path,var_s a_var);
 
 WUR libchannel_odl_EXPORT int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,const bc_array_s *a_message);
 WUR libchannel_odl_EXPORT int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event);
@@ -259,10 +259,12 @@ static inline int od_channel_client_s_send_message(od_channel_client_s *this,bc_
   return 0;
 }/*}}}*/
 
-static inline int od_channel_client_s_watch_path(od_channel_client_s *this,const char *a_path)
+static inline int od_channel_client_s_set_path(od_channel_client_s *this,const char *a_path,var_s a_data_var)
 {/*{{{*/
   this->buffer.used = 0;
-  bc_array_s_append_format(&this->buffer,"{\"type\":\"watch\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\"}",++this->message_id,a_path);
+  bc_array_s_append_format(&this->buffer,"{\"type\":\"set\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\",\"data\":",++this->message_id,a_path);
+  var_s_to_json(&a_data_var,&this->buffer);
+  bc_array_s_push(&this->buffer,'}');
 
   if (od_channel_client_s_send_message(this,&this->buffer))
   {
@@ -272,12 +274,10 @@ static inline int od_channel_client_s_watch_path(od_channel_client_s *this,const
   return 0;
 }/*}}}*/
 
-static inline int od_channel_client_s_set_path(od_channel_client_s *this,const char *a_path,var_s a_var)
+static inline int od_channel_client_s_watch_path(od_channel_client_s *this,const char *a_path)
 {/*{{{*/
   this->buffer.used = 0;
-  bc_array_s_append_format(&this->buffer,"{\"type\":\"set\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\",\"data\":",++this->message_id,a_path);
-  var_s_to_json(&a_var,&this->buffer);
-  bc_array_s_push(&this->buffer,'}');
+  bc_array_s_append_format(&this->buffer,"{\"type\":\"watch\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\"}",++this->message_id,a_path);
 
   if (od_channel_client_s_send_message(this,&this->buffer))
   {
