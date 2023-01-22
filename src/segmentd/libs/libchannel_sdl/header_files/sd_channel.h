@@ -32,6 +32,7 @@ include "cl_channel.h"
 #define ERROR_SD_CHANNEL_CLIENT_TIMER_READ_ERROR 2
 #define ERROR_SD_CHANNEL_CLIENT_SCHEDULE_MESSAGE_ERROR 3
 #define ERROR_SD_CHANNEL_CLIENT_CALLBACK_ERROR 4
+#define ERROR_SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR 5
 
 typedef int (*sd_channel_cbreq_t)(void *a_object,unsigned a_index,unsigned a_type,va_list a_ap);
 
@@ -117,6 +118,8 @@ pointer:channel_callback
 pointer:cb_object
 ui:cb_index
 
+bc_array_s:buffer
+
 epoll_timer_s:epoll_timer
 >
 sd_channel_client_s;
@@ -128,6 +131,15 @@ WUR libchannel_sdl_EXPORT int sd_channel_client_s_create(sd_channel_client_s *th
   void *a_cb_object,unsigned a_cb_index);
 WUR static inline int sd_channel_client_s_message_call(sd_channel_client_s *this,unsigned a_type,...);
 WUR static inline int sd_channel_client_s_send_message(sd_channel_client_s *this,bc_array_s *a_message);
+WUR static inline int sd_channel_client_s_trace_info(sd_channel_client_s *this,const string_s *a_trace_id);
+WUR static inline int sd_channel_client_s_trace_write(sd_channel_client_s *this,const string_s *a_trace_id,ulli a_time,const bc_array_s *a_data);
+WUR static inline int sd_channel_client_s_trace_read(sd_channel_client_s *this,const string_s *a_trace_id,lli a_record_id);
+WUR static inline int sd_channel_client_s_trace_head(sd_channel_client_s *this,const string_s *a_trace_id);
+WUR static inline int sd_channel_client_s_trace_tail(sd_channel_client_s *this,const string_s *a_trace_id);
+WUR static inline int sd_channel_client_s_trace_lee_time(sd_channel_client_s *this,const string_s *a_trace_id,ulli a_time);
+WUR static inline int sd_channel_client_s_trace_gre_time(sd_channel_client_s *this,const string_s *a_trace_id,ulli a_time);
+WUR static inline int sd_channel_client_s_trace_watch(sd_channel_client_s *this,const string_s *a_trace_id);
+WUR static inline int sd_channel_client_s_trace_ignore(sd_channel_client_s *this,const string_s *a_trace_id);
 WUR libchannel_sdl_EXPORT int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,const bc_array_s *a_message);
 WUR libchannel_sdl_EXPORT int sd_channel_client_s_fd_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event);
 WUR libchannel_sdl_EXPORT int sd_channel_client_s_connect_time_event(void *a_sd_channel_client,unsigned a_index,epoll_event_s *a_epoll_event);
@@ -213,6 +225,138 @@ static inline int sd_channel_client_s_send_message(sd_channel_client_s *this,bc_
   if (channel_conn_s_schedule_message(&this->connection,a_message))
   {
     throw_error(SD_CHANNEL_CLIENT_SCHEDULE_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_info(sd_channel_client_s *this,const string_s *a_trace_id)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_INFO,a_trace_id);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_write(sd_channel_client_s *this,
+    const string_s *a_trace_id,ulli a_time,const bc_array_s *a_data)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_WRITE,a_trace_id);
+  bc_array_s_append_be_ulli(&this->buffer,a_time);
+  bc_array_s_append(&this->buffer,a_data->used,a_data->data);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_read(sd_channel_client_s *this,const string_s *a_trace_id,lli a_record_id)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_READ,a_trace_id);
+  bc_array_s_append_be_lli(&this->buffer,a_record_id);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_head(sd_channel_client_s *this,const string_s *a_trace_id)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_HEAD,a_trace_id);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_tail(sd_channel_client_s *this,const string_s *a_trace_id)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_TAIL,a_trace_id);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_lee_time(sd_channel_client_s *this,const string_s *a_trace_id,ulli a_time)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_LEE_TIME,a_trace_id);
+  bc_array_s_append_be_ulli(&this->buffer,a_time);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_gre_time(sd_channel_client_s *this,const string_s *a_trace_id,ulli a_time)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_GRE_TIME,a_trace_id);
+  bc_array_s_append_be_ulli(&this->buffer,a_time);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_watch(sd_channel_client_s *this,const string_s *a_trace_id)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_WATCH,a_trace_id);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_ignore(sd_channel_client_s *this,const string_s *a_trace_id)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_IGNORE,a_trace_id);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
   }
 
   return 0;

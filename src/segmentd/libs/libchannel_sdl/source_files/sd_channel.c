@@ -558,6 +558,8 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
               case sd_channel_cbreq_TRACE_READ:
               case sd_channel_cbreq_TRACE_HEAD:
               case sd_channel_cbreq_TRACE_TAIL:
+              case sd_channel_cbreq_TRACE_LEE_TIME:
+              case sd_channel_cbreq_TRACE_GRE_TIME:
               case sd_channel_cbreq_TRACE_WATCH:
               case sd_channel_cbreq_TRACE_IGNORE:
                 {/*{{{*/
@@ -598,6 +600,8 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                         break;
                       case sd_channel_cbreq_TRACE_HEAD:
                       case sd_channel_cbreq_TRACE_TAIL:
+                      case sd_channel_cbreq_TRACE_LEE_TIME:
+                      case sd_channel_cbreq_TRACE_GRE_TIME:
                       case sd_channel_cbreq_TRACE_READ:
                         {/*{{{*/
                           if (ptr_end - ptr >= sizeof(lli) + sizeof(ulli))

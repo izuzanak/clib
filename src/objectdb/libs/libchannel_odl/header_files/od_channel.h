@@ -158,7 +158,10 @@ WUR static inline int od_channel_client_s_message_call(od_channel_client_s *this
 WUR static inline int od_channel_client_s_send_message(od_channel_client_s *this,bc_array_s *a_message);
 
 WUR static inline int od_channel_client_s_set_path(od_channel_client_s *this,const char *a_path,var_s a_data_var);
-WUR static inline int od_channel_client_s_watch_path(od_channel_client_s *this,const char *a_path);
+WUR static inline int od_channel_client_s_list_path(od_channel_client_s *this,const char *a_path);
+WUR static inline int od_channel_client_s_get_path(od_channel_client_s *this,const char *a_path);
+WUR static inline int od_channel_client_s_watch_path(od_channel_client_s *this,const char *a_path,lli a_options);
+WUR static inline int od_channel_client_s_ignore_path(od_channel_client_s *this,const char *a_path);
 
 WUR libchannel_odl_EXPORT int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,const bc_array_s *a_message);
 WUR libchannel_odl_EXPORT int od_channel_client_s_fd_event(void *a_od_channel_client,unsigned a_index,epoll_event_s *a_epoll_event);
@@ -274,10 +277,50 @@ static inline int od_channel_client_s_set_path(od_channel_client_s *this,const c
   return 0;
 }/*}}}*/
 
-static inline int od_channel_client_s_watch_path(od_channel_client_s *this,const char *a_path)
+static inline int od_channel_client_s_list_path(od_channel_client_s *this,const char *a_path)
 {/*{{{*/
   this->buffer.used = 0;
-  bc_array_s_append_format(&this->buffer,"{\"type\":\"watch\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\"}",++this->message_id,a_path);
+  bc_array_s_append_format(&this->buffer,"{\"type\":\"list\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\"}",++this->message_id,a_path);
+
+  if (od_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(OD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int od_channel_client_s_get_path(od_channel_client_s *this,const char *a_path)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_format(&this->buffer,"{\"type\":\"get\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\"}",++this->message_id,a_path);
+
+  if (od_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(OD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int od_channel_client_s_watch_path(od_channel_client_s *this,const char *a_path,lli a_options)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_format(&this->buffer,"{\"type\":\"watch\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\",\"options\":%" HOST_LL_FORMAT "d}",
+      ++this->message_id,a_path,a_options);
+
+  if (od_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(OD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int od_channel_client_s_ignore_path(od_channel_client_s *this,const char *a_path)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_format(&this->buffer,"{\"type\":\"ignore\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\"}",++this->message_id,a_path);
 
   if (od_channel_client_s_send_message(this,&this->buffer))
   {
