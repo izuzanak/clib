@@ -506,6 +506,8 @@ int xs_anySimpleType_value_s_read(xs_anySimpleType_value_s *this,var_s a_var)
 // -- xs_anyType_s --
 int xs_anyType_s_write(const xs_anyType_s *this,bc_array_s *a_trg)
 {/*{{{*/
+  (void)this;
+  (void)a_trg;
 
   // FIXME TODO continue ...
   cassert(0);

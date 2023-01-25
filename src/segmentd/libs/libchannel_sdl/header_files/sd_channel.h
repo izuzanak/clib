@@ -81,6 +81,22 @@ enum
 static inline void bc_array_s_append_sd_segmentd_msg_header(bc_array_s *this,
     ulli a_id,usi a_type,usi a_req_id,const string_s *a_segment_id);
 
+// -- sd_range_record_s --
+@begin
+struct
+<
+lli:record_id
+ulli:time
+bc_array_s:record
+>
+sd_range_record_s;
+@end
+
+// -- sd_range_records_s --
+@begin
+array<sd_range_record_s> sd_range_records_s;
+@end
+
 // -- sd_channel_s --
 @begin
 struct
@@ -136,6 +152,9 @@ WUR static inline int sd_channel_client_s_trace_write(sd_channel_client_s *this,
 WUR static inline int sd_channel_client_s_trace_read(sd_channel_client_s *this,const string_s *a_trace_id,lli a_record_id);
 WUR static inline int sd_channel_client_s_trace_head(sd_channel_client_s *this,const string_s *a_trace_id);
 WUR static inline int sd_channel_client_s_trace_tail(sd_channel_client_s *this,const string_s *a_trace_id);
+WUR static inline int sd_channel_client_s_trace_range(sd_channel_client_s *this,const string_s *a_trace_id,lli a_first_id,lli a_last_id,lli a_count);
+WUR static inline int sd_channel_client_s_trace_step_range(sd_channel_client_s *this,const string_s *a_trace_id,lli a_first_id,lli a_last_id,ulli a_step);
+WUR static inline int sd_channel_client_s_trace_time_range(sd_channel_client_s *this,const string_s *a_trace_id,ulli a_first_time,ulli a_last_time,lli a_count);
 WUR static inline int sd_channel_client_s_trace_lee_time(sd_channel_client_s *this,const string_s *a_trace_id,ulli a_time);
 WUR static inline int sd_channel_client_s_trace_gre_time(sd_channel_client_s *this,const string_s *a_trace_id,ulli a_time);
 WUR static inline int sd_channel_client_s_trace_watch(sd_channel_client_s *this,const string_s *a_trace_id);
@@ -156,6 +175,16 @@ static inline void bc_array_s_append_sd_segmentd_msg_header(bc_array_s *this,
   bc_array_s_append_be_usi(this,a_req_id);
   bc_array_s_append(this,a_segment_id->size,a_segment_id->data);
 }/*}}}*/
+
+// -- sd_range_record_s --
+@begin
+inlines sd_range_record_s
+@end
+
+// -- sd_range_records_s --
+@begin
+inlines sd_range_records_s
+@end
 
 // -- sd_channel_s --
 @begin
@@ -295,6 +324,57 @@ static inline int sd_channel_client_s_trace_tail(sd_channel_client_s *this,const
   this->buffer.used = 0;
   bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
       ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_TAIL,a_trace_id);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_range(sd_channel_client_s *this,const string_s *a_trace_id,lli a_first_id,lli a_last_id,lli a_count)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_RANGE,a_trace_id);
+  bc_array_s_append_be_lli(&this->buffer,a_first_id);
+  bc_array_s_append_be_lli(&this->buffer,a_last_id);
+  bc_array_s_append_be_lli(&this->buffer,a_count);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_step_range(sd_channel_client_s *this,const string_s *a_trace_id,lli a_first_id,lli a_last_id,ulli a_step)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_STEP_RANGE,a_trace_id);
+  bc_array_s_append_be_lli(&this->buffer,a_first_id);
+  bc_array_s_append_be_lli(&this->buffer,a_last_id);
+  bc_array_s_append_be_ulli(&this->buffer,a_step);
+
+  if (sd_channel_client_s_send_message(this,&this->buffer))
+  {
+    throw_error(SD_CHANNEL_CLIENT_SEND_MESSAGE_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int sd_channel_client_s_trace_time_range(sd_channel_client_s *this,const string_s *a_trace_id,ulli a_first_time,ulli a_last_time,lli a_count)
+{/*{{{*/
+  this->buffer.used = 0;
+  bc_array_s_append_sd_segmentd_msg_header(&this->buffer,
+      ++this->message_id,sd_channel_msg_type_REQUEST,sd_channel_cbreq_TRACE_TIME_RANGE,a_trace_id);
+  bc_array_s_append_be_ulli(&this->buffer,a_first_time);
+  bc_array_s_append_be_ulli(&this->buffer,a_last_time);
+  bc_array_s_append_be_lli(&this->buffer,a_count);
 
   if (sd_channel_client_s_send_message(this,&this->buffer))
   {

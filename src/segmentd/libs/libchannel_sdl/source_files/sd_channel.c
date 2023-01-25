@@ -7,6 +7,16 @@ include "sd_channel.h"
 
 // === methods of generated structures =========================================
 
+// -- sd_range_record_s --
+@begin
+methods sd_range_record_s
+@end
+
+// -- sd_range_records_s --
+@begin
+methods sd_range_records_s
+@end
+
 // -- sd_channel_s --
 @begin
 methods sd_channel_s
@@ -558,6 +568,9 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
               case sd_channel_cbreq_TRACE_READ:
               case sd_channel_cbreq_TRACE_HEAD:
               case sd_channel_cbreq_TRACE_TAIL:
+              case sd_channel_cbreq_TRACE_RANGE:
+              case sd_channel_cbreq_TRACE_STEP_RANGE:
+              case sd_channel_cbreq_TRACE_TIME_RANGE:
               case sd_channel_cbreq_TRACE_LEE_TIME:
               case sd_channel_cbreq_TRACE_GRE_TIME:
               case sd_channel_cbreq_TRACE_WATCH:
@@ -623,6 +636,86 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                             {
                               throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
                             }
+                          }
+                        }/*}}}*/
+                        break;
+                      case sd_channel_cbreq_TRACE_RANGE:
+                      case sd_channel_cbreq_TRACE_STEP_RANGE:
+                      case sd_channel_cbreq_TRACE_TIME_RANGE:
+                        {/*{{{*/
+                          if (ptr_end - ptr < sizeof(ulli))
+                          {
+                            break;
+                          }
+
+                          ulli resp_count;
+                          memcpy(&resp_count,ptr,sizeof(ulli)); ptr += sizeof(ulli);
+                          resp_count = be64toh(resp_count);
+
+                          CONT_INIT(sd_range_records_s,range_records);
+
+                          do
+                          {
+                            if (resp_count > 0)
+                            {
+                              sd_range_records_s_push_blanks(&range_records,resp_count);
+
+                              sd_range_record_s *rr_ptr = range_records.data;
+                              sd_range_record_s *rr_ptr_end = rr_ptr + resp_count;
+                              do
+                              {
+                                if (ptr_end - ptr < sizeof(lli) + sizeof(ulli) + sizeof(ui))
+                                {
+                                  break;
+                                }
+
+                                memcpy(&rr_ptr->record_id,ptr,sizeof(lli)); ptr += sizeof(lli);
+                                rr_ptr->record_id = be64toh(rr_ptr->record_id);
+
+                                memcpy(&rr_ptr->time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
+                                rr_ptr->time = be64toh(rr_ptr->time);
+
+                                unsigned record_size;
+                                memcpy(&record_size,ptr,sizeof(ui)); ptr += sizeof(unsigned);
+                                record_size = be32toh(record_size);
+
+                                if (ptr_end - ptr < record_size)
+                                {
+                                  break;
+                                }
+
+                                rr_ptr->record.size = record_size;
+                                rr_ptr->record.used = record_size;
+                                rr_ptr->record.data = ptr; ptr += record_size;
+
+                              } while(++rr_ptr < rr_ptr_end);
+
+                              // - all records were retrieved -
+                              if (rr_ptr < rr_ptr_end)
+                              {
+                                break;
+                              }
+                            }
+
+                            // - call callback -
+                            if (sd_channel_client_s_message_call(
+                                  this,request,id,
+                                  &trace_id,&range_records))
+                            {
+                              // - release range records -
+                              if (range_records.data != NULL)
+                              {
+                                cfree(range_records.data);
+                              }
+
+                              throw_error(SD_CHANNEL_CLIENT_CALLBACK_ERROR);
+                            }
+                          } while(0);
+
+                          // - release range records -
+                          if (range_records.data != NULL)
+                          {
+                            cfree(range_records.data);
                           }
                         }/*}}}*/
                         break;

@@ -9,9 +9,9 @@ include "cl_struct.h"
 #include <openssl/conf.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
+#include <openssl/opensslv.h>
 #include <openssl/pem.h>
 #include <openssl/rand.h>
-#include <openssl/opensslv.h>
 
 // - replace deprecated function -
 #if OPENSSL_VERSION_MAJOR >= 3
