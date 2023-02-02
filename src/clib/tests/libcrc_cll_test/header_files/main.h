@@ -10,6 +10,7 @@ include "cl_crc.h"
 // === test execution functions ================================================
 
 void test_crc16();
+void test_crc32();
 
 // === program entry function ==================================================
 

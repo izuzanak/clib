@@ -36,6 +36,22 @@ static inline void crc16_s_to_json(const crc16_s *this,bc_array_s *a_trg);
 libcrc_cll_EXPORT void crc16_s_update(crc16_s *this,unsigned a_size,const void *a_data);
 static inline int crc16_s_valid(const crc16_s *this,crc16_s a_init,unsigned a_size,const void *a_data);
 
+// === definition of structure crc32_s =========================================
+
+typedef ui crc32_s;
+@begin
+define crc32_s basic
+@end
+
+#if OPTION_TO_STRING == ENABLED
+static inline void crc32_s_to_string(const crc32_s *this,bc_array_s *a_trg);
+#endif
+#if OPTION_TO_JSON == ENABLED
+static inline void crc32_s_to_json(const crc32_s *this,bc_array_s *a_trg);
+#endif
+libcrc_cll_EXPORT void crc32_s_update(crc32_s *this,unsigned a_size,const void *a_data);
+static inline int crc32_s_valid(const crc32_s *this,crc32_s a_init,unsigned a_size,const void *a_data);
+
 // === inline methods of structure crc16_s =====================================
 
 #if OPTION_TO_STRING == ENABLED
@@ -56,6 +72,30 @@ static inline int crc16_s_valid(const crc16_s *this,crc16_s a_init,unsigned a_si
 {/*{{{*/
   crc16_s crc = a_init;
   crc16_s_update(&crc,a_size,a_data);
+
+  return *this == crc;
+}/*}}}*/
+
+// === inline methods of structure crc32_s =====================================
+
+#if OPTION_TO_STRING == ENABLED
+static inline void crc32_s_to_string(const crc32_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"crc32_s{0x%8.8x}",*this);
+}/*}}}*/
+#endif
+
+#if OPTION_TO_JSON == ENABLED
+static inline void crc32_s_to_json(const crc32_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  ui_to_json(this,a_trg);
+}/*}}}*/
+#endif
+
+static inline int crc32_s_valid(const crc32_s *this,crc32_s a_init,unsigned a_size,const void *a_data)
+{/*{{{*/
+  crc32_s crc = a_init;
+  crc32_s_update(&crc,a_size,a_data);
 
   return *this == crc;
 }/*}}}*/
