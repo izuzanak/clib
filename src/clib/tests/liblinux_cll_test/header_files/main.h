@@ -33,6 +33,7 @@ void test_socket_udp();
 void test_socket_tcp();
 void test_aio();
 void test_pid();
+void test_pthread();
 void test_epoll();
 void test_rtc();
 

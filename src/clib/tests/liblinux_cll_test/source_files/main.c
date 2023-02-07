@@ -17,6 +17,7 @@ const char *test_names[] =
   "socket_tcp",
   "aio",
   "pid",
+  "pthread",
   "epoll",
   "rtc",
 };/*}}}*/
@@ -31,6 +32,7 @@ test_function_t test_functions[] =
   test_socket_tcp,
   test_aio,
   test_pid,
+  test_pthread,
   test_epoll,
   test_rtc,
 };/*}}}*/
@@ -323,6 +325,64 @@ void test_pid()
   pid_s_clear(&pid_0);
   string_array_s_clear(&arguments);
   bc_array_s_clear(&buffer);
+#endif
+}/*}}}*/
+
+void *thread_function(void *a_arg)
+{/*{{{*/
+  return NULL;
+}/*}}}*/
+
+void test_pthread()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+
+#define PTHREAD_S_TO_BUFFER(NAME) \
+{/*{{{*/\
+  buffer.used = 0;\
+  pthread_s_to_string(NAME,&buffer);\
+  bc_array_s_push(&buffer,'\0');\
+}/*}}}*/
+
+  CONT_INIT_CLEAR(regex_s,regex);
+  cassert(regex_s_create(&regex,"^pthread_s\\{0x[0-9a-f]+,1\\}$") == 0);
+  regmatch_s match;
+
+  CONT_INIT_CLEAR(pthread_s,thread);
+
+  // - pthread_s_join -
+  PTHREAD_S_TO_BUFFER(&thread);
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_MSYS2
+  cassert(strcmp(buffer.data,"pthread_s{0x0,0}") == 0);
+#else
+  cassert(strcmp(buffer.data,"pthread_s{(nil),0}") == 0);
+#endif
+
+  cassert(pthread_s_create(&thread,NULL,thread_function,NULL) == 0);
+  PTHREAD_S_TO_BUFFER(&thread);
+  cassert(regex_s_match(&regex,buffer.data,&match));
+
+  cassert(pthread_s_join(&thread,NULL) == 0);
+  PTHREAD_S_TO_BUFFER(&thread);
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_MSYS2
+  cassert(strcmp(buffer.data,"pthread_s{0x0,0}") == 0);
+#else
+  cassert(strcmp(buffer.data,"pthread_s{(nil),0}") == 0);
+#endif
+
+  // - pthread_s_detach -
+  cassert(pthread_s_create(&thread,NULL,thread_function,NULL) == 0);
+  PTHREAD_S_TO_BUFFER(&thread);
+  cassert(regex_s_match(&regex,buffer.data,&match));
+
+  cassert(pthread_s_join(&thread,NULL) == 0);
+  PTHREAD_S_TO_BUFFER(&thread);
+#if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_MSYS2
+  cassert(strcmp(buffer.data,"pthread_s{0x0,0}") == 0);
+#else
+  cassert(strcmp(buffer.data,"pthread_s{(nil),0}") == 0);
+#endif
 #endif
 }/*}}}*/
 

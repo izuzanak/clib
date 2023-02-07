@@ -39,6 +39,7 @@ include "cl_sys.h"
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <pthread.h>
 
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
@@ -80,6 +81,11 @@ include "cl_sys.h"
 #define ERROR_PID_MISSING_PROGRAM_NAME 1
 #define ERROR_PID_CANNOT_CREATE_NEW_PROCESS 2
 #define ERROR_PID_KILL_ERROR 3
+
+#define ERROR_PTHREAD_CREATE_ERROR 1
+#define ERROR_PTHREAD_NOT_JOINABLE_ERROR 2
+#define ERROR_PTHREAD_JOIN_ERROR 3
+#define ERROR_PTHREAD_DETACH_ERROR 4
 
 #define ERROR_SIGNAL_SIMPLE_HANDLER_INSTALL_ERROR 1
 
@@ -233,6 +239,35 @@ static inline void pid_s_to_string(const pid_s *this,bc_array_s *a_trg);
 
 WUR liblinux_cll_EXPORT int pid_s_execute(pid_s *this,const string_array_s *a_arguments);
 WUR static inline int pid_s_kill(const pid_s *this,int a_signal);
+
+// === definition of structure pthread_s =======================================
+
+typedef struct pthread_s
+{
+  pthread_t *thread_ptr;
+  int joinable;
+}
+pthread_s;
+
+@begin
+define pthread_s dynamic
+@end
+
+static inline void pthread_s_init(pthread_s *this);
+static inline void pthread_s_clear(pthread_s *this);
+static inline void pthread_s_flush_all(pthread_s *this);
+static inline void pthread_s_swap(pthread_s *this,pthread_s *a_second);
+static inline void pthread_s_copy(const pthread_s *this,const pthread_s *a_src);
+static inline int pthread_s_compare(const pthread_s *this,const pthread_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void pthread_s_to_string(const pthread_s *this,bc_array_s *a_trg);
+#endif
+
+static inline int pthread_s_create(pthread_s *this,
+    const pthread_attr_t *a_attr,void *(*a_function)(void *),void *a_arg);
+static inline int pthread_s_join(pthread_s *this,void **a_retval);
+static inline int pthread_s_detach(pthread_s *this);
+static inline void pthread_s_exit(void *a_retval);
 
 // === definition of structure signal_s ========================================
 
@@ -870,6 +905,132 @@ static inline int pid_s_kill(const pid_s *this,int a_signal)
   }
 
   return 0;
+}/*}}}*/
+
+// === inline methods of structure pthread_s ===================================
+
+static inline void pthread_s_init(pthread_s *this)
+{/*{{{*/
+  this->thread_ptr = NULL;
+  this->joinable = 0;
+}/*}}}*/
+
+static inline void pthread_s_clear(pthread_s *this)
+{/*{{{*/
+  if (this->thread_ptr != NULL)
+  {
+    if (this->joinable)
+    {
+      cassert(pthread_join(*this->thread_ptr,NULL) == 0);
+    }
+
+    cfree(this->thread_ptr);
+  }
+
+  pthread_s_init(this);
+}/*}}}*/
+
+static inline void pthread_s_flush_all(pthread_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void pthread_s_swap(pthread_s *this,pthread_s *a_second)
+{/*{{{*/
+  pthread_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void pthread_s_copy(const pthread_s *this,const pthread_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int pthread_s_compare(const pthread_s *this,const pthread_s *a_second)
+{/*{{{*/
+  (void)this;
+  (void)a_second;
+
+  cassert(0);
+  return 0;
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void pthread_s_to_string(const pthread_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"pthread_s{%p,%d}",this->thread_ptr,this->joinable);
+}/*}}}*/
+#endif
+
+static inline int pthread_s_create(pthread_s *this,
+    const pthread_attr_t *a_attr,void *(*a_function)(void *),void *a_arg)
+{/*{{{*/
+  pthread_s_clear(this);
+
+  // - allocate pthread memory -
+  this->thread_ptr = cmalloc(sizeof(pthread_t));
+
+  if (pthread_create(this->thread_ptr,a_attr,a_function,a_arg))
+  {
+    // - release pthread memory -
+    cfree(this->thread_ptr);
+    pthread_s_init(this);
+
+    throw_error(PTHREAD_CREATE_ERROR);
+  }
+
+  // - set joinable flag -
+  this->joinable = 1;
+
+  return 0;
+}/*}}}*/
+
+static inline int pthread_s_join(pthread_s *this,void **a_retval)
+{/*{{{*/
+  if (!this->joinable)
+  {
+    throw_error(PTHREAD_NOT_JOINABLE_ERROR);
+  }
+
+  if (pthread_join(*this->thread_ptr,a_retval))
+  {
+    throw_error(PTHREAD_JOIN_ERROR);
+  }
+
+  // - reset joinable flag -
+  this->joinable = 0;
+
+  pthread_s_clear(this);
+
+  return 0;
+}/*}}}*/
+
+static inline int pthread_s_detach(pthread_s *this)
+{/*{{{*/
+  if (!this->joinable)
+  {
+    throw_error(PTHREAD_NOT_JOINABLE_ERROR);
+  }
+
+  if (pthread_detach(*this->thread_ptr))
+  {
+    throw_error(PTHREAD_DETACH_ERROR);
+  }
+
+  // - reset joinable flag -
+  this->joinable = 0;
+
+  pthread_s_clear(this);
+
+  return 0;
+}/*}}}*/
+
+static inline void pthread_s_exit(void *a_retval)
+{/*{{{*/
+  pthread_exit(a_retval);
 }/*}}}*/
 
 // === inline methods of generated structures ==================================
