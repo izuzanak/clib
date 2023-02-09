@@ -67,7 +67,8 @@ static inline void loc_s_to_string(var_s this,bc_array_s *a_trg);
 static inline void loc_s_to_json(var_s this,bc_array_s *a_trg);
 static inline void loc_s_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_array_s *a_trg);
 #endif
-libvar_cll_EXPORT var_s loc_s_at_path(var_s this,const char *a_path);
+static inline var_s loc_s_at_path(var_s this,const char *a_path);
+libvar_cll_EXPORT var_s loc_s_at_part_path(var_s this,const char *a_path,const char **a_rest);
 
 // === definition of structure loc_s function maps =============================
 
@@ -343,6 +344,13 @@ static inline void loc_s_to_json_nice(var_s this,json_nice_s *a_json_nice,bc_arr
   g_loc_s___to_json_nice[this->v_type](this,a_json_nice,a_trg);
 }/*}}}*/
 #endif
+
+static inline var_s loc_s_at_path(var_s this,const char *a_path)
+{/*{{{*/
+  const char *rest;
+  var_s data_var = loc_s_at_part_path(this,a_path,&rest);
+  return rest == NULL ? data_var : NULL;
+}/*}}}*/
 
 // === inline methods of var_s =================================================
 

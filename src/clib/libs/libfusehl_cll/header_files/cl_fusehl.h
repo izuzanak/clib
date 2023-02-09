@@ -29,54 +29,62 @@ include "cl_struct.h"
 #define throw_fuse_error(REQUEST,ERROR_ID)\
 {/*{{{*/\
   debug_message_1(fprintf(stderr,"ERROR: " #ERROR_ID ", %s +%d, function: %s\n",__FILE__,__LINE__,__FUNCTION__));\
-  fuse_reply_err(REQUEST,ERROR_ID);\
+  fusehl_reply_err(REQUEST,ERROR_ID);\
   return;\
 }/*}}}*/
 
 // === definition of fuse_lowlevel api =========================================
 
-typedef uint32_t fuse_req_t;
+typedef uintptr_t fuse_req_t;
 typedef uint64_t fuse_ino_t;
 
-// === definition of structure fuse_dirbuff_s ==================================
+struct fuse_entry_param
+{/*{{{*/
+  fuse_ino_t ino;
+  uint64_t generation;
+  struct stat attr;
+  double attr_timeout;
+  double entry_timeout;
+};/*}}}*/
 
-static inline void fuse_dirbuff_s_add(bc_array_s *this,fuse_req_t a_req,const char *a_name,fuse_ino_t a_ino);
-static inline void fuse_dirbuff_s_reply(bc_array_s *this,fuse_req_t a_req,size_t a_size,off_t a_off);
+struct fusehl_request_data_s
+{/*{{{*/
+  fuse_req_t req;
+  fuse_ino_t parent;
+  fuse_ino_t ino;
+  const char *name;
+  struct fuse_file_info *fi;
+  char *buf;
+  size_t size;
+};/*}}}*/
+
+struct fusehl_response_data_s
+{/*{{{*/
+  int err;
+  struct fuse_entry_param ep;
+  struct stat attr;
+  const struct fuse_file_info *fi;
+  size_t size;
+};/*}}}*/
+
+extern struct fusehl_request_data_s g_fusehl_request;
+extern struct fusehl_response_data_s g_fusehl_response;
+
+#define FUSEHL_REQUEST_LOOKUP  '\x00'
+#define FUSEHL_REQUEST_GETATTR '\x01'
+#define FUSEHL_REQUEST_READDIR '\x02'
+#define FUSEHL_REQUEST_OPEN    '\x03'
+#define FUSEHL_REQUEST_RELEASE '\x04'
+#define FUSEHL_REQUEST_READ    '\x05'
+
+#define FUSEHL_RESPONSE_ERR    '\xf0'
+#define FUSEHL_RESPONSE_ENTRY  '\xf1'
+#define FUSEHL_RESPONSE_ATTR   '\xf2'
+#define FUSEHL_RESPONSE_DIRBUF '\xf3'
+#define FUSEHL_RESPONSE_OPEN   '\xf4'
+#define FUSEHL_RESPONSE_BUF    '\xf5'
 
 // === definition of generated structures ======================================
-
-// === inline methods of structure fuse_dirbuff_s ==============================
-
-static inline void fuse_dirbuff_s_add(bc_array_s *this,fuse_req_t a_req,const char *a_name,fuse_ino_t a_ino)
-{/*{{{*/
-  
-  // FIXME TODO add to dir buffer ...
-  //struct stat stbuf = {};
-  //stbuf.st_ino = a_ino;
-
-  //unsigned entry_size = fuse_add_direntry(a_req,NULL,0,a_name,NULL,0);
-
-  //unsigned old_used = this->used;
-  //bc_array_s_push_blanks(this,entry_size);
-  //fuse_add_direntry(a_req,this->data + old_used,this->size - old_used,a_name,&stbuf,this->used);
-}/*}}}*/
-
-static inline void fuse_dirbuff_s_reply(bc_array_s *this,fuse_req_t a_req,size_t a_size,off_t a_off)
-{/*{{{*/
-  if (a_off < this->used)
-  {
-    // FIXME TODO reply dir buffer ...
-    //unsigned rest = this->used - a_off;
-    //unsigned size = rest < a_size ? rest : a_size;
-
-    //fuse_reply_buf(a_req,this->data + a_off,size);
-  }
-  else
-  {
-    // FIXME TODO reply dir buffer ...
-    //fuse_reply_buf(a_req,NULL,0);
-  }
-}/*}}}*/
 
 // === inline methods of generated structures ==================================
 

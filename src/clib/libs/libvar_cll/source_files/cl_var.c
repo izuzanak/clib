@@ -5,7 +5,7 @@ include "cl_var.h"
 
 // === methods of structure loc_s ==============================================
 
-var_s loc_s_at_path(var_s this,const char *a_path)
+var_s loc_s_at_part_path(var_s this,const char *a_path,const char **a_rest)
 {/*{{{*/
   var_s data_var = this;
 
@@ -29,7 +29,8 @@ var_s loc_s_at_path(var_s this,const char *a_path)
           }
           else
           {
-            return NULL;
+            *a_rest = key_ptr;
+            return data_var;
           }
         }/*}}}*/
         break;
@@ -44,18 +45,23 @@ var_s loc_s_at_path(var_s this,const char *a_path)
           }
           else
           {
-            return NULL;
+            *a_rest = key_ptr;
+            return data_var;
           }
         }/*}}}*/
         break;
       default:
-        return NULL;
+        {/*{{{*/
+          *a_rest = key_ptr;
+          return data_var;
+        }/*}}}*/
       }
 
       key_ptr = key_end_ptr + 1;
     } while(*key_end_ptr != '\0');
   }
 
+  *a_rest = NULL;
   return data_var;
 }/*}}}*/
 

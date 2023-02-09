@@ -852,8 +852,8 @@ static inline void pid_s_clear(pid_s *this)
     int status;
     if (waitpid(*this,&status,WNOHANG) <= 0)
     {
-      // - send terminate signal to process -
-      if (kill(*this,SIGTERM) == 0)
+      // - send kill signal to process -
+      if (kill(*this,SIGKILL) == 0)
       {
         // - wait on process to terminate -
         waitpid(*this,&status,0);

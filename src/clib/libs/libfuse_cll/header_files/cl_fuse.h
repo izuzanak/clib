@@ -33,6 +33,20 @@ include "cl_struct.h"
   return;\
 }/*}}}*/
 
+// - map fusehl callbacks to fuse callbacks -
+#define fusehl_req_userdata(req)                 fuse_req_userdata(req)
+#define fusehl_reply_buf(req,buf,size)           fuse_reply_buf(req,buf,size)
+#define fusehl_reply_err(req,err)                fuse_reply_err(req,err)
+#define fusehl_reply_entry(req,e)                fuse_reply_entry(req,e)
+#define fusehl_reply_attr(req,attr,attr_timeout) fuse_reply_attr(req,attr,attr_timeout)
+#define fusehl_reply_open(req,fi)                fuse_reply_open(req,fi)
+
+#define fusehl_dirbuff_s_add(this,a_req,a_name,a_ino) \
+  fuse_dirbuff_s_add(this,a_req,a_name,a_ino)
+
+#define fusehl_dirbuff_s_reply(this,a_req,a_size,a_off) \
+  fuse_dirbuff_s_reply(this,a_req,a_size,a_off)
+
 // === definition of structure fuse_dirbuff_s ==================================
 
 static inline void fuse_dirbuff_s_add(bc_array_s *this,fuse_req_t a_req,const char *a_name,fuse_ino_t a_ino);

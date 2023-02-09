@@ -18,6 +18,7 @@ const char *test_names[] =
   "register_type",
   "from_var",
   "at_path",
+  "at_part_path",
 };/*}}}*/
 
 test_function_t test_functions[] =
@@ -31,6 +32,7 @@ test_function_t test_functions[] =
   test_register_type,
   test_from_var,
   test_at_path,
+  test_at_part_path,
 };/*}}}*/
 
 // === methods of generated structures =========================================
@@ -922,6 +924,53 @@ void test_at_path()
   cassert(strcmp(loc_s_string_value(loc_s_at_path(dict_1,"fifth/0"))->data,"one") == 0);
   cassert(strcmp(loc_s_string_value(loc_s_at_path(dict_1,"fifth/1"))->data,"two") == 0);
   cassert(strcmp(loc_s_string_value(loc_s_at_path(dict_1,"fifth/2"))->data,"three") == 0);
+#endif
+}/*}}}*/
+
+void test_at_part_path()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+
+  VAR_CLEAR(dict_1,loc_s_dict());
+  loc_s_dict_set(dict_1,loc_s_string_ptr("first"),loc_s_int(1));
+  loc_s_dict_set(dict_1,loc_s_string_ptr("second"),loc_s_int(2));
+  loc_s_dict_set(dict_1,loc_s_string_ptr("third"),loc_s_int(3));
+
+  VAR_CLEAR(dict_2,loc_s_dict());
+  loc_s_dict_set(dict_2,loc_s_string_ptr("first"),loc_s_int(4));
+  loc_s_dict_set(dict_2,loc_s_string_ptr("second"),loc_s_int(5));
+  loc_s_dict_set(dict_2,loc_s_string_ptr("third"),loc_s_int(6));
+
+  loc_s_dict_set(dict_1,loc_s_string_ptr("fourth"),dict_2);
+
+  VAR_CLEAR(array_1,loc_s_array());
+  loc_s_array_push(array_1,loc_s_string_ptr("one"));
+  loc_s_array_push(array_1,loc_s_string_ptr("two"));
+  loc_s_array_push(array_1,loc_s_string_ptr("three"));
+
+  loc_s_dict_set(dict_1,loc_s_string_ptr("fifth"),array_1);
+
+  var_s path_var;
+  const char *path_rest = NULL;
+
+  cassert(loc_s_int_value(loc_s_at_part_path(dict_1,"first",&path_rest)) == 1 && path_rest == NULL);
+  cassert(loc_s_int_value(loc_s_at_part_path(dict_1,"second",&path_rest)) == 2 && path_rest == NULL);
+  cassert(loc_s_int_value(loc_s_at_part_path(dict_1,"third",&path_rest)) == 3 && path_rest == NULL);
+
+  cassert(loc_s_int_value(loc_s_at_part_path(dict_1,"fourth/first",&path_rest)) == 4 && path_rest == NULL);
+  cassert(loc_s_int_value(loc_s_at_part_path(dict_1,"fourth/second",&path_rest)) == 5 && path_rest == NULL);
+  cassert(loc_s_int_value(loc_s_at_part_path(dict_1,"fourth/third",&path_rest)) == 6 && path_rest == NULL);
+
+  path_var = loc_s_at_part_path(dict_1,"fourth/fourth",&path_rest);
+  cassert(var_s_compare(&dict_2,&path_var) && strcmp(path_rest,"fourth") == 0);
+
+  cassert(strcmp(loc_s_string_value(loc_s_at_part_path(dict_1,"fifth/0",&path_rest))->data,"one") == 0 && path_rest == NULL);
+  cassert(strcmp(loc_s_string_value(loc_s_at_part_path(dict_1,"fifth/1",&path_rest))->data,"two") == 0 && path_rest == NULL);
+  cassert(strcmp(loc_s_string_value(loc_s_at_part_path(dict_1,"fifth/2",&path_rest))->data,"three") == 0 && path_rest == NULL);
+
+  path_var = loc_s_at_part_path(dict_1,"fifth/3",&path_rest);
+  cassert(var_s_compare(&array_1,&path_var) && strcmp(path_rest,"3") == 0);
 #endif
 }/*}}}*/
 

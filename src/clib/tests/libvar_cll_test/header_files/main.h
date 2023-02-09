@@ -316,6 +316,7 @@ void test_var_dict();
 void test_register_type();
 void test_from_var();
 void test_at_path();
+void test_at_part_path();
 
 // === program entry function ==================================================
 
