@@ -1,5 +1,5 @@
 
-#ifndef CL_LIB_FUSEHL_H
+#ifndef CL_LIB_FUSEHL_H // NOLINT
 #define CL_LIB_FUSEHL_H
 
 @begin
@@ -76,6 +76,7 @@ extern struct fusehl_response_data_s g_fusehl_response;
 #define FUSEHL_REQUEST_OPEN    '\x03'
 #define FUSEHL_REQUEST_RELEASE '\x04'
 #define FUSEHL_REQUEST_READ    '\x05'
+#define FUSEHL_REQUEST_NOOP    '\x06'
 
 #define FUSEHL_RESPONSE_ERR    '\xf0'
 #define FUSEHL_RESPONSE_ENTRY  '\xf1'

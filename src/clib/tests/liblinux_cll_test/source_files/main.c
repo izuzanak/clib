@@ -330,6 +330,8 @@ void test_pid()
 
 void *thread_function(void *a_arg)
 {/*{{{*/
+  (void)a_arg;
+
   return NULL;
 }/*}}}*/
 

@@ -109,6 +109,22 @@ abbreviation ulli xs_unsignedLong_s
 WUR int xs_unsignedLong_s_write(const xs_unsignedLong_s *this,bc_array_s *a_trg);
 WUR int xs_unsignedLong_s_read(xs_unsignedLong_s *this,var_s a_var);
 
+// -- xs_positiveInteger_value_s --
+@begin
+abbreviation lli xs_positiveInteger_value_s
+@end
+
+WUR int xs_positiveInteger_value_s_write(const xs_positiveInteger_value_s *this,bc_array_s *a_trg);
+WUR int xs_positiveInteger_value_s_read(xs_positiveInteger_value_s *this,var_s a_var);
+
+// -- xs_nonNegativeInteger_value_s --
+@begin
+abbreviation lli xs_nonNegativeInteger_value_s
+@end
+
+WUR int xs_nonNegativeInteger_value_s_write(const xs_nonNegativeInteger_value_s *this,bc_array_s *a_trg);
+WUR int xs_nonNegativeInteger_value_s_read(xs_nonNegativeInteger_value_s *this,var_s a_var);
+
 // -- xs_nonNegativeInteger_s --
 @begin
 abbreviation lli xs_nonNegativeInteger_s
@@ -261,13 +277,13 @@ abbreviation string_s xs_base64Binary_s
 WUR int xs_base64Binary_s_write(const xs_base64Binary_s *this,bc_array_s *a_trg);
 WUR int xs_base64Binary_s_read(xs_base64Binary_s *this,var_s a_var);
 
-// -- xs_dateTime_value_s --
+// -- xs_date_value_s --
 @begin
-abbreviation string_s xs_dateTime_value_s
+abbreviation string_s xs_date_value_s
 @end
 
-WUR int xs_dateTime_value_s_write(const xs_dateTime_value_s *this,bc_array_s *a_trg);
-WUR int xs_dateTime_value_s_read(xs_dateTime_value_s *this,var_s a_var);
+WUR int xs_date_value_s_write(const xs_date_value_s *this,bc_array_s *a_trg);
+WUR int xs_date_value_s_read(xs_date_value_s *this,var_s a_var);
 
 // -- xs_date_s --
 @begin
@@ -290,6 +306,14 @@ WUR int xs_time_s_read(xs_time_s *this,var_s a_var);
 
 void xs_time_s_create(xs_time_s *this,time_s a_time);
 WUR int xs_time_s_parse(xs_time_s *this,time_s *a_time);
+
+// -- xs_dateTime_value_s --
+@begin
+abbreviation string_s xs_dateTime_value_s
+@end
+
+WUR int xs_dateTime_value_s_write(const xs_dateTime_value_s *this,bc_array_s *a_trg);
+WUR int xs_dateTime_value_s_read(xs_dateTime_value_s *this,var_s a_var);
 
 // -- xs_dateTime_s --
 @begin

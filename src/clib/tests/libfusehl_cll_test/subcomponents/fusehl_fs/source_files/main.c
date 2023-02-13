@@ -56,7 +56,9 @@ static int fusehl_fs_readdir(const char *path,void *buf,fuse_fill_dir_t filler,
   fprintf(stderr,"fusehl_fs_readdir, path: %s, fi: %p\n",path,fi);
 
   if (strcmp(path,"/") != 0)
+  {
     return -ENOENT;
+  }
 
   filler(buf,".",NULL,0,0);
   filler(buf,"..",NULL,0,0);

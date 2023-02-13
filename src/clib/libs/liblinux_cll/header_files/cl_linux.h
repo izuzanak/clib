@@ -31,6 +31,7 @@ include "cl_sys.h"
 #define EPOLL_CLOEXEC 0
 #endif
 
+#include <pthread.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -39,7 +40,6 @@ include "cl_sys.h"
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <pthread.h>
 
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX

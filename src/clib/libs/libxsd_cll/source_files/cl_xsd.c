@@ -235,6 +235,62 @@ int xs_unsignedLong_s_read(xs_unsignedLong_s *this,var_s a_var)
   return 0;
 }/*}}}*/
 
+// -- xs_positiveInteger_value_s --
+int xs_positiveInteger_value_s_write(const xs_positiveInteger_value_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  if (*this <= 0)
+  {
+    throw_error(XSD_INVALID_DATA_ERROR);
+  }
+
+  bc_array_s_append_format(a_trg,"%lld",*this);
+
+  return 0;
+}/*}}}*/
+
+int xs_positiveInteger_value_s_read(xs_positiveInteger_value_s *this,var_s a_var)
+{/*{{{*/
+  const string_s *value_str = loc_s_string_value(a_var);
+  char *end_ptr;
+  *this = strtoll(value_str->data,&end_ptr,10);
+
+  if (end_ptr != (value_str->data + value_str->size - 1) ||
+      *this <= 0)
+  {
+    throw_error(XSD_INVALID_DATA_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+// -- xs_nonNegativeInteger_value_s --
+int xs_nonNegativeInteger_value_s_write(const xs_nonNegativeInteger_value_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  if (*this < 0)
+  {
+    throw_error(XSD_INVALID_DATA_ERROR);
+  }
+
+  bc_array_s_append_format(a_trg,"%lld",*this);
+
+  return 0;
+}/*}}}*/
+
+int xs_nonNegativeInteger_value_s_read(xs_nonNegativeInteger_value_s *this,var_s a_var)
+{/*{{{*/
+  const string_s *value_str = loc_s_string_value(a_var);
+  char *end_ptr;
+  *this = strtoll(value_str->data,&end_ptr,10);
+
+  if (end_ptr != (value_str->data + value_str->size - 1) ||
+      *this < 0)
+  {
+    throw_error(XSD_INVALID_DATA_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
 // -- xs_nonNegativeInteger_s --
 int xs_nonNegativeInteger_s_write(const xs_nonNegativeInteger_s *this,bc_array_s *a_trg)
 {/*{{{*/
@@ -584,15 +640,15 @@ int xs_base64Binary_s_read(xs_base64Binary_s *this,var_s a_var)
   return 0;
 }/*}}}*/
 
-// -- xs_dateTime_value_s --
-int xs_dateTime_value_s_write(const xs_dateTime_value_s *this,bc_array_s *a_trg)
+// -- xs_date_value_s --
+int xs_date_value_s_write(const xs_date_value_s *this,bc_array_s *a_trg)
 {/*{{{*/
   xml_create_append_string(this->size - 1,this->data,a_trg);
 
   return 0;
 }/*}}}*/
 
-int xs_dateTime_value_s_read(xs_dateTime_value_s *this,var_s a_var)
+int xs_date_value_s_read(xs_date_value_s *this,var_s a_var)
 {/*{{{*/
   string_s_copy(this,loc_s_string_value(a_var));
 
@@ -767,6 +823,21 @@ int xs_time_s_parse(xs_time_s *this,time_s *a_time)
   } while(0);
 
   throw_error(XSD_DATE_TIME_PARSE_ERROR);
+}/*}}}*/
+
+// -- xs_dateTime_value_s --
+int xs_dateTime_value_s_write(const xs_dateTime_value_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  xml_create_append_string(this->size - 1,this->data,a_trg);
+
+  return 0;
+}/*}}}*/
+
+int xs_dateTime_value_s_read(xs_dateTime_value_s *this,var_s a_var)
+{/*{{{*/
+  string_s_copy(this,loc_s_string_value(a_var));
+
+  return 0;
 }/*}}}*/
 
 // -- xs_dateTime_s --
