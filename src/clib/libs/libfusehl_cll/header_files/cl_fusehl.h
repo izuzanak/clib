@@ -87,7 +87,22 @@ extern struct fusehl_response_data_s g_fusehl_response;
 
 // === definition of generated structures ======================================
 
+// -- fuse_req_t --
+@begin
+define fuse_req_t basic
+@end
+
+static inline void fuse_req_t_to_string(const fuse_req_t *this,bc_array_s *a_trg);
+
 // === inline methods of generated structures ==================================
+
+// -- fuse_req_t --
+static inline void fuse_req_t_to_string(const fuse_req_t *this,bc_array_s *a_trg)
+{/*{{{*/
+  (void)this;
+
+  bc_array_s_append(a_trg,2,"{}");
+}/*}}}*/
 
 #endif
 

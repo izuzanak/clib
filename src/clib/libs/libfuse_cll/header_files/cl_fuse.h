@@ -82,6 +82,13 @@ static inline int fuse_session_s_fd(fuse_session_s *this);
 
 // === definition of generated structures ======================================
 
+// -- fuse_req_t --
+@begin
+define fuse_req_t basic
+@end
+
+static inline void fuse_req_t_to_string(const fuse_req_t *this,bc_array_s *a_trg);
+
 // === inline methods of structure fuse_dirbuff_s ==============================
 
 static inline void fuse_dirbuff_s_add(bc_array_s *this,fuse_req_t a_req,const char *a_name,fuse_ino_t a_ino)
@@ -189,6 +196,14 @@ static inline int fuse_session_s_fd(fuse_session_s *this)
 }/*}}}*/
 
 // === inline methods of generated structures ==================================
+
+// -- fuse_req_t --
+static inline void fuse_req_t_to_string(const fuse_req_t *this,bc_array_s *a_trg)
+{/*{{{*/
+  (void)this;
+
+  bc_array_s_append(a_trg,2,"{}");
+}/*}}}*/
 
 #endif
 
