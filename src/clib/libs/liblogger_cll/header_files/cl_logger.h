@@ -42,7 +42,7 @@ extern logger_s *g_logger;
 #define LOG_MSG_PARAMETERS(LENGTH,DATA) \
   (LENGTH) < LOG_MSG_MAX ? (LENGTH) : LOG_MSG_MAX,DATA,(LENGTH) < LOG_MSG_MAX ? "" : " ..."
 
-// - camsys processes log levels -
+// - processes log levels -
 enum
 {/*{{{*/
   log_lvl_fatal   = 0,
