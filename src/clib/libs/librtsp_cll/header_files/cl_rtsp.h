@@ -415,15 +415,11 @@ static inline int rtsp_setup_s_update_tcp_outq(rtsp_setup_s *this,int a_fd)
   // - compute space in outq -
   this->tcp_outq_space = RTSP_TCP_OUTPUT_QUEUE_SIZE - outq_count;
 #else
-#ifndef CS_DATA_BROWSER
   // - slowly increase space in outq -
   if ((this->tcp_outq_space += 1024) >= RTSP_TCP_OUTPUT_QUEUE_SIZE)
   {
     this->tcp_outq_space = RTSP_TCP_OUTPUT_QUEUE_SIZE;
   }
-#else
-  this->tcp_outq_space = RTSP_TCP_OUTPUT_QUEUE_SIZE;
-#endif
 #endif
 
   return 0;
