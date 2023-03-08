@@ -616,6 +616,8 @@ int epoll_s_wait(epoll_s *this,int a_timeout)
   // - call epoll_wait -
   int count = epoll_wait(this->fd,&event,1,a_timeout);
 #else
+  (void)a_timeout;
+
   int count = poll(this->pollfd_array.data,this->pollfd_array.used,-1);
 #endif
 

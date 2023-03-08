@@ -1067,6 +1067,8 @@ static inline int epoll_s_create(epoll_s *this,int a_flags)
   {
     throw_error(EPOLL_CREATE_ERROR);
   }
+#else
+  (void)a_flags;
 #endif
 
   return 0;
