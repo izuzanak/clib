@@ -132,7 +132,7 @@ WUR libmicrohttp_cll_EXPORT int http_server_s_create(http_server_s *this,usi a_p
     http_completed_cb_t a_completed_cb,
     void *a_user_data);
 WUR libmicrohttp_cll_EXPORT int http_server_s_fds(http_server_s *this,pollfd_array_s *a_trg);
-static inline ulli http_server_s_timeout(http_server_s *this);
+static inline bi http_server_s_timeout(http_server_s *this,ulli *a_timeout);
 WUR static inline int http_server_s_process(http_server_s *this);
 
 // === definition of structure http_conn_s =====================================
@@ -347,14 +347,16 @@ static inline void http_server_s_to_string(const http_server_s *this,bc_array_s 
 }/*}}}*/
 #endif
 
-static inline ulli http_server_s_timeout(http_server_s *this)
+static inline bi http_server_s_timeout(http_server_s *this,ulli *a_timeout)
 {/*{{{*/
   MHD_UNSIGNED_LONG_LONG mhd_timeout;
 
   // - retrieve mhd timeout -
   if (MHD_get_timeout(this->daemon,&mhd_timeout) == MHD_YES)
   {
-    return mhd_timeout*1000000ULL;
+    *a_timeout = mhd_timeout == 0 ? 1 : mhd_timeout*1000000ULL;
+
+    return 1;
   }
 
   return 0;

@@ -158,7 +158,7 @@ int http_server_s_create(http_server_s *this,usi a_port,
 
   // - start http server -
   struct MHD_Daemon *daemon = MHD_start_daemon(
-      MHD_USE_SUSPEND_RESUME,a_port,NULL,NULL,
+      MHD_USE_SUSPEND_RESUME | MHD_USE_EPOLL,a_port,NULL,NULL,
       http_server_s_connection_func,this,
       MHD_OPTION_NONCE_NC_SIZE,(unsigned)2000,
       MHD_OPTION_NOTIFY_COMPLETED,http_server_s_completed_func,this,
@@ -458,9 +458,15 @@ int http_epoll_s_update_epoll_fds(http_epoll_s *this)
   }
 
   // - schedule http timer -
-  ulli timeout = http_server_s_timeout(&this->server);
+  struct itimerspec itimerspec = {{0,0},{0,0}};
 
-  struct itimerspec itimerspec = {{0,0},{timeout/1000000000ULL,timeout%1000000000ULL}};
+  ulli timeout;
+  if (http_server_s_timeout(&this->server,&timeout))
+  {
+    itimerspec.it_value.tv_sec  = timeout/1000000000ULL;
+    itimerspec.it_value.tv_nsec = timeout%1000000000ULL;
+  }
+
   if (epoll_s_timer_callback(&this->epoll_timer,&itimerspec,0,http_epoll_s_time_event,this,0))
   {
     throw_error(HTTP_EPOLL_EPOLL_ERROR);
