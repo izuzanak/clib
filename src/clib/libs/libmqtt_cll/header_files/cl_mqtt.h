@@ -99,9 +99,6 @@ enum
   MQTT_PACKET_TYPE_PINGRESP    = 13,
   MQTT_PACKET_TYPE_DISCONNECT  = 14,
   MQTT_PACKET_TYPE_AUTH        = 15,
-
-  // - not mqtt standard -
-  MQTT_PACKET_TYPE_WILLPROPS = 16,
 };/*}}}*/
 
 // - type of control packet data -
