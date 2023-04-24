@@ -52,7 +52,7 @@ static inline void string_s_to_json_nice(const string_s *this,void *a_json_nice,
 #endif
 
 libbase_cll_EXPORT void string_s_buffer_to_json(const char *a_ptr,const char *a_ptr_end,bc_array_s *a_trg);
-libbase_cll_EXPORT unsigned string_s_get_idx(string_s *this,unsigned a_idx,unsigned a_length,const char *a_data);
+libbase_cll_EXPORT unsigned string_s_get_idx(const string_s *this,unsigned a_idx,unsigned a_length,const char *a_data);
 
 // === definition of generated structures ======================================
 

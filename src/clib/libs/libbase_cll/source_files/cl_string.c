@@ -81,7 +81,7 @@ void string_s_buffer_to_json(const char *a_ptr,const char *a_ptr_end,bc_array_s 
   bc_array_s_push(a_trg,'"');
 }/*}}}*/
 
-unsigned string_s_get_idx(string_s *this,unsigned a_idx,unsigned a_length,const char *a_data)
+unsigned string_s_get_idx(const string_s *this,unsigned a_idx,unsigned a_length,const char *a_data)
 {/*{{{*/
   if (a_idx >= (this->size - 1) || a_length == 0 || a_length >= (this->size - a_idx))
   {

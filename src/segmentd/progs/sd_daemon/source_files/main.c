@@ -555,7 +555,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       sd_segment_descr_s *segment = sd_segment_tree_s_at(&this->segments,segment_idx);
 
       // - check write data size -
-      if (data->used >= segment->config.size)
+      if (data->used > segment->config.size)
       {
         throw_error(SD_DAEMON_SEGMENT_INVALID_WRITE_SIZE);
       }
@@ -775,7 +775,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       sd_trace_descr_s *trace = sd_trace_tree_s_at(&this->traces,trace_idx);
 
       // - check write data size -
-      if (data->used >= trace->trace.data_size)
+      if (data->used > trace->trace.data_size)
       {
         throw_error(SD_DAEMON_TRACE_INVALID_WRITE_SIZE);
       }
