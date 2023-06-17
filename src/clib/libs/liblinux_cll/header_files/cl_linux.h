@@ -333,7 +333,7 @@ typedef epoll_fd_s epoll_timer_s;
 @begin
 struct
 <
-#ifndef DISABLE_EPOLL
+#if !DISABLE_EPOLL
 fd_s:fd
 #else
 pollfd_array_s:pollfd_array
