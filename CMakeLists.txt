@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8...3.13)
 
 find_package(PkgConfig)
 
@@ -8,6 +8,11 @@ project(clib)
 
 if(NOT DEFINED PROJECT_DEFS)
   set(PROJECT_DEFS
+      #"-DDISABLE_EPOLL"
+      #"-DDISABLE_SO_DOMAIN"
+      #"-DDISABLE_PAM_AUTH"
+      #"-DDISABLE_TIOCOUTQ"
+
       #"-DCLIB_OBJECTDB_NOSYNC"
       #"-DCLIB_SEGMENTD_NOSYNC"
      )
