@@ -1,5 +1,5 @@
 
-find_package(OpenSSL 1.0.2)
+find_package(OpenSSL 1.0.1)
 
 set(CONF_COMPONENTS
   "src/clib/libs/libbase_cll")
