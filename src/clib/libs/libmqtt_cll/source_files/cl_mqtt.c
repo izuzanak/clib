@@ -742,7 +742,8 @@ int mqtt_conn_s_process_packet(mqtt_conn_s *this,uint8_t pkt_type,uint32_t size,
       if (data < data_end)
       {
         // - reason code -
-        if ((uint8_t)(*data++) >= 0x80)
+        uint32_t reason_code = (uint8_t)(*data++);
+        if (reason_code >= 0x80 && reason_code != 0x92)
         {
           throw_error(MQTT_INVALID_PUBCOMP_PACKET);
         }
