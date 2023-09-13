@@ -10,16 +10,16 @@ const char c_string_terminating_char = '\0';
 
 // === methods of structure string_s ===========================================
 
-void string_s_set_format(string_s *this,const char *a_format,...)
+void string_s_set_format_ap(string_s *this,const char *a_format,va_list a_ap)
 {/*{{{*/
   string_s_clear(this);
 
   const int init_size = 128;
-  va_list ap;
 
   this->data = (char *)cmalloc(init_size*sizeof(char));
 
-  va_start(ap,a_format);
+  va_list ap;
+  va_copy(ap,a_ap);
   int length = vsnprintf(this->data,init_size,a_format,ap);
   va_end(ap);
 
@@ -28,10 +28,7 @@ void string_s_set_format(string_s *this,const char *a_format,...)
   if (length >= init_size)
   {
     this->data = crealloc(this->data,this->size*sizeof(char));
-
-    va_start(ap,a_format);
-    vsnprintf(this->data,this->size,a_format,ap);
-    va_end(ap);
+    vsnprintf(this->data,this->size,a_format,a_ap);
   }
 }/*}}}*/
 

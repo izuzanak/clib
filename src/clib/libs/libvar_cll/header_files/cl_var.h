@@ -241,6 +241,7 @@ static inline var_s loc_s_string(unsigned a_length,const char *a_data);
 static inline var_s loc_s_string_ptr(const char *a_data);
 static inline var_s loc_s_string_str(string_s *a_src);
 static inline var_s loc_s_string_swap(string_s *a_src);
+static inline var_s loc_s_string_format(const char *a_format,...);
 static inline void loc_s_string_clear(var_s this);
 static inline int loc_s_string_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED
@@ -792,6 +793,24 @@ static inline var_s loc_s_string_swap(string_s *a_src)
   string_s *string = (string_s *)cmalloc(sizeof(string_s));
   string_s_init(string);
   string_s_swap(string,a_src);
+
+  var_s var = loc_s___new();
+  var->v_type = c_bi_type_string;
+  atomic_s_set(&var->v_ref_cnt,0);
+  var->v_data.ptr = string;
+
+  return var;
+}/*}}}*/
+
+static inline var_s loc_s_string_format(const char *a_format,...)
+{/*{{{*/
+  string_s *string = (string_s *)cmalloc(sizeof(string_s));
+  string_s_init(string);
+
+  va_list ap;
+  va_start(ap,a_format);
+  string_s_set_format_ap(string,a_format,ap);
+  va_end(ap);
 
   var_s var = loc_s___new();
   var->v_type = c_bi_type_string;

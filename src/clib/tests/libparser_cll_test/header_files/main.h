@@ -15,6 +15,9 @@ include "cl_parser.h"
 // === test execution functions ================================================
 
 void test_finite_automata_create();
+void test_inverted_index_create();
+void test_inverted_index_remove();
+void test_fa_states_recognize();
 void test_parser_create();
 
 // === program entry function ==================================================

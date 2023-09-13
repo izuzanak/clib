@@ -260,18 +260,18 @@ void test_var_string()
 #define STRING_TO_STRING(NAME) \
 {/*{{{*/\
   buffer.used = 0;\
-  loc_s_string_to_string(NAME,&buffer);\
+  var_s_to_string(&(NAME),&buffer);\
   bc_array_s_push(&buffer,'\0');\
 }/*}}}*/
 
   // - loc_s_string -
   // - loc_s_string_clear -
-  VAR(string_0,loc_s_string_ptr("Hello world!"));
+  VAR_CLEAR(string_0,loc_s_string_ptr("Hello world!"));
   STRING_TO_STRING(string_0);
   cassert(strcmp(buffer.data,"Hello world!") == 0);
 
   // - loc_s_string_order -
-  CONT_INIT(var_s,string_1);
+  CONT_INIT_CLEAR(var_s,string_1);
   var_s_copy(&string_1,&string_0);
   STRING_TO_STRING(string_1);
   cassert(
@@ -285,16 +285,17 @@ void test_var_string()
     strcmp(string->data,"Hello world!") == 0);
 
   // - loc_s_string_order -
-  VAR(string_2,loc_s_string_ptr("Hello world"));
-  VAR(string_3,loc_s_string_ptr("Hello there world"));
+  VAR_CLEAR(string_2,loc_s_string_ptr("Hello world"));
+  VAR_CLEAR(string_3,loc_s_string_ptr("Hello there world"));
   cassert(
     loc_s_string_order(string_2,string_0) < 0 &&
     loc_s_string_order(string_3,string_0) > 0);
 
-  var_s_clear(&string_3);
-  var_s_clear(&string_2);
-  var_s_clear(&string_1);
-  var_s_clear(&string_0);
+  // - loc_s_string_format -
+  VAR_CLEAR(string_4,loc_s_string_format("Hello %s %d","world",123));
+  STRING_TO_STRING(string_4);
+  cassert(strcmp(buffer.data,"Hello world 123") == 0);
+
   bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/

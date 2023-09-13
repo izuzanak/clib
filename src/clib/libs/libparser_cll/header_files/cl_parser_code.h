@@ -207,6 +207,9 @@ fa_state_s;
 array<fa_state_s> fa_states_s;
 @end
 
+unsigned fa_states_s_recognize(fa_states_s *this,
+    const char *input,unsigned *input_idx,unsigned input_length);
+
 // -- fa_states_array_s --
 @begin
 array<fa_states_s> fa_states_array_s;
@@ -252,6 +255,11 @@ fa_state_descr_s;
 array<reg_states_s> fa_state_reg_states_s;
 @end
 
+// -- fa_state_reg_state_tree_s --
+@begin
+rb_tree<reg_states_s> fa_state_reg_state_tree_s;
+@end
+
 // -- fa_state_descr_queue_s --
 @begin
 queue<fa_state_descr_s> fa_state_descr_queue_s;
@@ -270,6 +278,7 @@ finite_automata_s;
 
 void finite_automata_s_create_new(finite_automata_s *this,
     fa_states_array_s *states_array);
+void finite_automata_s_moves_from_states(finite_automata_s *this);
 unsigned finite_automata_s_recognize(finite_automata_s *this,
     const char *input,unsigned *input_idx,unsigned input_length);
 
@@ -285,10 +294,10 @@ reg_parser_s;
 @end
 
 static inline usi reg_parser_s_process_char(char **c_ptr);
-unsigned reg_parser_s_recognize_terminal(string_s *source_string,unsigned *input_idx);
-int reg_parser_s_parse_reg_exp(reg_parser_s *this,string_s *source_string);
+unsigned reg_parser_s_recognize_terminal(const string_s *source_string,unsigned *input_idx);
+int reg_parser_s_parse_reg_exp(reg_parser_s *this,const string_s *source_string,unsigned a_final);
 int reg_parser_s_NKA_to_DKA(reg_parser_s *this);
-static inline int reg_parser_s_process_reg_exp(reg_parser_s *this,string_s *source_string);
+static inline int reg_parser_s_process_reg_exp(reg_parser_s *this,const string_s *source_string,unsigned a_final);
 int reg_parser_sprocess_reg_exps(reg_parser_s *this,
     string_array_s *source_strings,fa_states_array_s *states_array);
 
@@ -570,10 +579,45 @@ inlines fa_state_descr_s
 inlines fa_state_reg_states_s
 @end
 
+// -- fa_state_reg_state_tree_s --
+@begin
+inlines fa_state_reg_state_tree_s
+@end
+
 // -- fa_state_descr_queue_s --
 @begin
 inlines fa_state_descr_queue_s
 @end
+
+static inline int fa_state_reg_state_tree_s___compare_value(const fa_state_reg_state_tree_s *this,const reg_states_s *a_first,const reg_states_s *a_second)
+{/*{{{*/
+  (void)this;
+
+  if (a_first->used != a_second->used)
+  {
+    return a_first->used < a_second->used ? -1 : 1;
+  }
+
+  if (a_first->used != 0)
+  {
+    reg_state_s *frs_ptr = a_first->data;
+    reg_state_s *frs_ptr_end = frs_ptr + a_first->used;
+    reg_state_s *srs_ptr = a_second->data;
+    do {
+      if (frs_ptr->ui_first != srs_ptr->ui_first)
+      {
+        return frs_ptr->ui_first < srs_ptr->ui_first ? -1 : 1;
+      }
+
+      if (frs_ptr->ui_second != srs_ptr->ui_second)
+      {
+        return frs_ptr->ui_second < srs_ptr->ui_second ? -1 : 1;
+      }
+    } while(++srs_ptr,++frs_ptr < frs_ptr_end);
+  }
+
+  return 0;
+}/*}}}*/
 
 // -- finite_automata_s --
 @begin
@@ -688,13 +732,14 @@ static inline usi reg_parser_s_process_char(char **c_ptr)
     }
   }
 
-  return *(*c_ptr)++;
+  return (unsigned char)*(*c_ptr)++;
 }/*}}}*/
 
-static inline int reg_parser_s_process_reg_exp(reg_parser_s *this,string_s *source_string)
+static inline int reg_parser_s_process_reg_exp(reg_parser_s *this,
+    const string_s *source_string,unsigned a_final)
 {/*{{{*/
   return
-    reg_parser_s_parse_reg_exp(this,source_string) &&
+    reg_parser_s_parse_reg_exp(this,source_string,a_final) &&
     reg_parser_s_NKA_to_DKA(this);
 }/*}}}*/
 

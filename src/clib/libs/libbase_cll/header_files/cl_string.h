@@ -38,7 +38,8 @@ static inline void string_s_clear(string_s *this);
 static inline void string_s_create(string_s *this,unsigned a_length);
 static inline void string_s_set(string_s *this,unsigned a_length,const char *a_data);
 static inline void string_s_set_ptr(string_s *this,const char *a_data);
-libbase_cll_EXPORT void string_s_set_format(string_s *this,const char *a_format,...);
+static inline void string_s_set_format(string_s *this,const char *a_format,...);
+libbase_cll_EXPORT void string_s_set_format_ap(string_s *this,const char *a_format,va_list a_ap);
 static inline void string_s_flush_all(string_s *this);
 static inline void string_s_swap(string_s *this,string_s *a_second);
 static inline void string_s_copy(string_s *this,const string_s *a_src);
@@ -126,6 +127,14 @@ static inline void string_s_set(string_s *this,unsigned a_length,const char *a_d
 static inline void string_s_set_ptr(string_s *this,const char *a_data)
 {/*{{{*/
   string_s_set(this,strlen(a_data),a_data);
+}/*}}}*/
+
+static inline void string_s_set_format(string_s *this,const char *a_format,...)
+{/*{{{*/
+  va_list ap;
+  va_start(ap,a_format);
+  string_s_set_format_ap(this,a_format,ap);
+  va_end(ap);
 }/*}}}*/
 
 static inline void string_s_flush_all(string_s *this)

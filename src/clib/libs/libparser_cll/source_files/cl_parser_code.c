@@ -328,6 +328,117 @@ methods fa_state_s
 methods fa_states_s
 @end
 
+unsigned fa_states_s_recognize(fa_states_s *this,
+    const char *input,unsigned *input_idx,unsigned input_length)
+{/*{{{*/
+  debug_assert(input != NULL && this->used != 0);
+
+  // - set first state -
+  unsigned state_idx = 0;
+
+  // - endless loop searching for terminal symbol -
+  do
+  {
+    // - retrieve reference to actual state and reset next state index -
+    fa_state_s *state = fa_states_s_at(this,state_idx);
+    unsigned next_state_idx = c_idx_not_exist;
+
+    // - process next input character -
+    unsigned short in_char;
+    if (*input_idx < input_length)
+    {
+      in_char = (unsigned char)input[*input_idx];
+    }
+    else
+    {
+      in_char = '\0';
+    }
+
+    // - retrieve next state index -
+    if (state->moves.used != 0)
+    {
+      // - brute force search -
+      fa_state_move_s *move_ptr = state->moves.data;
+      fa_state_move_s *move_ptr_end = move_ptr + state->moves.used;
+      do {
+        if (move_ptr->idx < c_base_char_cnt)
+        {
+          if (move_ptr->idx == in_char)
+          {
+            next_state_idx = move_ptr->value;
+          }
+        }
+        else
+        {
+          // - process special regular expressions -
+          if (move_ptr->idx >= c_no_char_base)
+          {
+            if (move_ptr->idx != in_char)
+            {
+              next_state_idx = move_ptr->value;
+            }
+          }
+          else
+          {
+            switch (move_ptr->idx)
+            {
+            case reg_char_white:
+            {
+              if (in_char == ' ' || (in_char >= '\b' && in_char <= '\r'))
+              {
+                next_state_idx = move_ptr->value;
+              }
+            }
+            break;
+            case reg_char_digit:
+            {
+              if (in_char >= '0' && in_char <= '9')
+              {
+                next_state_idx = move_ptr->value;
+              }
+            }
+            break;
+            case reg_char_letter:
+            {
+              if ((in_char >= 'a' && in_char <= 'z') ||
+                  (in_char >= 'A' && in_char <= 'Z'))
+              {
+                next_state_idx = move_ptr->value;
+              }
+
+            }
+            break;
+            default:
+              cassert(0);
+            }
+          }
+        }
+      } while(++move_ptr < move_ptr_end);
+    }
+
+    // - transition to next state if it exists -
+    if (next_state_idx != c_idx_not_exist)
+    {
+      // - input end -
+      if (*input_idx >= input_length)
+      {
+        return fa_states_s_at(this,next_state_idx)->final;
+      }
+
+      (*input_idx)++;
+
+      state_idx = next_state_idx;
+    }
+
+    // - if there is no next state -
+    else
+    {
+      return state->final;
+    }
+  }
+  while(true);
+}/*}}}*/
+
 // -- fa_states_array_s --
 @begin
 methods fa_states_array_s
@@ -358,6 +469,11 @@ methods fa_state_reg_states_s
 methods fa_state_descr_queue_s
 @end
 
+// -- fa_state_reg_state_tree_s --
+@begin
+methods fa_state_reg_state_tree_s
+@end
+
 // -- finite_automata_s --
 @begin
 methods finite_automata_s
@@ -370,23 +486,15 @@ void finite_automata_s_create_new(finite_automata_s *this,fa_states_array_s *sta
   finite_automata_s_clear(this);
 
   // - queue of new states descriptions -
-  fa_state_descr_queue_s queue;
-  fa_state_descr_queue_s_init(&queue);
+  CONT_INIT_CLEAR(fa_state_descr_queue_s,queue);
 
-  fa_state_reg_states_s state_descrs;
-  fa_state_reg_states_s_init(&state_descrs);
+  CONT_INIT_CLEAR(fa_state_reg_state_tree_s,state_descr_tree);
 
   // - array of moves used by one state -
-  fa_state_moves_array_s moves_array;
-  fa_state_moves_array_s_init(&moves_array);
-
-  // - work stack shared by called functions -
-  ui_array_s work_stack;
-  ui_array_s_init(&work_stack);
+  CONT_INIT_CLEAR(fa_state_moves_array_s,moves_array);
 
   // - description of new produced automata state -
-  fa_state_descr_s new_state_descr;
-  fa_state_descr_s_init(&new_state_descr);
+  CONT_INIT_CLEAR(fa_state_descr_s,new_state_descr);
 
   // - insert first record to queue of new states description -
   {
@@ -417,7 +525,7 @@ void finite_automata_s_create_new(finite_automata_s *this,fa_states_array_s *sta
     fa_state_descr_s_swap(&q_state_descr,fa_state_descr_queue_s_next(&queue));
 
     // - test if such state is not defined already -
-    unsigned state_descr_idx = fa_state_reg_states_s_get_idx(&state_descrs,&q_state_descr.reg_states);
+    unsigned state_descr_idx = fa_state_reg_state_tree_s_get_idx(&state_descr_tree,&q_state_descr.reg_states);
     if (state_descr_idx != c_idx_not_exist)
     {
       /*
@@ -434,7 +542,7 @@ void finite_automata_s_create_new(finite_automata_s *this,fa_states_array_s *sta
 
       unsigned move_idx = fa_state_moves_s_get_map_idx(&state->moves,&s_move);
       cassert(move_idx != c_idx_not_exist);
-      fa_state_moves_s_at(&state->moves,move_idx)->value = state_descr_idx;
+      fa_state_moves_s_at(&state->moves,move_idx)->value = state_descr_idx - 1;
 
       fa_state_descr_s_clear(&q_state_descr);
       continue;
@@ -479,11 +587,11 @@ void finite_automata_s_create_new(finite_automata_s *this,fa_states_array_s *sta
       fa_state_moves_s_copy(fa_state_moves_array_s_last(&moves_array),&state->moves);
 
       // - assign regexp to final state -
-      if (state->final)
+      if (state->final != c_idx_not_exist)
       {
         if (*state_final == c_idx_not_exist || fa_state_moves_array_s_last(&moves_array)->used == 0)
         {
-          *state_final = p_reg_state_ptr->ui_first;
+          *state_final = state->final;
         }
       }
 
@@ -627,22 +735,21 @@ void finite_automata_s_create_new(finite_automata_s *this,fa_states_array_s *sta
     while(true);
 
     // - store description of accepted state, for state existence control -
-    fa_state_reg_states_s_push_blank(&state_descrs);
-    reg_states_s_swap(fa_state_reg_states_s_last(&state_descrs),&q_state_descr.reg_states);
-    fa_state_descr_s_clear(&q_state_descr);
+    fa_state_reg_state_tree_s_swap_insert(&state_descr_tree,&q_state_descr.reg_states);
 
+    fa_state_descr_s_clear(&q_state_descr);
   }
   while(queue.used > 0);
 
   // - flush redundant memory -
   fa_states_s_flush(&this->states);
 
-  // - release dynamically allocated memory -
-  fa_state_descr_s_clear(&new_state_descr);
-  ui_array_s_clear(&work_stack);
-  fa_state_moves_array_s_clear(&moves_array);
-  fa_state_reg_states_s_clear(&state_descrs);
-  fa_state_descr_queue_s_clear(&queue);
+  // - create moves from states -
+  finite_automata_s_moves_from_states(this);
+}/*}}}*/
+
+void finite_automata_s_moves_from_states(finite_automata_s *this)
+{/*{{{*/
 
   /*
    * creates effective set of transitions
@@ -844,7 +951,7 @@ unsigned finite_automata_s_recognize(finite_automata_s *this,
 methods reg_parser_s
 @end
 
-unsigned reg_parser_s_recognize_terminal(string_s *source_string,unsigned *input_idx) // lgtm [cpp/use-of-goto] // NOLINT
+unsigned reg_parser_s_recognize_terminal(const string_s *source_string,unsigned *input_idx) // lgtm [cpp/use-of-goto] // NOLINT
 {/*{{{*/
   unsigned source_string_length = source_string->size - 1;
 
@@ -2306,7 +2413,7 @@ int compare_unsigned_shorts(const void *a_first,const void *a_second)
   return first < second ? -1 : first > second ? 1 : 0;
 }/*}}}*/
 
-int reg_parser_s_parse_reg_exp(reg_parser_s *this,string_s *source_string)
+int reg_parser_s_parse_reg_exp(reg_parser_s *this,const string_s *source_string,unsigned a_final)
 {/*{{{*/
   this->lalr_stack.used = 0;
   lalr_stack_s_push_state(&this->lalr_stack,0);
@@ -2395,7 +2502,7 @@ int reg_parser_s_parse_reg_exp(reg_parser_s *this,string_s *source_string)
         fa_states_s_push_blank(&this->states);
         unsigned begin_state_idx = this->states.used - 1;
         fa_state_s *begin_state = fa_states_s_at(&this->states,begin_state_idx);
-        begin_state->final = 0;
+        begin_state->final = c_idx_not_exist;
 
         fa_state_moves_s_push_blank(&begin_state->moves);
         fa_state_move_s_set(fa_state_moves_s_last(&begin_state->moves),0xffff,first_begin_idx);
@@ -2406,7 +2513,7 @@ int reg_parser_s_parse_reg_exp(reg_parser_s *this,string_s *source_string)
         // - create final state -
         fa_states_s_push_blank(&this->states);
         unsigned end_state_idx = this->states.used - 1;
-        fa_states_s_at(&this->states,end_state_idx)->final = 0;
+        fa_states_s_at(&this->states,end_state_idx)->final = c_idx_not_exist;
 
         // - connect ends of both parts to final state -
         {
@@ -2461,7 +2568,7 @@ int reg_parser_s_parse_reg_exp(reg_parser_s *this,string_s *source_string)
         fa_states_s_push_blank(&this->states);
         unsigned state_idx = this->states.used - 1;
 
-        fa_states_s_at(&this->states,state_idx)->final = 0;
+        fa_states_s_at(&this->states,state_idx)->final = c_idx_not_exist;
 
         ui_array_s_push(&begin_idxs,state_idx);
         ui_array_s_push(&end_idxs,state_idx);
@@ -2505,11 +2612,11 @@ c_reduce_char_lbl:
 
         unsigned begin_state_idx = this->states.used - 2;
         fa_state_s *begin_state = fa_states_s_at(&this->states,begin_state_idx);
-        begin_state->final = 0;
+        begin_state->final = c_idx_not_exist;
 
         unsigned end_state_idx = this->states.used - 1;
         fa_state_s *end_state = fa_states_s_at(&this->states,end_state_idx);
-        end_state->final = 0;
+        end_state->final = c_idx_not_exist;
 
         fa_state_moves_s_push_blank(&begin_state->moves);
         fa_state_move_s_set(fa_state_moves_s_last(&begin_state->moves),in_char,end_state_idx);
@@ -2540,7 +2647,7 @@ c_reduce_char_lbl:
           state_idx = this->states.used - 1;
           fa_state_s *state = fa_states_s_at(&this->states,state_idx);
 
-          state->final = 0;
+          state->final = c_idx_not_exist;
           fa_state_moves_s_push_blank(&state->moves);
           fa_state_move_s_set(fa_state_moves_s_last(&state->moves),in_char,c_idx_not_exist);
 
@@ -2558,7 +2665,7 @@ c_reduce_char_lbl:
         state_idx = this->states.used - 1;
         fa_state_s *state = fa_states_s_at(&this->states,state_idx);
 
-        state->final = 0;
+        state->final = c_idx_not_exist;
 
         if (last_state_idx != c_idx_not_exist)
         {
@@ -2597,11 +2704,11 @@ c_reduce_char_lbl:
 
         unsigned begin_state_idx = this->states.used - 2;
         fa_state_s *begin_state = fa_states_s_at(&this->states,begin_state_idx);
-        begin_state->final = 0;
+        begin_state->final = c_idx_not_exist;
 
         unsigned end_state_idx = this->states.used - 1;
         fa_state_s *end_state = fa_states_s_at(&this->states,end_state_idx);
-        end_state->final = 0;
+        end_state->final = c_idx_not_exist;
 
         do
         {
@@ -2627,11 +2734,11 @@ c_reduce_char_lbl:
 
         unsigned begin_state_idx = this->states.used - 2;
         fa_state_s *begin_state = fa_states_s_at(&this->states,begin_state_idx);
-        begin_state->final = 0;
+        begin_state->final = c_idx_not_exist;
 
         unsigned end_state_idx = this->states.used - 1;
         fa_state_s *end_state = fa_states_s_at(&this->states,end_state_idx);
-        end_state->final = 0;
+        end_state->final = c_idx_not_exist;
 
         do
         {
@@ -2671,11 +2778,11 @@ c_reduce_char_lbl:
 
         unsigned begin_state_idx = this->states.used - 2;
         fa_state_s *begin_state = fa_states_s_at(&this->states,begin_state_idx);
-        begin_state->final = 0;
+        begin_state->final = c_idx_not_exist;
 
         unsigned end_state_idx = this->states.used - 1;
         fa_state_s *end_state = fa_states_s_at(&this->states,end_state_idx);
-        end_state->final = 0;
+        end_state->final = c_idx_not_exist;
 
         // - generate accepted characters -
         {
@@ -2736,7 +2843,7 @@ c_reduce_char_lbl:
   this->fas_idx = ui_array_s_pop(&begin_idxs);
 
   // - mark final states -
-  fa_states_s_at(&this->states,ui_array_s_pop(&end_idxs))->final = 1;
+  fa_states_s_at(&this->states,ui_array_s_pop(&end_idxs))->final = a_final;
 
   ui_array_s_clear(&end_idxs);
   ui_array_s_clear(&begin_idxs);
@@ -2839,7 +2946,7 @@ int reg_parser_s_NKA_to_DKA(reg_parser_s *this)
             }
 
             // - if state contain other than epsilon moves add it to epsilon closure -
-            if (have_no_eps_move || state->final)
+            if (have_no_eps_move || state->final != c_idx_not_exist)
             {
               ui_array_set_s_push(eps_closure,ss_idx);
             }
@@ -2882,7 +2989,7 @@ int reg_parser_s_NKA_to_DKA(reg_parser_s *this)
       // - create new state -
       fa_states_s_push_blank(&this->states);
       fa_state_s *state = fa_states_s_last(&this->states);
-      state->final = 0;
+      state->final = c_idx_not_exist;
 
       reg_mul_state_map_array_s_push_blank(&ms_map_array);
       reg_mul_state_map_s *ms_map = reg_mul_state_map_array_s_last(&ms_map_array);
@@ -2904,9 +3011,9 @@ int reg_parser_s_NKA_to_DKA(reg_parser_s *this)
           fa_state_s *nka_state = fa_states_s_at(&nka_states,*ui_array_set_s_at(mul_state,s_idx));
 
           // - set finality of new state -
-          if (nka_state->final)
+          if (nka_state->final != c_idx_not_exist)
           {
-            state->final = 1;
+            state->final = nka_state->final;
           }
 
           reg_state_moves_s *state_moves = &nka_state->moves;
@@ -2982,35 +3089,6 @@ int reg_parser_s_NKA_to_DKA(reg_parser_s *this)
   reg_mul_state_map_array_s_clear(&ms_map_array);
   reg_mul_state_move_queue_s_clear(&msm_queue);
   fa_states_s_clear(&nka_states);
-
-  return true;
-}/*}}}*/
-
-int reg_parser_s_process_reg_exps(reg_parser_s *this,
-    string_array_s *source_strings,fa_states_array_s *states_array)
-{/*{{{*/
-  fa_states_array_s_clear(states_array);
-
-  if (source_strings->used == 0)
-  {
-    return true;
-  }
-
-  fa_states_array_s_copy_resize(states_array,source_strings->used);
-
-  unsigned idx = 0;
-  do
-  {
-    if (!reg_parser_s_process_reg_exp(this,string_array_s_at(source_strings,idx)))
-    {
-      return false;
-    }
-
-    fa_states_array_s_push_blank(states_array);
-    fa_states_s_swap(fa_states_array_s_last(states_array),&this->states);
-
-  }
-  while(++idx < source_strings->used);
 
   return true;
 }/*}}}*/
@@ -3176,7 +3254,7 @@ int p_creat_descr_s_load_finite_automata_set_new(p_creat_descr_s *this)
       reg_exp_string.size = strlen(test_reg_exps[re_idx]) + 1;
       reg_exp_string.data = (char *)test_reg_exps[re_idx];
 
-      reg_parser_s_process_reg_exp(&reg_parser,&reg_exp_string);
+      reg_parser_s_process_reg_exp(&reg_parser,&reg_exp_string,re_idx);
 
       fa_states_array_s_push_blank(&states_array);
       fa_states_s_swap(fa_states_array_s_last(&states_array),&reg_parser.states);
@@ -3198,7 +3276,7 @@ int p_creat_descr_s_load_finite_automata_set_new(p_creat_descr_s *this)
       reg_exp_string.size = strlen(key_terminals[re_idx]) + 1;
       reg_exp_string.data = (char *)key_terminals[re_idx];
 
-      reg_parser_s_process_reg_exp(&reg_parser,&reg_exp_string);
+      reg_parser_s_process_reg_exp(&reg_parser,&reg_exp_string,re_idx);
 
       fa_states_array_s_push_blank(&states_array);
       fa_states_s_swap(fa_states_array_s_last(&states_array),&reg_parser.states);
@@ -3624,7 +3702,7 @@ int p_creat_descr_s_create_final_automata_new(p_creat_descr_s *this,finite_autom
     do
     {
       // - ERROR -
-      if (!reg_parser_s_process_reg_exp(&reg_parser,&p_terminals_s_at(&this->terminals,t_idx)->value))
+      if (!reg_parser_s_process_reg_exp(&reg_parser,&p_terminals_s_at(&this->terminals,t_idx)->value,t_idx))
       {
         reg_parser_s_clear(&reg_parser);
         fa_states_array_s_clear(&states_array);
@@ -3906,7 +3984,7 @@ int p_creat_descr_s_compute_kernels(p_creat_descr_s *this)
             terminal_first.data[0] = element;
           }
 
-          p_first_set_s *element_first = (element < this->terminals.used) ? &terminal_first : 
+          p_first_set_s *element_first = (element < this->terminals.used) ? &terminal_first :
             ui_array_sets_s_at(&this->firsts,element - this->terminals.used);
 
           if (element_first->used != 0)
