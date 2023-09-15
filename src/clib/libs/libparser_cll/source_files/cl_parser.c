@@ -374,9 +374,8 @@ void inverted_index_s_remove_targets(inverted_index_s *this,
 {/*{{{*/
   debug_assert(this->states.used != 0 && this->targets.used != 0 && a_targets->used != 0);
 
-  CONT_INIT_CLEAR(ui_array_s,keep_finals);
-  ui_array_s_copy_resize(&keep_finals,this->targets.used);
-  ui_array_s_fill(&keep_finals,0);
+  // - removed target flag -
+  int removed_target = 0;
 
   ui_tree_s *t_ptr = this->targets.data;
   ui_tree_s *t_ptr_end = t_ptr + this->targets.used;
@@ -390,150 +389,166 @@ void inverted_index_s_remove_targets(inverted_index_s *this,
       if (target_idx != c_idx_not_exist)
       {
         ui_tree_s_remove(t_ptr,target_idx);
+
+        // - set removed target flag -
+        removed_target = 1;
       }
 
     } while(++at_ptr < at_ptr_end);
-
-    // - set of targets is not empty -
-    if (t_ptr->root_idx != c_idx_not_exist)
-    {
-      ui_tree_s_node *ttn_ptr = t_ptr->data;
-      ui_tree_s_node *ttn_ptr_end = ttn_ptr + t_ptr->used;
-      do {
-        if (ttn_ptr->valid)
-        {
-          *ui_array_s_at(&keep_finals,t_ptr - this->targets.data) = 1;
-        }
-      } while(++ttn_ptr < ttn_ptr_end);
-    }
   } while(++t_ptr < t_ptr_end);
 
-  CONT_INIT_CLEAR(ui_array_s,keep_states);
-  ui_array_s_copy_resize(&keep_states,this->states.used);
-  ui_array_s_fill(&keep_states,0);
+  // - removed target flag is set -
+  if (removed_target)
+  {
+    CONT_INIT_CLEAR(ui_array_s,keep_finals);
+    ui_array_s_copy_resize(&keep_finals,this->targets.used);
+    ui_array_s_fill(&keep_finals,0);
 
-  do {
+    ui_tree_s *t_ptr = this->targets.data;
+    ui_tree_s *t_ptr_end = t_ptr + this->targets.used;
+    do {
 
-    // - keep states changed flag -
-    int keep_states_changed = 0;
+      // - set of targets is not empty -
+      if (t_ptr->root_idx != c_idx_not_exist)
+      {
+        ui_tree_s_node *ttn_ptr = t_ptr->data;
+        ui_tree_s_node *ttn_ptr_end = ttn_ptr + t_ptr->used;
+        do {
+          if (ttn_ptr->valid)
+          {
+            *ui_array_s_at(&keep_finals,t_ptr - this->targets.data) = 1;
+          }
+        } while(++ttn_ptr < ttn_ptr_end);
+      }
+    } while(++t_ptr < t_ptr_end);
 
-    unsigned fs_idx = this->states.used;
-    do
-    {
-      --fs_idx;
+    CONT_INIT_CLEAR(ui_array_s,keep_states);
+    ui_array_s_copy_resize(&keep_states,this->states.used);
+    ui_array_s_fill(&keep_states,0);
 
-      // - state not keeped -
-      if (!*ui_array_s_at(&keep_states,fs_idx))
+    do {
+
+      // - keep states changed flag -
+      int keep_states_changed = 0;
+
+      unsigned fs_idx = this->states.used;
+      do
+      {
+        --fs_idx;
+
+        // - state not keeped -
+        if (!*ui_array_s_at(&keep_states,fs_idx))
+        {
+          fa_state_s *fs_ptr = fa_states_s_at(&this->states,fs_idx);
+
+          int keep_state = 0;
+
+          if (fs_ptr->moves.used != 0)
+          {
+            fa_state_move_s *fsm_ptr = fs_ptr->moves.data;
+            fa_state_move_s *fsm_ptr_end = fsm_ptr + fs_ptr->moves.used;
+            do
+            {
+              // - move to keep state -
+              if (*ui_array_s_at(&keep_states,fsm_ptr->value))
+              {
+                keep_state = 1;
+                break;
+              }
+            } while(++fsm_ptr < fsm_ptr_end);
+          }
+
+          if (fs_ptr->final != c_idx_not_exist)
+          {
+            // - final in keep finals -
+            if (*ui_array_s_at(&keep_finals,fs_ptr->final))
+            {
+              keep_state = 1;
+            }
+            else
+            {
+              fs_ptr->final = c_idx_not_exist;
+            }
+          }
+
+          // - move to keep state -
+          if (keep_state)
+          {
+            *ui_array_s_at(&keep_states,fs_idx) = 1;
+            keep_states_changed = 1;
+          }
+        }
+      } while(fs_idx > 0);
+
+      // - count of keeped states does not changed -
+      if (!keep_states_changed)
+      {
+        break;
+      }
+    } while(1);
+
+    // - map finals to new positions -
+    unsigned *kf_ptr = keep_finals.data;
+    unsigned *kf_ptr_end = kf_ptr + keep_finals.used;
+    unsigned kf_idx = 0;
+    do {
+      *kf_ptr = *kf_ptr ? kf_idx++ : c_idx_not_exist;
+    } while(++kf_ptr < kf_ptr_end);
+
+    // - map states to new positions -
+    unsigned *ks_ptr = keep_states.data;
+    unsigned *ks_ptr_end = ks_ptr + keep_states.used;
+    unsigned ks_idx = 0;
+    do {
+      *ks_ptr = *ks_ptr ? ks_idx++ : c_idx_not_exist;
+    } while(++ks_ptr < ks_ptr_end);
+
+    // - rebuild states -
+    CONT_INIT_CLEAR(fa_states_s,states);
+
+    unsigned fs_idx = 0;
+    do {
+      if (*ui_array_s_at(&keep_states,fs_idx) != c_idx_not_exist)
       {
         fa_state_s *fs_ptr = fa_states_s_at(&this->states,fs_idx);
 
-        int keep_state = 0;
+        fa_states_s_push_blank(&states);
+        fa_state_s *nfs_ptr = fa_states_s_last(&states);
+
+        nfs_ptr->final = fs_ptr->final == c_idx_not_exist ?
+          c_idx_not_exist : *ui_array_s_at(&keep_finals,fs_ptr->final);
 
         if (fs_ptr->moves.used != 0)
         {
           fa_state_move_s *fsm_ptr = fs_ptr->moves.data;
           fa_state_move_s *fsm_ptr_end = fsm_ptr + fs_ptr->moves.used;
-          do
-          {
-            // - move to keep state -
-            if (*ui_array_s_at(&keep_states,fsm_ptr->value))
+          do {
+            unsigned value = *ui_array_s_at(&keep_states,fsm_ptr->value);
+            if (value != c_idx_not_exist)
             {
-              keep_state = 1;
-              break;
+              fa_state_moves_s_push_blank(&nfs_ptr->moves);
+              fa_state_move_s_set(fa_state_moves_s_last(&nfs_ptr->moves),fsm_ptr->idx,value);
             }
           } while(++fsm_ptr < fsm_ptr_end);
         }
-
-        if (fs_ptr->final != c_idx_not_exist)
-        {
-          // - final in keep finals -
-          if (*ui_array_s_at(&keep_finals,fs_ptr->final))
-          {
-            keep_state = 1;
-          }
-          else
-          {
-            fs_ptr->final = c_idx_not_exist;
-          }
-        }
-
-        // - move to keep state -
-        if (keep_state)
-        {
-          *ui_array_s_at(&keep_states,fs_idx) = 1;
-          keep_states_changed = 1;
-        }
       }
-    } while(fs_idx > 0);
+    } while(++fs_idx < this->states.used);
 
-    // - count of keeped states does not changed -
-    if (!keep_states_changed)
-    {
-      break;
-    }
-  } while(1);
+    // - rebuild targets -
+    CONT_INIT_CLEAR(ui_tree_array_s,targets);
 
-  // - map finals to new positions -
-  unsigned *kf_ptr = keep_finals.data;
-  unsigned *kf_ptr_end = kf_ptr + keep_finals.used;
-  unsigned kf_idx = 0;
-  do {
-    *kf_ptr = *kf_ptr ? kf_idx++ : c_idx_not_exist;
-  } while(++kf_ptr < kf_ptr_end);
-
-  // - map states to new positions -
-  unsigned *ks_ptr = keep_states.data;
-  unsigned *ks_ptr_end = ks_ptr + keep_states.used;
-  unsigned ks_idx = 0;
-  do {
-    *ks_ptr = *ks_ptr ? ks_idx++ : c_idx_not_exist;
-  } while(++ks_ptr < ks_ptr_end);
-
-  // - rebuild states -
-  CONT_INIT_CLEAR(fa_states_s,states);
-
-  unsigned fs_idx = 0;
-  do {
-    if (*ui_array_s_at(&keep_states,fs_idx) != c_idx_not_exist)
-    {
-      fa_state_s *fs_ptr = fa_states_s_at(&this->states,fs_idx);
-
-      fa_states_s_push_blank(&states);
-      fa_state_s *nfs_ptr = fa_states_s_last(&states);
-
-      nfs_ptr->final = fs_ptr->final == c_idx_not_exist ?
-        c_idx_not_exist : *ui_array_s_at(&keep_finals,fs_ptr->final);
-
-      if (fs_ptr->moves.used != 0)
+    unsigned t_idx = 0;
+    do {
+      if (*ui_array_s_at(&keep_finals,t_idx) != c_idx_not_exist)
       {
-        fa_state_move_s *fsm_ptr = fs_ptr->moves.data;
-        fa_state_move_s *fsm_ptr_end = fsm_ptr + fs_ptr->moves.used;
-        do {
-          unsigned value = *ui_array_s_at(&keep_states,fsm_ptr->value);
-          if (value != c_idx_not_exist)
-          {
-            fa_state_moves_s_push_blank(&nfs_ptr->moves);
-            fa_state_move_s_set(fa_state_moves_s_last(&nfs_ptr->moves),fsm_ptr->idx,value);
-          }
-        } while(++fsm_ptr < fsm_ptr_end);
+        ui_tree_array_s_push_blank(&targets);
+        ui_tree_s_swap(ui_tree_array_s_last(&targets),ui_tree_array_s_at(&this->targets,t_idx));
       }
-    }
-  } while(++fs_idx < this->states.used);
+    } while(++t_idx < this->targets.used);
 
-  // - rebuild targets -
-  CONT_INIT_CLEAR(ui_tree_array_s,targets);
-
-  unsigned t_idx = 0;
-  do {
-    if (*ui_array_s_at(&keep_finals,t_idx) != c_idx_not_exist)
-    {
-      ui_tree_array_s_push_blank(&targets);
-      ui_tree_s_swap(ui_tree_array_s_last(&targets),ui_tree_array_s_at(&this->targets,t_idx));
-    }
-  } while(++t_idx < this->targets.used);
-
-  fa_states_s_swap(&states,&this->states);
-  ui_tree_array_s_swap(&targets,&this->targets);
+    fa_states_s_swap(&states,&this->states);
+    ui_tree_array_s_swap(&targets,&this->targets);
+  }
 }/*}}}*/
 
 // -- inverted_indexes_s --
@@ -819,4 +834,9 @@ void inverted_indexes_s_merge(inverted_indexes_s *this,inverted_index_s *a_trg)
     while(queue.used > 0);
   }
 }/*}}}*/
+
+// -- inverted_index_tree_s --
+@begin
+methods inverted_index_tree_s
+@end
 

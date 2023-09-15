@@ -12,7 +12,9 @@ const char *test_names[] =
   "finite_automata_create",
   "inverted_index_create",
   "inverted_index_remove",
+  "inverted_index_tree",
   "fa_states_recognize",
+  "fa_states_dot_code",
   "parser_create",
 };/*}}}*/
 
@@ -21,7 +23,9 @@ test_function_t test_functions[] =
   test_finite_automata_create,
   test_inverted_index_create,
   test_inverted_index_remove,
+  test_inverted_index_tree,
   test_fa_states_recognize,
+  test_fa_states_dot_code,
   test_parser_create,
 };/*}}}*/
 
@@ -460,6 +464,31 @@ void test_inverted_index_remove()
 #endif
 }/*}}}*/
 
+void test_inverted_index_tree()
+{/*{{{*/
+  CONT_INIT_CLEAR(fa_states_array_s,states_array);
+  CONT_INIT_CLEAR(reg_parser_s,reg_parser);
+  CONT_INIT_CLEAR(string_s,regexp);
+  CONT_INIT_CLEAR(inverted_index_s,inverted_index);
+
+  CONT_INIT_CLEAR(inverted_index_tree_s,inverted_index_tree);
+
+  unsigned idx = 0;
+  do {
+    string_s_set_format(&regexp,"\"test_%u\"",idx);
+    cassert(reg_parser_s_process_reg_exp(&reg_parser,&regexp,idx));
+
+    states_array.used = 0;
+    fa_states_array_s_push_blank(&states_array);
+    fa_states_s_swap(fa_states_array_s_last(&states_array),&reg_parser.states);
+
+    inverted_index_s_update(&inverted_index,&states_array);
+    inverted_index_tree_s_swap_insert(&inverted_index_tree,&inverted_index);
+  } while(++idx < 50);
+
+  cassert(inverted_index_tree.count == 50);
+}/*}}}*/
+
 void test_fa_states_recognize()
 {/*{{{*/
   CONT_INIT_CLEAR(parser_fa_s,fa);
@@ -485,6 +514,31 @@ void test_fa_states_recognize()
 
   ui_array_s reference = {6,6,(unsigned[]){2,1,0,2,1,0}};
   cassert(ui_array_s_compare(&terminals,&reference));
+}/*}}}*/
+
+void test_fa_states_dot_code()
+{/*{{{*/
+  CONT_INIT_CLEAR(file_s,file);
+  cassert(file_s_open(&file,"tests/libparser_cll_test/resources/fa_states.dot","r") == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,reference);
+  cassert(file_s_read_close(&file,&reference) == 0);
+
+  CONT_INIT_CLEAR(parser_fa_s,fa);
+  string_array_s reg_exps = {5,5,(string_s[]){
+    STRING_S("\"Ahoj\""),
+    STRING_S("\"Hello\""),
+    STRING_S("\"Bonjour\""),
+    STRING_S("\"Bon appetit\""),
+    STRING_S("\"Bon\"*"),
+  }};
+
+  cassert(parser_fa_s_create(&fa,&reg_exps) == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+  fa_states_s_to_dot_code(&fa.fa.states,&buffer);
+
+  cassert(bc_array_s_compare(&buffer,&reference));
 }/*}}}*/
 
 void test_parser_create()

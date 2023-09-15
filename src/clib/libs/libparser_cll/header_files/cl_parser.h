@@ -76,6 +76,11 @@ array<inverted_index_s> inverted_indexes_s;
 
 void inverted_indexes_s_merge(inverted_indexes_s *this,inverted_index_s *a_trg);
 
+// -- inverted_index_tree_s --
+@begin
+safe_rb_tree<inverted_index_s> inverted_index_tree_s;
+@end
+
 // === inline methods of generated structures ==================================
 
 // -- parser_fa_s --
@@ -115,6 +120,21 @@ inlines inverted_index_s
 @begin
 inlines inverted_indexes_s
 @end
+
+// -- inverted_index_tree_s --
+@begin
+inlines inverted_index_tree_s
+@end
+
+static inline int inverted_index_tree_s___compare_value(const inverted_index_tree_s *this,const inverted_index_s *a_first,const inverted_index_s *a_second)
+{/*{{{*/
+  (void)this;
+
+  unsigned fs_used = a_first->states.used;
+  unsigned ss_used = a_second->states.used;
+
+  return fs_used < ss_used ? -1 : fs_used > ss_used ? 1 : 0;
+}/*}}}*/
 
 #endif
 

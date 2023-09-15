@@ -439,6 +439,53 @@ unsigned fa_states_s_recognize(fa_states_s *this,
   while(true);
 }/*}}}*/
 
+void fa_states_s_to_dot_code(fa_states_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_ptr(a_trg,
+"digraph {\n"
+"  rankdir=LR\n");
+
+  if (this->used != 0)
+  {
+    unsigned fs_idx = 0;
+    do
+    {
+      fa_state_s *fs_ptr = this->data + fs_idx;
+
+      if (fs_ptr->final != c_idx_not_exist)
+      {
+        bc_array_s_append_format(a_trg,"  %u [ style=\"filled\" label=\"%u\" ]\n",
+            fs_idx,fs_ptr->final);
+      }
+      else
+      {
+        bc_array_s_append_format(a_trg,"  %u [ label=\"\" ]\n",fs_idx);
+      }
+
+      if (fs_ptr->moves.used != 0)
+      {
+        fa_state_move_s *fsm_ptr = fs_ptr->moves.data;
+        fa_state_move_s *fsm_ptr_end = fsm_ptr + fs_ptr->moves.used;
+        do
+        {
+          if (isprint(fsm_ptr->idx))
+          {
+            bc_array_s_append_format(a_trg,"  %u -> %u [ label=\"%c\" ]\n",
+                fs_idx,fsm_ptr->value,(char)fsm_ptr->idx);
+          }
+          else
+          {
+            bc_array_s_append_format(a_trg,"  %u -> %u [ label=\"%hu\" ]\n",
+                fs_idx,fsm_ptr->value,fsm_ptr->idx);
+          }
+        } while(++fsm_ptr < fsm_ptr_end);
+      }
+    } while(++fs_idx < this->used);
+  }
+
+  bc_array_s_append_ptr(a_trg,"}\n");
+}/*}}}*/
+
 // -- fa_states_array_s --
 @begin
 methods fa_states_array_s

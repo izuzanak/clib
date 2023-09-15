@@ -209,6 +209,7 @@ array<fa_state_s> fa_states_s;
 
 unsigned fa_states_s_recognize(fa_states_s *this,
     const char *input,unsigned *input_idx,unsigned input_length);
+void fa_states_s_to_dot_code(fa_states_s *this,bc_array_s *a_trg);
 
 // -- fa_states_array_s --
 @begin
