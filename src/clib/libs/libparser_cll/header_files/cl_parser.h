@@ -26,6 +26,15 @@ include "cl_parser_code.h"
 #define ERROR_PARSER_PARSE_STATE_OUTSIDE_OF_REDUCE_CALLBACK 6
 #define ERROR_PARSER_PARSE_STATE_INDEX_EXCEEDS_RULE_BODY_SIZE 7
 
+// - inverted index dump offsets -
+enum
+{
+  c_ii_dump_offset_to_targets_offset = 0,
+  c_ii_dump_offset_to_target_list_offset,
+  c_ii_dump_state_count_offset,
+  c_ii_dump_first_state_offset,
+};
+
 // === definition of generated structures ======================================
 
 // -- parser_fa_s --
@@ -64,22 +73,20 @@ ui_tree_array_s:targets
 inverted_index_s;
 @end
 
-void inverted_index_s_update(inverted_index_s *this,
-    fa_states_array_s *states_array);
-void inverted_index_s_remove_targets(inverted_index_s *this,
-    ui_array_s *a_targets);
+libparser_cll_EXPORT void inverted_index_s_update(inverted_index_s *this,fa_states_array_s *states_array);
+libparser_cll_EXPORT void inverted_index_s_remove_targets(inverted_index_s *this,ui_array_s *a_targets);
+libparser_cll_EXPORT void inverted_index_s_dump(inverted_index_s *this,ui_array_s *a_trg);
+WUR libparser_cll_EXPORT int inverted_index_s_load(inverted_index_s *this,const unsigned *a_data);
+
+WUR libparser_cll_EXPORT unsigned inverted_index_dump_s_recognize(const unsigned *a_dump,
+    const char *input,unsigned *input_idx,unsigned input_length);
 
 // -- inverted_indexes_s --
 @begin
 array<inverted_index_s> inverted_indexes_s;
 @end
 
-void inverted_indexes_s_merge(inverted_indexes_s *this,inverted_index_s *a_trg);
-
-// -- inverted_index_tree_s --
-@begin
-safe_rb_tree<inverted_index_s> inverted_index_tree_s;
-@end
+libparser_cll_EXPORT void inverted_indexes_s_merge(inverted_indexes_s *this,inverted_index_s *a_trg);
 
 // === inline methods of generated structures ==================================
 
@@ -120,21 +127,6 @@ inlines inverted_index_s
 @begin
 inlines inverted_indexes_s
 @end
-
-// -- inverted_index_tree_s --
-@begin
-inlines inverted_index_tree_s
-@end
-
-static inline int inverted_index_tree_s___compare_value(const inverted_index_tree_s *this,const inverted_index_s *a_first,const inverted_index_s *a_second)
-{/*{{{*/
-  (void)this;
-
-  unsigned fs_used = a_first->states.used;
-  unsigned ss_used = a_second->states.used;
-
-  return fs_used < ss_used ? -1 : fs_used > ss_used ? 1 : 0;
-}/*}}}*/
 
 #endif
 

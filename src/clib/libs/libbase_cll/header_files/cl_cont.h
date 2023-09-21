@@ -75,6 +75,8 @@ options ( to_json to_json_nice )
 ui_array_s;
 @end
 
+WUR unsigned ui_binary_search(const unsigned *a_data,unsigned a_size,unsigned a_value);
+
 #if OPTION_MEMCHECK == ENABLED
 #define check_malloc(SIZE) malloc(SIZE)
 #define check_realloc(LOCATION,SIZE) realloc(LOCATION,SIZE)

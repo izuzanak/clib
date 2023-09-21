@@ -40,6 +40,7 @@ include "cl_sys.h"
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <dirent.h>
 
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
@@ -70,6 +71,9 @@ include "cl_sys.h"
 
 #define ERROR_FD_WRITE_ERROR 1
 #define ERROR_FD_READ_ERROR 2
+
+#define ERROR_DIR_OPEN_ERROR 1
+#define ERROR_DIR_READ_ERROR 2
 
 #define ERROR_MMAP_CREATE_ERROR 1
 
@@ -127,6 +131,26 @@ WUR liblinux_cll_EXPORT int fd_s_writev(const fd_s *this,struct iovec *a_iov,int
 WUR liblinux_cll_EXPORT int fd_s_read(const fd_s *this,bc_array_s *a_trg);
 WUR liblinux_cll_EXPORT int fd_s_read_cnt(const fd_s *this,size_t a_count,bc_array_s *a_trg);
 WUR liblinux_cll_EXPORT int fd_s_read_max(const fd_s *this,size_t a_count,bc_array_s *a_trg);
+
+// === definition of structure dir_s ===========================================
+
+typedef DIR * dir_s;
+@begin
+define dir_s dynamic
+@end
+
+static inline void dir_s_init(dir_s *this);
+static inline void dir_s_clear(dir_s *this);
+static inline void dir_s_flush_all(dir_s *this);
+static inline void dir_s_swap(dir_s *this,dir_s *a_second);
+static inline void dir_s_copy(dir_s *this,const dir_s *a_src);
+static inline int dir_s_compare(const dir_s *this,const dir_s *a_second);
+#if OPTION_TO_STRING == ENABLED
+static inline void dir_s_to_string(const dir_s *this,bc_array_s *a_trg);
+#endif
+
+WUR static inline int dir_s_open(dir_s *this,const char *a_pathname);
+WUR static inline int dir_s_read(dir_s *this,struct dirent **a_entry);
 
 // === definition of structure mmap_s ==========================================
 
@@ -550,6 +574,83 @@ static inline void fd_s_to_string(const fd_s *this,bc_array_s *a_trg)
   bc_array_s_append_format(a_trg,"fd_s{%d}",*this);
 }/*}}}*/
 #endif
+
+// === inline methods of structure dir_s ======================================
+
+static inline void dir_s_init(dir_s *this)
+{/*{{{*/
+  *this = NULL;
+}/*}}}*/
+
+static inline void dir_s_clear(dir_s *this)
+{/*{{{*/
+  if (*this != NULL)
+  {
+    closedir(*this);
+  }
+
+  dir_s_init(this);
+}/*}}}*/
+
+static inline void dir_s_flush_all(dir_s *this)
+{/*{{{*/
+}/*}}}*/
+
+static inline void dir_s_swap(dir_s *this,dir_s *a_second)
+{/*{{{*/
+  dir_s tmp = *this;
+  *this = *a_second;
+  *a_second = tmp;
+}/*}}}*/
+
+static inline void dir_s_copy(dir_s *this,const dir_s *a_src)
+{/*{{{*/
+  (void)this;
+  (void)a_src;
+
+  cassert(0);
+}/*}}}*/
+
+static inline int dir_s_compare(const dir_s *this,const dir_s *a_second)
+{/*{{{*/
+  return *this == *a_second;
+}/*}}}*/
+
+#if OPTION_TO_STRING == ENABLED
+static inline void dir_s_to_string(const dir_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"dir_s{%p}",*this);
+}/*}}}*/
+#endif
+
+static inline int dir_s_open(dir_s *this,const char *a_pathname)
+{/*{{{*/
+  dir_s_clear(this);
+
+  *this = opendir(a_pathname);
+
+  // - ERROR -
+  if (*this == NULL)
+  {
+    throw_error(DIR_OPEN_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int dir_s_read(dir_s *this,struct dirent **a_entry)
+{/*{{{*/
+  errno = 0;
+  *a_entry = readdir(*this);
+
+  // - ERROR -
+  if (*a_entry == NULL && errno != 0)
+  {
+    throw_error(DIR_READ_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
 
 // === inline methods of structure mmap_s ======================================
 

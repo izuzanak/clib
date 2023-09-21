@@ -26,6 +26,7 @@ inlines fd_array_s
 // === test execution functions ================================================
 
 void test_fd();
+void test_dir();
 void test_mmap();
 void test_socket_address();
 void test_socket();

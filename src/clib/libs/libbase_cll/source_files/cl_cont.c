@@ -57,6 +57,47 @@ methods bc_block_s
 methods ui_array_s
 @end
 
+unsigned ui_binary_search(const unsigned *a_data,unsigned a_size,unsigned a_value)
+{/*{{{*/
+  if (a_size == 0)
+  {
+    return c_idx_not_exist;
+  }
+
+  unsigned left = 0;
+  unsigned right = a_size - 1;
+
+  do {
+    unsigned next = (left + right) >> 1;
+
+    if (a_data[next] < a_value)
+    {
+      if (next < right)
+      {
+        left = next + 1;
+        continue;
+      }
+
+      break;
+    }
+
+    if (a_data[next] > a_value)
+    {
+      if (next > left)
+      {
+        right = next - 1;
+        continue;
+      }
+
+      break;
+    }
+
+    return next;
+  } while(1);
+
+  return c_idx_not_exist;
+}/*}}}*/
+
 #if OPTION_MEMCHECK == ENABLED
 #define check_malloc(SIZE) malloc(SIZE)
 #define check_realloc(LOCATION,SIZE) realloc(LOCATION,SIZE)

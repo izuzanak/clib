@@ -360,7 +360,8 @@ unsigned fa_states_s_recognize(fa_states_s *this,
       // - brute force search -
       fa_state_move_s *move_ptr = state->moves.data;
       fa_state_move_s *move_ptr_end = move_ptr + state->moves.used;
-      do {
+      do
+      {
         if (move_ptr->idx < c_base_char_cnt)
         {
           if (move_ptr->idx == in_char)

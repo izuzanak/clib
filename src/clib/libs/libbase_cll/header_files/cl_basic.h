@@ -221,24 +221,24 @@ typedef long long DWORD;
 #if OPTION_TO_STRING == ENABLED
 #define DEBUG_PRINT(TYPE,VALUE) \
 {/*{{{*/\
-  CONT_INIT(bc_array_s,buffer);\
-  TYPE ## _to_string(VALUE,&buffer);\
-  bc_array_s_push(&buffer,'\0');\
-  fputs(buffer.data,stderr);\
+  CONT_INIT(bc_array_s,__dp_buffer);\
+  TYPE ## _to_string(VALUE,&__dp_buffer);\
+  bc_array_s_push(&__dp_buffer,'\0');\
+  fputs(__dp_buffer.data,stderr);\
   fputc('\n',stderr);\
-  bc_array_s_clear(&buffer);\
+  bc_array_s_clear(&__dp_buffer);\
 }/*}}}*/
 #endif
 
 #if OPTION_TO_STRING == ENABLED
 #define DEBUG_PRINT_LINES(TYPE,VALUE) \
 {/*{{{*/\
-  CONT_INIT(bc_array_s,buffer);\
-  TYPE ## _to_string_separator(VALUE,&buffer,1,"\n");\
-  bc_array_s_push(&buffer,'\0');\
-  fputs(buffer.data,stderr);\
+  CONT_INIT(bc_array_s,__dp_buffer);\
+  TYPE ## _to_string_separator(VALUE,&__dp_buffer,1,"\n");\
+  bc_array_s_push(&__dp_buffer,'\0');\
+  fputs(__dp_buffer.data,stderr);\
   fputc('\n',stderr);\
-  bc_array_s_clear(&buffer);\
+  bc_array_s_clear(&__dp_buffer);\
 }/*}}}*/
 #endif
 

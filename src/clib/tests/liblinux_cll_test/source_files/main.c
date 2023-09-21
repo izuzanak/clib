@@ -10,6 +10,7 @@ const char *test_name = "liblinux_cll_test";
 const char *test_names[] =
 {/*{{{*/
   "fd",
+  "dir",
   "mmap",
   "socket_address",
   "socket",
@@ -25,6 +26,7 @@ const char *test_names[] =
 test_function_t test_functions[] =
 {/*{{{*/
   test_fd,
+  test_dir,
   test_mmap,
   test_socket_address,
   test_socket,
@@ -85,6 +87,35 @@ void test_fd()
   regex_s_clear(&regex);
   fd_array_s_clear(&fd_array);
   bc_array_s_clear(&buffer);
+#endif
+}/*}}}*/
+
+void test_dir()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  CONT_INIT_CLEAR(string_tree_s,filenames);
+
+  CONT_INIT_CLEAR(dir_s,dir);
+  cassert(dir_s_open(&dir,"tests/liblinux_cll_test/resources/dir") == 0);
+
+  struct dirent *de;
+  do {
+    cassert(dir_s_read(&dir,&de) == 0);
+    if (de == NULL) { break; }
+
+    // - is regular file -
+    if (de->d_type == DT_REG)
+    {
+      CONT_INIT_CLEAR(string_s,filename);
+      string_s_set_ptr(&filename,de->d_name);
+      string_tree_s_swap_insert(&filenames,&filename);
+    }
+  } while(1);
+
+  CONT_INIT_CLEAR(bc_array_s,buffer);
+  string_tree_s_to_string(&filenames,&buffer);
+  bc_array_s_push(&buffer,'\0');
+  cassert(strcmp(buffer.data,"[file_1,file_2,file_3,file_4,file_5]") == 0);
 #endif
 }/*}}}*/
 

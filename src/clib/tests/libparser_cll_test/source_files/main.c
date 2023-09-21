@@ -12,7 +12,7 @@ const char *test_names[] =
   "finite_automata_create",
   "inverted_index_create",
   "inverted_index_remove",
-  "inverted_index_tree",
+  "inverted_index_dump",
   "fa_states_recognize",
   "fa_states_dot_code",
   "parser_create",
@@ -23,7 +23,7 @@ test_function_t test_functions[] =
   test_finite_automata_create,
   test_inverted_index_create,
   test_inverted_index_remove,
-  test_inverted_index_tree,
+  test_inverted_index_dump,
   test_fa_states_recognize,
   test_fa_states_dot_code,
   test_parser_create,
@@ -464,29 +464,53 @@ void test_inverted_index_remove()
 #endif
 }/*}}}*/
 
-void test_inverted_index_tree()
+void test_inverted_index_dump()
 {/*{{{*/
   CONT_INIT_CLEAR(fa_states_array_s,states_array);
   CONT_INIT_CLEAR(reg_parser_s,reg_parser);
-  CONT_INIT_CLEAR(string_s,regexp);
   CONT_INIT_CLEAR(inverted_index_s,inverted_index);
 
-  CONT_INIT_CLEAR(inverted_index_tree_s,inverted_index_tree);
+  string_array_s reg_exps = {4,4,(string_s[]){
+    STRING_S("\"augue\""),
+    STRING_S("\"sollicitudin\""),
+    STRING_S("\"sollic\".\"it\"*.\"udin\""),
+    STRING_S("\"euismod\""),
+  }};
 
-  unsigned idx = 0;
+  string_s *re_ptr = reg_exps.data;
+  string_s *re_ptr_end = re_ptr + reg_exps.used;
   do {
-    string_s_set_format(&regexp,"\"test_%u\"",idx);
-    cassert(reg_parser_s_process_reg_exp(&reg_parser,&regexp,idx));
+    cassert(reg_parser_s_process_reg_exp(&reg_parser,re_ptr,re_ptr - reg_exps.data));
 
-    states_array.used = 0;
     fa_states_array_s_push_blank(&states_array);
     fa_states_s_swap(fa_states_array_s_last(&states_array),&reg_parser.states);
+  } while(++re_ptr < re_ptr_end);
 
-    inverted_index_s_update(&inverted_index,&states_array);
-    inverted_index_tree_s_swap_insert(&inverted_index_tree,&inverted_index);
-  } while(++idx < 50);
+  inverted_index_s_update(&inverted_index,&states_array);
 
-  cassert(inverted_index_tree.count == 50);
+  // FIXME
+  //DEBUG_PRINT_LINES(fa_states_s,&inverted_index.states);
+  //DEBUG_PRINT_LINES(ui_tree_array_s,&inverted_index.targets);
+
+  CONT_INIT_CLEAR(ui_array_s,dump);
+  inverted_index_s_dump(&inverted_index,&dump);
+
+  // FIXME
+  //fprintf(stderr,"dump size: %u\n",dump.used*(ui)sizeof(ui));
+
+  CONT_INIT_CLEAR(inverted_index_s,loaded_index);
+  cassert(inverted_index_s_load(&loaded_index,dump.data) == 0);
+  cassert(inverted_index_s_compare(&loaded_index,&inverted_index));
+
+  const char *input = "sollicitudin";
+  unsigned input_len = strlen(input);
+
+  unsigned input_idx = 0;
+  unsigned token = inverted_index_dump_s_recognize(dump.data,
+      input,&input_idx,input_len);
+
+  cassert(token == 136);
+  cassert(input_idx == 12);
 }/*}}}*/
 
 void test_fa_states_recognize()
