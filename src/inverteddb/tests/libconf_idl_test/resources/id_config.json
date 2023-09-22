@@ -1,0 +1,18 @@
+{
+  "channel": {
+    "ip": "0.0.0.0",
+    "port": 10000
+  },
+  "watchdog": {
+    "ip": "127.0.0.1",
+    "port": 9006
+  },
+  "databases": [
+    {
+      "name": "test",
+      "storage": "/dev/shm/idb",
+      "max_indexes": 50,
+      "merge_cnt": 25
+    }
+  ]
+}

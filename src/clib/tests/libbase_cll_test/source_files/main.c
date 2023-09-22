@@ -10,6 +10,7 @@ const char *test_name = "libbase_cll_test";
 const char *test_names[] =
 {/*{{{*/
   "bc_array",
+  "ui_array",
   "atomic",
   "static",
   "string",
@@ -33,6 +34,7 @@ const char *test_names[] =
 test_function_t test_functions[] =
 {/*{{{*/
   test_bc_array,
+  test_ui_array,
   test_atomic,
   test_static,
   test_string,
@@ -165,6 +167,36 @@ void test_bc_array()
 
   bc_array_s_clear(&buffer_1);
   bc_array_s_clear(&buffer_0);
+}/*}}}*/
+
+void test_ui_array()
+{/*{{{*/
+
+  // - fill tree by random numbers -
+  CONT_INIT_CLEAR(ui_tree_s,tree);
+
+  unsigned idx = 0;
+  do {
+    unsigned value = rand();
+    ui_tree_s_insert(&tree,value);
+  } while(++idx < 1000);
+
+  // - create sorted ui array -
+  CONT_INIT_CLEAR(ui_array_s,sorted);
+
+  unsigned t_idx = ui_tree_s_get_min_value_idx(&tree,tree.root_idx);
+  unsigned s_idx = 0;
+  do
+  {
+    ui_array_s_push(&sorted,tree.data[t_idx].object);
+    t_idx = ui_tree_s_get_next_idx(&tree,t_idx);
+  } while(++s_idx,t_idx != c_idx_not_exist);
+
+  // - test function ui_binary_search -
+  idx = 0;
+  do {
+    cassert(ui_binary_search(sorted.data,sorted.used,sorted.data[idx]) == idx);
+  } while(++idx < sorted.used);
 }/*}}}*/
 
 void test_atomic()

@@ -187,6 +187,7 @@ inlines dynamic_choice_s
 // === test execution functions ================================================
 
 void test_bc_array();
+void test_ui_array();
 void test_atomic();
 void test_static();
 void test_string();

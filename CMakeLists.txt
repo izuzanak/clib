@@ -222,6 +222,8 @@ if(NOT DEFINED CS_COMPONENT_DIRS)
       "src/segmentd/progs"
       "src/objectdb/tests"
       "src/objectdb/progs"
+      "src/inverteddb/tests"
+      "src/inverteddb/progs"
       "src/watchdogd/tests"
       "src/watchdogd/progs")
 endif()

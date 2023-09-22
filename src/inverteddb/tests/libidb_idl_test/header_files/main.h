@@ -1,0 +1,21 @@
+
+#ifndef ID_TEST_MAIN_H
+#define ID_TEST_MAIN_H
+
+@begin
+include "cl_test.h"
+include "id_idb.h"
+@end
+
+// === test execution functions ================================================
+
+void test_update_extractor();
+void test_update_index();
+void test_remove_docs();
+
+// === program entry function ==================================================
+
+int main(int argc,char **argv);
+
+#endif
+
