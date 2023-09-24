@@ -300,6 +300,10 @@ int idb_database_s_update_extractor(idb_database_s *this,var_s a_data)
 int idb_database_s_extract_regexps(idb_database_s *this,
     var_s a_doc,string_array_s *a_reg_exps)
 {/*{{{*/
+  if (this->extractor_index.mmap.address == NULL)
+  {
+    throw_error(IDB_DATABASE_EXTRACT_REGEXPS_EXTRACTOR_INDEX_MISSING);
+  }
 
   // - extract regular expressions -
   CONT_INIT_CLEAR(var_queue_s,dict_queue);

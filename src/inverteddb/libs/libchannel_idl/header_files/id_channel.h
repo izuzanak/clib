@@ -60,6 +60,7 @@ enum
 
   id_channel_EXTRACT,
   id_channel_INDEX,
+  id_channel_REINDEX,
   id_channel_REMOVE,
   id_channel_QUERY,
 
@@ -78,11 +79,13 @@ enum
 
   id_channel_cbreq_EXTRACT = 0,
   id_channel_cbreq_INDEX,
+  id_channel_cbreq_REINDEX,
   id_channel_cbreq_REMOVE,
   id_channel_cbreq_QUERY,
 
   id_channel_cbresp_EXTRACT,
   id_channel_cbresp_INDEX,
+  id_channel_cbresp_REINDEX,
   id_channel_cbresp_REMOVE,
   id_channel_cbresp_QUERY,
 

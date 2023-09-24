@@ -9,7 +9,7 @@ include "cl_rtsp.h"
 
 // === test execution functions ================================================
 
-void test_rtsp();
+void test_rtsp_parse_range_time();
 
 // === program entry function ==================================================
 

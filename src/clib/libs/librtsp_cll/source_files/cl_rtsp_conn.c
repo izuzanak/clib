@@ -9,6 +9,20 @@ const char *c_week_day_names[] = {"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
 const char *c_month_names[] =
   {"Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","Oct","Nov","Dec"};
 
+ulli powers_of_10[] =
+{/*{{{*/
+  1,
+  10,
+  100,
+  1000,
+  10000,
+  100000,
+  1000000,
+  10000000,
+  100000000,
+  1000000000,
+};/*}}}*/
+
 // === methods of generated structures =========================================
 
 // -- rtsp_setup_s --
@@ -94,10 +108,23 @@ int rtsp_conn_s_parse_range_time(char **a_ptr,time_s *a_time)
   }
 
   // - retrieve milliseconds -
-  ulli msec = 0;
+  ulli subsec = 0;
   if (*ptr == '.')
   {
-    msec = strtoll(ptr + 1,&ptr,10);
+    // - skip dot -
+    ++ptr;
+
+    char *ptr_end;
+    subsec = strtoll(ptr,&ptr_end,10);
+
+    unsigned subsec_len = ptr_end - ptr;
+    if (subsec_len < 1 || subsec_len > 9)
+    {
+      throw_error(RTSP_CONN_INVALID_RANGE_TIME);
+    }
+
+    subsec *= powers_of_10[9 - subsec_len];
+    ptr = ptr_end;
   }
 
   if (time_s_from_string(a_time,14,datetime))
@@ -105,7 +132,7 @@ int rtsp_conn_s_parse_range_time(char **a_ptr,time_s *a_time)
     throw_error(RTSP_CONN_INVALID_RANGE_TIME);
   }
 
-  *a_time += msec*1000000ULL;
+  *a_time += subsec;
   *a_ptr = ptr;
 
   return 0;
@@ -849,12 +876,8 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
   {\
     ulli time_stamp_llu = (ulli)old_time_stamp + (ulli)rtsp_setup->time_stamp_offset;\
 \
-    /* - timestamp overflow detection - */\
-    if (time_stamp_llu > UINT_MAX)\
-    {\
-      rtsp_setup->time_stamp_offset -= UINT_MAX;\
-    }\
-    else\
+    /* - timestamp did not overflow - */\
+    if (time_stamp_llu <= UINT_MAX)\
     {\
       rtsp_setup->time_stamp_offset = rtsp_setup->last_time_stamp - old_time_stamp;\
       time_stamp = rtsp_setup->last_time_stamp;\

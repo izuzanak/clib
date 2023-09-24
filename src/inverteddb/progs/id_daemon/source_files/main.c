@@ -287,6 +287,47 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       }
     }/*}}}*/
     break;
+  case id_channel_cbreq_REINDEX:
+    {/*{{{*/
+      lli id = va_arg(a_ap,lli);
+      const string_s *db_name = va_arg(a_ap,const string_s *);
+      lli doc_id = va_arg(a_ap,lli);
+      var_s data_var = va_arg(a_ap,var_s);
+
+      idb_database_s search_db = {*db_name,};
+      unsigned db_idx = idb_database_tree_s_get_idx(&this->databases,&search_db);
+      if (db_idx == c_idx_not_exist)
+      {
+        throw_error(ID_DAEMON_DATABASE_NOT_EXIST);
+      }
+
+      idb_database_s *database = idb_database_tree_s_at(&this->databases,db_idx);
+
+      // - remove old document index from database -
+      ui_array_s doc_indexes = {1,1,(unsigned[]){(unsigned)doc_id}};
+      if (idb_database_s_remove_docs(database,&doc_indexes))
+      {
+        throw_error(ID_DAEMON_DATABASE_REMOVE_DOCS_ERROR);
+      }
+
+      // - update index of database -
+      if (idb_database_s_update_index(database,data_var,doc_id) ||
+          idb_database_s_merge_index(database))
+      {
+        throw_error(ID_DAEMON_DATABASE_UPDATE_INDEX_ERROR);
+      }
+
+      // - send response -
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,"{\"resp\":\"reindex\",\"id\":%" HOST_LL_FORMAT "d",id);
+      bc_array_s_push(&this->buffer,'}');
+
+      if (id_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(ID_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
   case id_channel_cbreq_REMOVE:
     {/*{{{*/
       lli id = va_arg(a_ap,lli);
@@ -302,6 +343,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
 
       idb_database_s *database = idb_database_tree_s_at(&this->databases,db_idx);
 
+      // - remove document indexes from database -
       if (idb_database_s_remove_docs(database,doc_indexes))
       {
         throw_error(ID_DAEMON_DATABASE_REMOVE_DOCS_ERROR);
