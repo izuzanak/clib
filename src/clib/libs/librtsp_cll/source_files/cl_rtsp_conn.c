@@ -9,7 +9,7 @@ const char *c_week_day_names[] = {"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
 const char *c_month_names[] =
   {"Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","Oct","Nov","Dec"};
 
-ulli powers_of_10[] =
+ulli rtsp_powers_of_10[] =
 {/*{{{*/
   1,
   10,
@@ -123,7 +123,7 @@ int rtsp_conn_s_parse_range_time(char **a_ptr,time_s *a_time)
       throw_error(RTSP_CONN_INVALID_RANGE_TIME);
     }
 
-    subsec *= powers_of_10[9 - subsec_len];
+    subsec *= rtsp_powers_of_10[9 - subsec_len];
     ptr = ptr_end;
   }
 

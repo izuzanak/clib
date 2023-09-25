@@ -79,6 +79,8 @@ include "cl_rtsp_sdp_parser.h"
 
 // === constants and definitions ===============================================
 
+extern ulli rtsp_powers_of_10[];
+
 #define RTSP_TCP_OUTPUT_QUEUE_SIZE 327680
 #define RTSP_TCP_OUTPUT_WRITE_LIMIT 32768
 
