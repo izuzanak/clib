@@ -12,6 +12,7 @@ const char *test_names[] =
   "update_extractor",
   "update_index",
   "remove_docs",
+  "reopen_database",
 };/*}}}*/
 
 test_function_t test_functions[] =
@@ -19,6 +20,7 @@ test_function_t test_functions[] =
   test_update_extractor,
   test_update_index,
   test_remove_docs,
+  test_reopen_database,
 };/*}}}*/
 
 // === test execution functions ================================================
@@ -155,6 +157,62 @@ void test_remove_docs()
   cassert(idb_database_s_remove_docs(&idb,&remove_docs) == 0);
   idb_database_s_query(&idb,&query);
   cassert(!ui_tree_s_compare(&idb.query_res,&reference));
+}/*}}}*/
+
+void test_reopen_database()
+{/*{{{*/
+#define REOPEN_DATABASE_DB_PATH "tests/libidb_idl_test/reopen_database"
+
+  // - clear test directory -
+  cassert(system("rm -rf " REOPEN_DATABASE_DB_PATH "/test" ) == 0);
+
+  CONT_INIT_CLEAR(idb_database_s,idb);
+  cassert(idb_database_s_create(&idb,"test",REOPEN_DATABASE_DB_PATH,50,25) == 0);
+
+  {
+    VAR_CLEAR(extract_var,loc_s_dict_locs(
+      loc_s_string_ptr("\"id_0\""),  loc_s_string_ptr("id"),
+      loc_s_string_ptr("\"id_1\""),  loc_s_string_ptr("id"),
+      loc_s_string_ptr("\"descr\""),loc_s_string_ptr("text"),
+      loc_s_string_ptr("\"popis\""), loc_s_string_ptr("text")
+      ));
+
+    cassert(idb_database_s_update_extractor(&idb,extract_var) == 0);
+  }
+
+  unsigned idx = 0;
+  do {
+    VAR_CLEAR(doc_var,loc_s_dict_locs(
+      loc_s_string_ptr("id_0"),loc_s_string_format("doc%u",idx),
+      loc_s_string_ptr("inner"),loc_s_array_locs(
+        loc_s_int(1),
+        loc_s_int(2),
+        loc_s_dict_locs(
+          loc_s_string_ptr("id_1"),loc_s_int(121 + idx),
+          loc_s_string_ptr("descr"),loc_s_string_format("Content of document doc%u",idx),
+          loc_s_string_ptr("popis"),loc_s_string_format("Unrelated document description")
+        )
+      )
+    ));
+
+    cassert(idb_database_s_update_index(&idb,doc_var,idx) == 0);
+    cassert(idb_database_s_merge_index(&idb) == 0);
+  } while(++idx < 100);
+
+  string_s query = STRING_S("id_0 == doc45");
+
+  CONT_INIT_CLEAR(ui_tree_s,reference);
+  ui_tree_s_insert(&reference,45);
+
+  idb_database_s_query(&idb,&query);
+  cassert(ui_tree_s_compare(&idb.query_res,&reference));
+
+  // - reopen databas -
+  idb_database_s_clear(&idb);
+  cassert(idb_database_s_create(&idb,"test",REOPEN_DATABASE_DB_PATH,50,25) == 0);
+
+  idb_database_s_query(&idb,&query);
+  cassert(ui_tree_s_compare(&idb.query_res,&reference));
 }/*}}}*/
 
 // === program entry function ==================================================

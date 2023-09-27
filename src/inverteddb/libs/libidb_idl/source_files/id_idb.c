@@ -192,7 +192,7 @@ int idb_database_s_create(idb_database_s *this,const char *a_name,
         while (file_idx > next_tree_idx)
         {
           CONT_INIT_CLEAR(idb_inverted_index_s,dummy_inverted_index);
-          debug_assert(idb_inverted_index_tree_s_swap_insert(
+          cassert(idb_inverted_index_tree_s_swap_insert(
                 &this->inverted_index_tree,&dummy_inverted_index) == next_tree_idx);
 
           ui_array_s_push(&this->remove_tree_idxs,next_tree_idx);
@@ -209,7 +209,7 @@ int idb_database_s_create(idb_database_s *this,const char *a_name,
           throw_error(IDB_DATABASE_CREATE_MAP_ERROR);
         }
 
-        debug_assert(idb_inverted_index_tree_s_swap_insert(
+        cassert(idb_inverted_index_tree_s_swap_insert(
               &this->inverted_index_tree,&inverted_index) == file_idx);
         ++next_tree_idx;
 
