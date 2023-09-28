@@ -390,6 +390,74 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       }
     }/*}}}*/
     break;
+  case id_channel_cbreq_QUERY_RANGES:
+    {/*{{{*/
+      lli id = va_arg(a_ap,lli);
+      const string_s *db_name = va_arg(a_ap,const string_s *);
+      const string_s *query = va_arg(a_ap,const string_s *);
+
+      idb_database_s search_db = {*db_name,};
+      unsigned db_idx = idb_database_tree_s_get_idx(&this->databases,&search_db);
+      if (db_idx == c_idx_not_exist)
+      {
+        throw_error(ID_DAEMON_DATABASE_NOT_EXIST);
+      }
+
+      idb_database_s *database = idb_database_tree_s_at(&this->databases,db_idx);
+
+      // - query database -
+      idb_database_s_query(database,query);
+
+      CONT_INIT_CLEAR(ui_array_s,ranges);
+      ui_tree_s *query_res = &database->query_res;
+
+      if (query_res->root_idx != c_idx_not_exist)
+      {
+        unsigned stack[RB_TREE_STACK_SIZE(ui_tree_s,query_res)];
+        unsigned *stack_ptr = stack;
+
+        unsigned qr_idx = ui_tree_s_get_stack_min_value_idx(query_res,query_res->root_idx,&stack_ptr);
+        unsigned last_value = *ui_tree_s_at(query_res,qr_idx);
+
+        // - first range start -
+        ui_array_s_push(&ranges,last_value);
+
+        do {
+          qr_idx = ui_tree_s_get_stack_next_idx(query_res,qr_idx,&stack_ptr,stack);
+          if (qr_idx == c_idx_not_exist)
+          {
+            // - last range end -
+            ui_array_s_push(&ranges,last_value);
+            break;
+          }
+
+          unsigned value = *ui_tree_s_at(query_res,qr_idx);
+
+          if (value != last_value + 1)
+          {
+            // - range end -
+            ui_array_s_push(&ranges,last_value);
+
+            // - range start -
+            ui_array_s_push(&ranges,value);
+          }
+
+          last_value = value;
+        } while(1);
+      }
+
+      // - send response -
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,"{\"resp\":\"query_ranges\",\"id\":%" HOST_LL_FORMAT "d,\"data\":",id);
+      ui_array_s_to_json(&ranges,&this->buffer);
+      bc_array_s_push(&this->buffer,'}');
+
+      if (id_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(ID_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
   default:
     {/*{{{*/
 

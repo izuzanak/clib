@@ -22,6 +22,7 @@ const char *g_id_channel_strings[] =
   "reindex",
   "remove",
   "query",
+  "query_ranges",
 
   "watch",
   "ignore",
@@ -292,6 +293,25 @@ int id_channel_s_conn_message(void *a_id_channel,unsigned a_index,const bc_array
       }
     }/*}}}*/
     break;
+  case id_channel_QUERY_RANGES:
+    {/*{{{*/
+      var_s database_var = loc_s_dict_get(msg_var,g_id_channel_vars.data[id_channel_DATABASE].object);
+      var_s data_var = loc_s_dict_get(msg_var,g_id_channel_vars.data[id_channel_DATA].object);
+
+      if (database_var == NULL || database_var->v_type != c_bi_type_string ||
+          data_var == NULL || data_var->v_type != c_bi_type_string)
+      {
+        throw_error(ID_CHANNEL_MESSAGE_ERROR);
+      }
+
+      // - call callback -
+      if (id_channel_s_message_call(this,a_index,id_channel_cbreq_QUERY_RANGES,id,
+            loc_s_string_value(database_var),loc_s_string_value(data_var)))
+      {
+        throw_error(ID_CHANNEL_SERVER_CALLBACK_ERROR);
+      }
+    }/*}}}*/
+    break;
   case id_channel_PING:
     {/*{{{*/
       this->buffer.used = 0;
@@ -485,6 +505,23 @@ int id_channel_client_s_conn_message(void *a_id_channel_client,unsigned a_index,
 
         // - call callback -
         if (id_channel_client_s_message_call(this,id_channel_cbresp_QUERY,id,
+            data_var))
+        {
+          throw_error(ID_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case id_channel_QUERY_RANGES:
+      {/*{{{*/
+        var_s data_var = loc_s_dict_get(msg_var,g_id_channel_vars.data[id_channel_DATA].object);
+
+        if (data_var == NULL || data_var->v_type != c_bi_type_array)
+        {
+          throw_error(ID_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (id_channel_client_s_message_call(this,id_channel_cbresp_QUERY_RANGES,id,
             data_var))
         {
           throw_error(ID_CHANNEL_CLIENT_CALLBACK_ERROR);
