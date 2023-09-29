@@ -432,7 +432,7 @@ static inline void rtsp_setup_s_reset_sequences(rtsp_setup_s *this)
   this->tcp_outq_space = 0;
 
   this->packet_sequence = 0;
-  this->last_time_stamp = (unsigned)rand() + 1;
+  this->last_time_stamp = (unsigned)rand() + 1; // NOLINT(cert-msc30-c,cert-msc50-cpp)
   this->time_stamp_offset = 0;
 }/*}}}*/
 

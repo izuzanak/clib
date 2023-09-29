@@ -37,7 +37,7 @@ void test_update_extractor()
 #define UPDATE_EXTRACTOR_DB_PATH "tests/libidb_idl_test/update_extractor"
 
   // - clear test directory -
-  cassert(system("rm -rf " UPDATE_EXTRACTOR_DB_PATH "/test" ) == 0);
+  cassert(system("rm -rf " UPDATE_EXTRACTOR_DB_PATH "/test" ) == 0); // NOLINT(cert-env33-c)
 
   CONT_INIT_CLEAR(idb_database_s,idb);
   cassert(idb_database_s_create(&idb,"test",UPDATE_EXTRACTOR_DB_PATH,50,25) == 0);
@@ -49,7 +49,7 @@ void test_update_index()
 #define UPDATE_INDEX_DB_PATH "tests/libidb_idl_test/update_index"
 
   // - clear test directory -
-  cassert(system("rm -rf " UPDATE_INDEX_DB_PATH "/test" ) == 0);
+  cassert(system("rm -rf " UPDATE_INDEX_DB_PATH "/test" ) == 0); // NOLINT(cert-env33-c)
 
   CONT_INIT_CLEAR(idb_database_s,idb);
   cassert(idb_database_s_create(&idb,"test",UPDATE_INDEX_DB_PATH,50,25) == 0);
@@ -106,7 +106,7 @@ void test_remove_docs()
 #define REMOVE_DOCS_DB_PATH "tests/libidb_idl_test/remove_docs"
 
   // - clear test directory -
-  cassert(system("rm -rf " REMOVE_DOCS_DB_PATH "/test" ) == 0);
+  cassert(system("rm -rf " REMOVE_DOCS_DB_PATH "/test" ) == 0); // NOLINT(cert-env33-c)
 
   CONT_INIT_CLEAR(idb_database_s,idb);
   cassert(idb_database_s_create(&idb,"test",REMOVE_DOCS_DB_PATH,50,25) == 0);
@@ -164,7 +164,7 @@ void test_reopen_database()
 #define REOPEN_DATABASE_DB_PATH "tests/libidb_idl_test/reopen_database"
 
   // - clear test directory -
-  cassert(system("rm -rf " REOPEN_DATABASE_DB_PATH "/test" ) == 0);
+  cassert(system("rm -rf " REOPEN_DATABASE_DB_PATH "/test" ) == 0); // NOLINT(cert-env33-c)
 
   CONT_INIT_CLEAR(idb_database_s,idb);
   cassert(idb_database_s_create(&idb,"test",REOPEN_DATABASE_DB_PATH,50,25) == 0);

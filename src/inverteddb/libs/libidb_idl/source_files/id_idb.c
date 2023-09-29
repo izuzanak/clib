@@ -824,15 +824,15 @@ void idb_database_s_query(idb_database_s *this,const string_s *a_query)
 
             unsigned *target_ptr = ((unsigned *)ii_ptr->mmap.address) + target_offset;
             unsigned target_cnt = *target_ptr++;
+            debug_assert(target_cnt > 0);
 
             if (ip_query_res_set)
             {
               // - set ip query result to target -
               unsigned *target_ptr_end = target_ptr + target_cnt;
-              while (target_ptr < target_ptr_end)
-              {
-                ui_tree_s_insert(&ip_query_res,*target_ptr++);
-              }
+              do {
+                ui_tree_s_insert(&ip_query_res,*target_ptr);
+              } while(++target_ptr < target_ptr_end);
 
               ip_query_res_set = 0;
             }

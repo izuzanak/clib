@@ -177,7 +177,7 @@ void test_ui_array()
 
   unsigned idx = 0;
   do {
-    unsigned value = rand();
+    unsigned value = rand(); // NOLINT(cert-msc30-c,cert-msc50-cpp)
     ui_tree_s_insert(&tree,value);
   } while(++idx < 1000);
 
