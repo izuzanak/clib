@@ -911,7 +911,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       }
 
       lli range_count = (trace_head != -1 && first_id <= last_id) ? last_id - first_id + 1 : 0;
-      lli resp_count = (count < 1 || count > range_count) ? range_count : count;
+      lli resp_count = (count < 0 || count > range_count) ? range_count : count;
 
       // - format response -
       this->buffer.used = 0;
@@ -1047,7 +1047,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       sd_trace_s_clear_timestamp(&trace->trace);
 
       lli range_count = (first_id != -1 && last_id != -1 && first_id <= last_id) ? last_id - first_id + 1 : 0;
-      lli resp_count = (count < 1 || count > range_count) ? range_count : count;
+      lli resp_count = (count < 0 || count > range_count) ? range_count : count;
 
       // - format response -
       this->buffer.used = 0;
