@@ -120,7 +120,12 @@ MHD_RESULT conn_key_value_func(void *cls,enum MHD_ValueKind kind,
 
   CONT_INIT_CLEAR(http_key_value_s,http_header);
   string_s_set(&http_header.key,strlen(key),key);
-  string_s_set(&http_header.value,strlen(value),value);
+
+  // - value is not empty -
+  if (value != NULL)
+  {
+    string_s_set(&http_header.value,strlen(value),value);
+  }
 
   // - insert header to tree -
   http_key_value_tree_s_unique_swap_insert(conn_ptr->http_key_value_tree,&http_header);
