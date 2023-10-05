@@ -870,18 +870,13 @@ int rtsp_conn_s_send_packet(rtsp_conn_s *this,int *a_packet_send)
   unsigned old_time_stamp = RTP_PKT_GET_TIME_STAMP(this->packet.data);\
   unsigned time_stamp = old_time_stamp + rtsp_setup->time_stamp_offset;\
 \
-  /* - fix invalid time stamp - */\
-  if (time_stamp < rtsp_setup->last_time_stamp ||\
-      time_stamp - rtsp_setup->last_time_stamp > 100000)\
-  {\
-    ulli time_stamp_llu = (ulli)old_time_stamp + (ulli)rtsp_setup->time_stamp_offset;\
+  unsigned fdiff = time_stamp - rtsp_setup->last_time_stamp;\
+  unsigned sdiff = rtsp_setup->last_time_stamp - time_stamp;\
 \
-    /* - timestamp did not overflow - */\
-    if (time_stamp_llu <= UINT_MAX)\
-    {\
-      rtsp_setup->time_stamp_offset = rtsp_setup->last_time_stamp - old_time_stamp;\
-      time_stamp = rtsp_setup->last_time_stamp;\
-    }\
+  if (fdiff > 100000 && sdiff > 100000)\
+  {\
+    rtsp_setup->time_stamp_offset = rtsp_setup->last_time_stamp - old_time_stamp;\
+    time_stamp = rtsp_setup->last_time_stamp;\
   }\
 \
   /* - update last time stamp - */\
