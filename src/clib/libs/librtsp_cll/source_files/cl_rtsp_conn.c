@@ -498,7 +498,7 @@ this->session);
         }
 
         // - prepare play options -
-        rtsp_play_options_s play_options = {0};
+        rtsp_play_options_s play_options = {this->session,a_parser->cseq,0};
 
         // - set onvif replay flag -
         if (a_parser->onvif_replay)
@@ -541,7 +541,7 @@ this->session);
 
         // - call conn_playing_callback -
         if (((rtsp_conn_playing_callback_t)server->conn_playing_callback)(
-              server->cb_object,this->index,this->session,&play_options))
+              server->cb_object,this->index,&play_options))
         {
           throw_error(RTSP_CONN_CALLBACK_ERROR);
         }

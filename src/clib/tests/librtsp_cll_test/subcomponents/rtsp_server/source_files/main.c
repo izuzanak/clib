@@ -71,11 +71,10 @@ int conn_check_media(void *a_rtsp_server,unsigned a_index,const char *a_url,unsi
   return 1;
 }/*}}}*/
 
-int conn_playing(void *a_rtsp_server,unsigned a_index,ulli a_session,rtsp_play_options_s *a_options)
+int conn_playing(void *a_rtsp_server,unsigned a_index,rtsp_play_options_s *a_options)
 {/*{{{*/
   (void)a_rtsp_server;
   (void)a_index;
-  (void)a_session;
   (void)a_options;
 
   return 0;
