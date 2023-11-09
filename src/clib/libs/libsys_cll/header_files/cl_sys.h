@@ -35,6 +35,8 @@ include "cl_struct.h"
 
 #define ERROR_PIPE_OPEN_ERROR 1
 
+#define ERROR_EVIRONMENT_RESOLVE_VARS_ERROR 1
+
 #ifdef __GNUC__
 // - should match glibc structure -
 typedef struct IO_FILE_plus IO_FILE_plus;
@@ -123,6 +125,21 @@ WUR static inline int pipe_s_read_close(pipe_s *this,bc_array_s *a_trg);
 #ifdef __GNUC__
 WUR static inline pid_t pipe_s_pid(pipe_s *this);
 #endif
+
+// === definition of structure environment_s ===================================
+
+enum
+{/*{{{*/
+  c_env_term_VAR = 0,
+  c_env_term_VAR_DEF,
+  c_env_term_ESCAPE,
+  c_env_term_TEXT,
+};/*}}}*/
+
+WUR libsys_cll_EXPORT unsigned environment_s_recognize_terminal(
+    const char **a_src,const char *a_src_end);
+WUR libsys_cll_EXPORT int environment_s_resolve_vars(
+    unsigned a_size,const char *a_src,bc_array_s *a_trg);
 
 // === definition of generated structures ======================================
 

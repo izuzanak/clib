@@ -53,6 +53,7 @@ inlines pipe_array_s
 void test_pollfd();
 void test_file();
 void test_pipe();
+void test_environment();
 
 // === program entry function ==================================================
 

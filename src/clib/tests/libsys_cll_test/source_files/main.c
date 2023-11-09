@@ -12,6 +12,7 @@ const char *test_names[] =
   "pollfd",
   "file",
   "pipe",
+  "environment",
 };/*}}}*/
 
 test_function_t test_functions[] =
@@ -19,6 +20,7 @@ test_function_t test_functions[] =
   test_pollfd,
   test_file,
   test_pipe,
+  test_environment,
 };/*}}}*/
 
 // === methods of generated structures =========================================
@@ -258,6 +260,36 @@ void test_pipe()
 
   pipe_array_s_clear(&pipe_array);
   bc_array_s_clear(&buffer);
+#endif
+}/*}}}*/
+
+void test_environment()
+{/*{{{*/
+#if OPTION_TO_STRING == ENABLED
+  const char data[] =
+"$${VALUE0}: '${VALUE0}'\n"
+"$${VALUE1}: '${VALUE1}'\n"
+"$${VALUE0:-default0}: '${VALUE0:-default0}'\n"
+"$${VALUE1:-default1}: '${VALUE1:-default1}'\n"
+"$${VALUE2:-default2}: '${VALUE2:-default2}'\n"
+"$$$$$$$$\n"
+;
+
+  cassert(setenv("VALUE0","value0",1) == 0);
+  cassert(setenv("VALUE1","value1",1) == 0);
+
+  CONT_INIT_CLEAR(bc_array_s,target);
+  cassert(environment_s_resolve_vars(strlen(data),data,&target) == 0);
+  bc_array_s_push(&target,'\0');
+
+  cassert(strcmp(target.data,
+"${VALUE0}: 'value0'\n"
+"${VALUE1}: 'value1'\n"
+"${VALUE0:-default0}: 'value0'\n"
+"${VALUE1:-default1}: 'value1'\n"
+"${VALUE2:-default2}: 'default2'\n"
+"$$$$\n"
+  ) == 0);
 #endif
 }/*}}}*/
 
