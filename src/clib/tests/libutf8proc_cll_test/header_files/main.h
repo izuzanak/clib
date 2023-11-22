@@ -1,19 +1,18 @@
 
-#ifndef ID_TEST_MAIN_H
-#define ID_TEST_MAIN_H
+#ifndef CL_TEST_MAIN_H
+#define CL_TEST_MAIN_H
 
 @begin
 include "cl_test.h"
-include "id_idb.h"
+include "cl_utf8proc.h"
 @end
 
 // === test execution functions ================================================
 
-void test_update_extractor();
-void test_update_index();
-void test_update_index_text();
-void test_remove_docs();
-void test_reopen_database();
+void test_version();
+void test_utf8_to_lower();
+void test_utf8_to_upper();
+void test_utf8_map();
 
 // === program entry function ==================================================
 

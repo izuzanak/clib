@@ -1,0 +1,20 @@
+
+find_path(PATH_UTF8PROC_H NAMES "utf8proc.h")
+
+if(PATH_UTF8PROC_H)
+  set(LIBUTF8PROC_FOUND TRUE)
+  set(LIBUTF8PROC_LIBRARY utf8proc)
+endif()
+
+set(CONF_COMPONENTS
+  "src/clib/libs/libbase_cll")
+set(CONF_HEADER_DIRS)
+
+if(LIBUTF8PROC_FOUND)
+  set(CONF_DO_BUILD TRUE)
+  set(CONF_INCLUDE_DIRS)
+  set(CONF_COMP_DEFS)
+  set(CONF_LINK_LIBS
+    ${LIBUTF8PROC_LIBRARY})
+endif()
+

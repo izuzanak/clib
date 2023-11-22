@@ -31,6 +31,7 @@ include "id_idb.h"
 #define ERROR_ID_DAEMON_DATABASE_UPDATE_EXTRACTOR_ERROR 10
 #define ERROR_ID_DAEMON_DATABASE_UPDATE_INDEX_ERROR 11
 #define ERROR_ID_DAEMON_DATABASE_REMOVE_DOCS_ERROR 12
+#define ERROR_ID_DAEMON_DATABASE_QUERY_ERROR 13
 
 // === definition of generated structures ======================================
 

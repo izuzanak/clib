@@ -11,6 +11,7 @@ const char *test_names[] =
 {/*{{{*/
   "update_extractor",
   "update_index",
+  "update_index_text",
   "remove_docs",
   "reopen_database",
 };/*}}}*/
@@ -19,6 +20,7 @@ test_function_t test_functions[] =
 {/*{{{*/
   test_update_extractor,
   test_update_index,
+  test_update_index_text,
   test_remove_docs,
   test_reopen_database,
 };/*}}}*/
@@ -93,12 +95,102 @@ void test_update_index()
   idx = 0;
   do {
     string_s query = STRING_S("document 43");
-    idb_database_s_query(&idb,&query);
+    cassert(idb_database_s_query(&idb,&query) == 0);
   } while(++idx < 50);
 
   CONT_INIT_CLEAR(ui_tree_s,reference);
   ui_tree_s_insert(&reference,43);
   cassert(ui_tree_s_compare(&idb.query_res,&reference));
+}/*}}}*/
+
+void test_update_index_text()
+{/*{{{*/
+#define UPDATE_INDEX_TEXT_DB_PATH "tests/libidb_idl_test/update_index_text"
+
+  // - clear test directory -
+  cassert(system("rm -rf " UPDATE_INDEX_TEXT_DB_PATH "/test" ) == 0); // NOLINT(cert-env33-c)
+
+  CONT_INIT_CLEAR(idb_database_s,idb);
+  cassert(idb_database_s_create(&idb,"test",UPDATE_INDEX_TEXT_DB_PATH,50,25) == 0);
+
+  {
+    VAR_CLEAR(extract_var,loc_s_dict_locs(
+      loc_s_string_ptr("\"id_0\""),  loc_s_string_ptr("id"),
+      loc_s_string_ptr("\"id_1\""),  loc_s_string_ptr("id"),
+      loc_s_string_ptr("\"descr\""), loc_s_string_ptr("text"),
+      loc_s_string_ptr("\"popis\""), loc_s_string_ptr("text")
+      ));
+
+    cassert(idb_database_s_update_extractor(&idb,extract_var) == 0);
+  }
+
+  unsigned idx = 0;
+  unsigned idx_end = 100;
+  do {
+    VAR_CLEAR(doc_var,loc_s_dict_locs(
+      loc_s_string_ptr("id_0"),loc_s_string_format("doc%u",idx),
+      loc_s_string_ptr("inner"),loc_s_array_locs(
+        loc_s_int(1),
+        loc_s_int(2),
+        loc_s_dict_locs(
+          loc_s_string_ptr("id_1"),loc_s_int(121 + idx),
+          loc_s_string_ptr("descr"),loc_s_string_format("Document time 2023/11/21 12:28:05.%03.3u",idx),
+          loc_s_string_ptr("popis"),loc_s_string_format("Related to unit CZ_CZL_1000000000%03.3u",idx)
+        )
+      )
+    ));
+
+    cassert(idb_database_s_update_index(&idb,doc_var,idx) == 0);
+    cassert(idb_database_s_merge_index(&idb) == 0);
+  } while(++idx < idx_end);
+
+  {
+    string_s query = STRING_S("20231121 122805050");
+    cassert(idb_database_s_query(&idb,&query) == 0);
+
+    CONT_INIT_CLEAR(ui_tree_s,reference);
+    ui_tree_s_insert(&reference,50);
+    cassert(ui_tree_s_compare(&idb.query_res,&reference));
+  }
+
+  {
+    string_s query = STRING_S("20231121");
+    cassert(idb_database_s_query(&idb,&query) == 0);
+    cassert(idb.query_res.count == 100);
+  }
+
+  {
+    string_s query = STRING_S("2023 11 21");
+    cassert(idb_database_s_query(&idb,&query) == 0);
+    cassert(idb.query_res.count == 0);
+  }
+
+  {
+    string_s query = STRING_S("CZ CZL 1000000000021");
+    cassert(idb_database_s_query(&idb,&query) == 0);
+
+    CONT_INIT_CLEAR(ui_tree_s,reference);
+    ui_tree_s_insert(&reference,21);
+    cassert(ui_tree_s_compare(&idb.query_res,&reference));
+  }
+
+  {
+    string_s query = STRING_S("CZ CZL");
+    cassert(idb_database_s_query(&idb,&query) == 0);
+    cassert(idb.query_res.count == 100);
+  }
+
+  {
+    string_s query = STRING_S("cz czl");
+    cassert(idb_database_s_query(&idb,&query) == 0);
+    cassert(idb.query_res.count == 100);
+  }
+
+  {
+    string_s query = STRING_S("ČŽ ČŽL");
+    cassert(idb_database_s_query(&idb,&query) == 0);
+    cassert(idb.query_res.count == 100);
+  }
 }/*}}}*/
 
 void test_remove_docs()
@@ -146,7 +238,7 @@ void test_remove_docs()
   CONT_INIT_CLEAR(ui_tree_s,reference);
   ui_tree_s_insert(&reference,44);
 
-  idb_database_s_query(&idb,&query);
+  cassert(idb_database_s_query(&idb,&query) == 0);
   cassert(ui_tree_s_compare(&idb.query_res,&reference));
 
   CONT_INIT_CLEAR(ui_array_s,remove_docs);
@@ -155,7 +247,7 @@ void test_remove_docs()
   ui_array_s_push(&remove_docs,44);
 
   cassert(idb_database_s_remove_docs(&idb,&remove_docs) == 0);
-  idb_database_s_query(&idb,&query);
+  cassert(idb_database_s_query(&idb,&query) == 0);
   cassert(!ui_tree_s_compare(&idb.query_res,&reference));
 }/*}}}*/
 
@@ -204,14 +296,14 @@ void test_reopen_database()
   CONT_INIT_CLEAR(ui_tree_s,reference);
   ui_tree_s_insert(&reference,45);
 
-  idb_database_s_query(&idb,&query);
+  cassert(idb_database_s_query(&idb,&query) == 0);
   cassert(ui_tree_s_compare(&idb.query_res,&reference));
 
   // - reopen databas -
   idb_database_s_clear(&idb);
   cassert(idb_database_s_create(&idb,"test",REOPEN_DATABASE_DB_PATH,50,25) == 0);
 
-  idb_database_s_query(&idb,&query);
+  cassert(idb_database_s_query(&idb,&query) == 0);
   cassert(ui_tree_s_compare(&idb.query_res,&reference));
 }/*}}}*/
 

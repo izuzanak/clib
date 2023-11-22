@@ -1,8 +1,6 @@
 
 set(CONF_COMPONENTS
-  "src/clib/libs/liblinux_cll"
-  "src/clib/libs/libparser_cll"
-  "src/clib/libs/libvar_cll"
+  "src/clib/libs/libtest_cll"
   "src/clib/libs/libutf8proc_cll")
 set(CONF_HEADER_DIRS)
 

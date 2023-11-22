@@ -376,7 +376,10 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       idb_database_s *database = idb_database_tree_s_at(&this->databases,db_idx);
 
       // - query database -
-      idb_database_s_query(database,query);
+      if (idb_database_s_query(database,query))
+      {
+        throw_error(ID_DAEMON_DATABASE_QUERY_ERROR);
+      }
 
       // - send response -
       this->buffer.used = 0;
@@ -406,7 +409,10 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       idb_database_s *database = idb_database_tree_s_at(&this->databases,db_idx);
 
       // - query database -
-      idb_database_s_query(database,query);
+      if (idb_database_s_query(database,query))
+      {
+        throw_error(ID_DAEMON_DATABASE_QUERY_ERROR);
+      }
 
       CONT_INIT_CLEAR(ui_array_s,ranges);
       ui_tree_s *query_res = &database->query_res;

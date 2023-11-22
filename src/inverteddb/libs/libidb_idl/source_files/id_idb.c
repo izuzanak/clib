@@ -397,13 +397,26 @@ int idb_database_s_extract_regexps(idb_database_s *this,
                         if (value_var->v_type == c_bi_type_string)
                         {
                           const string_s *value_str = loc_s_string_value(value_var);
-                          if (value_str->size > 1)
+
+                          // - normalize text string -
+                          this->utf8_buffer.used = 0;
+                          if (utf8proc_s_map(value_str->size,value_str->data,
+                                UTF8PROC_STABLE | UTF8PROC_STRIPMARK | UTF8PROC_DECOMPOSE |
+                                UTF8PROC_CASEFOLD,&this->utf8_buffer))
                           {
-                            const char *ptr = value_str->data;
-                            const char *ptr_end = ptr + value_str->size - 1;
+                            throw_error(IDB_DATABASE_EXTRACT_REGEXPS_UTF8_ERROR);
+                          }
+
+                          if (this->utf8_buffer.used > 1)
+                          {
+                            const char *ptr = this->utf8_buffer.data;
+                            const char *ptr_end = ptr + this->utf8_buffer.used - 1;
                             do
                             {
-                              if (isspace(*ptr) || ispunct(*ptr) || *ptr == '\0')
+                              if (isspace(*ptr) ||
+                                  *ptr == '-' ||
+                                  *ptr == '_' ||
+                                  *ptr == '\0')
                               {
                                 if (this->buffer.used != 0)
                                 {
@@ -416,6 +429,7 @@ int idb_database_s_extract_regexps(idb_database_s *this,
 
                                 if (ptr >= ptr_end) { break; }
                               }
+                              else if (ispunct(*ptr)) {}
                               else
                               {
                                 bc_array_s_push(&this->buffer,*ptr);
@@ -786,7 +800,7 @@ int idb_database_s_remove_docs(idb_database_s *this,ui_array_s *a_doc_indexes)
   return 0;
 }/*}}}*/
 
-void idb_database_s_query(idb_database_s *this,const string_s *a_query)
+int idb_database_s_query(idb_database_s *this,const string_s *a_query)
 {/*{{{*/
 
   // - reset query result -
@@ -796,6 +810,15 @@ void idb_database_s_query(idb_database_s *this,const string_s *a_query)
   {
     if (this->inverted_index_tree.root_idx != c_idx_not_exist)
     {
+      // - normalize query string -
+      this->utf8_buffer.used = 0;
+      if (utf8proc_s_map(a_query->size - 1,a_query->data,
+            UTF8PROC_STABLE | UTF8PROC_STRIPMARK | UTF8PROC_DECOMPOSE |
+            UTF8PROC_CASEFOLD,&this->utf8_buffer))
+      {
+        throw_error(IDB_DATABASE_EXTRACT_REGEXPS_UTF8_ERROR);
+      }
+
       idb_inverted_index_tree_s_node *iitn_ptr = this->inverted_index_tree.data;
       idb_inverted_index_tree_s_node *iitn_ptr_end = iitn_ptr + this->inverted_index_tree.used;
       do
@@ -809,12 +832,12 @@ void idb_database_s_query(idb_database_s *this,const string_s *a_query)
 
           // - traverse query string -
           unsigned input_idx = 0;
-          while (isspace(a_query->data[input_idx])) { ++input_idx; }
+          while (isspace(this->utf8_buffer.data[input_idx])) { ++input_idx; }
 
           do
           {
             unsigned target_offset = inverted_index_dump_s_recognize(
-                ii_ptr->mmap.address,a_query->data,&input_idx,a_query->size - 1);
+                ii_ptr->mmap.address,this->utf8_buffer.data,&input_idx,this->utf8_buffer.used);
 
             if (target_offset == c_idx_not_exist)
             {
@@ -858,8 +881,8 @@ void idb_database_s_query(idb_database_s *this,const string_s *a_query)
               }
             }
 
-            while (isspace(a_query->data[input_idx])) { ++input_idx; }
-          } while(input_idx < a_query->size - 1);
+            while (isspace(this->utf8_buffer.data[input_idx])) { ++input_idx; }
+          } while(input_idx < this->utf8_buffer.used);
 
           if (ip_query_res.root_idx != c_idx_not_exist)
           {
@@ -878,6 +901,8 @@ void idb_database_s_query(idb_database_s *this,const string_s *a_query)
       } while(++iitn_ptr < iitn_ptr_end);
     }
   }
+
+  return 0;
 }/*}}}*/
 
 // -- idb_database_tree_s --
