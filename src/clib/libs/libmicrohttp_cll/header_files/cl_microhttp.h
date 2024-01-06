@@ -122,8 +122,6 @@ static inline void http_server_s_to_string(const http_server_s *this,bc_array_s 
 MHD_RESULT http_server_s_connection_func(void *cls,struct MHD_Connection *connection,
     const char *url,const char *method,const char *version,
     const char *upload_data,size_t *upload_data_size,void **con_cls);
-MHD_RESULT conn_key_value_func(void *cls,enum MHD_ValueKind kind,
-    const char *key,const char *value);
 void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
     void **con_cls,enum MHD_RequestTerminationCode toe);
 
@@ -168,6 +166,8 @@ static inline int http_conn_s_compare(const http_conn_s *this,const http_conn_s 
 static inline void http_conn_s_to_string(const http_conn_s *this,bc_array_s *a_trg);
 #endif
 
+MHD_RESULT conn_key_value_func(void *cls,enum MHD_ValueKind kind,
+    const char *key,const char *value);
 void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_key_value_tree_s *a_trg);
 WUR libmicrohttp_cll_EXPORT int http_conn_s_client_ip(http_conn_s *this,bc_array_s *a_trg);
 WUR static inline int http_conn_s_suspend(http_conn_s *this);

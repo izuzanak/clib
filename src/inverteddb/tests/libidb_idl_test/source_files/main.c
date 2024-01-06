@@ -154,7 +154,22 @@ void test_update_index_text()
   }
 
   {
+    string_s query = STRING_S("2023/11/21 12:28:05.050");
+    cassert(idb_database_s_query(&idb,&query) == 0);
+
+    CONT_INIT_CLEAR(ui_tree_s,reference);
+    ui_tree_s_insert(&reference,50);
+    cassert(ui_tree_s_compare(&idb.query_res,&reference));
+  }
+
+  {
     string_s query = STRING_S("20231121");
+    cassert(idb_database_s_query(&idb,&query) == 0);
+    cassert(idb.query_res.count == 100);
+  }
+
+  {
+    string_s query = STRING_S("2023/11/21");
     cassert(idb_database_s_query(&idb,&query) == 0);
     cassert(idb.query_res.count == 100);
   }
@@ -190,6 +205,15 @@ void test_update_index_text()
     string_s query = STRING_S("ČŽ ČŽL");
     cassert(idb_database_s_query(&idb,&query) == 0);
     cassert(idb.query_res.count == 100);
+  }
+
+  {
+    string_s query = STRING_S("id_1 == 125");
+    cassert(idb_database_s_query(&idb,&query) == 0);
+
+    CONT_INIT_CLEAR(ui_tree_s,reference);
+    ui_tree_s_insert(&reference,4);
+    cassert(ui_tree_s_compare(&idb.query_res,&reference));
   }
 }/*}}}*/
 

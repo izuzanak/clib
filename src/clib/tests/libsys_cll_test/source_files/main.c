@@ -125,7 +125,7 @@ void test_file()
   cassert(writed == strlen(text));
 
   // - stream_s_fflush -
-  cassert(stream_s_fflush(&file_array.data[0]) == 0);
+  cassert(stream_s_flush(&file_array.data[0]) == 0);
 
   // - stream_s_read -
   cassert(file_s_open(&file_array.data[1],"tests/libsys_cll_test/file/write.txt","rb") == 0);
@@ -219,7 +219,7 @@ void test_pipe()
 
   // - stream_s_fflush -
   // - pipe_s_clear -
-  cassert(stream_s_fflush(&pipe_array.data[0]) == 0);
+  cassert(stream_s_flush(&pipe_array.data[0]) == 0);
   pipe_s_clear(&pipe_array.data[0]);
 
   // - stream_s_read -
@@ -232,7 +232,7 @@ void test_pipe()
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,string.data) == 0);
 
-  // - stream_s_read -
+  // - pipe_s_read_close -
   cassert(pipe_s_popen(&pipe_array.data[2],"cat tests/libsys_cll_test/pipe/write.txt","r") == 0);
   buffer.used = 0;
   cassert(pipe_s_read_close(&pipe_array.data[2],&buffer) == 0);

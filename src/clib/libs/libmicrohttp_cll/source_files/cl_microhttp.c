@@ -111,28 +111,6 @@ MHD_RESULT http_server_s_connection_func(void *cls,struct MHD_Connection *connec
   return MHD_YES;
 }/*}}}*/
 
-MHD_RESULT conn_key_value_func(void *cls,enum MHD_ValueKind kind,
-    const char *key,const char *value)
-{/*{{{*/
-  (void)kind;
-
-  http_conn_s *conn_ptr = (http_conn_s *)cls;
-
-  CONT_INIT_CLEAR(http_key_value_s,http_header);
-  string_s_set(&http_header.key,strlen(key),key);
-
-  // - value is not empty -
-  if (value != NULL)
-  {
-    string_s_set(&http_header.value,strlen(value),value);
-  }
-
-  // - insert header to tree -
-  http_key_value_tree_s_unique_swap_insert(conn_ptr->http_key_value_tree,&http_header);
-
-  return MHD_YES;
-}/*}}}*/
-
 void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
     void **con_cls,enum MHD_RequestTerminationCode toe)
 {/*{{{*/
@@ -190,7 +168,6 @@ int http_server_s_create(http_server_s *this,usi a_port,
 
 int http_server_s_fds(http_server_s *this,pollfd_array_s *a_trg)
 {/*{{{*/
-  a_trg->used = 0;
 
   // - prepare file descriptor sets -
   fd_set rs; FD_ZERO(&rs); // NOLINT(readability-isolate-declaration)
@@ -252,6 +229,28 @@ int http_server_s_fds(http_server_s *this,pollfd_array_s *a_trg)
 }/*}}}*/
 
 // === methods of structure http_conn_s ========================================
+
+MHD_RESULT conn_key_value_func(void *cls,enum MHD_ValueKind kind,
+    const char *key,const char *value)
+{/*{{{*/
+  (void)kind;
+
+  http_conn_s *conn_ptr = (http_conn_s *)cls;
+
+  CONT_INIT_CLEAR(http_key_value_s,http_header);
+  string_s_set(&http_header.key,strlen(key),key);
+
+  // - value is not empty -
+  if (value != NULL)
+  {
+    string_s_set(&http_header.value,strlen(value),value);
+  }
+
+  // - insert header to tree -
+  http_key_value_tree_s_unique_swap_insert(conn_ptr->http_key_value_tree,&http_header);
+
+  return MHD_YES;
+}/*}}}*/
 
 void http_conn_s_values(http_conn_s *this,enum MHD_ValueKind a_value_kind,http_key_value_tree_s *a_trg)
 {/*{{{*/

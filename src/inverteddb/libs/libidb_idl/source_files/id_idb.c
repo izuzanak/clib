@@ -371,22 +371,44 @@ int idb_database_s_extract_regexps(idb_database_s *this,
                     {
                     case c_idb_extracted_type_ID:
                       {/*{{{*/
+                        
+                        // - normalize key string -
+                        this->utf8_buffer.used = 0;
+
+                        if (key_str->size > 1)
+                        {
+                          const char *ks_ptr = key_str->data;
+                          const char *ks_ptr_end = ks_ptr + key_str->size - 1;
+                          do {
+                            if (*ks_ptr == '-' || *ks_ptr == '_')
+                            {
+                              bc_array_s_push(&this->utf8_buffer,' ');
+                            }
+                            else
+                            {
+                              bc_array_s_push(&this->utf8_buffer,*ks_ptr);
+                            }
+                          } while(++ks_ptr < ks_ptr_end);
+                        }
+
                         switch (value_var->v_type)
                         {
                         case c_bi_type_integer:
                           {
                             string_array_s_push_blank(a_reg_exps);
                             string_s_set_format(string_array_s_last(a_reg_exps),
-                                "\"%s\".w*.\"==\".w*.\"%lld\"",
-                                key_str->data,loc_s_int_value(value_var));
+                                "\"%.*s\".w*.\"==\".w*.\"%lld\"",
+                                this->utf8_buffer.used,this->utf8_buffer.data,
+                                loc_s_int_value(value_var));
                           }
                           break;
                         case c_bi_type_string:
                           {
                             string_array_s_push_blank(a_reg_exps);
                             string_s_set_format(string_array_s_last(a_reg_exps),
-                                "\"%s\".w*.\"==\".w*.\"%s\"",
-                                key_str->data,loc_s_string_value(value_var)->data);
+                                "\"%.*s\".w*.\"==\".w*.\"%s\"",
+                                this->utf8_buffer.used,this->utf8_buffer.data,
+                                loc_s_string_value(value_var)->data);
                           }
                           break;
                         }
@@ -817,6 +839,33 @@ int idb_database_s_query(idb_database_s *this,const string_s *a_query)
             UTF8PROC_CASEFOLD,&this->utf8_buffer))
       {
         throw_error(IDB_DATABASE_EXTRACT_REGEXPS_UTF8_ERROR);
+      }
+
+      // - modify query string -
+      if (this->utf8_buffer.used != 0)
+      {
+        char *s_ptr = this->utf8_buffer.data;
+        char *s_ptr_end = s_ptr + this->utf8_buffer.used;
+        char *t_ptr = this->utf8_buffer.data;
+        do
+        {
+          if (*s_ptr == '-' || *s_ptr == '_')
+          {
+            *t_ptr++ = ' ';
+          }
+          else if (*s_ptr == '=')
+          {
+            *t_ptr++ = '=';
+          }
+          else if (ispunct(*s_ptr)) {}
+          else
+          {
+            *t_ptr++ = *s_ptr;
+          }
+        } while(++s_ptr < s_ptr_end);
+
+        // - adjust buffer size -
+        this->utf8_buffer.used = t_ptr - this->utf8_buffer.data;
       }
 
       idb_inverted_index_tree_s_node *iitn_ptr = this->inverted_index_tree.data;

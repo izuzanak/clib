@@ -73,7 +73,7 @@ typedef FILE * stream_s;
 
 WUR static inline int stream_s_write_cnt(stream_s *this,const void *a_src,size_t a_size,size_t *a_writed);
 WUR static inline int stream_s_write(stream_s *this,const void *a_src,size_t a_size);
-WUR static inline int stream_s_fflush(stream_s *this);
+WUR static inline int stream_s_flush(stream_s *this);
 WUR libsys_cll_EXPORT int stream_s_read(stream_s *this,bc_array_s *a_trg);
 WUR static inline int stream_s_read_cnt(stream_s *this,bc_array_s *a_trg,size_t a_size);
 WUR libsys_cll_EXPORT int stream_s_read_max(stream_s *this,bc_array_s *a_trg,size_t a_size);
@@ -186,7 +186,7 @@ static inline int stream_s_write(stream_s *this,const void *a_src,size_t a_size)
   return stream_s_write_cnt(this,a_src,a_size,&a_writed);
 }/*}}}*/
 
-static inline int stream_s_fflush(stream_s *this)
+static inline int stream_s_flush(stream_s *this)
 {/*{{{*/
   debug_assert(*this != NULL);
 

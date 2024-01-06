@@ -155,7 +155,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
               case sd_channel_cbreq_SEGMENT_WATCH:
               case sd_channel_cbreq_SEGMENT_IGNORE:
                 {/*{{{*/
-                  unsigned rest_length = a_message->used + (ptr - a_message->data);
+                  unsigned rest_length = a_message->used - (ptr - a_message->data);
                   unsigned segment_id_length = strnlen(ptr,rest_length);
                   if (segment_id_length < rest_length)
                   {
@@ -216,7 +216,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
               case sd_channel_cbreq_TRACE_WATCH:
               case sd_channel_cbreq_TRACE_IGNORE:
                 {/*{{{*/
-                  unsigned rest_length = a_message->used + (ptr - a_message->data);
+                  unsigned rest_length = a_message->used - (ptr - a_message->data);
                   unsigned trace_id_length = strnlen(ptr,rest_length);
                   if (trace_id_length < rest_length)
                   {
@@ -498,7 +498,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
               case sd_channel_cbreq_SEGMENT_WATCH:
               case sd_channel_cbreq_SEGMENT_IGNORE:
                 {/*{{{*/
-                  unsigned rest_length = a_message->used + (ptr - a_message->data);
+                  unsigned rest_length = a_message->used - (ptr - a_message->data);
                   unsigned segment_id_length = strnlen(ptr,rest_length);
                   if (segment_id_length < rest_length)
                   {
@@ -576,7 +576,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
               case sd_channel_cbreq_TRACE_WATCH:
               case sd_channel_cbreq_TRACE_IGNORE:
                 {/*{{{*/
-                  unsigned rest_length = a_message->used + (ptr - a_message->data);
+                  unsigned rest_length = a_message->used - (ptr - a_message->data);
                   unsigned trace_id_length = strnlen(ptr,rest_length);
                   if (trace_id_length < rest_length)
                   {
@@ -770,7 +770,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
             {
               case sd_channel_cbreq_SEGMENT_UPDATE:
                 {/*{{{*/
-                  unsigned rest_length = a_message->used + (ptr - a_message->data);
+                  unsigned rest_length = a_message->used - (ptr - a_message->data);
                   unsigned segment_id_length = strnlen(ptr,rest_length);
                   if (segment_id_length < rest_length)
                   {
@@ -798,7 +798,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                 break;
               case sd_channel_cbreq_TRACE_UPDATE:
                 {/*{{{*/
-                  unsigned rest_length = a_message->used + (ptr - a_message->data);
+                  unsigned rest_length = a_message->used - (ptr - a_message->data);
                   unsigned trace_id_length = strnlen(ptr,rest_length);
                   if (trace_id_length < rest_length)
                   {

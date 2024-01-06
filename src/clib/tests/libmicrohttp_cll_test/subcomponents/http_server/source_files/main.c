@@ -33,7 +33,7 @@ int http_connection(http_conn_s *a_conn)
       // - file response -
       if (strcmp(a_conn->url,"/file") == 0)
       {
-        int fd = open("tests/libhttp_cll_test/resources/http_file.xml",O_RDONLY);
+        int fd = open("tests/libmicrohttp_cll_test/resources/http_file.xml",O_RDONLY);
         cassert(fd != -1);
 
         // - retrieve file size -
@@ -120,14 +120,22 @@ int main(int argc,char **argv)
     CONT_INIT_CLEAR(http_server_s,server);
     cassert(http_server_s_create(&server,8888,http_connection,http_completed,NULL) == 0);
 
-    CONT_INIT_CLEAR(pollfd_array_s,pollfd_array);
+    CONT_INIT_CLEAR(pollfd_array_s,pollfds);
 
     while (!g_terminate)
     {
-      cassert(http_server_s_fds(&server,&pollfd_array) == 0);
+      pollfds.used = 0;
+      cassert(http_server_s_fds(&server,&pollfds) == 0);
 
-      int res = poll(pollfd_array.data,pollfd_array.used,100);
-      if (res > 0)
+      int timeout = -1;
+      ulli nano_timeout;
+      if (http_server_s_timeout(&server,&nano_timeout))
+      {
+        timeout = nano_timeout / 1000000ULL;
+      }
+
+      int res = poll(pollfds.data,pollfds.used,timeout);
+      if (res >= 0)
       {
         cassert(http_server_s_process(&server) == 0);
       }

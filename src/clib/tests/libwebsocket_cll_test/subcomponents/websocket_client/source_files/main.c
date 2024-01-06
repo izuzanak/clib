@@ -84,10 +84,6 @@ int ws_prot_conn_cb(ws_conn_s *a_conn)
 
           ++send;
         }
-        else
-        {
-          cassert(ws_conn_s_write(a_conn,"",0,LWS_WRITE_TEXT) == 0);
-        }
       }
       break;
     case LWS_CALLBACK_SERVER_WRITEABLE:
