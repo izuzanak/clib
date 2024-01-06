@@ -380,7 +380,11 @@ int idb_database_s_extract_regexps(idb_database_s *this,
                           const char *ks_ptr = key_str->data;
                           const char *ks_ptr_end = ks_ptr + key_str->size - 1;
                           do {
-                            if (*ks_ptr == '-' || *ks_ptr == '_')
+                            if (
+                                *ks_ptr == '-' ||
+                                *ks_ptr == '_' ||
+                                *ks_ptr == '.' ||
+                                *ks_ptr == ',')
                             {
                               bc_array_s_push(&this->utf8_buffer,' ');
                             }
@@ -438,6 +442,8 @@ int idb_database_s_extract_regexps(idb_database_s *this,
                               if (isspace(*ptr) ||
                                   *ptr == '-' ||
                                   *ptr == '_' ||
+                                  *ptr == '.' ||
+                                  *ptr == ',' ||
                                   *ptr == '\0')
                               {
                                 if (this->buffer.used != 0)
@@ -849,7 +855,11 @@ int idb_database_s_query(idb_database_s *this,const string_s *a_query)
         char *t_ptr = this->utf8_buffer.data;
         do
         {
-          if (*s_ptr == '-' || *s_ptr == '_')
+          if (
+            *s_ptr == '-' ||
+            *s_ptr == '_' ||
+            *s_ptr == '.' ||
+            *s_ptr == ',')
           {
             *t_ptr++ = ' ';
           }
