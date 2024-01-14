@@ -102,7 +102,7 @@ void test_digest()
   crypto_encode_base16(digest_value.data,digest_value.used,&data);
   bc_array_s_push(&data,'\0');
   printf("digest: %.*s\n",data.used,data.data);
-  cassert(strcmp(data.data,"1bd5ec15650c4dc0c3b1cf48c8d32cc05664aa807a8d11651133a9fe3e6076be") == 0);
+  cassert(strcmp(data.data,"05e60383fdbeb9784b9b9f50f8897ef0e10872853db311fa0e0a0c98e07b1d8b") == 0);
 }/*}}}*/
 
 void test_sign()
@@ -135,11 +135,12 @@ void test_sign()
   CONT_INIT_CLEAR(bc_array_s,signature_base16);
   crypto_encode_base16(signature.data,signature.used,&signature_base16);
   bc_array_s_push(&signature_base16,'\0');
-  printf("singature: %.*s\n",signature_base16.used,signature_base16.data);
+  printf("signature: %.*s\n",signature_base16.used,signature_base16.data);
   cassert(strcmp(signature_base16.data,
-"15476b81b7da6fac5a3bd341266c37f4e7f9179efec5a5454d8d5b93fae02194f34b08b94af713b12e09baab4b43b39d14826"
-"0fd348ad983ada3cafec39ad49860a72c69e1947ced821780548b3592a473af2a1142865af6d9400933e93ca564d55e7fff5c"
-"0e27990db365b93e4dcfd98a2375a32656c41ad525394d1e64920a") == 0);
+        "32461f41d2784b3ddae89c34d87a89129481782d16c5d9e57c993b101989cfa83fb7af5735dfd444"
+        "581734a54e2e780f954bb2f937e868e2e139d0740d5ac0e3057b273b2b17812e2a655ef16b021b1f"
+        "74bebc2e2307ca5f55f5ac3197e202bd0242670c7df4ed40fa0775cfd124922da0a6bbe152adb558"
+        "2913c8376b1b8384") == 0);
 
   // - verify signature -
   CONT_INIT_CLEAR(crypto_verify_s,verify);
