@@ -8,13 +8,6 @@ include "cl_struct.h"
 
 #include <zlib.h>
 
-// - replace deprecated function -
-#if OPENSSL_VERSION_MAJOR >= 3
-#define EVP_MD_CTX_MD EVP_MD_CTX_get0_md
-#else
-#define EVP_MD_CTX_MD EVP_MD_CTX_md
-#endif
-
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
 #define libzlib_cll_EXPORT
