@@ -2,6 +2,8 @@
 set(CONF_COMPONENTS
   "src/clib/libs/libcrc_cll"
   "src/clib/libs/libprocess_cll"
+  "src/clib/libs/libzlib_cll"
+  "src/clib/libs/libcrypto_cll"
   "src/watchdogd/libs/libchannel_wdl"
   "src/inverteddb/libs/libconf_idl"
   "src/inverteddb/libs/libchannel_idl"

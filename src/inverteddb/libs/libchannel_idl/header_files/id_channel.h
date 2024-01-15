@@ -64,6 +64,7 @@ enum
   id_channel_REMOVE,
   id_channel_QUERY,
   id_channel_QUERY_RANGES,
+  id_channel_QUERY_RANGES_GZIP,
 
   id_channel_WATCH,
   id_channel_IGNORE,
@@ -84,6 +85,7 @@ enum
   id_channel_cbreq_REMOVE,
   id_channel_cbreq_QUERY,
   id_channel_cbreq_QUERY_RANGES,
+  id_channel_cbreq_QUERY_RANGES_GZIP,
 
   id_channel_cbresp_EXTRACT,
   id_channel_cbresp_INDEX,
@@ -91,6 +93,7 @@ enum
   id_channel_cbresp_REMOVE,
   id_channel_cbresp_QUERY,
   id_channel_cbresp_QUERY_RANGES,
+  id_channel_cbresp_QUERY_RANGES_GZIP,
 
   id_channel_cbevt_UPDATE,
 };/*}}}*/

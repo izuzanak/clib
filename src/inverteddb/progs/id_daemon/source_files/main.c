@@ -197,6 +197,44 @@ int id_daemon_s_run(id_daemon_s *this)
   return 0;
 }/*}}}*/
 
+void id_daemon_query_result_to_ranges(ui_tree_s *a_query_res,ui_array_s *a_ranges)
+{/*{{{*/
+  if (a_query_res->root_idx != c_idx_not_exist)
+  {
+    unsigned stack[RB_TREE_STACK_SIZE(ui_tree_s,a_query_res)];
+    unsigned *stack_ptr = stack;
+
+    unsigned qr_idx = ui_tree_s_get_stack_min_value_idx(a_query_res,a_query_res->root_idx,&stack_ptr);
+    unsigned last_value = *ui_tree_s_at(a_query_res,qr_idx);
+
+    // - first range start -
+    ui_array_s_push(a_ranges,last_value);
+
+    do {
+      qr_idx = ui_tree_s_get_stack_next_idx(a_query_res,qr_idx,&stack_ptr,stack);
+      if (qr_idx == c_idx_not_exist)
+      {
+        // - last range end -
+        ui_array_s_push(a_ranges,last_value);
+        break;
+      }
+
+      unsigned value = *ui_tree_s_at(a_query_res,qr_idx);
+
+      if (value != last_value + 1)
+      {
+        // - range end -
+        ui_array_s_push(a_ranges,last_value);
+
+        // - range start -
+        ui_array_s_push(a_ranges,value);
+      }
+
+      last_value = value;
+    } while(1);
+  }
+}/*}}}*/
+
 int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_type,va_list a_ap)
 {/*{{{*/
   id_daemon_s *this = (id_daemon_s *)a_id_daemon;
@@ -415,48 +453,65 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       }
 
       CONT_INIT_CLEAR(ui_array_s,ranges);
-      ui_tree_s *query_res = &database->query_res;
-
-      if (query_res->root_idx != c_idx_not_exist)
-      {
-        unsigned stack[RB_TREE_STACK_SIZE(ui_tree_s,query_res)];
-        unsigned *stack_ptr = stack;
-
-        unsigned qr_idx = ui_tree_s_get_stack_min_value_idx(query_res,query_res->root_idx,&stack_ptr);
-        unsigned last_value = *ui_tree_s_at(query_res,qr_idx);
-
-        // - first range start -
-        ui_array_s_push(&ranges,last_value);
-
-        do {
-          qr_idx = ui_tree_s_get_stack_next_idx(query_res,qr_idx,&stack_ptr,stack);
-          if (qr_idx == c_idx_not_exist)
-          {
-            // - last range end -
-            ui_array_s_push(&ranges,last_value);
-            break;
-          }
-
-          unsigned value = *ui_tree_s_at(query_res,qr_idx);
-
-          if (value != last_value + 1)
-          {
-            // - range end -
-            ui_array_s_push(&ranges,last_value);
-
-            // - range start -
-            ui_array_s_push(&ranges,value);
-          }
-
-          last_value = value;
-        } while(1);
-      }
+      id_daemon_query_result_to_ranges(&database->query_res,&ranges);
 
       // - send response -
       this->buffer.used = 0;
       bc_array_s_append_format(&this->buffer,"{\"resp\":\"query_ranges\",\"id\":%" HOST_LL_FORMAT "d,\"data\":",id);
       ui_array_s_to_json(&ranges,&this->buffer);
       bc_array_s_push(&this->buffer,'}');
+
+      if (id_channel_s_send_message(&this->channel,a_index,&this->buffer))
+      {
+        throw_error(ID_DAEMON_CHANNEL_SEND_MESSAGE_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case id_channel_cbreq_QUERY_RANGES_GZIP:
+    {/*{{{*/
+      lli id = va_arg(a_ap,lli);
+      const string_s *db_name = va_arg(a_ap,const string_s *);
+      const string_s *query = va_arg(a_ap,const string_s *);
+
+      idb_database_s search_db = {*db_name,};
+      unsigned db_idx = idb_database_tree_s_get_idx(&this->databases,&search_db);
+      if (db_idx == c_idx_not_exist)
+      {
+        throw_error(ID_DAEMON_DATABASE_NOT_EXIST);
+      }
+
+      idb_database_s *database = idb_database_tree_s_at(&this->databases,db_idx);
+
+      // - query database -
+      if (idb_database_s_query(database,query))
+      {
+        throw_error(ID_DAEMON_DATABASE_QUERY_ERROR);
+      }
+
+      CONT_INIT_CLEAR(ui_array_s,ranges);
+      id_daemon_query_result_to_ranges(&database->query_res,&ranges);
+
+      CONT_INIT_CLEAR(file_s,tmp_file);
+      CONT_INIT_CLEAR(gz_file_s,gz_file);
+      this->compressed.used = 0;
+      int tmp_fd;
+
+      // - gzip compression through temporary file -
+      if ((tmp_file = tmpfile()) == NULL ||
+          (tmp_fd = dup(stream_s_fd(&tmp_file))) == -1 ||
+          gz_file_s_fd_open(&gz_file,tmp_fd,"w") ||
+          gz_file_s_write_close(&gz_file,ranges.data,ranges.used*sizeof(unsigned)) ||
+          file_s_seek(&tmp_file,SEEK_SET,0) ||
+          file_s_read_close(&tmp_file,&this->compressed))
+      {
+        throw_error(ID_DAEMON_GZIP_COMPRESSION_ERROR);
+      }
+
+      // - send response -
+      this->buffer.used = 0;
+      bc_array_s_append_format(&this->buffer,"{\"resp\":\"query_ranges_gzip\",\"id\":%" HOST_LL_FORMAT "d,\"data\":\"",id);
+      crypto_encode_base64(this->compressed.data,this->compressed.used,&this->buffer);
+      bc_array_s_append_ptr(&this->buffer,"\"}");
 
       if (id_channel_s_send_message(&this->channel,a_index,&this->buffer))
       {
@@ -604,6 +659,7 @@ int main(int argc,char **argv)
   (void)argv;
 
   memcheck_init();
+  libcrypto_cll_init();
   libchannel_cll_init();
   libchannel_wdl_init();
   libchannel_idl_init();
@@ -675,6 +731,7 @@ int main(int argc,char **argv)
   libchannel_idl_clear();
   libchannel_wdl_clear();
   libchannel_cll_clear();
+  libcrypto_cll_clear();
   memcheck_release_assert();
 
   return 0;

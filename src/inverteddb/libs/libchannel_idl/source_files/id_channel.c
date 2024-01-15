@@ -23,6 +23,7 @@ const char *g_id_channel_strings[] =
   "remove",
   "query",
   "query_ranges",
+  "query_ranges_gzip",
 
   "watch",
   "ignore",
@@ -306,6 +307,25 @@ int id_channel_s_conn_message(void *a_id_channel,unsigned a_index,const bc_array
 
       // - call callback -
       if (id_channel_s_message_call(this,a_index,id_channel_cbreq_QUERY_RANGES,id,
+            loc_s_string_value(database_var),loc_s_string_value(data_var)))
+      {
+        throw_error(ID_CHANNEL_SERVER_CALLBACK_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case id_channel_QUERY_RANGES_GZIP:
+    {/*{{{*/
+      var_s database_var = loc_s_dict_get(msg_var,g_id_channel_vars.data[id_channel_DATABASE].object);
+      var_s data_var = loc_s_dict_get(msg_var,g_id_channel_vars.data[id_channel_DATA].object);
+
+      if (database_var == NULL || database_var->v_type != c_bi_type_string ||
+          data_var == NULL || data_var->v_type != c_bi_type_string)
+      {
+        throw_error(ID_CHANNEL_MESSAGE_ERROR);
+      }
+
+      // - call callback -
+      if (id_channel_s_message_call(this,a_index,id_channel_cbreq_QUERY_RANGES_GZIP,id,
             loc_s_string_value(database_var),loc_s_string_value(data_var)))
       {
         throw_error(ID_CHANNEL_SERVER_CALLBACK_ERROR);
