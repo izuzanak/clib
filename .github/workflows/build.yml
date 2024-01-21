@@ -24,6 +24,10 @@ jobs:
           libsnappy-dev
           libuuid1
           libpam0g-dev
+          zlib1g-dev
+          libssl-dev
+          libcurl4-openssl-dev
+          libutf8proc-dev
 
       - name: Build and install cont_c
         run: |
