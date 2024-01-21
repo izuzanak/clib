@@ -197,41 +197,54 @@ int id_daemon_s_run(id_daemon_s *this)
   return 0;
 }/*}}}*/
 
-void id_daemon_query_result_to_ranges(ui_tree_s *a_query_res,ui_array_s *a_ranges)
+void id_daemon_bits_result_to_ranges(idb_bits_tree_s *a_bits_res,ui_array_s *a_ranges)
 {/*{{{*/
-  if (a_query_res->root_idx != c_idx_not_exist)
+  if (a_bits_res->root_idx != c_idx_not_exist)
   {
-    unsigned stack[RB_TREE_STACK_SIZE(ui_tree_s,a_query_res)];
+    unsigned stack[RB_TREE_STACK_SIZE(idb_bits_tree_s,a_bits_res)];
     unsigned *stack_ptr = stack;
 
-    unsigned qr_idx = ui_tree_s_get_stack_min_value_idx(a_query_res,a_query_res->root_idx,&stack_ptr);
-    unsigned last_value = *ui_tree_s_at(a_query_res,qr_idx);
-
-    // - first range start -
-    ui_array_s_push(a_ranges,last_value);
+    unsigned br_idx = idb_bits_tree_s_get_stack_min_value_idx(a_bits_res,a_bits_res->root_idx,&stack_ptr);
+    unsigned last_value = c_idx_not_exist;
 
     do {
-      qr_idx = ui_tree_s_get_stack_next_idx(a_query_res,qr_idx,&stack_ptr,stack);
-      if (qr_idx == c_idx_not_exist)
-      {
-        // - last range end -
-        ui_array_s_push(a_ranges,last_value);
-        break;
-      }
+      idb_bits_s *idb_bits = idb_bits_tree_s_at(a_bits_res,br_idx);
+      unsigned value = idb_bits->pos;
 
-      unsigned value = *ui_tree_s_at(a_query_res,qr_idx);
+      ulli *bits_ptr = &idb_bits->bits0;
+      ulli *bits_ptr_end = bits_ptr + IDB_BITS_SLOT_COUNT;
+      do {
+        ulli bit_mask = 1;
+        do {
+          if (*bits_ptr & bit_mask)
+          {
+            if (last_value == c_idx_not_exist)
+            {
+              // - range start -
+              ui_array_s_push(a_ranges,value);
+            }
+            else
+            {
+              if (value != last_value + 1)
+              {
+                // - range end -
+                ui_array_s_push(a_ranges,last_value);
 
-      if (value != last_value + 1)
-      {
-        // - range end -
-        ui_array_s_push(a_ranges,last_value);
+                // - range start -
+                ui_array_s_push(a_ranges,value);
+              }
+            }
 
-        // - range start -
-        ui_array_s_push(a_ranges,value);
-      }
+            last_value = value;
+          }
+        } while(++value,bit_mask <<= 1);
+      } while(++bits_ptr < bits_ptr_end);
 
-      last_value = value;
-    } while(1);
+      br_idx = idb_bits_tree_s_get_stack_next_idx(a_bits_res,br_idx,&stack_ptr,stack);
+    } while(br_idx != c_idx_not_exist);
+
+    // - range end -
+    ui_array_s_push(a_ranges,last_value);
   }
 }/*}}}*/
 
@@ -419,10 +432,13 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
         throw_error(ID_DAEMON_DATABASE_QUERY_ERROR);
       }
 
+      CONT_INIT_CLEAR(ui_array_s,query_res);
+      idb_bits_tree_s_to_query_res(&database->bits_res,&query_res);
+
       // - send response -
       this->buffer.used = 0;
       bc_array_s_append_format(&this->buffer,"{\"resp\":\"query\",\"id\":%" HOST_LL_FORMAT "d,\"data\":",id);
-      ui_tree_s_to_json(&database->query_res,&this->buffer);
+      ui_array_s_to_json(&query_res,&this->buffer);
       bc_array_s_push(&this->buffer,'}');
 
       if (id_channel_s_send_message(&this->channel,a_index,&this->buffer))
@@ -453,7 +469,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       }
 
       CONT_INIT_CLEAR(ui_array_s,ranges);
-      id_daemon_query_result_to_ranges(&database->query_res,&ranges);
+      id_daemon_bits_result_to_ranges(&database->bits_res,&ranges);
 
       // - send response -
       this->buffer.used = 0;
@@ -489,7 +505,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       }
 
       CONT_INIT_CLEAR(ui_array_s,ranges);
-      id_daemon_query_result_to_ranges(&database->query_res,&ranges);
+      id_daemon_bits_result_to_ranges(&database->bits_res,&ranges);
 
       CONT_INIT_CLEAR(file_s,tmp_file);
       CONT_INIT_CLEAR(gz_file_s,gz_file);

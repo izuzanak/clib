@@ -63,6 +63,36 @@ enum
 
 // === definition of generated structures ======================================
 
+#define IDB_BITS_TARGET_POS(TARGET) ((TARGET)  & 0xfffffe00)
+#define IDB_BITS_TARGET_IDX(TARGET) (((TARGET) & 0x000001ff) >> 6)
+#define IDB_BITS_TARGET_OFF(TARGET) ((TARGET)  & 0x0000003f)
+#define IDB_BITS_SLOT_COUNT 8
+#define IDB_BITS_BITCOUNT (IDB_BITS_SLOT_COUNT*64)
+
+// -- idb_bits_s --
+@begin
+struct
+<
+ui:pos
+ulli:bits0
+ulli:bits1
+ulli:bits2
+ulli:bits3
+ulli:bits4
+ulli:bits5
+ulli:bits6
+ulli:bits7
+>
+idb_bits_s;
+@end
+
+// -- idb_bits_tree_s --
+@begin
+safe_rb_tree<idb_bits_s> idb_bits_tree_s;
+@end
+
+void idb_bits_tree_s_to_query_res(idb_bits_tree_s *this,ui_array_s *a_trg);
+
 // -- idb_inverted_index_s --
 @begin
 struct
@@ -104,7 +134,7 @@ bc_array_s:new_path
 $// - storage -
 idb_inverted_index_s:extractor_index
 idb_inverted_index_tree_s:inverted_index_tree
-ui_tree_s:query_res
+idb_bits_tree_s:bits_res
 >
 idb_database_s;
 @end
@@ -142,6 +172,23 @@ void libidb_idl_init();
 void libidb_idl_clear();
 
 // === inline methods of generated structures ==================================
+
+// -- idb_bits_s --
+@begin
+inlines idb_bits_s
+@end
+
+// -- idb_bits_tree_s --
+@begin
+inlines idb_bits_tree_s
+@end
+
+static inline int idb_bits_tree_s___compare_value(const idb_bits_tree_s *this,const idb_bits_s *a_first,const idb_bits_s *a_second)
+{/*{{{*/
+  (void)this;
+
+  return a_first->pos < a_second->pos ? -1 : a_first->pos > a_second->pos ? 1 : 0;
+}/*}}}*/
 
 // -- idb_inverted_index_s --
 @begin

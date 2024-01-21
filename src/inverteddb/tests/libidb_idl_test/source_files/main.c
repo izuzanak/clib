@@ -98,9 +98,12 @@ void test_update_index()
     cassert(idb_database_s_query(&idb,&query) == 0);
   } while(++idx < 50);
 
-  CONT_INIT_CLEAR(ui_tree_s,reference);
-  ui_tree_s_insert(&reference,43);
-  cassert(ui_tree_s_compare(&idb.query_res,&reference));
+  CONT_INIT_CLEAR(ui_array_s,query_res)
+  idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+
+  CONT_INIT_CLEAR(ui_array_s,reference);
+  ui_array_s_push(&reference,43);
+  cassert(ui_array_s_compare(&query_res,&reference));
 }/*}}}*/
 
 void test_update_index_text()
@@ -148,72 +151,102 @@ void test_update_index_text()
     string_s query = STRING_S("20231121 122805050");
     cassert(idb_database_s_query(&idb,&query) == 0);
 
-    CONT_INIT_CLEAR(ui_tree_s,reference);
-    ui_tree_s_insert(&reference,50);
-    cassert(ui_tree_s_compare(&idb.query_res,&reference));
+    CONT_INIT_CLEAR(ui_array_s,query_res)
+    idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+
+    CONT_INIT_CLEAR(ui_array_s,reference);
+    ui_array_s_push(&reference,50);
+    cassert(ui_array_s_compare(&query_res,&reference));
   }
 
   {
     string_s query = STRING_S("2023/11/21 12:28:05.050");
     cassert(idb_database_s_query(&idb,&query) == 0);
 
-    CONT_INIT_CLEAR(ui_tree_s,reference);
-    ui_tree_s_insert(&reference,50);
-    cassert(ui_tree_s_compare(&idb.query_res,&reference));
+    CONT_INIT_CLEAR(ui_array_s,query_res)
+    idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+
+    CONT_INIT_CLEAR(ui_array_s,reference);
+    ui_array_s_push(&reference,50);
+    cassert(ui_array_s_compare(&query_res,&reference));
   }
 
   {
     string_s query = STRING_S("20231121");
     cassert(idb_database_s_query(&idb,&query) == 0);
-    cassert(idb.query_res.count == 100);
+
+    CONT_INIT_CLEAR(ui_array_s,query_res)
+    idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+    cassert(query_res.used == 100);
   }
 
   {
     string_s query = STRING_S("2023/11/21");
     cassert(idb_database_s_query(&idb,&query) == 0);
-    cassert(idb.query_res.count == 100);
+
+    CONT_INIT_CLEAR(ui_array_s,query_res)
+    idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+    cassert(query_res.used == 100);
   }
 
   {
     string_s query = STRING_S("2023 11 21");
     cassert(idb_database_s_query(&idb,&query) == 0);
-    cassert(idb.query_res.count == 0);
+
+    CONT_INIT_CLEAR(ui_array_s,query_res)
+    idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+    cassert(query_res.used == 0);
   }
 
   {
     string_s query = STRING_S("CZ CZL 1000000000021");
     cassert(idb_database_s_query(&idb,&query) == 0);
 
-    CONT_INIT_CLEAR(ui_tree_s,reference);
-    ui_tree_s_insert(&reference,21);
-    cassert(ui_tree_s_compare(&idb.query_res,&reference));
+    CONT_INIT_CLEAR(ui_array_s,query_res)
+    idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+
+    CONT_INIT_CLEAR(ui_array_s,reference);
+    ui_array_s_push(&reference,21);
+    cassert(ui_array_s_compare(&query_res,&reference));
   }
 
   {
     string_s query = STRING_S("CZ CZL");
     cassert(idb_database_s_query(&idb,&query) == 0);
-    cassert(idb.query_res.count == 100);
+
+    CONT_INIT_CLEAR(ui_array_s,query_res)
+    idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+    cassert(query_res.used == 100);
   }
 
   {
     string_s query = STRING_S("cz czl");
     cassert(idb_database_s_query(&idb,&query) == 0);
-    cassert(idb.query_res.count == 100);
+
+    CONT_INIT_CLEAR(ui_array_s,query_res)
+    idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+    cassert(query_res.used == 100);
   }
 
   {
     string_s query = STRING_S("ČŽ ČŽL");
     cassert(idb_database_s_query(&idb,&query) == 0);
-    cassert(idb.query_res.count == 100);
+
+    CONT_INIT_CLEAR(ui_array_s,query_res)
+    idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+    cassert(query_res.used == 100);
   }
 
   {
     string_s query = STRING_S("id_1 == 125");
     cassert(idb_database_s_query(&idb,&query) == 0);
 
-    CONT_INIT_CLEAR(ui_tree_s,reference);
-    ui_tree_s_insert(&reference,4);
-    cassert(ui_tree_s_compare(&idb.query_res,&reference));
+    CONT_INIT_CLEAR(ui_array_s,query_res)
+    idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+
+    CONT_INIT_CLEAR(ui_array_s,reference);
+    ui_array_s_push(&reference,4);
+    cassert(ui_array_s_compare(&query_res,&reference));
   }
 }/*}}}*/
 
@@ -259,11 +292,14 @@ void test_remove_docs()
 
   string_s query = STRING_S("document id_0 == doc44");
 
-  CONT_INIT_CLEAR(ui_tree_s,reference);
-  ui_tree_s_insert(&reference,44);
+  CONT_INIT_CLEAR(ui_array_s,reference);
+  ui_array_s_push(&reference,44);
 
   cassert(idb_database_s_query(&idb,&query) == 0);
-  cassert(ui_tree_s_compare(&idb.query_res,&reference));
+
+  CONT_INIT_CLEAR(ui_array_s,query_res)
+  idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+  cassert(ui_array_s_compare(&query_res,&reference));
 
   CONT_INIT_CLEAR(ui_array_s,remove_docs);
   ui_array_s_push(&remove_docs,42);
@@ -272,7 +308,8 @@ void test_remove_docs()
 
   cassert(idb_database_s_remove_docs(&idb,&remove_docs) == 0);
   cassert(idb_database_s_query(&idb,&query) == 0);
-  cassert(!ui_tree_s_compare(&idb.query_res,&reference));
+  idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+  cassert(!ui_array_s_compare(&query_res,&reference));
 }/*}}}*/
 
 void test_reopen_database()
@@ -317,18 +354,22 @@ void test_reopen_database()
 
   string_s query = STRING_S("id_0 == doc45");
 
-  CONT_INIT_CLEAR(ui_tree_s,reference);
-  ui_tree_s_insert(&reference,45);
+  CONT_INIT_CLEAR(ui_array_s,reference);
+  ui_array_s_push(&reference,45);
 
   cassert(idb_database_s_query(&idb,&query) == 0);
-  cassert(ui_tree_s_compare(&idb.query_res,&reference));
+
+  CONT_INIT_CLEAR(ui_array_s,query_res)
+  idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+  cassert(ui_array_s_compare(&query_res,&reference));
 
   // - reopen databas -
   idb_database_s_clear(&idb);
   cassert(idb_database_s_create(&idb,"test",REOPEN_DATABASE_DB_PATH,50,25) == 0);
 
   cassert(idb_database_s_query(&idb,&query) == 0);
-  cassert(ui_tree_s_compare(&idb.query_res,&reference));
+  idb_bits_tree_s_to_query_res(&idb.bits_res,&query_res);
+  cassert(ui_array_s_compare(&query_res,&reference));
 }/*}}}*/
 
 // === program entry function ==================================================

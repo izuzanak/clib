@@ -67,7 +67,7 @@ WUR int id_daemon_s_process_config(id_daemon_s *this);
 WUR int id_daemon_s_update_databases(id_daemon_s *this);
 WUR int id_daemon_s_run(id_daemon_s *this);
 
-void id_daemon_query_result_to_ranges(ui_tree_s *a_query_res,ui_array_s *a_ranges);
+void id_daemon_bits_result_to_ranges(idb_bits_tree_s *a_bits_res,ui_array_s *a_ranges);
 
 WUR int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_type,va_list a_ap);
 WUR int id_daemon_s_watchdog_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_type,va_list a_ap);

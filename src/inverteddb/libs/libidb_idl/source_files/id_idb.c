@@ -15,6 +15,47 @@ var_tree_s g_id_type_vars;
 
 // === methods of generated structures =========================================
 
+// -- idb_bits_s --
+@begin
+methods idb_bits_s
+@end
+
+// -- idb_bits_tree_s --
+@begin
+methods idb_bits_tree_s
+@end
+
+void idb_bits_tree_s_to_query_res(idb_bits_tree_s *this,ui_array_s *a_trg)
+{/*{{{*/
+  a_trg->used = 0;
+
+  if (this->root_idx != c_idx_not_exist)
+  {
+    unsigned stack[RB_TREE_STACK_SIZE(idb_bits_tree_s,this)];
+    unsigned *stack_ptr = stack;
+
+    unsigned br_idx = idb_bits_tree_s_get_stack_min_value_idx(this,this->root_idx,&stack_ptr);
+    do {
+      idb_bits_s *idb_bits = idb_bits_tree_s_at(this,br_idx);
+      unsigned value = idb_bits->pos;
+
+      ulli *bits_ptr = &idb_bits->bits0;
+      ulli *bits_ptr_end = bits_ptr + IDB_BITS_SLOT_COUNT;
+      do {
+        ulli bit_mask = 1;
+        do {
+          if (*bits_ptr & bit_mask)
+          {
+            ui_array_s_push(a_trg,value);
+          }
+        } while(++value,bit_mask <<= 1);
+      } while(++bits_ptr < bits_ptr_end);
+
+      br_idx = idb_bits_tree_s_get_stack_next_idx(this,br_idx,&stack_ptr,stack);
+    } while(br_idx != c_idx_not_exist);
+  }
+}/*}}}*/
+
 // -- idb_inverted_index_s --
 @begin
 methods idb_inverted_index_s
@@ -371,7 +412,7 @@ int idb_database_s_extract_regexps(idb_database_s *this,
                     {
                     case c_idb_extracted_type_ID:
                       {/*{{{*/
-                        
+
                         // - normalize key string -
                         this->utf8_buffer.used = 0;
 
@@ -832,7 +873,7 @@ int idb_database_s_query(idb_database_s *this,const string_s *a_query)
 {/*{{{*/
 
   // - reset query result -
-  ui_tree_s_clear(&this->query_res);
+  idb_bits_tree_s_clear(&this->bits_res);
 
   if (a_query->size > 1)
   {
@@ -886,21 +927,21 @@ int idb_database_s_query(idb_database_s *this,const string_s *a_query)
         {
           idb_inverted_index_s *ii_ptr = &iitn_ptr->object;
 
-          CONT_INIT_CLEAR(ui_tree_s,ip_query_res);
-          int ip_query_res_set = 1;
+          CONT_INIT_CLEAR(idb_bits_tree_s,ip_bits_res);
+          int ip_bits_res_set = 1;
 
           // - traverse query string -
           unsigned input_idx = 0;
-          while (isspace(this->utf8_buffer.data[input_idx])) { ++input_idx; }
-
           do
           {
+            while (isspace(this->utf8_buffer.data[input_idx])) { ++input_idx; }
+
             unsigned target_offset = inverted_index_dump_s_recognize(
                 ii_ptr->mmap.address,this->utf8_buffer.data,&input_idx,this->utf8_buffer.used);
 
             if (target_offset == c_idx_not_exist)
             {
-              ui_tree_s_clear(&ip_query_res);
+              idb_bits_tree_s_clear(&ip_bits_res);
               break;
             }
 
@@ -908,53 +949,111 @@ int idb_database_s_query(idb_database_s *this,const string_s *a_query)
             unsigned target_cnt = *target_ptr++;
             debug_assert(target_cnt > 0);
 
-            if (ip_query_res_set)
+            if (ip_bits_res_set)
             {
               // - set ip query result to target -
               unsigned *target_ptr_end = target_ptr + target_cnt;
               do {
-                ui_tree_s_insert(&ip_query_res,*target_ptr);
-              } while(++target_ptr < target_ptr_end);
+                unsigned target = *target_ptr;
+                unsigned target_pos = IDB_BITS_TARGET_POS(target);
 
-              ip_query_res_set = 0;
+                // - find or create bitset -
+                idb_bits_s search_bits = {target_pos,0,0,0,0,0,0,0,0};
+                unsigned bits_index = idb_bits_tree_s_get_idx(&ip_bits_res,&search_bits);
+                if (bits_index == c_idx_not_exist)
+                {
+                  bits_index = idb_bits_tree_s_insert(&ip_bits_res,&search_bits);
+                }
+
+                ulli *bits_ptr = &idb_bits_tree_s_at(&ip_bits_res,bits_index)->bits0;
+
+                // - process all targets of bitset -
+                unsigned target_end = target_pos + IDB_BITS_BITCOUNT;
+                do {
+                  bits_ptr[IDB_BITS_TARGET_IDX(target)] |= 1ULL << IDB_BITS_TARGET_OFF(target);
+                } while(++target_ptr < target_ptr_end && (target = *target_ptr) < target_end);
+
+              } while(target_ptr < target_ptr_end);
+
+              ip_bits_res_set = 0;
             }
             else
             {
-              // - intersection of ip query result and target -
-              unsigned ipqrtn_idx = 0;
+              // - intersection of ip bits result and target -
+              unsigned ipbrtn_idx = 0;
               do {
-                ui_tree_s_node *ipqrtn_ptr = ip_query_res.data + ipqrtn_idx;
-
-                if (ipqrtn_ptr->valid)
+                idb_bits_tree_s_node *ipbrtn_ptr = ip_bits_res.data + ipbrtn_idx;
+                if (ipbrtn_ptr->valid)
                 {
-                  if (ui_binary_search(target_ptr,target_cnt,ipqrtn_ptr->object) == c_idx_not_exist)
+                  // - remove bitset flag -
+                  int remove_bits = 1;
+                  unsigned value = ipbrtn_ptr->object.pos;
+
+                  // - check all slots -
+                  ulli *bits_ptr = &ipbrtn_ptr->object.bits0;
+                  ulli *bits_ptr_end = bits_ptr + IDB_BITS_SLOT_COUNT;
+                  do
                   {
-                    ui_tree_s_remove(&ip_query_res,ipqrtn_idx);
+                    // - check all bits of slot -
+                    ulli bit_mask = 1;
+                    do
+                    {
+                      if (*bits_ptr & bit_mask)
+                      {
+                        // - if bit is set check presence of value in target -
+                        if (ui_binary_search(target_ptr,target_cnt,value) == c_idx_not_exist)
+                        {
+                          *bits_ptr &= ~bit_mask;
+                        }
+                        else
+                        {
+                          remove_bits = 0;
+                        }
+                      }
+                    } while(++value,bit_mask <<= 1);
+                  } while(++bits_ptr < bits_ptr_end);
+
+                  // - remove bitset flag is set -
+                  if (remove_bits)
+                  {
+                    idb_bits_tree_s_remove(&ip_bits_res,ipbrtn_idx);
                   }
                 }
-              } while(++ipqrtn_idx < ip_query_res.used);
+              } while(++ipbrtn_idx < ip_bits_res.used);
 
-              if (ip_query_res.root_idx == c_idx_not_exist)
+              if (ip_bits_res.root_idx == c_idx_not_exist)
               {
                 break;
               }
             }
-
-            while (isspace(this->utf8_buffer.data[input_idx])) { ++input_idx; }
           } while(input_idx < this->utf8_buffer.used);
 
-          if (ip_query_res.root_idx != c_idx_not_exist)
+          if (ip_bits_res.root_idx != c_idx_not_exist)
           {
             // - union of ip query result and query result -
-            ui_tree_s_node *ipqrtn_ptr = ip_query_res.data;
-            ui_tree_s_node *ipqrtn_ptr_end = ipqrtn_ptr + ip_query_res.used;
-            do
-            {
-              if (ipqrtn_ptr->valid)
+            unsigned ipbrtn_idx = 0;
+            do {
+              idb_bits_tree_s_node *ipbrtn_ptr = ip_bits_res.data + ipbrtn_idx;
+              if (ipbrtn_ptr->valid)
               {
-                ui_tree_s_unique_insert(&this->query_res,ipqrtn_ptr->object);
+                unsigned bits_index = idb_bits_tree_s_get_idx(&this->bits_res,&ipbrtn_ptr->object);
+                if (bits_index == c_idx_not_exist)
+                {
+                  // - insert new bitset -
+                  idb_bits_tree_s_insert(&this->bits_res,&ipbrtn_ptr->object);
+                }
+                else
+                {
+                  // - update bitset target from source -
+                  ulli *s_bits_ptr = &ipbrtn_ptr->object.bits0;
+                  ulli *s_bits_ptr_end = s_bits_ptr + IDB_BITS_SLOT_COUNT;
+                  ulli *t_bits_ptr = &idb_bits_tree_s_at(&this->bits_res,bits_index)->bits0;
+                  do {
+                    *t_bits_ptr |= *s_bits_ptr;
+                  } while(++t_bits_ptr,++s_bits_ptr < s_bits_ptr_end);
+                }
               }
-            } while(++ipqrtn_ptr < ipqrtn_ptr_end);
+            } while(++ipbrtn_idx < ip_bits_res.used);
           }
         }
       } while(++iitn_ptr < iitn_ptr_end);
