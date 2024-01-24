@@ -24,10 +24,10 @@ typedef struct string_s
 } string_s;
 
 #define STRING_S(CONST) \
-  {sizeof(CONST),CONST}
+  ((string_s){sizeof(CONST),CONST})
 
 #define STRING_S_EMPTY \
-  {1,(char *)&c_string_terminating_char}
+  ((string_s){1,(char *)&c_string_terminating_char})
 
 #define STRING_S_FORMAT(NAME,FORMAT,...) \
   CONT_INIT(string_s,NAME);\

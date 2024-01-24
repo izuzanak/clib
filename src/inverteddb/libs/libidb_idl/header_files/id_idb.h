@@ -28,7 +28,7 @@ include "cl_utf8proc.h"
 #define ERROR_IDB_DATABASE_CREATE_MAP_ERROR 5
 #define ERROR_IDB_DATABASE_CREATE_FILENAME_ERROR 6
 #define ERROR_IDB_DATABASE_UPDATE_EXTRACTOR_INVALID_DATA 7
-#define ERROR_IDB_DATABASE_UPDATE_INDEX_INVALID_DATA 8
+#define ERROR_IDB_DATABASE_UPDATE_INDEXES_INVALID_DATA 8
 #define ERROR_IDB_DATABASE_EXTRACT_REGEXPS_EXTRACTOR_INDEX_MISSING 9
 #define ERROR_IDB_DATABASE_EXTRACT_REGEXPS_UTF8_ERROR 10
 #define ERROR_IDB_DATABASE_EXTRACT_REGEXPS_UNKNOWN_EXTRACTED_TYPE 11
@@ -39,10 +39,10 @@ include "cl_utf8proc.h"
 #define ERROR_IDB_DATABASE_MAP_INDEX_OPEN_ERROR 16
 #define ERROR_IDB_DATABASE_MAP_INDEX_SEEK_ERROR 17
 #define ERROR_IDB_DATABASE_MAP_INDEX_MAP_ERROR 18
-#define ERROR_IDB_DATABASE_UPDATE_INDEX_EXTRACT_REGEXPS_ERROR 19
-#define ERROR_IDB_DATABASE_UPDATE_INDEX_INVALID_REGEXP 20
-#define ERROR_IDB_DATABASE_UPDATE_INDEX_DUMP_ERROR 21
-#define ERROR_IDB_DATABASE_UPDATE_INDEX_RENAME_ERROR 22
+#define ERROR_IDB_DATABASE_UPDATE_INDEXES_EXTRACT_REGEXPS_ERROR 19
+#define ERROR_IDB_DATABASE_UPDATE_INDEXES_INVALID_REGEXP 20
+#define ERROR_IDB_DATABASE_UPDATE_INDEXES_DUMP_ERROR 21
+#define ERROR_IDB_DATABASE_UPDATE_INDEXES_RENAME_ERROR 22
 #define ERROR_IDB_DATABASE_MERGE_INDEX_LOAD_ERROR 23
 #define ERROR_IDB_DATABASE_MERGE_INDEX_DUMP_ERROR 24
 #define ERROR_IDB_DATABASE_MERGE_INDEX_SWAP_ERROR 25
@@ -151,11 +151,13 @@ WUR libidb_idl_EXPORT int idb_database_s_dump_index(idb_database_s *this,
 WUR libidb_idl_EXPORT int idb_database_s_map_index(
     const char *a_path,idb_inverted_index_s *a_inverted_index);
 
-WUR libidb_idl_EXPORT int idb_database_s_update_index(idb_database_s *this,
-    var_s a_doc,unsigned a_doc_index);
-WUR libidb_idl_EXPORT int idb_database_s_merge_index(idb_database_s *this);
+WUR libidb_idl_EXPORT int idb_database_s_update_indexes(idb_database_s *this,
+    var_array_s *a_docs,const ui_array_s *a_doc_ids);
+WUR static inline int idb_database_s_update_index(idb_database_s *this,
+    var_s a_doc,unsigned a_doc_id);
+WUR libidb_idl_EXPORT int idb_database_s_merge_indexes(idb_database_s *this);
 WUR libidb_idl_EXPORT int idb_database_s_remove_docs(idb_database_s *this,
-    ui_array_s *a_doc_indexes);
+    const ui_array_s *a_doc_ids);
 WUR libidb_idl_EXPORT int idb_database_s_query(idb_database_s *this,
     const string_s *a_query);
 
@@ -217,6 +219,14 @@ static inline int idb_inverted_index_tree_s___compare_value(const idb_inverted_i
 @begin
 inlines idb_database_s
 @end
+
+WUR static inline int idb_database_s_update_index(idb_database_s *this,
+    var_s a_doc,unsigned a_doc_id)
+{/*{{{*/
+  var_array_s docs = {1,1,&a_doc};
+  ui_array_s doc_ids = {1,1,&a_doc_id};
+  return idb_database_s_update_indexes(this,&docs,&doc_ids);
+}/*}}}*/
 
 // -- idb_database_tree_s --
 @begin

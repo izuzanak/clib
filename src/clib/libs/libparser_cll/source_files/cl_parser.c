@@ -370,7 +370,7 @@ void inverted_index_s_update(inverted_index_s *this,fa_states_array_s *states_ar
 }/*}}}*/
 
 void inverted_index_s_remove_targets(inverted_index_s *this,
-    ui_array_s *a_targets)
+    const ui_array_s *a_targets)
 {/*{{{*/
   debug_assert(this->states.used != 0 && this->targets.used != 0 && a_targets->used != 0);
 

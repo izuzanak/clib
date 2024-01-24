@@ -190,26 +190,6 @@ int id_channel_s_conn_message(void *a_id_channel,unsigned a_index,const bc_array
     }/*}}}*/
     break;
   case id_channel_INDEX:
-    {/*{{{*/
-      var_s database_var = loc_s_dict_get(msg_var,g_id_channel_vars.data[id_channel_DATABASE].object);
-      var_s document_var = loc_s_dict_get(msg_var,g_id_channel_vars.data[id_channel_DOCUMENT].object);
-      var_s data_var = loc_s_dict_get(msg_var,g_id_channel_vars.data[id_channel_DATA].object);
-
-      if (database_var == NULL || database_var->v_type != c_bi_type_string ||
-          document_var == NULL || document_var->v_type != c_bi_type_integer ||
-          data_var == NULL || data_var->v_type != c_bi_type_dict)
-      {
-        throw_error(ID_CHANNEL_MESSAGE_ERROR);
-      }
-
-      // - call callback -
-      if (id_channel_s_message_call(this,a_index,id_channel_cbreq_INDEX,id,
-            loc_s_string_value(database_var),loc_s_int_value(document_var),data_var))
-      {
-        throw_error(ID_CHANNEL_SERVER_CALLBACK_ERROR);
-      }
-    }/*}}}*/
-    break;
   case id_channel_REINDEX:
     {/*{{{*/
       var_s database_var = loc_s_dict_get(msg_var,g_id_channel_vars.data[id_channel_DATABASE].object);
@@ -217,17 +197,113 @@ int id_channel_s_conn_message(void *a_id_channel,unsigned a_index,const bc_array
       var_s data_var = loc_s_dict_get(msg_var,g_id_channel_vars.data[id_channel_DATA].object);
 
       if (database_var == NULL || database_var->v_type != c_bi_type_string ||
-          document_var == NULL || document_var->v_type != c_bi_type_integer ||
-          data_var == NULL || data_var->v_type != c_bi_type_dict)
+          document_var == NULL || data_var == NULL)
       {
         throw_error(ID_CHANNEL_MESSAGE_ERROR);
       }
 
-      // - call callback -
-      if (id_channel_s_message_call(this,a_index,id_channel_cbreq_REINDEX,id,
-            loc_s_string_value(database_var),loc_s_int_value(document_var),data_var))
+      unsigned cbreq_type;
+      switch (type_idx)
       {
-        throw_error(ID_CHANNEL_SERVER_CALLBACK_ERROR);
+      case id_channel_INDEX:
+        cbreq_type = id_channel_cbreq_INDEX;
+        break;
+      case id_channel_REINDEX:
+        cbreq_type = id_channel_cbreq_REINDEX;
+        break;
+      default:
+        cassert(0);
+      }
+
+      switch (document_var->v_type)
+      {
+        // - single document -
+        case c_bi_type_integer:
+        {/*{{{*/
+          lli value;
+          if (data_var->v_type != c_bi_type_dict ||
+              (value = loc_s_int_value(document_var)) < 0 ||
+              value > UINT_MAX)
+          {
+            throw_error(ID_CHANNEL_MESSAGE_ERROR);
+          }
+
+          unsigned doc_id = value;
+          ui_array_s doc_ids = {1,1,&doc_id};
+          var_array_s docs = {1,1,&data_var};
+
+          // - call callback -
+          if (id_channel_s_message_call(this,a_index,cbreq_type,id,
+                loc_s_string_value(database_var),&doc_ids,&docs))
+          {
+            throw_error(ID_CHANNEL_SERVER_CALLBACK_ERROR);
+          }
+        }/*}}}*/
+        break;
+
+        // - multiple documents -
+        case c_bi_type_array:
+        {/*{{{*/
+          if (data_var->v_type != c_bi_type_array)
+          {
+            throw_error(ID_CHANNEL_MESSAGE_ERROR);
+          }
+
+          var_array_s *idx_vars = loc_s_array_value(document_var);
+          var_array_s *docs = loc_s_array_value(data_var);
+
+          if (idx_vars->used != docs->used)
+          {
+            throw_error(ID_CHANNEL_MESSAGE_ERROR);
+          }
+
+          CONT_INIT_CLEAR(ui_array_s,doc_ids);
+
+          // - retrieve document indexes -
+          if (idx_vars->used != 0)
+          {
+            ui_array_s_reserve(&doc_ids,idx_vars->used);
+
+            var_s *idx_ptr = idx_vars->data;
+            var_s *idx_ptr_end = idx_ptr + idx_vars->used;
+            do
+            {
+              lli value;
+              if (*idx_ptr == NULL || (*idx_ptr)->v_type != c_bi_type_integer ||
+                  (value = loc_s_int_value(*idx_ptr)) < 0 ||
+                  value > UINT_MAX)
+              {
+                throw_error(ID_CHANNEL_MESSAGE_ERROR);
+              }
+
+              ui_array_s_push(&doc_ids,value);
+            } while(++idx_ptr < idx_ptr_end);
+          }
+
+          // - check documents -
+          if (docs->used != 0)
+          {
+            var_s *doc_ptr = docs->data;
+            var_s *doc_ptr_end = doc_ptr + docs->used;
+            do {
+              if (*doc_ptr == NULL || (*doc_ptr)->v_type != c_bi_type_dict)
+              {
+                throw_error(ID_CHANNEL_MESSAGE_ERROR);
+              }
+            } while(++doc_ptr < doc_ptr_end);
+          }
+
+          // - call callback -
+          if (id_channel_s_message_call(this,a_index,cbreq_type,id,
+                loc_s_string_value(database_var),&doc_ids,docs))
+          {
+            throw_error(ID_CHANNEL_SERVER_CALLBACK_ERROR);
+          }
+        }/*}}}*/
+        break;
+
+        default:
+          throw_error(ID_CHANNEL_MESSAGE_ERROR);
       }
     }/*}}}*/
     break;
@@ -250,7 +326,7 @@ int id_channel_s_conn_message(void *a_id_channel,unsigned a_index,const bc_array
         throw_error(ID_CHANNEL_MESSAGE_ERROR);
       }
 
-      CONT_INIT_CLEAR(ui_array_s,doc_indexes);
+      CONT_INIT_CLEAR(ui_array_s,doc_ids);
 
       // - check and convert document indexes -
       var_s *di_ptr = array_ptr->data;
@@ -264,12 +340,12 @@ int id_channel_s_conn_message(void *a_id_channel,unsigned a_index,const bc_array
           throw_error(ID_CHANNEL_MESSAGE_ERROR);
         }
 
-        ui_array_s_push(&doc_indexes,value);
+        ui_array_s_push(&doc_ids,value);
       } while(++di_ptr < di_ptr_end);
 
       // - call callback -
       if (id_channel_s_message_call(this,a_index,id_channel_cbreq_REMOVE,id,
-            loc_s_string_value(database_var),&doc_indexes))
+            loc_s_string_value(database_var),&doc_ids))
       {
         throw_error(ID_CHANNEL_SERVER_CALLBACK_ERROR);
       }

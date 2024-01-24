@@ -74,7 +74,7 @@ inverted_index_s;
 @end
 
 libparser_cll_EXPORT void inverted_index_s_update(inverted_index_s *this,fa_states_array_s *states_array);
-libparser_cll_EXPORT void inverted_index_s_remove_targets(inverted_index_s *this,ui_array_s *a_targets);
+libparser_cll_EXPORT void inverted_index_s_remove_targets(inverted_index_s *this,const ui_array_s *a_targets);
 libparser_cll_EXPORT void inverted_index_s_dump(inverted_index_s *this,ui_array_s *a_trg);
 WUR libparser_cll_EXPORT int inverted_index_s_load(inverted_index_s *this,const unsigned *a_data);
 

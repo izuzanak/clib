@@ -594,47 +594,67 @@ int idb_database_s_map_index(const char *a_path,idb_inverted_index_s *a_inverted
   return 0;
 }/*}}}*/
 
-int idb_database_s_update_index(idb_database_s *this,var_s a_doc,unsigned a_doc_index)
+int idb_database_s_update_indexes(idb_database_s *this,
+    var_array_s *a_docs,const ui_array_s *a_doc_ids)
 {/*{{{*/
-  if (a_doc->v_type != c_bi_type_dict)
+  if (a_docs->used != a_doc_ids->used)
   {
-    throw_error(IDB_DATABASE_UPDATE_INDEX_INVALID_DATA);
+    throw_error(IDB_DATABASE_UPDATE_INDEXES_INVALID_DATA);
   }
 
-  // - extract regular expressions -
-  this->reg_exps.used = 0;
-  if (idb_database_s_extract_regexps(this,a_doc,&this->reg_exps))
+  if (a_docs->used == 0)
   {
-    throw_error(IDB_DATABASE_UPDATE_INDEX_EXTRACT_REGEXPS_ERROR);
+    return 0;
   }
+
+  CONT_INIT_CLEAR(reg_parser_s,reg_parser);
+  this->states_array.used = 0;
+
+  unsigned idx = 0;
+  do {
+    var_s doc = *var_array_s_at(a_docs,idx);
+    unsigned doc_id = *ui_array_s_at(a_doc_ids,idx);
+
+    if (doc == NULL || doc->v_type != c_bi_type_dict)
+    {
+      throw_error(IDB_DATABASE_UPDATE_INDEXES_INVALID_DATA);
+    }
+
+    // - extract regular expressions -
+    this->reg_exps.used = 0;
+    if (idb_database_s_extract_regexps(this,doc,&this->reg_exps))
+    {
+      throw_error(IDB_DATABASE_UPDATE_INDEXES_EXTRACT_REGEXPS_ERROR);
+    }
+
+    // - update inverted index -
+    if (this->reg_exps.used != 0)
+    {
+      string_s *re_ptr = this->reg_exps.data;
+      string_s *re_ptr_end = re_ptr + this->reg_exps.used;
+      do
+      {
+        if (!reg_parser_s_process_reg_exp(&reg_parser,re_ptr,doc_id))
+        {
+          throw_error(IDB_DATABASE_UPDATE_INDEXES_INVALID_REGEXP);
+        }
+
+        fa_states_array_s_push_blank(&this->states_array);
+        fa_states_s_swap(fa_states_array_s_last(&this->states_array),&reg_parser.states);
+      } while(++re_ptr < re_ptr_end);
+    }
+  } while(++idx < a_docs->used);
 
   // - update inverted index -
-  if (this->reg_exps.used != 0)
+  if (this->states_array.used != 0)
   {
-    CONT_INIT_CLEAR(reg_parser_s,reg_parser);
-    this->states_array.used = 0;
-
-    string_s *re_ptr = this->reg_exps.data;
-    string_s *re_ptr_end = re_ptr + this->reg_exps.used;
-    do
-    {
-      if (!reg_parser_s_process_reg_exp(&reg_parser,re_ptr,a_doc_index))
-      {
-        throw_error(IDB_DATABASE_UPDATE_INDEX_INVALID_REGEXP);
-      }
-
-      fa_states_array_s_push_blank(&this->states_array);
-      fa_states_s_swap(fa_states_array_s_last(&this->states_array),&reg_parser.states);
-    } while(++re_ptr < re_ptr_end);
-
-
     CONT_INIT_CLEAR(inverted_index_s,inverted_index);
     inverted_index_s_update(&inverted_index,&this->states_array);
 
     unsigned ii_index;
     if (idb_database_s_dump_index(this,&inverted_index,&ii_index))
     {
-      throw_error(IDB_DATABASE_UPDATE_INDEX_DUMP_ERROR);
+      throw_error(IDB_DATABASE_UPDATE_INDEXES_DUMP_ERROR);
     }
 
     // - move index from remove to data -
@@ -646,14 +666,14 @@ int idb_database_s_update_index(idb_database_s *this,var_s a_doc,unsigned a_doc_
 
     if (rename(this->old_path.data,this->new_path.data) != 0)
     {
-      throw_error(IDB_DATABASE_UPDATE_INDEX_RENAME_ERROR);
+      throw_error(IDB_DATABASE_UPDATE_INDEXES_RENAME_ERROR);
     }
   }
 
   return 0;
 }/*}}}*/
 
-int idb_database_s_merge_index(idb_database_s *this)
+int idb_database_s_merge_indexes(idb_database_s *this)
 {/*{{{*/
   if (this->inverted_index_tree.count > this->indexes_max)
   {
@@ -745,9 +765,9 @@ int idb_database_s_merge_index(idb_database_s *this)
   return 0;
 }/*}}}*/
 
-int idb_database_s_remove_docs(idb_database_s *this,ui_array_s *a_doc_indexes)
+int idb_database_s_remove_docs(idb_database_s *this,const ui_array_s *a_doc_ids)
 {/*{{{*/
-  if (a_doc_indexes->used == 0)
+  if (a_doc_ids->used == 0)
   {
     return 0;
   }
@@ -767,8 +787,8 @@ int idb_database_s_remove_docs(idb_database_s *this,ui_array_s *a_doc_indexes)
         unsigned *targets_ptr = ((unsigned *)iitn_ptr->object.mmap.address) + targets_offset;
         unsigned targets_cnt = *targets_ptr++;
 
-        unsigned *di_ptr = a_doc_indexes->data;
-        unsigned *di_ptr_end = di_ptr + a_doc_indexes->used;
+        unsigned *di_ptr = a_doc_ids->data;
+        unsigned *di_ptr_end = di_ptr + a_doc_ids->used;
         do
         {
           if (ui_binary_search(targets_ptr,targets_cnt,*di_ptr) != c_idx_not_exist)
@@ -803,7 +823,7 @@ int idb_database_s_remove_docs(idb_database_s *this,ui_array_s *a_doc_indexes)
             throw_error(IDB_DATABASE_REMOVE_DOCS_RENAME_ERROR);
           }
 
-          inverted_index_s_remove_targets(&inverted_index,a_doc_indexes);
+          inverted_index_s_remove_targets(&inverted_index,a_doc_ids);
 
           // - some states of inverted index remained -
           if (inverted_index.states.used != 0)

@@ -709,7 +709,7 @@ static inline int mmap_s_create(mmap_s *this,
   void *address = mmap(a_addr,a_length,a_prot,a_flags,a_fd,a_offset);
 
   // - ERROR -
-  if (address == MAP_FAILED)
+  if (address == MAP_FAILED) // NOLINT(performance-no-int-to-ptr)
   {
     throw_error(MMAP_CREATE_ERROR);
   }

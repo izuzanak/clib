@@ -12,6 +12,7 @@ include "id_idb.h"
 void test_update_extractor();
 void test_update_index();
 void test_update_index_text();
+void test_update_indexes_text();
 void test_remove_docs();
 void test_reopen_database();
 
