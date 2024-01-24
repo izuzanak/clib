@@ -197,7 +197,7 @@ int id_daemon_s_run(id_daemon_s *this)
   return 0;
 }/*}}}*/
 
-void id_daemon_bits_result_to_ranges(idb_bits_tree_s *a_bits_res,ui_array_s *a_ranges)
+void id_daemon_bits_result_to_range_offsets(idb_bits_tree_s *a_bits_res,ui_array_s *a_ranges)
 {/*{{{*/
   if (a_bits_res->root_idx != c_idx_not_exist)
   {
@@ -206,6 +206,7 @@ void id_daemon_bits_result_to_ranges(idb_bits_tree_s *a_bits_res,ui_array_s *a_r
 
     unsigned br_idx = idb_bits_tree_s_get_stack_min_value_idx(a_bits_res,a_bits_res->root_idx,&stack_ptr);
     unsigned last_value = c_idx_not_exist;
+    unsigned start_value = 0;
 
     do {
       idb_bits_s *idb_bits = idb_bits_tree_s_at(a_bits_res,br_idx);
@@ -222,16 +223,18 @@ void id_daemon_bits_result_to_ranges(idb_bits_tree_s *a_bits_res,ui_array_s *a_r
             {
               // - range start -
               ui_array_s_push(a_ranges,value);
+              start_value = value;
             }
             else
             {
               if (value != last_value + 1)
               {
                 // - range end -
-                ui_array_s_push(a_ranges,last_value);
+                ui_array_s_push(a_ranges,last_value - start_value);
 
                 // - range start -
-                ui_array_s_push(a_ranges,value);
+                ui_array_s_push(a_ranges,value - last_value);
+                start_value = value;
               }
             }
 
@@ -244,7 +247,7 @@ void id_daemon_bits_result_to_ranges(idb_bits_tree_s *a_bits_res,ui_array_s *a_r
     } while(br_idx != c_idx_not_exist);
 
     // - range end -
-    ui_array_s_push(a_ranges,last_value);
+    ui_array_s_push(a_ranges,last_value - start_value);
   }
 }/*}}}*/
 
@@ -468,7 +471,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       }
 
       CONT_INIT_CLEAR(ui_array_s,ranges);
-      id_daemon_bits_result_to_ranges(&database->bits_res,&ranges);
+      id_daemon_bits_result_to_range_offsets(&database->bits_res,&ranges);
 
       // - send response -
       this->buffer.used = 0;
@@ -504,7 +507,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       }
 
       CONT_INIT_CLEAR(ui_array_s,ranges);
-      id_daemon_bits_result_to_ranges(&database->bits_res,&ranges);
+      id_daemon_bits_result_to_range_offsets(&database->bits_res,&ranges);
 
       CONT_INIT_CLEAR(file_s,tmp_file);
       CONT_INIT_CLEAR(gz_file_s,gz_file);
