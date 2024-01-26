@@ -185,7 +185,7 @@ int sd_daemon_s_update_segments(sd_daemon_s *this,ui_array_s *a_updated)
         if (segment_conf_idx == c_idx_not_exist)
         {
           // - log message -
-          log_info_2("remove segment %s",segment->config.segment_id.data);
+          log_info_2("remove segment, id: %s",segment->config.segment_id.data);
 
           sd_segment_descr_s_clear(segment);
           sd_segment_tree_s_remove(&this->segments,sstn_ptr - this->segments.data);
@@ -228,6 +228,9 @@ int sd_daemon_s_update_segments(sd_daemon_s *this,ui_array_s *a_updated)
           // - segment configuration changed -
           if (!sd_conf_segment_s_compare(&segment->config,segment_config))
           {
+            // - log message -
+            log_info_2("update segment, id: %s",segment->config.segment_id.data);
+
             // - update old segment -
             if (sd_segment_descr_s_create(segment,segment_config))
             {
@@ -268,7 +271,7 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
         if (trace_conf_idx == c_idx_not_exist)
         {
           // - log message -
-          log_info_2("remove trace %s",trace_descr->config.trace_id.data);
+          log_info_2("remove trace, id: %s",trace_descr->config.trace_id.data);
 
           sd_trace_descr_s_clear(trace_descr);
           sd_trace_tree_s_remove(&this->traces,sttn_ptr - this->traces.data);
@@ -311,6 +314,9 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
           // - trace configuration changed -
           if (!sd_conf_trace_s_compare(&trace->config,trace_config))
           {
+            // - log message -
+            log_info_2("update trace, id: %s",trace->config.trace_id.data);
+
             // - update old trace -
             if (sd_trace_descr_s_create(trace,trace_config))
             {

@@ -31,6 +31,24 @@ include "cl_struct.h"
 #define ERROR_ZLIB_NOT_ENOUGHT_SPACE_IN_BUFFER 3
 #define ERROR_ZLIB_UNCOMPRESS_ERROR 4
 
+// === definition of structure zlib_crc32_s ====================================
+
+typedef ui zlib_crc32_s;
+@begin
+define zlib_crc32_s basic
+@end
+
+#if OPTION_TO_STRING == ENABLED
+static inline void zlib_crc32_s_to_string(const zlib_crc32_s *this,bc_array_s *a_trg);
+#endif
+#if OPTION_TO_JSON == ENABLED
+static inline void zlib_crc32_s_to_json(const zlib_crc32_s *this,bc_array_s *a_trg);
+#endif
+static inline void zlib_crc32_s_update(zlib_crc32_s *this,
+    unsigned a_size,const void *a_data);
+static inline int zlib_crc32_s_valid(const zlib_crc32_s *this,
+    zlib_crc32_s a_init,unsigned a_size,const void *a_data);
+
 // === definition of structure gz_file_s =======================================
 
 typedef gzFile gz_file_s;
@@ -63,6 +81,37 @@ WUR libzlib_cll_EXPORT int zlib_compress(
     const void *a_src,uLong a_size,int a_level,bc_array_s *a_trg);
 WUR libzlib_cll_EXPORT int zlib_uncompress(
     const void *a_src,uLong a_size,uLongf a_target_size,bc_array_s *a_trg);
+
+// === inline methods of structure zlib_crc32_s ================================
+
+#if OPTION_TO_STRING == ENABLED
+static inline void zlib_crc32_s_to_string(const zlib_crc32_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  bc_array_s_append_format(a_trg,"zlib_crc32_s{0x%8.8x}",*this);
+}/*}}}*/
+#endif
+
+#if OPTION_TO_JSON == ENABLED
+static inline void zlib_crc32_s_to_json(const zlib_crc32_s *this,bc_array_s *a_trg)
+{/*{{{*/
+  ui_to_json(this,a_trg);
+}/*}}}*/
+#endif
+
+static inline void zlib_crc32_s_update(zlib_crc32_s *this,
+    unsigned a_size,const void *a_data)
+{//{{{
+  *this = crc32_z(*this,a_data,a_size);
+}//}}}
+
+static inline int zlib_crc32_s_valid(const zlib_crc32_s *this,
+    zlib_crc32_s a_init,unsigned a_size,const void *a_data)
+{/*{{{*/
+  zlib_crc32_s crc = a_init;
+  zlib_crc32_s_update(&crc,a_size,a_data);
+
+  return *this == crc;
+}/*}}}*/
 
 // === inline methods of structure gz_file_s ===================================
 

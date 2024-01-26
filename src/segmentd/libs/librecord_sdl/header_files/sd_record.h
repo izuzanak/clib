@@ -5,6 +5,13 @@
 @begin
 include "cl_time.h"
 include "cl_crc.h"
+@end
+#ifdef CLIB_SEGMENTD_ISAL_CRC16
+@begin
+include "cl_isal.h"
+@end
+#endif
+@begin
 include "cl_linux.h"
 include "cl_logger.h"
 include "sd_conf.h"
@@ -162,8 +169,13 @@ static inline crc16_s sd_record_s_compute_crc(const sd_record_s *this,unsigned a
   const char *crc_begin = (const char *)&this->header.id;
   const char *crc_end = (const char *)this + a_rec_size;
 
+#ifdef CLIB_SEGMENTD_ISAL_CRC16
+  isal_crc16_s crc = RECORD_CRC_INIT_VALUE;
+  isal_crc16_s_update(&crc,crc_end - crc_begin,crc_begin);
+#else
   crc16_s crc = RECORD_CRC_INIT_VALUE;
   crc16_s_update(&crc,crc_end - crc_begin,crc_begin);
+#endif
 
   return crc;
 }/*}}}*/

@@ -9,6 +9,7 @@ const char *test_name = "libzlib_cll_test";
 
 const char *test_names[] =
 {/*{{{*/
+  "crc32",
   "compress",
   "gz_file",
   "gz_temp",
@@ -16,12 +17,33 @@ const char *test_names[] =
 
 test_function_t test_functions[] =
 {/*{{{*/
+  test_crc32,
   test_compress,
   test_gz_file,
   test_gz_temp,
 };/*}}}*/
 
 // === test execution functions ================================================
+
+void test_crc32()
+{/*{{{*/
+  zlib_crc32_s crc;
+
+  crc = ~0x55555555;
+  zlib_crc32_s_update(&crc,0,"");
+  cassert(~crc == 1431655765);
+
+  crc = ~0x55555555;
+  char data_0[] = "Hello world!!!";
+  zlib_crc32_s_update(&crc,sizeof(data_0) - 1,data_0);
+  cassert(~crc == 586538615);
+
+  crc = ~0x55555555;
+  char data_1[256];
+  memset(data_1,0,sizeof(data_1));
+  zlib_crc32_s_update(&crc,sizeof(data_1),data_1);
+  cassert(~crc == 3876072354);
+}/*}}}*/
 
 void test_compress()
 {/*{{{*/

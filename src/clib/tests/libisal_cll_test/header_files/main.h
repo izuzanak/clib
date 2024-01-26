@@ -4,16 +4,12 @@
 
 @begin
 include "cl_test.h"
-include "cl_sys.h"
-include "cl_zlib.h"
+include "cl_isal.h"
 @end
 
 // === test execution functions ================================================
 
-void test_crc32();
-void test_compress();
-void test_gz_file();
-void test_gz_temp();
+void test_crc16();
 
 // === program entry function ==================================================
 
