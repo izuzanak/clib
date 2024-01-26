@@ -204,9 +204,6 @@ int sd_daemon_s_update_segments(sd_daemon_s *this,ui_array_s *a_updated)
       {
         sd_conf_segment_s *segment_config = &scstn_ptr->object;
 
-        // - segment to create or update -
-        sd_segment_descr_s *segment = NULL;
-
         sd_segment_descr_s search_segment = {*segment_config,};
         unsigned segment_idx = sd_segment_tree_s_get_idx(&this->segments,&search_segment);
 
@@ -220,14 +217,13 @@ int sd_daemon_s_update_segments(sd_daemon_s *this,ui_array_s *a_updated)
           }
 
           segment_idx = sd_segment_tree_s_swap_insert(&this->segments,&insert_segment);
-          sd_segment_tree_s_at(&this->segments,segment_idx);
 
           // - store updated segment -
           ui_array_s_push(a_updated,segment_idx);
         }
         else
         {
-          segment = sd_segment_tree_s_at(&this->segments,segment_idx);
+          sd_segment_descr_s *segment = sd_segment_tree_s_at(&this->segments,segment_idx);
 
           // - segment configuration changed -
           if (!sd_conf_segment_s_compare(&segment->config,segment_config))
@@ -291,33 +287,26 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
       {
         sd_conf_trace_s *trace_config = &scttn_ptr->object;
 
-        // - trace to create or update -
-        sd_trace_descr_s *trace = NULL;
-
         sd_trace_descr_s search_trace = {*trace_config,};
         unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
         if (trace_idx == c_idx_not_exist)
         {
-          CONT_INIT_CLEAR(sd_trace_descr_s,insert_trace);
-
           // - create new trace -
+          CONT_INIT_CLEAR(sd_trace_descr_s,insert_trace);
           if (sd_trace_descr_s_create(&insert_trace,trace_config))
           {
             throw_error(SD_DAEMON_TRACE_CREATE_ERROR);
           }
 
-          sd_conf_trace_s_copy(&insert_trace.config,trace_config);
-
-          trace_idx = sd_trace_tree_s_swap_insert(&this->traces,&insert_trace);
-          sd_trace_tree_s_at(&this->traces,trace_idx);
+          sd_trace_tree_s_swap_insert(&this->traces,&insert_trace);
 
           // - set update watches -
           this->update_watches = 1;
         }
         else
         {
-          trace = sd_trace_tree_s_at(&this->traces,trace_idx);
+          sd_trace_descr_s *trace = sd_trace_tree_s_at(&this->traces,trace_idx);
 
           // - trace configuration changed -
           if (!sd_conf_trace_s_compare(&trace->config,trace_config))
