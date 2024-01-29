@@ -393,6 +393,21 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                   }
                 }/*}}}*/
                 break;
+              case sd_channel_cbreq_PING:
+                {/*{{{*/
+
+                  // - send response -
+                  this->buffer.used = 0;
+                  bc_array_s_append_be_ulli(&this->buffer,id);
+                  bc_array_s_append_be_usi(&this->buffer,sd_channel_msg_type_RESPONSE);
+                  bc_array_s_append_be_usi(&this->buffer,request);
+
+                  if (sd_channel_s_send_message(this,a_index,&this->buffer))
+                  {
+                    throw_error(SD_CHANNEL_SERVER_SEND_MESSAGE_ERROR);
+                  }
+                }/*}}}*/
+                break;
             }
           }
         }/*}}}*/

@@ -613,6 +613,16 @@ int od_channel_client_s_connect_time_event(void *a_od_channel_client,unsigned a_
 
   od_channel_client_s *this = (od_channel_client_s *)a_od_channel_client;
 
+  // - ping timeout elapsed -
+  if (this->connected)
+  {
+    // - call callback -
+    if (od_channel_client_s_message_call(this,od_channel_cbreq_DROP))
+    {
+      throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+    }
+  }
+
   if (channel_conn_s_create_client(&this->connection,
         this->server_ip.data,this->server_port,od_channel_client_s_conn_message,this,0) ||
       epoll_s_fd_callback(&this->connection.epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,od_channel_client_s_fd_event,this,0))

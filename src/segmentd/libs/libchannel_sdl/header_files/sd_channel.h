@@ -25,8 +25,9 @@ include "cl_channel.h"
 #define ERROR_SD_CHANNEL_SERVER_EPOLL_ERROR 2
 #define ERROR_SD_CHANNEL_SERVER_FD_EVENT_ERROR 3
 #define ERROR_SD_CHANNEL_SERVER_SCHEDULE_MESSAGE_ERROR 4
-#define ERROR_SD_CHANNEL_SERVER_CALLBACK_ERROR 5
-#define ERROR_SD_CHANNEL_SERVER_SEND_MULTI_MESSAGE_VAR_ERROR 6
+#define ERROR_SD_CHANNEL_SERVER_SEND_MESSAGE_ERROR 5
+#define ERROR_SD_CHANNEL_SERVER_CALLBACK_ERROR 6
+#define ERROR_SD_CHANNEL_SERVER_SEND_MULTI_MESSAGE_VAR_ERROR 7
 
 #define ERROR_SD_CHANNEL_CLIENT_EPOLL_ERROR 1
 #define ERROR_SD_CHANNEL_CLIENT_TIMER_READ_ERROR 2
@@ -72,6 +73,7 @@ enum
   sd_channel_cbreq_TRACE_UPDATE,
 
   sd_channel_cbreq_CONFIG = 30,
+  sd_channel_cbreq_PING = 40,
 };/*}}}*/
 
 // === definition of generated structures ======================================
@@ -105,6 +107,8 @@ channel_server_s:server
 
 pointer:channel_callback
 pointer:cb_object
+
+bc_array_s:buffer
 >
 sd_channel_s;
 @end

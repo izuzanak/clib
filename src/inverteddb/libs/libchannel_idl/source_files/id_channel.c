@@ -717,6 +717,16 @@ int id_channel_client_s_connect_time_event(void *a_id_channel_client,unsigned a_
 
   id_channel_client_s *this = (id_channel_client_s *)a_id_channel_client;
 
+  // - ping timeout elapsed -
+  if (this->connected)
+  {
+    // - call callback -
+    if (id_channel_client_s_message_call(this,id_channel_cbreq_DROP))
+    {
+      throw_error(ID_CHANNEL_CLIENT_CALLBACK_ERROR);
+    }
+  }
+
   if (channel_conn_s_create_client(&this->connection,
         this->server_ip.data,this->server_port,id_channel_client_s_conn_message,this,0) ||
       epoll_s_fd_callback(&this->connection.epoll_fd,EPOLLIN | EPOLLOUT | EPOLLPRI,id_channel_client_s_fd_event,this,0))
