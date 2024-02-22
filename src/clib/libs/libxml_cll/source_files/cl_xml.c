@@ -144,12 +144,12 @@ int xml_node_s___node_dict_to_var(var_s this,var_s *a_trg) // NOLINT(misc-no-rec
       {
         if (ptr->valid)
         {
-          CONT_INIT_CLEAR(var_s,value_var);
+          CONT_INIT_CLEAR(var_s,item_var);
 
           // - process single node -
           if (ptr->object.value->v_type == g_type_xml_node)
           {/*{{{*/
-            if (xml_node_s___node_dict_to_var(ptr->object.value,&value_var))
+            if (xml_node_s___node_dict_to_var(ptr->object.value,&item_var))
             {
               throw_error(XML_NODE_NODE_DICT_TO_VAR_ERROR);
             }
@@ -160,7 +160,7 @@ int xml_node_s___node_dict_to_var(var_s this,var_s *a_trg) // NOLINT(misc-no-rec
           {/*{{{*/
             var_array_s *array = loc_s_array_value(ptr->object.value);
 
-            var_s_copy_loc(&value_var,loc_s_array());
+            var_s_copy_loc(&item_var,loc_s_array());
 
             if (array->used != 0)
             {
@@ -174,7 +174,7 @@ int xml_node_s___node_dict_to_var(var_s this,var_s *a_trg) // NOLINT(misc-no-rec
                   throw_error(XML_NODE_NODE_DICT_TO_VAR_ERROR);
                 }
 
-                loc_s_array_push(value_var,node_var);
+                loc_s_array_push(item_var,node_var);
               } while(++ptr < ptr_end);
             }
           }/*}}}*/
@@ -183,7 +183,7 @@ int xml_node_s___node_dict_to_var(var_s this,var_s *a_trg) // NOLINT(misc-no-rec
             throw_error(XML_NODE_NODE_VALUE_TYPE_ERROR);
           }
 
-          loc_s_dict_set(nodes_var,ptr->object.key,value_var);
+          loc_s_dict_set(nodes_var,ptr->object.key,item_var);
         }
       } while(++ptr < ptr_end);
     }

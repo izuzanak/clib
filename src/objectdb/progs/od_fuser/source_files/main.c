@@ -90,6 +90,7 @@ int od_fuser_s_process_config(od_fuser_s *this)
       .open       = od_fuser_s_open,
       .release    = od_fuser_s_release,
       .read       = od_fuser_s_read,
+      .write      = od_fuser_s_write,
     };/*}}}*/
 
     CONT_INIT_CLEAR(string_array_s,fuse_args);
@@ -156,12 +157,12 @@ int od_fuser_s_run(od_fuser_s *this)
   return 0;
 }/*}}}*/
 
-void od_fuser_s_get_ino_value(od_fuser_s *this,unsigned a_ino,var_s *a_value_var)
+void od_fuser_s_buffer_ino_path(od_fuser_s *this,unsigned a_ino)
 {/*{{{*/
   debug_assert(a_ino != 0);
 
   this->ino_stack.used = 0;
-  this->buffer.used = 0;
+  this->path_buffer.used = 0;
 
   if (a_ino > 1)
   {
@@ -175,19 +176,32 @@ void od_fuser_s_get_ino_value(od_fuser_s *this,unsigned a_ino,var_s *a_value_var
     // - construct database path -
     do {
       string_s *name = &this->ino_name_tree.data[ui_array_s_pop(&this->ino_stack)].object.name;
-      bc_array_s_append(&this->buffer,name->size - 1,name->data);
+      bc_array_s_append(&this->path_buffer,name->size - 1,name->data);
 
       if (this->ino_stack.used == 0)
       {
         break;
       }
 
-      bc_array_s_push(&this->buffer,'/');
+      bc_array_s_push(&this->path_buffer,'/');
     } while(1);
   }
 
-  bc_array_s_push(&this->buffer,'\0');
-  odb_database_s_get_value(&this->database,this->buffer.data,a_value_var);
+  bc_array_s_push(&this->path_buffer,'\0');
+}/*}}}*/
+
+void od_fuser_s_set_ino_value(od_fuser_s *this,unsigned a_ino,var_s a_value_var)
+{/*{{{*/
+  od_fuser_s_buffer_ino_path(this,a_ino);
+
+  int updated;
+  odb_database_s_set_value(&this->database,this->path_buffer.data,a_value_var,&updated);
+}/*}}}*/
+
+void od_fuser_s_get_ino_value(od_fuser_s *this,unsigned a_ino,var_s *a_value_var)
+{/*{{{*/
+  od_fuser_s_buffer_ino_path(this,a_ino);
+  odb_database_s_get_value(&this->database,this->path_buffer.data,a_value_var);
 }/*}}}*/
 
 void od_fuser_s_stat(od_fuser_s *this,unsigned ino,struct stat *stbuf)
@@ -203,7 +217,7 @@ void od_fuser_s_stat(od_fuser_s *this,unsigned ino,struct stat *stbuf)
     stbuf->st_nlink = 2 + loc_s_dict_value(data_var)->count;
     stbuf->st_uid = getuid();
     stbuf->st_gid = getgid();
-    stbuf->st_atime = time(NULL);
+    stbuf->st_atime = 0;
     stbuf->st_mtime = stbuf->st_atime;
     stbuf->st_ctime = stbuf->st_atime;
   }
@@ -215,7 +229,7 @@ void od_fuser_s_stat(od_fuser_s *this,unsigned ino,struct stat *stbuf)
     stbuf->st_nlink = 1;
     stbuf->st_uid = getuid();
     stbuf->st_gid = getgid();
-    stbuf->st_atime = time(NULL);
+    stbuf->st_atime = 0;
     stbuf->st_mtime = stbuf->st_atime;
     stbuf->st_ctime = stbuf->st_atime;
   }
@@ -370,25 +384,57 @@ void od_fuser_s_open(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 
   od_fuser_s *this = (od_fuser_s *)fuse_req_userdata(req);
 
-  if ((fi->flags & O_ACCMODE) != O_RDONLY)
+  // - retrieve open ino name -
+  fuse_ino_t open_ino = ino;
+
+  ino_name_s *ino_name = &this->ino_name_tree.data[ino].object;
+  string_s *name = &ino_name->name;
+
+  // - check for .json extension -
+  if (name->size >= 6 && strcmp(name->data + name->size - 6,".json") == 0)
   {
-    throw_fuse_error(req,EACCES);
+    // - retrieve or create ino -
+    ino_name_s open_ino_name = {ino_name->parent,{name->size - 5,name->data}};
+    open_ino = ino_name_tree_s_unique_insert(&this->ino_name_tree,&open_ino_name);
   }
 
-  CONT_INIT_CLEAR(var_s,data_var);
-  od_fuser_s_get_ino_value(this,ino,&data_var);
+  unsigned file_idx;
 
-  if (data_var != NULL && data_var->v_type == c_bi_type_dict)
+  switch (fi->flags & O_ACCMODE)
   {
-    throw_fuse_error(req,EISDIR);
+    case O_RDONLY:
+      {/*{{{*/
+        CONT_INIT_CLEAR(var_s,data_var);
+        od_fuser_s_get_ino_value(this,open_ino,&data_var);
+
+        file_idx = file_list_s_append_blank(&this->open_files);
+        bc_array_s *file_buffer = file_list_s_at(&this->open_files,file_idx);
+
+        CONT_INIT_CLEAR(json_nice_s,json_nice);
+        json_nice_s_create(&json_nice,"  ","",NULL);
+
+        file_buffer->used = 0;
+        var_s_to_json_nice(&data_var,&json_nice,file_buffer);
+        bc_array_s_push(file_buffer,'\n');
+      }/*}}}*/
+      break;
+    case O_WRONLY:
+      {/*{{{*/
+        
+        // - write only .json files -
+        if (open_ino == ino)
+        {
+          throw_fuse_error(req,EACCES);
+        }
+
+        file_idx = file_list_s_append_blank(&this->open_files);
+        bc_array_s *file_buffer = file_list_s_at(&this->open_files,file_idx);
+        file_buffer->used = 0;
+      }/*}}}*/
+      break;
+    default:
+      throw_fuse_error(req,EACCES);
   }
-
-  unsigned file_idx = file_list_s_append_blank(&this->open_files);
-  bc_array_s *file_buffer = file_list_s_at(&this->open_files,file_idx);
-
-  file_buffer->used = 0;
-  var_s_to_json(&data_var,file_buffer);
-  bc_array_s_push(file_buffer,'\n');
 
   // - update file info structure -
   fi->direct_io = 1;
@@ -410,6 +456,42 @@ void od_fuser_s_release(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
   if (file_idx >= this->open_files.used)
   {
     throw_fuse_error(req,ENOENT);
+  }
+
+  if ((fi->flags & O_ACCMODE) == O_WRONLY)
+  {
+    bc_array_s *file_buffer = file_list_s_at(&this->open_files,file_idx);
+
+    CONT_INIT_CLEAR(var_s,value_var);
+    CONT_INIT_CLEAR(json_parser_s,json_parser);
+    if (json_parser_s_parse(&json_parser,file_buffer,&value_var))
+    {
+      file_list_s_remove(&this->open_files,file_idx);
+
+      throw_fuse_error(req,EIO);
+    }
+
+    ino_name_s *ino_name = &this->ino_name_tree.data[ino].object;
+    string_s *name = &ino_name->name;
+
+    // - retrieve or create ino -
+    ino_name_s open_ino_name = {ino_name->parent,{name->size - 5,name->data}};
+    fuse_ino_t open_ino = ino_name_tree_s_unique_insert(&this->ino_name_tree,&open_ino_name);
+
+    od_fuser_s_set_ino_value(this,open_ino,value_var);
+
+    // - update database -
+    this->buffer.used = 0;
+    bc_array_s_append_format(&this->buffer,
+        "{\"type\":\"set\",\"id\":%" HOST_LL_FORMAT "d,\"path\":\"%s\",\"data\":%.*s}",
+        ++this->channel.message_id,this->path_buffer.data,file_buffer->used,file_buffer->data);
+
+    if (od_channel_client_s_send_message(&this->channel,&this->buffer))
+    {
+      file_list_s_remove(&this->open_files,file_idx);
+
+      throw_fuse_error(req,EIO);
+    }
   }
 
   file_list_s_remove(&this->open_files,file_idx);
@@ -435,6 +517,33 @@ void od_fuser_s_read(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct 
 
   unsigned rest = file_buffer->used - off;
   fuse_reply_buf(req,file_buffer->data + off,rest > size ? size : rest);
+}/*}}}*/
+
+void od_fuser_s_write(fuse_req_t req,fuse_ino_t ino,const char *buf,size_t size,off_t off,struct fuse_file_info *fi)
+{/*{{{*/
+  (void)ino;
+
+  debug_message_7(fprintf(stderr,"od_fuser_s_write, ino: %" HOST_LL_FORMAT "u\n",(ulli)ino));
+
+  od_fuser_s *this = (od_fuser_s *)fuse_req_userdata(req);
+
+  unsigned file_idx = fi->fh;
+  if (file_idx >= this->open_files.used)
+  {
+    throw_fuse_error(req,ENOENT);
+  }
+
+  bc_array_s *file_buffer = file_list_s_at(&this->open_files,file_idx);
+
+  if (file_buffer->used != off)
+  {
+    throw_fuse_error(req,EIO);
+  }
+
+  // - append data to file buffer -
+  bc_array_s_append(file_buffer,size,buf);
+
+  fuse_reply_write(req,size);
 }/*}}}*/
 
 // === global functions ========================================================

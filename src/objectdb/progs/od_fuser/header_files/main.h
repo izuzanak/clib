@@ -66,6 +66,7 @@ bc_array_s:fuse_dirbuff
 
 $// - temporary buffers -
 ui_array_s:ino_stack
+bc_array_s:path_buffer
 bc_array_s:buffer
 >
 od_fuser_s;
@@ -75,6 +76,8 @@ WUR int od_fuser_s_create(od_fuser_s *this);
 WUR int od_fuser_s_process_config(od_fuser_s *this);
 WUR int od_fuser_s_run(od_fuser_s *this);
 
+void od_fuser_s_buffer_ino_path(od_fuser_s *this,unsigned a_ino);
+void od_fuser_s_set_ino_value(od_fuser_s *this,unsigned a_ino,var_s a_value_var);
 void od_fuser_s_get_ino_value(od_fuser_s *this,unsigned a_ino,var_s *a_value_var);
 void od_fuser_s_stat(od_fuser_s *this,unsigned ino,struct stat *stbuf);
 
@@ -91,6 +94,7 @@ void od_fuser_s_readdir(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,stru
 void od_fuser_s_open(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi);
 void od_fuser_s_release(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi);
 void od_fuser_s_read(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fuse_file_info *fi);
+void od_fuser_s_write(fuse_req_t req,fuse_ino_t ino,const char *buf,size_t size,off_t off,struct fuse_file_info *fi);
 
 // === inline methods of generated structures ==================================
 
