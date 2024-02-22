@@ -255,12 +255,10 @@ int od_fuser_s_channel_callback(void *a_od_fuser,unsigned a_index,unsigned a_typ
     }/*}}}*/
     break;
   case od_channel_cbreq_DROP:
-    {/*{{{*/
-    }/*}}}*/
+    break;
+  case od_channel_cbresp_SET:
     break;
   case od_channel_cbresp_WATCH:
-    {/*{{{*/
-    }/*}}}*/
     break;
   case od_channel_cbevt_UPDATE:
     {/*{{{*/
