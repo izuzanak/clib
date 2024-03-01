@@ -9,6 +9,7 @@ const char *g_id_type_strings[] =
 {/*{{{*/
   "id",
   "text",
+  "cpid",
 };/*}}}*/
 
 var_tree_s g_id_type_vars;
@@ -460,6 +461,7 @@ int idb_database_s_extract_regexps(idb_database_s *this,
                       }/*}}}*/
                       break;
                     case c_idb_extracted_type_TEXT:
+                    case c_idb_extracted_type_CPID:
                       {/*{{{*/
                         if (value_var->v_type == c_bi_type_string)
                         {
@@ -513,6 +515,31 @@ int idb_database_s_extract_regexps(idb_database_s *this,
                     default:
                       throw_error(IDB_DATABASE_EXTRACT_REGEXPS_UNKNOWN_EXTRACTED_TYPE);
                     }
+
+                    // - cpid text extra processing -
+                    if (*target_ptr == c_idb_extracted_type_CPID)
+                    {
+                      string_s *cpid_numeric = string_array_s_last(a_reg_exps);
+
+                      // - check cpid numeric size -
+                      if (cpid_numeric->size - 1 == 15)
+                      {
+                        char *cpid_numeric_data = cpid_numeric->data + 1;
+
+                        string_array_s_push_blank(a_reg_exps);
+                        string_s_set_format(string_array_s_last(a_reg_exps),
+                            "\"%.*s\"",12,cpid_numeric_data);
+
+                        string_array_s_push_blank(a_reg_exps);
+                        string_s_set_format(string_array_s_last(a_reg_exps),
+                            "\"%.*s\"",3,cpid_numeric_data + 5);
+
+                        string_array_s_push_blank(a_reg_exps);
+                        string_s_set_format(string_array_s_last(a_reg_exps),
+                            "\"%.*s\"",6,cpid_numeric_data + 5);
+                      }
+                    }
+
                   } while(++target_ptr < target_ptr_end);
                 }
               }
@@ -777,10 +804,11 @@ int idb_database_s_remove_docs(idb_database_s *this,const ui_array_s *a_doc_ids)
     this->remove_tree_idxs.used = 0;
     this->keep_tree_idxs.used = 0;
 
-    idb_inverted_index_tree_s_node *iitn_ptr = this->inverted_index_tree.data;
-    idb_inverted_index_tree_s_node *iitn_ptr_end = iitn_ptr + this->inverted_index_tree.used;
+    unsigned iitn_idx = 0;
     do
     {
+      idb_inverted_index_tree_s_node *iitn_ptr = this->inverted_index_tree.data + iitn_idx;
+
       if (iitn_ptr->valid)
       {
         unsigned targets_offset = ((unsigned *)iitn_ptr->object.mmap.address)[c_ii_dump_offset_to_target_list_offset];
@@ -838,7 +866,7 @@ int idb_database_s_remove_docs(idb_database_s *this,const ui_array_s *a_doc_ids)
           }
         }
       }
-    } while(++iitn_ptr < iitn_ptr_end);
+    } while(++iitn_idx < this->inverted_index_tree.used);
 
     if (this->remove_tree_idxs.used != 0)
     {

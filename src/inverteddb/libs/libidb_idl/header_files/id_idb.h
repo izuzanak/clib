@@ -59,6 +59,7 @@ enum
 {/*{{{*/
   c_idb_extracted_type_ID = 1,
   c_idb_extracted_type_TEXT,
+  c_idb_extracted_type_CPID,
 };/*}}}*/
 
 // === definition of generated structures ======================================
