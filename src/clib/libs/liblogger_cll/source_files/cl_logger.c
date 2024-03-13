@@ -111,7 +111,7 @@ int logger_s_add_file(logger_s *this,
     throw_error(LOGGER_LOG_FILE_INVALID_PARAMETERS);
   }
 
-  log_file_s search_log_file = {{strlen(a_path) + 1,(char *)a_path},};
+  log_file_s search_log_file = {.path={strlen(a_path) + 1,(char *)a_path}};
   unsigned log_file_idx = log_file_tree_s_get_idx(&this->log_files,&search_log_file);
 
   // - ERROR -

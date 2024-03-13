@@ -408,7 +408,7 @@ int http_epoll_s_update_epoll_fds(http_epoll_s *this)
     do {
 
       // - insert fds to http epoll fds -
-      while (pfd_ptr->fd >= this->epoll_fds.used)
+      while ((unsigned)pfd_ptr->fd >= this->epoll_fds.used)
       {
         CONT_INIT_CLEAR(http_borrow_fd_s,insert_borrow_fd)
         insert_borrow_fd.evts     = 0;
@@ -421,7 +421,7 @@ int http_epoll_s_update_epoll_fds(http_epoll_s *this)
       http_borrow_fd_s *borrow_fd = this->epoll_fds.data + pfd_ptr->fd;
 
       // - requested events were changed -
-      if (borrow_fd->evts != pfd_ptr->events)
+      if (borrow_fd->evts != (unsigned)pfd_ptr->events)
       {
         borrow_fd->epoll_fd.fd = pfd_ptr->fd;
 

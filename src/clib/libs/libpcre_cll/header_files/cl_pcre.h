@@ -106,6 +106,7 @@ static inline void pcre_s_clear(pcre_s *this)
 
 static inline void pcre_s_flush_all(pcre_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void pcre_s_swap(pcre_s *this,pcre_s *a_second)

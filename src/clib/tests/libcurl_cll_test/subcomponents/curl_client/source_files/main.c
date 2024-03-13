@@ -81,8 +81,10 @@ int main(int argc,char **argv)
 
     unsigned idx = 0;
     do {
+      void *idx_ptr = (void *)(uintptr_t)idx; // NOLINT(performance-no-int-to-ptr)
+
       unsigned req_index;
-      cassert(curl_multi_s_GET(&curl_multi,"http://127.0.0.1",(void *)(uintptr_t)idx,&req_index) == 0);
+      cassert(curl_multi_s_GET(&curl_multi,"http://127.0.0.1",idx_ptr,&req_index) == 0);
     } while(++idx < 1);
 
     int running;

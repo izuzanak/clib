@@ -63,6 +63,7 @@ static inline void srtp_policy_s_clear(srtp_policy_s *this)
 
 static inline void srtp_policy_s_flush_all(srtp_policy_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void srtp_policy_s_swap(srtp_policy_s *this,srtp_policy_s *a_second)

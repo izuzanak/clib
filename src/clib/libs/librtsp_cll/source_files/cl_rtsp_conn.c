@@ -498,7 +498,7 @@ this->session);
         }
 
         // - prepare play options -
-        rtsp_play_options_s play_options = {this->session,a_parser->cseq,0};
+        rtsp_play_options_s play_options = {.session=this->session,.cseq=a_parser->cseq,.flags=0};
 
         // - set onvif replay flag -
         if (a_parser->onvif_replay)
@@ -764,7 +764,7 @@ int rtsp_conn_s_recv_http_cmd(rtsp_conn_s *this,int a_read)
   }
 
   // - retrieve pair connection -
-  x_session_map_s search_x_session_map = {this->x_session,};
+  x_session_map_s search_x_session_map = {.x_session=this->x_session};
   unsigned x_session_map_idx = x_session_map_tree_s_get_idx(&server->x_session_map_tree,&search_x_session_map);
   if (x_session_map_idx == c_idx_not_exist)
   {

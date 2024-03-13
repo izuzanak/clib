@@ -307,7 +307,7 @@ void test_aio()
   } while(!done);
 
   ssize_t result;
-  cassert(aio_s_return(&aio,&result) == 0 && result == data_size);
+  cassert(aio_s_return(&aio,&result) == 0 && result == (ssize_t)data_size);
 
   // - aio_s_read -
   cassert(file_s_open(&file,"tests/liblinux_cll_test/aio/write","r") == 0);
@@ -321,7 +321,7 @@ void test_aio()
     cassert(aio_s_is_done(&aio,&done) == 0);
   } while(!done);
 
-  cassert(aio_s_return(&aio,&result) == 0 && result == data_size);
+  cassert(aio_s_return(&aio,&result) == 0 && result == (ssize_t)data_size);
   cassert(strcmp(write_data,read_data) == 0);
 
   bc_array_s_clear(&buffer);

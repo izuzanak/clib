@@ -270,10 +270,12 @@ static inline void sd_trace_queue_s_set_buffer(sd_trace_queue_s *this,
 
 static inline void sd_trace_queue_s_flush(sd_trace_queue_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void sd_trace_queue_s_flush_all(sd_trace_queue_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void sd_trace_queue_s_swap(sd_trace_queue_s *this,sd_trace_queue_s *a_second)

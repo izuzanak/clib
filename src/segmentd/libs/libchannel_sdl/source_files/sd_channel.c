@@ -5,6 +5,8 @@ include "sd_channel.h"
 
 // === constants and definitions ===============================================
 
+#define MSG_REST() ((size_t)(ptr_end - ptr))
+
 // === methods of generated structures =========================================
 
 // -- sd_range_record_s --
@@ -127,7 +129,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
   char *ptr = a_message->data;
   char *ptr_end = ptr + a_message->used;
 
-  if (ptr_end - ptr >= sizeof(ulli) + sizeof(usi))
+  if (MSG_REST() >= sizeof(ulli) + sizeof(usi))
   {
     ulli id;
     memcpy(&id,ptr,sizeof(ulli)); ptr += sizeof(ulli);
@@ -141,7 +143,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
     {
       case sd_channel_msg_type_REQUEST:
         {/*{{{*/
-          if (ptr_end - ptr >= sizeof(usi))
+          if (MSG_REST() >= sizeof(usi))
           {
             usi request;
             memcpy(&request,ptr,sizeof(usi)); ptr += sizeof(usi);
@@ -181,13 +183,13 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                         break;
                       case sd_channel_cbreq_SEGMENT_WRITE:
                         {/*{{{*/
-                          if (ptr_end - ptr >= sizeof(ulli))
+                          if (MSG_REST() >= sizeof(ulli))
                           {
                             ulli time;
                             memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
                             time = be64toh(time);
 
-                            const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+                            const bc_array_s data = {MSG_REST(),MSG_REST(),ptr};
 
                             // - call callback -
                             if (sd_channel_s_message_call(
@@ -243,13 +245,13 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                         break;
                       case sd_channel_cbreq_TRACE_WRITE:
                         {/*{{{*/
-                          if (ptr_end - ptr >= sizeof(ulli))
+                          if (MSG_REST() >= sizeof(ulli))
                           {
                             ulli time;
                             memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
                             time = be64toh(time);
 
-                            const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+                            const bc_array_s data = {MSG_REST(),MSG_REST(),ptr};
 
                             // - call callback -
                             if (sd_channel_s_message_call(
@@ -263,7 +265,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                         break;
                       case sd_channel_cbreq_TRACE_READ:
                         {/*{{{*/
-                          if (ptr_end - ptr >= sizeof(lli))
+                          if (MSG_REST() >= sizeof(lli))
                           {
                             lli record_id;
                             memcpy(&record_id,ptr,sizeof(lli));
@@ -281,7 +283,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                         break;
                       case sd_channel_cbreq_TRACE_RANGE:
                         {/*{{{*/
-                          if (ptr_end - ptr >= 3*sizeof(lli))
+                          if (MSG_REST() >= 3*sizeof(lli))
                           {
                             lli first_id;
                             memcpy(&first_id,ptr,sizeof(lli)); ptr += sizeof(lli);
@@ -307,7 +309,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                         break;
                       case sd_channel_cbreq_TRACE_STEP_RANGE:
                         {/*{{{*/
-                          if (ptr_end - ptr >= 3*sizeof(lli))
+                          if (MSG_REST() >= 3*sizeof(lli))
                           {
                             lli first_id;
                             memcpy(&first_id,ptr,sizeof(lli)); ptr += sizeof(lli);
@@ -333,7 +335,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                         break;
                       case sd_channel_cbreq_TRACE_TIME_RANGE:
                         {/*{{{*/
-                          if (ptr_end - ptr >= 3*sizeof(lli))
+                          if (MSG_REST() >= 3*sizeof(lli))
                           {
                             ulli first_time;
                             memcpy(&first_time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
@@ -360,7 +362,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                       case sd_channel_cbreq_TRACE_LEE_TIME:
                       case sd_channel_cbreq_TRACE_GRE_TIME:
                         {/*{{{*/
-                          if (ptr_end - ptr >= sizeof(ulli))
+                          if (MSG_REST() >= sizeof(ulli))
                           {
                             ulli time;
                             memcpy(&time,ptr,sizeof(ulli));
@@ -382,7 +384,7 @@ int sd_channel_s_conn_message(void *a_sd_channel,unsigned a_index,const bc_array
                 break;
               case sd_channel_cbreq_CONFIG:
                 {/*{{{*/
-                  const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+                  const bc_array_s data = {MSG_REST(),MSG_REST(),ptr};
 
                   // - call callback -
                   if (sd_channel_s_message_call(
@@ -483,7 +485,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
   char *ptr = a_message->data;
   char *ptr_end = ptr + a_message->used;
 
-  if (ptr_end - ptr >= sizeof(ulli) + sizeof(usi))
+  if (MSG_REST() >= sizeof(ulli) + sizeof(usi))
   {
     ulli id;
     memcpy(&id,ptr,sizeof(ulli)); ptr += sizeof(ulli);
@@ -499,7 +501,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
         break;
       case sd_channel_msg_type_RESPONSE:
         {/*{{{*/
-          if (ptr_end - ptr >= sizeof(usi))
+          if (MSG_REST() >= sizeof(usi))
           {
             usi request;
             memcpy(&request,ptr,sizeof(usi)); ptr += sizeof(usi);
@@ -524,7 +526,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                     {
                       case sd_channel_cbreq_SEGMENT_INFO:
                         {/*{{{*/
-                          if (ptr_end - ptr >= sizeof(unsigned))
+                          if (MSG_REST() >= sizeof(unsigned))
                           {
                             unsigned rec_size;
                             memcpy(&rec_size,ptr,sizeof(unsigned));
@@ -542,13 +544,13 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                         break;
                       case sd_channel_cbreq_SEGMENT_READ:
                         {/*{{{*/
-                          if (ptr_end - ptr >= sizeof(ulli))
+                          if (MSG_REST() >= sizeof(ulli))
                           {
                             ulli time;
                             memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
                             time = be64toh(time);
 
-                            const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+                            const bc_array_s data = {MSG_REST(),MSG_REST(),ptr};
 
                             // - call callback -
                             if (sd_channel_client_s_message_call(
@@ -602,7 +604,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                     {
                       case sd_channel_cbreq_TRACE_INFO:
                         {/*{{{*/
-                          if (ptr_end - ptr >= sizeof(unsigned) + 2*sizeof(lli))
+                          if (MSG_REST() >= sizeof(unsigned) + 2*sizeof(lli))
                           {
                             unsigned rec_size;
                             memcpy(&rec_size,ptr,sizeof(unsigned)); ptr += sizeof(unsigned);
@@ -632,7 +634,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                       case sd_channel_cbreq_TRACE_GRE_TIME:
                       case sd_channel_cbreq_TRACE_READ:
                         {/*{{{*/
-                          if (ptr_end - ptr >= sizeof(lli) + sizeof(ulli))
+                          if (MSG_REST() >= sizeof(lli) + sizeof(ulli))
                           {
                             lli record_id;
                             memcpy(&record_id,ptr,sizeof(lli)); ptr += sizeof(lli);
@@ -642,7 +644,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                             memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
                             time = be64toh(time);
 
-                            const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+                            const bc_array_s data = {MSG_REST(),MSG_REST(),ptr};
 
                             // - call callback -
                             if (sd_channel_client_s_message_call(
@@ -658,7 +660,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                       case sd_channel_cbreq_TRACE_STEP_RANGE:
                       case sd_channel_cbreq_TRACE_TIME_RANGE:
                         {/*{{{*/
-                          if (ptr_end - ptr < sizeof(ulli))
+                          if (MSG_REST() < sizeof(ulli))
                           {
                             break;
                           }
@@ -679,7 +681,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                               sd_range_record_s *rr_ptr_end = rr_ptr + resp_count;
                               do
                               {
-                                if (ptr_end - ptr < sizeof(lli) + sizeof(ulli) + sizeof(ui))
+                                if (MSG_REST() < sizeof(lli) + sizeof(ulli) + sizeof(ui))
                                 {
                                   break;
                                 }
@@ -694,7 +696,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                                 memcpy(&record_size,ptr,sizeof(ui)); ptr += sizeof(unsigned);
                                 record_size = be32toh(record_size);
 
-                                if (ptr_end - ptr < record_size)
+                                if (MSG_REST() < record_size)
                                 {
                                   break;
                                 }
@@ -736,7 +738,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                         break;
                       case sd_channel_cbreq_TRACE_WRITE:
                         {/*{{{*/
-                          if (ptr_end - ptr >= sizeof(lli))
+                          if (MSG_REST() >= sizeof(lli))
                           {
                             lli record_id;
                             memcpy(&record_id,ptr,sizeof(lli));
@@ -775,7 +777,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
         break;
       case sd_channel_msg_type_EVENT:
         {/*{{{*/
-          if (ptr_end - ptr >= sizeof(usi))
+          if (MSG_REST() >= sizeof(usi))
           {
             usi request;
             memcpy(&request,ptr,sizeof(usi)); ptr += sizeof(usi);
@@ -792,13 +794,13 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                     const string_s segment_id = {segment_id_length + 1,ptr};
                     ptr += segment_id.size;
 
-                    if (ptr_end - ptr >= sizeof(ulli))
+                    if (MSG_REST() >= sizeof(ulli))
                     {
                       ulli time;
                       memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
                       time = be64toh(time);
 
-                      const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+                      const bc_array_s data = {MSG_REST(),MSG_REST(),ptr};
 
                       // - call callback -
                       if (sd_channel_client_s_message_call(
@@ -820,7 +822,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                     const string_s trace_id = {trace_id_length + 1,ptr};
                     ptr += trace_id.size;
 
-                    if (ptr_end - ptr >= sizeof(lli) + sizeof(ulli))
+                    if (MSG_REST() >= sizeof(lli) + sizeof(ulli))
                     {
                       lli record_id;
                       memcpy(&record_id,ptr,sizeof(lli)); ptr += sizeof(lli);
@@ -830,7 +832,7 @@ int sd_channel_client_s_conn_message(void *a_sd_channel_client,unsigned a_index,
                       memcpy(&time,ptr,sizeof(ulli)); ptr += sizeof(ulli);
                       time = be64toh(time);
 
-                      const bc_array_s data = {ptr_end - ptr,ptr_end - ptr,ptr};
+                      const bc_array_s data = {MSG_REST(),MSG_REST(),ptr};
 
                       // - call callback -
                       if (sd_channel_client_s_message_call(

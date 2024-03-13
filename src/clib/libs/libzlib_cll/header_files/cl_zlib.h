@@ -132,6 +132,7 @@ static inline void gz_file_s_clear(gz_file_s *this)
 
 static inline void gz_file_s_flush_all(gz_file_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void gz_file_s_swap(gz_file_s *this,gz_file_s *a_second)

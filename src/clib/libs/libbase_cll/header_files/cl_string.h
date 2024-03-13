@@ -24,10 +24,10 @@ typedef struct string_s
 } string_s;
 
 #define STRING_S(CONST) \
-  ((string_s){sizeof(CONST),CONST})
+  {sizeof(CONST),CONST}
 
 #define STRING_S_EMPTY \
-  ((string_s){1,(char *)&c_string_terminating_char})
+  {1,(char *)&c_string_terminating_char}
 
 #define STRING_S_FORMAT(NAME,FORMAT,...) \
   CONT_INIT(string_s,NAME);\
@@ -139,6 +139,7 @@ static inline void string_s_set_format(string_s *this,const char *a_format,...)
 
 static inline void string_s_flush_all(string_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void string_s_swap(string_s *this,string_s *a_second)

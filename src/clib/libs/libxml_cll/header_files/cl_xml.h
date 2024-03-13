@@ -355,22 +355,30 @@ inlines xml_parser_s
 
 static inline void xml_parser_s_start_document(void *user)
 {/*{{{*/
+  (void)user;
 }/*}}}*/
 
 static inline void xml_parser_s_end_document(void *user)
 {/*{{{*/
+  (void)user;
 }/*}}}*/
 
 static inline void xml_parser_s_warning(void *user,const char *msg,...)
 {/*{{{*/
+  (void)user;
+  (void)msg;
 }/*}}}*/
 
 static inline void xml_parser_s_error(void *user,const char *msg,...)
 {/*{{{*/
+  (void)user;
+  (void)msg;
 }/*}}}*/
 
 static inline void xml_parser_s_fatal_error(void *user,const char *msg,...)
 {/*{{{*/
+  (void)user;
+  (void)msg;
 }/*}}}*/
 
 // === inline global functions =================================================

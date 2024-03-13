@@ -1432,6 +1432,7 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
       conn->state = c_http_conn_state_HEADERS;
     }/*}}}*/
 
+  /* fall through */
   case c_http_conn_state_HEADERS:
     {/*{{{*/
       do {
@@ -1527,6 +1528,7 @@ int http_server_s_tcp_conn_recv(void *a_http_server,unsigned a_index,bc_array_s 
       break;
     }
 
+  /* fall through */
   case c_http_conn_state_BODY:
     {/*{{{*/
 

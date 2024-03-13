@@ -356,6 +356,7 @@ static inline void crypto_pkey_s_clear(crypto_pkey_s *this)
 
 static inline void crypto_pkey_s_flush_all(crypto_pkey_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void crypto_pkey_s_swap(crypto_pkey_s *this,crypto_pkey_s *a_second)
@@ -402,6 +403,7 @@ static inline void crypto_digest_info_s_clear(crypto_digest_info_s *this)
 
 static inline void crypto_digest_info_s_flush_all(crypto_digest_info_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void crypto_digest_info_s_swap(crypto_digest_info_s *this,crypto_digest_info_s *a_second)
@@ -467,6 +469,7 @@ static inline void crypto_digest_s_clear(crypto_digest_s *this)
 
 static inline void crypto_digest_s_flush_all(crypto_digest_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void crypto_digest_s_swap(crypto_digest_s *this,crypto_digest_s *a_second)
@@ -531,6 +534,7 @@ static inline void crypto_sign_s_clear(crypto_sign_s *this)
 
 static inline void crypto_sign_s_flush_all(crypto_sign_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void crypto_sign_s_swap(crypto_sign_s *this,crypto_sign_s *a_second)
@@ -601,6 +605,7 @@ static inline void crypto_verify_s_clear(crypto_verify_s *this)
 
 static inline void crypto_verify_s_flush_all(crypto_verify_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void crypto_verify_s_swap(crypto_verify_s *this,crypto_verify_s *a_second)
@@ -659,6 +664,7 @@ static inline void crypto_cipher_info_s_clear(crypto_cipher_info_s *this)
 
 static inline void crypto_cipher_info_s_flush_all(crypto_cipher_info_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void crypto_cipher_info_s_swap(crypto_cipher_info_s *this,crypto_cipher_info_s *a_second)
@@ -745,6 +751,7 @@ static inline void crypto_encrypt_s_clear(crypto_encrypt_s *this)
 
 static inline void crypto_encrypt_s_flush_all(crypto_encrypt_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void crypto_encrypt_s_swap(crypto_encrypt_s *this,crypto_encrypt_s *a_second)
@@ -816,6 +823,7 @@ static inline void crypto_decrypt_s_clear(crypto_decrypt_s *this)
 
 static inline void crypto_decrypt_s_flush_all(crypto_decrypt_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void crypto_decrypt_s_swap(crypto_decrypt_s *this,crypto_decrypt_s *a_second)
@@ -892,6 +900,7 @@ static inline void crypto_seal_s_clear(crypto_seal_s *this)
 
 static inline void crypto_seal_s_flush_all(crypto_seal_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void crypto_seal_s_swap(crypto_seal_s *this,crypto_seal_s *a_second)
@@ -963,6 +972,7 @@ static inline void crypto_open_s_clear(crypto_open_s *this)
 
 static inline void crypto_open_s_flush_all(crypto_open_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void crypto_open_s_swap(crypto_open_s *this,crypto_open_s *a_second)

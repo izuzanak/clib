@@ -164,7 +164,7 @@ void test_file()
   // - file_s_seek -
   long offset;
   cassert(file_s_tell(&file_array.data[2],&offset) == 0);
-  cassert(offset == strlen(text));
+  cassert(offset == (long)strlen(text));
   cassert(file_s_seek(&file_array.data[2],strlen("Hello "),SEEK_CUR) == 0);
   buffer.used = 0;
   cassert(stream_s_read(&file_array.data[2],&buffer) == 0);

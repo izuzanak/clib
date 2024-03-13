@@ -94,6 +94,7 @@ static inline void sqlite_stmt_s_clear(sqlite_stmt_s *this)
 
 static inline void sqlite_stmt_s_flush_all(sqlite_stmt_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void sqlite_stmt_s_swap(sqlite_stmt_s *this,sqlite_stmt_s *a_second)
@@ -145,6 +146,7 @@ static inline void sqlite_s_clear(sqlite_s *this)
 
 static inline void sqlite_s_flush_all(sqlite_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void sqlite_s_swap(sqlite_s *this,sqlite_s *a_second)

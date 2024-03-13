@@ -308,7 +308,7 @@ void xml_parser_s_start_element(void *user,const xmlChar *name,const xmlChar **a
       // - namespace attribute -
       if (strncmp("xmlns",attr_name,5) == 0)
       {
-        string_map_s ns_search = {{strlen(attr_value) + 1,(char *)attr_value},};
+        string_map_s ns_search = {.key={strlen(attr_value) + 1,(char *)attr_value}};
         unsigned ns_abbr_idx = string_map_tree_s_get_idx(&parser->ns_abbr_map,&ns_search);
 
         if (attr_name[5] == '\0')
@@ -397,11 +397,11 @@ void xml_parser_s_end_element(void *user,const xmlChar *name)
   const char *name_ptr = strchr((char *)name,':');
   if (name_ptr != NULL)
   {
-    string_map_s abbr_search = {{(name_ptr - (char *)name) + 1,(char *)name},};
+    string_map_s abbr_search = {.key={(name_ptr - (char *)name) + 1,(char *)name}};
     unsigned abbr_ns_idx = string_map_tree_s_get_idx(&parser->abbr_ns_map,&abbr_search);
     if (abbr_ns_idx != c_idx_not_exist)
     {
-      string_map_s ns_search = {string_map_tree_s_at(&parser->abbr_ns_map,abbr_ns_idx)->value,};
+      string_map_s ns_search = {.key=string_map_tree_s_at(&parser->abbr_ns_map,abbr_ns_idx)->value};
       unsigned ns_abbr_idx = string_map_tree_s_get_idx(&parser->ns_abbr_map,&ns_search);
 
       if (ns_abbr_idx != c_idx_not_exist)

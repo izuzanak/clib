@@ -52,7 +52,7 @@ int fd_s_writev(const fd_s *this,struct iovec *a_iov,int a_iovcnt,size_t a_size)
     }
 
     // - remove completely writed buffers -
-    while (cnt >= a_iov->iov_len)
+    while ((size_t)cnt >= a_iov->iov_len)
     {
       cnt -= a_iov->iov_len;
 
@@ -504,7 +504,7 @@ int epoll_s_fd_update(epoll_s *this,
   epoll_fd_events_s *fd_events = &this->fd_events;
 
   // - resize fd events if needed -
-  if (fd_events->used <= a_fd)
+  if (fd_events->used <= (unsigned)a_fd)
   {
     unsigned old_used = fd_events->used;
     epoll_fd_events_s_push_blanks(fd_events,a_fd + 1 - fd_events->used);

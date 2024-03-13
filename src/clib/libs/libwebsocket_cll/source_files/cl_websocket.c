@@ -14,6 +14,9 @@ static const struct lws_extension ws_default_extensions[] =
 
 void ws_context_s_log_emit(int level,const char *line)
 {/*{{{*/
+  (void)level;
+  (void)line;
+
   //fprintf(stderr,"LWS_LOG: %d,%s",level,line);
 }/*}}}*/
 
@@ -316,7 +319,7 @@ int ws_conn_s_write(ws_conn_s *this,
   memcpy(buff_ptr,a_data,a_size);
 
   // - ERROR -
-  if (lws_write(this->ws_ptr,buff_ptr,a_size,a_protocol) != a_size)
+  if (lws_write(this->ws_ptr,buff_ptr,a_size,a_protocol) != (int)a_size)
   {
     throw_error(WS_CONN_WRITE_ERROR);
   }

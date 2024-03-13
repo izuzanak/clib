@@ -88,6 +88,7 @@ static inline void image_s_clear(image_s *this)
 
 static inline void image_s_flush_all(image_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void image_s_swap(image_s *this,image_s *a_second)

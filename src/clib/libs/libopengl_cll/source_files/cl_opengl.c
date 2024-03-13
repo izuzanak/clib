@@ -207,7 +207,7 @@ int gl_texture_s_create(gl_texture_s *this,
   glGetIntegerv(GL_MAX_TEXTURE_SIZE,&mt_size);
 
   // - ERROR -
-  if (a_width <= 0 || a_width > mt_size || a_height <= 0 || a_height > mt_size)
+  if (a_width <= 0 || a_width > (unsigned)mt_size || a_height <= 0 || a_height > (unsigned)mt_size)
   {
     throw_error(GL_TEXTURE_INVALID_DIMENSIONS);
   }

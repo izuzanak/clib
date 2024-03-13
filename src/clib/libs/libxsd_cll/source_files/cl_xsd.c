@@ -967,7 +967,7 @@ void xs_duration_s_create(xs_duration_s *this,lli a_period)
 
   bc_array_s_push(&buffer,'P');
 
-  if (a_period >= CL_TIME_NANOSEC_IN_DAY)
+  if ((ulli)a_period >= CL_TIME_NANOSEC_IN_DAY)
   {
     lli days = a_period / CL_TIME_NANOSEC_IN_DAY;
     a_period %= CL_TIME_NANOSEC_IN_DAY;
@@ -976,7 +976,7 @@ void xs_duration_s_create(xs_duration_s *this,lli a_period)
 
   int time_section = 0;
 
-  if (a_period >= CL_TIME_NANOSEC_IN_HOUR)
+  if ((ulli)a_period >= CL_TIME_NANOSEC_IN_HOUR)
   {
     lli hours = a_period / CL_TIME_NANOSEC_IN_HOUR;
     a_period %= CL_TIME_NANOSEC_IN_HOUR;
@@ -984,7 +984,7 @@ void xs_duration_s_create(xs_duration_s *this,lli a_period)
     time_section = 1;
   }
 
-  if (a_period >= CL_TIME_NANOSEC_IN_MINUTE)
+  if ((ulli)a_period >= CL_TIME_NANOSEC_IN_MINUTE)
   {
     lli minutes = a_period / CL_TIME_NANOSEC_IN_MINUTE;
     a_period %= CL_TIME_NANOSEC_IN_MINUTE;

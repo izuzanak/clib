@@ -41,10 +41,12 @@ static inline int atomic_s_inc_and_test(atomic_s *this,int a_test);
 
 static inline void atomic_s_init(atomic_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void atomic_s_clear(atomic_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void atomic_s_swap(atomic_s *this,atomic_s *a_second)

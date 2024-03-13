@@ -81,6 +81,7 @@ static inline void gl_vertex_buffer_s_clear(gl_vertex_buffer_s *this)
 
 static inline void gl_vertex_buffer_s_flush_all(gl_vertex_buffer_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void gl_vertex_buffer_s_swap(gl_vertex_buffer_s *this,gl_vertex_buffer_s *a_second)

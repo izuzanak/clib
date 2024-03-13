@@ -546,6 +546,7 @@ static inline void fd_s_clear(fd_s *this)
 
 static inline void fd_s_flush_all(fd_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void fd_s_swap(fd_s *this,fd_s *a_second)
@@ -594,6 +595,7 @@ static inline void dir_s_clear(dir_s *this)
 
 static inline void dir_s_flush_all(dir_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void dir_s_swap(dir_s *this,dir_s *a_second)
@@ -672,6 +674,7 @@ static inline void mmap_s_clear(mmap_s *this)
 
 static inline void mmap_s_flush_all(mmap_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void mmap_s_swap(mmap_s *this,mmap_s *a_second)
@@ -739,6 +742,7 @@ static inline void socket_s_clear(socket_s *this)
 
 static inline void socket_s_flush_all(socket_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void socket_s_swap(socket_s *this,socket_s *a_second)
@@ -825,6 +829,7 @@ static inline void aio_s_clear(aio_s *this)
 
 static inline void aio_s_flush_all(aio_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void aio_s_swap(aio_s *this,aio_s *a_second)
@@ -967,6 +972,7 @@ static inline void pid_s_clear(pid_s *this)
 
 static inline void pid_s_flush_all(pid_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void pid_s_swap(pid_s *this,pid_s *a_second)
@@ -1033,6 +1039,7 @@ static inline void pthread_s_clear(pthread_s *this)
 
 static inline void pthread_s_flush_all(pthread_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void pthread_s_swap(pthread_s *this,pthread_s *a_second)
@@ -1229,6 +1236,7 @@ static inline void epoll_fd_s_clear(epoll_fd_s *this)
 
 static inline void epoll_fd_s_flush_all(epoll_fd_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void epoll_fd_s_swap(epoll_fd_s *this,epoll_fd_s *a_second)
@@ -1286,6 +1294,7 @@ static inline void epoll_borrow_fd_s_clear(epoll_borrow_fd_s *this)
 
 static inline void epoll_borrow_fd_s_flush_all(epoll_borrow_fd_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void epoll_borrow_fd_s_swap(epoll_borrow_fd_s *this,epoll_borrow_fd_s *a_second)
@@ -1335,6 +1344,7 @@ static inline void epoll_timer_s_clear(epoll_timer_s *this)
 
 static inline void epoll_timer_s_flush_all(epoll_timer_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void epoll_timer_s_swap(epoll_timer_s *this,epoll_timer_s *a_second)
@@ -1412,6 +1422,7 @@ static inline void rtc_s_clear(rtc_s *this)
 
 static inline void rtc_s_flush_all(rtc_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void rtc_s_swap(rtc_s *this,rtc_s *a_second)

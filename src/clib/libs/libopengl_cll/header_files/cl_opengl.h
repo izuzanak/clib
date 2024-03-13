@@ -176,6 +176,7 @@ static inline void gl_shader_s_clear(gl_shader_s *this)
 
 static inline void gl_shader_s_flush_all(gl_shader_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void gl_shader_s_swap(gl_shader_s *this,gl_shader_s *a_second)
@@ -224,6 +225,7 @@ static inline void gl_program_s_clear(gl_program_s *this)
 
 static inline void gl_program_s_flush_all(gl_program_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void gl_program_s_swap(gl_program_s *this,gl_program_s *a_second)
@@ -279,6 +281,7 @@ static inline void gl_texture_s_clear(gl_texture_s *this)
 
 static inline void gl_texture_s_flush_all(gl_texture_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void gl_texture_s_swap(gl_texture_s *this,gl_texture_s *a_second)
@@ -380,7 +383,7 @@ static inline int gl_uniform_tree_s___compare_value(const gl_uniform_tree_s *thi
 
 static inline gl_uniform_s *gl_uniform_tree_s_get(gl_uniform_tree_s *this,const char *a_name)
 {/*{{{*/
-  gl_uniform_s search_uniform = {{strlen(a_name) + 1,(char *)a_name},};
+  gl_uniform_s search_uniform = {.name={strlen(a_name) + 1,(char *)a_name}};
   unsigned idx = gl_uniform_tree_s_get_idx(this,&search_uniform);
   debug_assert(idx != c_idx_not_exist);
   return &this->data[idx].object;

@@ -187,6 +187,7 @@ static inline void curl_multi_s_clear(curl_multi_s *this)
 
 static inline void curl_multi_s_flush_all(curl_multi_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void curl_multi_s_swap(curl_multi_s *this,curl_multi_s *a_second)
@@ -300,6 +301,7 @@ static inline void curl_props_s_clear(curl_props_s *this)
 
 static inline void curl_props_s_flush_all(curl_props_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void curl_props_s_swap(curl_props_s *this,curl_props_s *a_second)
@@ -361,6 +363,7 @@ static inline void curl_result_s_clear(curl_result_s *this)
 
 static inline void curl_result_s_flush_all(curl_result_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void curl_result_s_swap(curl_result_s *this,curl_result_s *a_second)

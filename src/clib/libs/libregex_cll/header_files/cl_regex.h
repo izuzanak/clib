@@ -106,6 +106,7 @@ static inline void regex_s_clear(regex_s *this)
 
 static inline void regex_s_flush_all(regex_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void regex_s_swap(regex_s *this,regex_s *a_second)

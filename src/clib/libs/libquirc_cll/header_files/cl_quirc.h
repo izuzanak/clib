@@ -97,6 +97,7 @@ static inline void quirc_s_clear(quirc_s *this)
 
 static inline void quirc_s_flush_all(quirc_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void quirc_s_swap(quirc_s *this,quirc_s *a_second)

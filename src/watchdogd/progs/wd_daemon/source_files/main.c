@@ -184,7 +184,7 @@ int wd_daemon_s_channel_callback(void *a_wd_daemon,unsigned a_index,unsigned a_t
       log_info_2("channel server %u, enable monitor, name: %s, timeout: %" HOST_LL_FORMAT "d",
           a_index,name->data,timeout);
 
-      wd_monitor_s search_monitor = {{name->size,name->data},};
+      wd_monitor_s search_monitor = {.name={name->size,name->data}};
       unsigned monitor_idx = wd_monitor_tree_s_get_idx(&this->monitor_tree,&search_monitor);
 
       // - monitor does not exists -
@@ -234,7 +234,7 @@ int wd_daemon_s_channel_callback(void *a_wd_daemon,unsigned a_index,unsigned a_t
       // - log message -
       log_info_2("channel server %u, disable monitor, name: %s",a_index,name->data);
 
-      wd_monitor_s search_monitor = {{name->size,name->data},};
+      wd_monitor_s search_monitor = {.name={name->size,name->data}};
       unsigned monitor_idx = wd_monitor_tree_s_get_idx(&this->monitor_tree,&search_monitor);
 
       if (monitor_idx != c_idx_not_exist)
@@ -261,7 +261,7 @@ int wd_daemon_s_channel_callback(void *a_wd_daemon,unsigned a_index,unsigned a_t
 
       const string_s *name = va_arg(a_ap,const string_s *);
 
-      wd_monitor_s search_monitor = {{name->size,name->data},};
+      wd_monitor_s search_monitor = {.name={name->size,name->data}};
       unsigned monitor_idx = wd_monitor_tree_s_get_idx(&this->monitor_tree,&search_monitor);
 
       if (monitor_idx == c_idx_not_exist)

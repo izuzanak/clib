@@ -186,6 +186,7 @@ static inline void ws_context_s_clear(ws_context_s *this)
 
 static inline void ws_context_s_flush_all(ws_context_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void ws_context_s_swap(ws_context_s *this,ws_context_s *a_second)
@@ -272,6 +273,7 @@ static inline void ws_conn_s_clear(ws_conn_s *this)
 
 static inline void ws_conn_s_flush_all(ws_conn_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void ws_conn_s_swap(ws_conn_s *this,ws_conn_s *a_second)
@@ -339,6 +341,7 @@ static inline void ws_client_s_clear(ws_client_s *this)
 
 static inline void ws_client_s_flush_all(ws_client_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void ws_client_s_swap(ws_client_s *this,ws_client_s *a_second)

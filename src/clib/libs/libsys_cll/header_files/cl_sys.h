@@ -240,6 +240,7 @@ static inline void file_s_clear(file_s *this)
 
 static inline void file_s_flush_all(file_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void file_s_swap(file_s *this,file_s *a_second)
@@ -355,6 +356,7 @@ static inline void pipe_s_clear(pipe_s *this)
 
 static inline void pipe_s_flush_all(pipe_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void pipe_s_swap(pipe_s *this,pipe_s *a_second)

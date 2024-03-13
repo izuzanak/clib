@@ -314,6 +314,8 @@ static inline void loc_s___release(var_s this)
     g_loc_s___clear[this->v_type](this);
     cfree(this);
   }
+#else
+  (void)this;
 #endif
 }/*}}}*/
 
@@ -371,6 +373,7 @@ static inline void var_s_clear(var_s *this)
 
 static inline void var_s_flush_all(var_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void var_s_swap(var_s *this,var_s *a_second)

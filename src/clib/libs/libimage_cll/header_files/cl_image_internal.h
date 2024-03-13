@@ -54,7 +54,7 @@ typedef struct image_internal_s
 
 static inline void image_internal_s_init(image_internal_s *this);
 static inline void image_internal_s_clear(image_internal_s *this);
-static inline void image_internal_s_flush_all(image_internal_s *this) {}
+static inline void image_internal_s_flush_all(image_internal_s *this);
 static inline void image_internal_s_swap(image_internal_s *this,image_internal_s *a_second);
 static inline void image_internal_s_copy(image_internal_s *this,const image_internal_s *a_src);
 int image_internal_s_compare(const image_internal_s *this,const image_internal_s *a_second);
@@ -140,6 +140,11 @@ inline void image_internal_s_clear(image_internal_s *this)
   }
 
   image_internal_s_init(this);
+}/*}}}*/
+
+static inline void image_internal_s_flush_all(image_internal_s *this)
+{/*{{{*/
+  (void)this;
 }/*}}}*/
 
 inline void image_internal_s_swap(image_internal_s *this,image_internal_s *a_second)

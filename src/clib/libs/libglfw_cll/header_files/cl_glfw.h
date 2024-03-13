@@ -74,6 +74,7 @@ static inline void glfw_window_s_clear(glfw_window_s *this)
 
 static inline void glfw_window_s_flush_all(glfw_window_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void glfw_window_s_swap(glfw_window_s *this,glfw_window_s *a_second)

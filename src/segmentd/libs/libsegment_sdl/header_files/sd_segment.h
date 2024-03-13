@@ -27,7 +27,7 @@ include "sd_segfiles.h"
 
 // === definition of structure sd_segment_handle_s =============================
 
-typedef int (*sd_segment_clear_cb_t)(void *a_object);
+typedef void (*sd_segment_clear_cb_t)(void *a_object);
 typedef int (*sd_segment_write_record_cb_t)(void *a_object,time_s a_time,unsigned a_size,const char *a_data);
 typedef int (*sd_segment_get_record_cb_t)(void *a_object,time_s *a_time,bc_array_s *a_record);
 
@@ -103,6 +103,7 @@ static inline void sd_segment_handle_s_clear(sd_segment_handle_s *this)
 
 static inline void sd_segment_handle_s_flush_all(sd_segment_handle_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void sd_segment_handle_s_swap(sd_segment_handle_s *this,sd_segment_handle_s *a_second)

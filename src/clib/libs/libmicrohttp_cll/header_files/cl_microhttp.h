@@ -315,6 +315,7 @@ static inline void http_server_s_clear(http_server_s *this)
 
 static inline void http_server_s_flush_all(http_server_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void http_server_s_swap(http_server_s *this,http_server_s *a_second)
@@ -409,6 +410,7 @@ static inline void http_conn_s_clear(http_conn_s *this)
 
 static inline void http_conn_s_flush_all(http_conn_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void http_conn_s_swap(http_conn_s *this,http_conn_s *a_second)
@@ -521,6 +523,7 @@ static inline void http_resp_s_clear(http_resp_s *this)
 
 static inline void http_resp_s_flush_all(http_resp_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void http_resp_s_swap(http_resp_s *this,http_resp_s *a_second)

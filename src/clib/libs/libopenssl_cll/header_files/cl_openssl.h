@@ -112,6 +112,7 @@ static inline void ssl_context_s_clear(ssl_context_s *this)
 
 static inline void ssl_context_s_flush_all(ssl_context_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void ssl_context_s_swap(ssl_context_s *this,ssl_context_s *a_second)
@@ -227,6 +228,7 @@ static inline void ssl_conn_s_clear(ssl_conn_s *this)
 
 static inline void ssl_conn_s_flush_all(ssl_conn_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void ssl_conn_s_swap(ssl_conn_s *this,ssl_conn_s *a_second)

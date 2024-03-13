@@ -528,6 +528,7 @@ JOCTET EOI_BYTE = JPEG_EOI;
 
 void jpeg_source_mgr_s_init_source(j_decompress_ptr cinfo)
 {/*{{{*/
+  (void)cinfo;
 }/*}}}*/
 
 boolean jpeg_source_mgr_s_fill_buffer(j_decompress_ptr cinfo)
@@ -558,6 +559,7 @@ void jpeg_source_mgr_s_skip_data(j_decompress_ptr cinfo,long num_bytes)
 
 void jpeg_source_mgr_s_term_source(j_decompress_ptr cinfo)
 {/*{{{*/
+  (void)cinfo;
 }/*}}}*/
 
 void jpeg_source_mgr_s_set_source(j_decompress_ptr cinfo,const char *data,unsigned length)

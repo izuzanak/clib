@@ -106,6 +106,7 @@ static inline void process_s_clear(process_s *this)
 
 static inline void process_s_flush_all(process_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void process_s_swap(process_s *this,process_s *a_second)

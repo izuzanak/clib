@@ -105,7 +105,7 @@ static int fusehl_fs_read(const char *path,char *buf,size_t size,off_t offset,
     return -ENOENT;
   }
 
-  if (offset < c_file_size)
+  if (offset < (ssize_t)c_file_size)
   {
     if (offset + size > c_file_size)
     {

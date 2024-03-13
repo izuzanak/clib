@@ -204,7 +204,7 @@ int sd_daemon_s_update_segments(sd_daemon_s *this,ui_array_s *a_updated)
       {
         sd_conf_segment_s *segment_config = &scstn_ptr->object;
 
-        sd_segment_descr_s search_segment = {*segment_config,};
+        sd_segment_descr_s search_segment = {.config=*segment_config};
         unsigned segment_idx = sd_segment_tree_s_get_idx(&this->segments,&search_segment);
 
         if (segment_idx == c_idx_not_exist)
@@ -290,7 +290,7 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
       {
         sd_conf_trace_s *trace_config = &scttn_ptr->object;
 
-        sd_trace_descr_s search_trace = {*trace_config,};
+        sd_trace_descr_s search_trace = {.config=*trace_config};
         unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
         if (trace_idx == c_idx_not_exist)
@@ -378,7 +378,7 @@ void sd_daemon_s_do_update_watches(sd_daemon_s *this)
         do {
           if (stn_ptr->valid)
           {
-            sd_segment_descr_s search_segment = {{stn_ptr->object,},};
+            sd_segment_descr_s search_segment = {.config={.segment_id=stn_ptr->object}};
             unsigned segment_idx = sd_segment_tree_s_get_idx(&this->segments,&search_segment);
 
             // - segment exists -
@@ -398,7 +398,7 @@ void sd_daemon_s_do_update_watches(sd_daemon_s *this)
         do {
           if (stn_ptr->valid)
           {
-            sd_trace_descr_s search_trace = {{stn_ptr->object,},};
+            sd_trace_descr_s search_trace = {.config={.trace_id=stn_ptr->object}};
             unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
             // - trace exists -
@@ -508,7 +508,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       ulli id = va_arg(a_ap,ulli);
       const string_s *segment_id = va_arg(a_ap,const string_s *);
 
-      sd_segment_descr_s search_segment = {{*segment_id,},};
+      sd_segment_descr_s search_segment = {.config={.segment_id=*segment_id,}};
       unsigned segment_idx = sd_segment_tree_s_get_idx(&this->segments,&search_segment);
 
       // - check if segment exists -
@@ -538,7 +538,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       time_s time = va_arg(a_ap,time_s);
       const bc_array_s *data = va_arg(a_ap,const bc_array_s *);
 
-      sd_segment_descr_s search_segment = {{*segment_id,},};
+      sd_segment_descr_s search_segment = {.config={.segment_id=*segment_id,}};
       unsigned segment_idx = sd_segment_tree_s_get_idx(&this->segments,&search_segment);
 
       // - check if segment exists -
@@ -593,7 +593,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       ulli id = va_arg(a_ap,ulli);
       const string_s *segment_id = va_arg(a_ap,const string_s *);
 
-      sd_segment_descr_s search_segment = {{*segment_id,},};
+      sd_segment_descr_s search_segment = {.config={.segment_id=*segment_id,}};
       unsigned segment_idx = sd_segment_tree_s_get_idx(&this->segments,&search_segment);
 
       // - check if segment exists -
@@ -633,7 +633,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       ulli id = va_arg(a_ap,ulli);
       const string_s *segment_id = va_arg(a_ap,const string_s *);
 
-      sd_segment_descr_s search_segment = {{*segment_id,},};
+      sd_segment_descr_s search_segment = {.config={.segment_id=*segment_id,}};
       unsigned segment_idx = sd_segment_tree_s_get_idx(&this->segments,&search_segment);
 
       sd_channel_watch_s *channel_watch = sd_channel_watches_s_at(&this->channel_watches,a_index);
@@ -726,7 +726,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       ulli id = va_arg(a_ap,ulli);
       const string_s *trace_id = va_arg(a_ap,const string_s *);
 
-      sd_trace_descr_s search_trace = {{*trace_id,},};
+      sd_trace_descr_s search_trace = {.config={.trace_id=*trace_id}};
       unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
       // - check if trace exists -
@@ -758,7 +758,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       time_s time = va_arg(a_ap,time_s);
       const bc_array_s *data = va_arg(a_ap,const bc_array_s *);
 
-      sd_trace_descr_s search_trace = {{*trace_id,},};
+      sd_trace_descr_s search_trace = {.config={.trace_id=*trace_id}};
       unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
       // - check if trace exists -
@@ -819,7 +819,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       const string_s *trace_id = va_arg(a_ap,const string_s *);
       lli record_id = va_arg(a_ap,lli);
 
-      sd_trace_descr_s search_trace = {{*trace_id,},};
+      sd_trace_descr_s search_trace = {.config={.trace_id=*trace_id}};
       unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
       // - check if trace exists -
@@ -848,7 +848,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       ulli id = va_arg(a_ap,ulli);
       const string_s *trace_id = va_arg(a_ap,const string_s *);
 
-      sd_trace_descr_s search_trace = {{*trace_id,},};
+      sd_trace_descr_s search_trace = {.config={.trace_id=*trace_id}};
       unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
       // - check if trace exists -
@@ -881,7 +881,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       lli last_id = va_arg(a_ap,lli);
       lli count = va_arg(a_ap,lli);
 
-      sd_trace_descr_s search_trace = {{*trace_id,},};
+      sd_trace_descr_s search_trace = {.config={.trace_id=*trace_id}};
       unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
       // - check if trace exists -
@@ -958,7 +958,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       lli last_id = va_arg(a_ap,lli);
       ulli step = va_arg(a_ap,ulli);
 
-      sd_trace_descr_s search_trace = {{*trace_id,},};
+      sd_trace_descr_s search_trace = {.config={.trace_id=*trace_id}};
       unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
       // - check if trace exists -
@@ -1020,7 +1020,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       ulli last_time = va_arg(a_ap,ulli);
       lli count = va_arg(a_ap,lli);
 
-      sd_trace_descr_s search_trace = {{*trace_id,},};
+      sd_trace_descr_s search_trace = {.config={.trace_id=*trace_id}};
       unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
       // - check if trace exists -
@@ -1133,7 +1133,7 @@ int sd_daemon_s_channel_callback(void *a_sd_daemon,unsigned a_index,unsigned a_t
       const string_s *trace_id = va_arg(a_ap,const string_s *);
       ulli time = va_arg(a_ap,ulli);
 
-      sd_trace_descr_s search_trace = {{*trace_id,},};
+      sd_trace_descr_s search_trace = {.config={.trace_id=*trace_id}};
       unsigned trace_idx = sd_trace_tree_s_get_idx(&this->traces,&search_trace);
 
       // - check if trace exists -

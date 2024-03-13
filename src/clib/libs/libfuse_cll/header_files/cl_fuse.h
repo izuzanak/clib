@@ -144,6 +144,7 @@ static inline void fuse_session_s_clear(fuse_session_s *this)
 
 static inline void fuse_session_s_flush_all(fuse_session_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void fuse_session_s_swap(fuse_session_s *this,fuse_session_s *a_second)

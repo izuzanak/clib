@@ -117,6 +117,7 @@ static inline void vdv301_operation_s_clear(vdv301_operation_s *this)
 
 static inline void vdv301_operation_s_flush_all(vdv301_operation_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void vdv301_operation_s_swap(vdv301_operation_s *this,vdv301_operation_s *a_second)

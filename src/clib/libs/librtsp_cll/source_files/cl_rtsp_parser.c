@@ -242,14 +242,17 @@ void pa_rtsp_header_cseq(rtsp_parser_s *this)
 
 void pa_rtsp_header_ct_base(rtsp_parser_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 void pa_rtsp_header_ct_type(rtsp_parser_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 void pa_rtsp_header_ct_length(rtsp_parser_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 void pa_rtsp_header_transport_tcp(rtsp_parser_s *this)
@@ -340,6 +343,7 @@ void pa_rtsp_header_basic_authenticate(rtsp_parser_s *this)
 
 void pa_rtsp_header_ignore(rtsp_parser_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 void pa_rtsp_pubcmd_get(rtsp_parser_s *this)
@@ -544,10 +548,12 @@ void pa_rtsp_auth_response(rtsp_parser_s *this)
 
 void pa_rtsp_auth_stale(rtsp_parser_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 void pa_rtsp_auth_ignore(rtsp_parser_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 // === methods of generated structures =========================================

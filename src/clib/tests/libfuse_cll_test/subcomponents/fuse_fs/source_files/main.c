@@ -150,7 +150,7 @@ void fuse_fs_release(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 
   fprintf(stderr,"fuse_fs_release\n");
 
-  unsigned *counter = (unsigned *)(uintptr_t)fi->fh;
+  unsigned *counter = (unsigned *)(uintptr_t)fi->fh; // NOLINT(performance-no-int-to-ptr)
   cfree(counter);
 
   fuse_reply_err(req,0);
@@ -166,7 +166,7 @@ void fuse_fs_read(fuse_req_t req,fuse_ino_t ino,size_t size,off_t off,struct fus
   {
     CONT_INIT_CLEAR(bc_array_s,buffer);
 
-    unsigned *counter = (unsigned *)(uintptr_t)fi->fh;
+    unsigned *counter = (unsigned *)(uintptr_t)fi->fh; // NOLINT(performance-no-int-to-ptr)
 
     while (*counter < 100000)
     {

@@ -99,7 +99,7 @@ int id_daemon_s_update_databases(id_daemon_s *this)
     {
       if (idtn_ptr->valid)
       {
-        id_conf_database_s search_database_conf = {idtn_ptr->object.name,};
+        id_conf_database_s search_database_conf = {.name=idtn_ptr->object.name};
         unsigned database_conf_idx = id_conf_database_tree_s_get_idx(&this->config.databases,&search_database_conf);
 
         // - database not present in configuration -
@@ -124,7 +124,7 @@ int id_daemon_s_update_databases(id_daemon_s *this)
     do {
       if (cdtn_ptr->valid)
       {
-        idb_database_s search_database = {cdtn_ptr->object.name,};
+        idb_database_s search_database = {.name=cdtn_ptr->object.name};
         unsigned database_idx = idb_database_tree_s_get_idx(&this->databases,&search_database);
 
         if (database_idx == c_idx_not_exist)
@@ -281,7 +281,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       const string_s *db_name = va_arg(a_ap,const string_s *);
       var_s data_var = va_arg(a_ap,var_s);
 
-      idb_database_s search_db = {*db_name,};
+      idb_database_s search_db = {.name=*db_name};
       unsigned db_idx = idb_database_tree_s_get_idx(&this->databases,&search_db);
       if (db_idx == c_idx_not_exist)
       {
@@ -314,7 +314,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       const ui_array_s *doc_ids = va_arg(a_ap,const ui_array_s *);
       var_array_s *docs = va_arg(a_ap,var_array_s *);
 
-      idb_database_s search_db = {*db_name,};
+      idb_database_s search_db = {.name=*db_name};
       unsigned db_idx = idb_database_tree_s_get_idx(&this->databases,&search_db);
       if (db_idx == c_idx_not_exist)
       {
@@ -348,7 +348,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       const ui_array_s *doc_ids = va_arg(a_ap,const ui_array_s *);
       var_array_s *docs = va_arg(a_ap,var_array_s *);
 
-      idb_database_s search_db = {*db_name,};
+      idb_database_s search_db = {.name=*db_name};
       unsigned db_idx = idb_database_tree_s_get_idx(&this->databases,&search_db);
       if (db_idx == c_idx_not_exist)
       {
@@ -387,7 +387,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       const string_s *db_name = va_arg(a_ap,const string_s *);
       const ui_array_s *doc_ids = va_arg(a_ap,const ui_array_s *);
 
-      idb_database_s search_db = {*db_name,};
+      idb_database_s search_db = {.name=*db_name};
       unsigned db_idx = idb_database_tree_s_get_idx(&this->databases,&search_db);
       if (db_idx == c_idx_not_exist)
       {
@@ -419,7 +419,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       const string_s *db_name = va_arg(a_ap,const string_s *);
       const string_s *query = va_arg(a_ap,const string_s *);
 
-      idb_database_s search_db = {*db_name,};
+      idb_database_s search_db = {.name=*db_name};
       unsigned db_idx = idb_database_tree_s_get_idx(&this->databases,&search_db);
       if (db_idx == c_idx_not_exist)
       {
@@ -455,7 +455,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       const string_s *db_name = va_arg(a_ap,const string_s *);
       const string_s *query = va_arg(a_ap,const string_s *);
 
-      idb_database_s search_db = {*db_name,};
+      idb_database_s search_db = {.name=*db_name};
       unsigned db_idx = idb_database_tree_s_get_idx(&this->databases,&search_db);
       if (db_idx == c_idx_not_exist)
       {
@@ -491,7 +491,7 @@ int id_daemon_s_channel_callback(void *a_id_daemon,unsigned a_index,unsigned a_t
       const string_s *db_name = va_arg(a_ap,const string_s *);
       const string_s *query = va_arg(a_ap,const string_s *);
 
-      idb_database_s search_db = {*db_name,};
+      idb_database_s search_db = {.name=*db_name};
       unsigned db_idx = idb_database_tree_s_get_idx(&this->databases,&search_db);
       if (db_idx == c_idx_not_exist)
       {

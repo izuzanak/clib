@@ -37,7 +37,7 @@ int ssl_conn_s_write(ssl_conn_s *this,const void *a_src,int a_size)
   if (a_size > 0)
   {
     int cnt;
-    unsigned writed = 0;
+    int writed = 0;
 
     do
     {

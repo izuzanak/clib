@@ -109,10 +109,12 @@ inlines sd_record_header_s
 
 static inline void sd_record_s_init(sd_record_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void sd_record_s_clear(sd_record_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void sd_record_s_set(sd_record_s *this,const sd_record_header_s *a_header,
@@ -124,6 +126,7 @@ static inline void sd_record_s_set(sd_record_s *this,const sd_record_header_s *a
 
 static inline void sd_record_s_flush_all(sd_record_s *this)
 {/*{{{*/
+  (void)this;
 }/*}}}*/
 
 static inline void sd_record_s_swap(sd_record_s *this,sd_record_s *a_second)
