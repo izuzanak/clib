@@ -118,7 +118,7 @@ define fd_s dynamic
 
 static inline void fd_s_init(fd_s *this);
 static inline void fd_s_clear(fd_s *this);
-static inline void fd_s_flush_all(fd_s *this);
+static inline void fd_s_flush_all(const fd_s *this);
 static inline void fd_s_swap(fd_s *this,fd_s *a_second);
 static inline void fd_s_copy(const fd_s *this,const fd_s *a_src);
 static inline int fd_s_compare(const fd_s *this,const fd_s *a_second);
@@ -203,7 +203,7 @@ define socket_s dynamic
 
 static inline void socket_s_init(socket_s *this);
 static inline void socket_s_clear(socket_s *this);
-static inline void socket_s_flush_all(socket_s *this);
+static inline void socket_s_flush_all(const socket_s *this);
 static inline void socket_s_swap(socket_s *this,socket_s *a_second);
 static inline void socket_s_copy(const socket_s *this,const socket_s *a_src);
 static inline int socket_s_compare(const socket_s *this,const socket_s *a_second);
@@ -253,7 +253,7 @@ define pid_s dynamic
 
 static inline void pid_s_init(pid_s *this);
 static inline void pid_s_clear(pid_s *this);
-static inline void pid_s_flush_all(pid_s *this);
+static inline void pid_s_flush_all(const pid_s *this);
 static inline void pid_s_swap(pid_s *this,pid_s *a_second);
 static inline void pid_s_copy(const pid_s *this,const pid_s *a_src);
 static inline int pid_s_compare(const pid_s *this,const pid_s *a_second);
@@ -453,7 +453,7 @@ define rtc_s dynamic
 
 static inline void rtc_s_init(rtc_s *this);
 static inline void rtc_s_clear(rtc_s *this);
-static inline void rtc_s_flush_all(rtc_s *this);
+static inline void rtc_s_flush_all(const rtc_s *this);
 static inline void rtc_s_swap(rtc_s *this,rtc_s *a_second);
 static inline void rtc_s_copy(const rtc_s *this,const rtc_s *a_src);
 static inline int rtc_s_compare(const rtc_s *this,const rtc_s *a_second);
@@ -544,7 +544,7 @@ static inline void fd_s_clear(fd_s *this)
   fd_s_init(this);
 }/*}}}*/
 
-static inline void fd_s_flush_all(fd_s *this)
+static inline void fd_s_flush_all(const fd_s *this)
 {/*{{{*/
   (void)this;
 }/*}}}*/
@@ -740,7 +740,7 @@ static inline void socket_s_clear(socket_s *this)
   socket_s_init(this);
 }/*}}}*/
 
-static inline void socket_s_flush_all(socket_s *this)
+static inline void socket_s_flush_all(const socket_s *this)
 {/*{{{*/
   (void)this;
 }/*}}}*/
@@ -970,7 +970,7 @@ static inline void pid_s_clear(pid_s *this)
   pid_s_init(this);
 }/*}}}*/
 
-static inline void pid_s_flush_all(pid_s *this)
+static inline void pid_s_flush_all(const pid_s *this)
 {/*{{{*/
   (void)this;
 }/*}}}*/
@@ -1420,7 +1420,7 @@ static inline void rtc_s_clear(rtc_s *this)
   rtc_s_init(this);
 }/*}}}*/
 
-static inline void rtc_s_flush_all(rtc_s *this)
+static inline void rtc_s_flush_all(const rtc_s *this)
 {/*{{{*/
   (void)this;
 }/*}}}*/

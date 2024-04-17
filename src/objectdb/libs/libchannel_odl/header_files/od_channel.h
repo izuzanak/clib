@@ -65,9 +65,11 @@ enum
   od_channel_PATH,
   od_channel_MOD,
   od_channel_DATA,
+  od_channel_KEYS,
 
   od_channel_SET,
   od_channel_CMD,
+  od_channel_DELETE,
   od_channel_LIST,
   od_channel_GET,
   od_channel_WATCH,
@@ -85,6 +87,7 @@ enum
 
   od_channel_cbreq_SET = 0,
   od_channel_cbreq_CMD,
+  od_channel_cbreq_DELETE,
   od_channel_cbreq_LIST,
   od_channel_cbreq_GET,
   od_channel_cbreq_WATCH,
@@ -92,6 +95,7 @@ enum
 
   od_channel_cbresp_SET,
   od_channel_cbresp_CMD,
+  od_channel_cbresp_DELETE,
   od_channel_cbresp_LIST,
   od_channel_cbresp_GET,
   od_channel_cbresp_WATCH,

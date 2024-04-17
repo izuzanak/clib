@@ -14,9 +14,11 @@ const char *g_od_channel_strings[] =
   "path",
   "mod",
   "data",
+  "keys",
 
   "set",
   "cmd",
+  "delete",
   "list",
   "get",
   "watch",
@@ -197,6 +199,40 @@ int od_channel_s_conn_message(void *a_od_channel,unsigned a_index,const bc_array
       // - call callback -
       if (od_channel_s_message_call(this,a_index,od_channel_cbreq_CMD,id,
             loc_s_string_value(path_var),data_var))
+      {
+        throw_error(OD_CHANNEL_SERVER_CALLBACK_ERROR);
+      }
+    }/*}}}*/
+    break;
+  case od_channel_DELETE:
+    {/*{{{*/
+      var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+      var_s keys_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_KEYS].object);
+
+      if (path_var == NULL || path_var->v_type != c_bi_type_string ||
+          keys_var == NULL || keys_var->v_type != c_bi_type_array)
+      {
+        throw_error(OD_CHANNEL_MESSAGE_ERROR);
+      }
+
+      var_array_s *keys = loc_s_array_value(keys_var);
+      if (keys->used == 0)
+      {
+        throw_error(OD_CHANNEL_MESSAGE_ERROR);
+      }
+
+      var_s *k_ptr = keys->data;
+      var_s *k_ptr_end = k_ptr + keys->used;
+      do {
+        if (*k_ptr == NULL || (*k_ptr)->v_type != c_bi_type_string)
+        {
+          throw_error(OD_CHANNEL_MESSAGE_ERROR);
+        }
+      } while(++k_ptr < k_ptr_end);
+
+      // - call callback -
+      if (od_channel_s_message_call(this,a_index,od_channel_cbreq_DELETE,id,
+            loc_s_string_value(path_var),keys))
       {
         throw_error(OD_CHANNEL_SERVER_CALLBACK_ERROR);
       }
@@ -442,6 +478,23 @@ int od_channel_client_s_conn_message(void *a_od_channel_client,unsigned a_index,
 
         // - call callback -
         if (od_channel_client_s_message_call(this,od_channel_cbresp_CMD,id,
+              loc_s_string_value(path_var)))
+        {
+          throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);
+        }
+      }/*}}}*/
+      break;
+    case od_channel_DELETE:
+      {/*{{{*/
+        var_s path_var = loc_s_dict_get(msg_var,g_od_channel_vars.data[od_channel_PATH].object);
+
+        if (path_var == NULL || path_var->v_type != c_bi_type_string)
+        {
+          throw_error(OD_CHANNEL_MESSAGE_ERROR);
+        }
+
+        // - call callback -
+        if (od_channel_client_s_message_call(this,od_channel_cbresp_DELETE,id,
               loc_s_string_value(path_var)))
         {
           throw_error(OD_CHANNEL_CLIENT_CALLBACK_ERROR);

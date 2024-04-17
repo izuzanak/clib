@@ -321,7 +321,12 @@ int idb_database_s_update_extractor(idb_database_s *this,var_s a_data)
     CONT_INIT_CLEAR(fd_s,fd);
     if ((fd = open(this->old_path.data,O_RDWR | O_CREAT,0644)) == -1 ||
         fd_s_write(&fd,this->ii_dump.data,this->ii_dump.used*sizeof(ui)) ||
-        mmap_s_create(&this->extractor_index.mmap,NULL,this->ii_dump.used*sizeof(ui),PROT_READ,MAP_SHARED,fd,0))
+        mmap_s_create(&this->extractor_index.mmap,NULL,this->ii_dump.used*sizeof(ui),
+          PROT_READ,MAP_SHARED
+#ifdef CLIB_INDEXDB_MAP_LOCKED
+        | MAP_LOCKED | MAP_POPULATE
+#endif
+,fd,0))
     {
       throw_error(IDB_DATABASE_UPDATE_EXTRACTOR_WRITE_ERROR);
     }
@@ -572,7 +577,12 @@ int idb_database_s_dump_index(idb_database_s *this,
     CONT_INIT_CLEAR(fd_s,fd);
     if ((fd = open(this->old_path.data,O_RDWR | O_CREAT,0644)) == -1 ||
         fd_s_write(&fd,this->ii_dump.data,this->ii_dump.used*sizeof(ui)) ||
-        mmap_s_create(&inverted_index.mmap,NULL,this->ii_dump.used*sizeof(ui),PROT_READ,MAP_SHARED,fd,0))
+        mmap_s_create(&inverted_index.mmap,NULL,this->ii_dump.used*sizeof(ui),
+          PROT_READ,MAP_SHARED
+#ifdef CLIB_INDEXDB_MAP_LOCKED
+        | MAP_LOCKED | MAP_POPULATE
+#endif
+,fd,0))
     {
       throw_error(IDB_DATABASE_DUMP_INDEX_WRITE_ERROR);
     }
@@ -613,7 +623,12 @@ int idb_database_s_map_index(const char *a_path,idb_inverted_index_s *a_inverted
   }
 
   // - create inverted index mmap -
-  if (mmap_s_create(&a_inverted_index->mmap,NULL,fsize,PROT_READ,MAP_SHARED,fd,0))
+  if (mmap_s_create(&a_inverted_index->mmap,NULL,fsize,
+        PROT_READ,MAP_SHARED
+#ifdef CLIB_INDEXDB_MAP_LOCKED
+        | MAP_LOCKED | MAP_POPULATE
+#endif
+        ,fd,0))
   {
     throw_error(IDB_DATABASE_MAP_INDEX_MAP_ERROR);
   }
