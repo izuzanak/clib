@@ -331,6 +331,8 @@ void od_fuser_s_getattr(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 
 void od_fuser_s_opendir(fuse_req_t req,fuse_ino_t ino,struct fuse_file_info *fi)
 {/*{{{*/
+  (void)ino;
+
   debug_message_6(fprintf(stderr,"od_fuser_s_opendir, ino: %" HOST_LL_FORMAT "u\n",(ulli)ino));
 
   fuse_reply_open(req,fi);

@@ -65,6 +65,7 @@ int tcp_comm_s_run(tcp_comm_s *this)
 int tcp_comm_s_conn_new(void *a_tcp_comm,unsigned a_index)
 {/*{{{*/
   (void)a_tcp_comm;
+  (void)a_index;
 
   debug_message_5(fprintf(stderr,"tcp_comm_s_conn_new: %u\n",a_index));
 
@@ -74,6 +75,7 @@ int tcp_comm_s_conn_new(void *a_tcp_comm,unsigned a_index)
 int tcp_comm_s_conn_drop(void *a_tcp_comm,unsigned a_index)
 {/*{{{*/
   (void)a_tcp_comm;
+  (void)a_index;
 
   debug_message_5(fprintf(stderr,"tcp_comm_s_conn_drop: %u\n",a_index));
 
@@ -105,6 +107,7 @@ int tcp_comm_s_conn_recv(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message
 int tcp_comm_s_conn_send(void *a_tcp_comm,unsigned a_index)
 {/*{{{*/
   (void)a_tcp_comm;
+  (void)a_index;
 
   debug_message_5(fprintf(stderr,"tcp_comm_s_conn_send: %u\n",a_index));
 

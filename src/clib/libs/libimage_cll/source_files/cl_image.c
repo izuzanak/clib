@@ -515,24 +515,15 @@ int image_s_read_jpeg_file(image_s *this,const char *a_path)
 int image_s_write_jpeg_file(image_s *this,const char *a_path,int a_quality)
 {/*{{{*/
 
-  // - retrieve jpeg image details -
-  J_COLOR_SPACE color_space;
-  int components;
-
+  // - check jpeg image details -
   switch (this->pixel_format)
   {
   case c_image_pixel_format_GRAY8:
-    color_space = JCS_GRAYSCALE;
-    components = 1;
-    break;
   case c_image_pixel_format_RGB24:
-    color_space = JCS_RGB;
-    components = 3;
     break;
 
   // - ERROR -
   default:
-
     throw_error(IMAGE_UNSUPPORTED_PIXEL_FORMAT);
   }
 
@@ -562,6 +553,26 @@ int image_s_write_jpeg_file(image_s *this,const char *a_path,int a_quality)
 
   jpeg_create_compress(&cinfo);
   jpeg_stdio_dest(&cinfo,file);
+
+  // - retrieve jpeg image details -
+  J_COLOR_SPACE color_space;
+  int components;
+
+  switch (this->pixel_format)
+  {
+  case c_image_pixel_format_GRAY8:
+    color_space = JCS_GRAYSCALE;
+    components = 1;
+    break;
+  case c_image_pixel_format_RGB24:
+    color_space = JCS_RGB;
+    components = 3;
+    break;
+
+  // - ERROR -
+  default:
+    throw_error(IMAGE_UNSUPPORTED_PIXEL_FORMAT);
+  }
 
   // - initialize image properties -
   cinfo.image_width = this->width;

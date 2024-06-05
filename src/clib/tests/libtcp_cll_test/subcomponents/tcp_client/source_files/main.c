@@ -146,6 +146,7 @@ int tcp_comm_s_client_fd_event(void *a_tcp_comm,unsigned a_index,epoll_event_s *
 int tcp_comm_s_recv(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message)
 {/*{{{*/
   (void)a_tcp_comm;
+  (void)a_index;
 
   debug_message_5(fprintf(stderr,"conn_message: %u - %.*s\n",a_index,a_message->used,a_message->data));
 
@@ -158,6 +159,7 @@ int tcp_comm_s_recv(void *a_tcp_comm,unsigned a_index,bc_array_s *a_message)
 int tcp_comm_s_send(void *a_tcp_comm,unsigned a_index)
 {/*{{{*/
   (void)a_tcp_comm;
+  (void)a_index;
 
   debug_message_5(fprintf(stderr,"conn_send: %u\n",a_index));
 

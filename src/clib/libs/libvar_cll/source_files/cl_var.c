@@ -146,10 +146,15 @@ unsigned loc_s_register_type(
   g_loc_s___order[g_loc_s_type_cnt] = a_order;
 #if OPTION_TO_STRING == ENABLED
   g_loc_s___to_string[g_loc_s_type_cnt] = a_to_string;
+#else
+  (void)a_to_string;
 #endif
 #if OPTION_TO_JSON == ENABLED
   g_loc_s___to_json[g_loc_s_type_cnt] = a_to_json;
   g_loc_s___to_json_nice[g_loc_s_type_cnt] = a_to_json_nice;
+#else
+  (void)a_to_json;
+  (void)a_to_json_nice;
 #endif
 
   return g_loc_s_type_cnt++;

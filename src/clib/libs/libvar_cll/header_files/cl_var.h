@@ -601,11 +601,16 @@ static inline var_s loc_s_blank(void)
 
 static inline void loc_s_blank_clear(var_s this)
 {/*{{{*/
+  (void)this;
+
   debug_assert(this->v_type == c_bi_type_blank);
 }/*}}}*/
 
 static inline int loc_s_blank_order(var_s a_first,var_s a_second)
 {/*{{{*/
+  (void)a_first;
+  (void)a_second;
+
   debug_assert(a_first->v_type == c_bi_type_blank && a_second->v_type == c_bi_type_blank);
 
   return 0;
@@ -623,6 +628,8 @@ static inline void loc_s_blank_to_string(var_s this,bc_array_s *a_trg)
 #if OPTION_TO_JSON == ENABLED
 static inline void loc_s_blank_to_json(var_s this,bc_array_s *a_trg)
 {/*{{{*/
+  (void)this;
+
   debug_assert(this->v_type == c_bi_type_blank);
 
   bc_array_s_append_ptr(a_trg,"null");
@@ -649,6 +656,8 @@ static inline var_s loc_s_int(long long int a_value)
 
 static inline void loc_s_int_clear(var_s this)
 {/*{{{*/
+  (void)this;
+
   debug_assert(this->v_type == c_bi_type_integer);
 }/*}}}*/
 
@@ -714,6 +723,8 @@ static inline var_s loc_s_float(double a_value)
 
 static inline void loc_s_float_clear(var_s this)
 {/*{{{*/
+  (void)this;
+
   debug_assert(this->v_type == c_bi_type_float);
 }/*}}}*/
 

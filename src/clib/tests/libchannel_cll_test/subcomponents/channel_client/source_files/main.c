@@ -146,6 +146,8 @@ int channel_comm_s_client_fd_event(void *a_channel_comm,unsigned a_index,epoll_e
 int channel_comm_s_message(void *a_channel_comm,unsigned a_index,const bc_array_s *a_message)
 {/*{{{*/
   (void)a_channel_comm;
+  (void)a_index;
+  (void)a_message;
 
   debug_message_5(fprintf(stderr,"conn_message: %u - %.*s\n",a_index,a_message->used,a_message->data));
 

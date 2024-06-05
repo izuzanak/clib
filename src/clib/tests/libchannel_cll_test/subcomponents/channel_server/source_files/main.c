@@ -64,6 +64,7 @@ int channel_comm_s_run(channel_comm_s *this)
 int channel_comm_s_conn_new(void *a_channel_comm,unsigned a_index)
 {/*{{{*/
   (void)a_channel_comm;
+  (void)a_index;
 
   debug_message_5(fprintf(stderr,"channel_comm_s_conn_new: %u\n",a_index));
 
@@ -73,6 +74,7 @@ int channel_comm_s_conn_new(void *a_channel_comm,unsigned a_index)
 int channel_comm_s_conn_drop(void *a_channel_comm,unsigned a_index)
 {/*{{{*/
   (void)a_channel_comm;
+  (void)a_index;
 
   debug_message_5(fprintf(stderr,"channel_comm_s_conn_drop: %u\n",a_index));
 

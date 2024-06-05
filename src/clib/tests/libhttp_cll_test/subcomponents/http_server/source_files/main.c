@@ -100,6 +100,7 @@ int http_comm_s_conn_request(void *a_http_comm,unsigned a_index,int a_complete)
 int http_comm_s_conn_response(void *a_http_comm,unsigned a_index)
 {/*{{{*/
   (void)a_http_comm;
+  (void)a_index;
 
   debug_message_5(fprintf(stderr,"http_comm_s_conn_response: %u\n",a_index));
 

@@ -172,6 +172,7 @@ int gpsd_server_s_conn_drop(void *a_gpsd_server,unsigned a_index)
 int gpsd_server_s_conn_recv(void *a_gpsd_server,unsigned a_index,bc_array_s *a_message)
 {/*{{{*/
   (void)a_gpsd_server;
+  (void)a_index;
 
   debug_message_5(fprintf(stderr,"gpsd_server_s_conn_recv: %u - %.*s\n",a_index,a_message->used,a_message->data));
 
