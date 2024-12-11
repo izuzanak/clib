@@ -39,9 +39,9 @@ typedef struct ws_client_s ws_client_s;
 
 // === definition of structure ws_context_s ====================================
 
-typedef int (*ws_fd_event_cb_t)(ws_context_s *a_ws_context,
+WUR typedef int (*ws_fd_event_cb_t)(ws_context_s *a_ws_context,
     enum lws_callback_reasons a_reason,int a_fd,unsigned a_events);
-typedef int (*ws_prot_conn_cb_t)(ws_conn_s *a_conn);
+WUR typedef int (*ws_prot_conn_cb_t)(ws_conn_s *a_conn);
 
 typedef struct ws_context_s
 {

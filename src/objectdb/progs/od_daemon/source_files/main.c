@@ -200,7 +200,7 @@ int od_daemon_s_storage_read(od_daemon_s *this)
     crc16_s rec_crc = *((usi *)(buffer.data + sizeof(unsigned)));
 
     // - read record data -
-    if (rest_size < rec_size)
+    if (rest_size < rec_size || (rec_size == 0 && rec_crc == 0))
     {
       if (file_s_seek(&this->storage,-ODB_RECORD_HEADER_SIZE,SEEK_CUR))
       {

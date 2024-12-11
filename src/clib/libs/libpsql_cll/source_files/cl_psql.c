@@ -89,9 +89,13 @@ int psql_conn_s_process(psql_conn_s *this)
 
     if (result.res_ptr)
     {
-      // - call result callback -
-      this->result_cb(this->cb_object,this->cb_index,&result);
       this->last_blank = 0;
+
+      // - call result callback -
+      if (this->result_cb(this->cb_object,this->cb_index,&result))
+      {
+        throw_error(PSQL_CONN_CALLBACK_ERROR);
+      }
     }
     else
     {
@@ -100,9 +104,13 @@ int psql_conn_s_process(psql_conn_s *this)
         break;
       }
 
-      // - call result callback -
-      this->result_cb(this->cb_object,this->cb_index,NULL);
       this->last_blank = 1;
+
+      // - call result callback -
+      if (this->result_cb(this->cb_object,this->cb_index,NULL))
+      {
+        throw_error(PSQL_CONN_CALLBACK_ERROR);
+      }
     }
   }
 
@@ -117,7 +125,10 @@ int psql_conn_s_process(psql_conn_s *this)
     if (notify.ntf_ptr == NULL) { break; }
 
     // - call notify callback -
-    this->notify_cb(this->cb_object,this->cb_index,&notify);
+    if (this->notify_cb(this->cb_object,this->cb_index,&notify))
+    {
+      throw_error(PSQL_CONN_CALLBACK_ERROR);
+    }
   }
 
   return 0;

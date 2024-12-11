@@ -91,8 +91,8 @@ rb_tree<http_key_value_s> http_key_value_tree_s;
 
 // === definition of structure http_server_s ===================================
 
-typedef int (*http_connection_cb_t)(http_conn_s *a_conn);
-typedef int (*http_completed_cb_t)(http_conn_s *a_conn);
+WUR typedef int (*http_connection_cb_t)(http_conn_s *a_conn);
+WUR typedef int (*http_completed_cb_t)(http_conn_s *a_conn);
 
 typedef struct http_server_s
 {

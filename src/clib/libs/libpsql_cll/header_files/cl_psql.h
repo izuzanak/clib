@@ -27,11 +27,11 @@ include "cl_var.h"
 #define ERROR_PSQL_CONN_SET_NONBLOCK_ERROR 3
 #define ERROR_PSQL_CONN_PIPELINE_MODE_ERROR 4
 #define ERROR_PSQL_CONN_SEND_FLUSH_ERROR 5
-#define ERROR_PSQL_CONN_EXEC_QUERY_ERROR 6
-#define ERROR_PSQL_CONN_SEND_QUERY_ERROR 7
-#define ERROR_PSQL_CONN_CONSUME_INPUT_ERROR 8
-#define ERROR_PSQL_CONN_FLUSH_ERROR 9
-#define ERROR_PSQL_CONN_PROCESS_ERROR 10
+#define ERROR_PSQL_CONN_SEND_QUERY_ERROR 6
+#define ERROR_PSQL_CONN_CONSUME_INPUT_ERROR 7
+#define ERROR_PSQL_CONN_FLUSH_ERROR 8
+#define ERROR_PSQL_CONN_PROCESS_ERROR 9
+#define ERROR_PSQL_CONN_CALLBACK_ERROR 10
 
 // - postgresql oids -
 #define BOOLOID 16
@@ -49,8 +49,8 @@ typedef struct psql_notify_s psql_notify_s;
 
 // === definition of structure psql_conn_s =======================================
 
-typedef int (*psql_result_cb_t)(void *a_object,unsigned a_index,psql_result_s *a_result);
-typedef int (*psql_notify_cb_t)(void *a_object,unsigned a_index,psql_notify_s *a_notify);
+WUR typedef int (*psql_result_cb_t)(void *a_object,unsigned a_index,psql_result_s *a_result);
+WUR typedef int (*psql_notify_cb_t)(void *a_object,unsigned a_index,psql_notify_s *a_notify);
 
 typedef struct psql_conn_s
 {

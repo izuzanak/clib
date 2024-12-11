@@ -124,7 +124,10 @@ void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
   if (conn_ptr != NULL)
   {
     // - call completed callback -
-    server->completed_cb(conn_ptr);
+    if (server->completed_cb(conn_ptr))
+    {
+      // - ignore callback error -
+    }
 
     // - release http connection -
     http_conn_s_clear(conn_ptr);

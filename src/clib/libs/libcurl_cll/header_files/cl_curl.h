@@ -37,8 +37,8 @@ typedef struct curl_result_s curl_result_s;
 
 // === definition of structure curl_multi_s ====================================
 
-typedef int (*curl_socket_cb_t)(curl_multi_s *a_curl_multi,int a_what,int a_fd,unsigned a_events);
-typedef int (*curl_response_cb_t)(curl_multi_s *a_curl_multi,curl_result_s *a_curl_result);
+WUR typedef int (*curl_socket_cb_t)(curl_multi_s *a_curl_multi,int a_what,int a_fd,unsigned a_events);
+WUR typedef int (*curl_response_cb_t)(curl_multi_s *a_curl_multi,curl_result_s *a_curl_result);
 
 typedef struct curl_multi_s
 {

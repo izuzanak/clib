@@ -28,8 +28,8 @@ include "sd_segfiles.h"
 // === definition of structure sd_segment_handle_s =============================
 
 typedef void (*sd_segment_clear_cb_t)(void *a_object);
-typedef int (*sd_segment_write_record_cb_t)(void *a_object,time_s a_time,unsigned a_size,const char *a_data);
-typedef int (*sd_segment_get_record_cb_t)(void *a_object,time_s *a_time,bc_array_s *a_record);
+WUR typedef int (*sd_segment_write_record_cb_t)(void *a_object,time_s a_time,unsigned a_size,const char *a_data);
+WUR typedef int (*sd_segment_get_record_cb_t)(void *a_object,time_s *a_time,bc_array_s *a_record);
 
 typedef struct sd_segment_handle_s
 {
