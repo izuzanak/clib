@@ -185,12 +185,11 @@ void test_ui_array()
   CONT_INIT_CLEAR(ui_array_s,sorted);
 
   unsigned t_idx = ui_tree_s_get_min_value_idx(&tree,tree.root_idx);
-  unsigned s_idx = 0;
   do
   {
     ui_array_s_push(&sorted,tree.data[t_idx].object);
     t_idx = ui_tree_s_get_next_idx(&tree,t_idx);
-  } while(++s_idx,t_idx != c_idx_not_exist);
+  } while(t_idx != c_idx_not_exist);
 
   // - test function ui_binary_search -
   idx = 0;

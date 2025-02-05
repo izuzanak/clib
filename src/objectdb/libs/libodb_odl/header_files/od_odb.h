@@ -42,7 +42,7 @@ odb_node_s;
 
 extern unsigned g_type_odb_node;
 
-static inline var_s loc_s_odb_node();
+static inline var_s loc_s_odb_node(unsigned a_length,const char *a_data);
 static inline void loc_s_odb_node_clear(var_s this);
 static inline int loc_s_odb_node_order(var_s a_first,var_s a_second);
 #if OPTION_TO_STRING == ENABLED

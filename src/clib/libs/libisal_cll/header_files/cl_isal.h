@@ -1,5 +1,5 @@
 
-#ifndef CL_LIB_ISAL_H
+#ifndef CL_LIB_ISAL_H // NOLINT
 #define CL_LIB_ISAL_H
 
 @begin
