@@ -138,9 +138,20 @@ void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
 int http_server_s_create(http_server_s *this,usi a_port,
     http_connection_cb_t a_connection_cb,
     http_completed_cb_t a_completed_cb,
-    void *a_user_data)
+    void *a_user_data,
+    const struct MHD_OptionItem *a_mhd_opts)
 {/*{{{*/
   http_server_s_clear(this);
+
+  const struct MHD_OptionItem mhd_empty_opts[] = {
+    { MHD_OPTION_END,0,NULL }
+  };
+
+  // - initialize empty options -
+  if (a_mhd_opts == NULL)
+  {
+    a_mhd_opts = mhd_empty_opts;
+  }
 
   // - start http server -
   struct MHD_Daemon *daemon = MHD_start_daemon(
@@ -148,6 +159,7 @@ int http_server_s_create(http_server_s *this,usi a_port,
       http_server_s_connection_func,this,
       MHD_OPTION_NONCE_NC_SIZE,(unsigned)2000,
       MHD_OPTION_NOTIFY_COMPLETED,http_server_s_completed_func,this,
+      MHD_OPTION_ARRAY,a_mhd_opts,
       MHD_OPTION_END);
 
   // - ERROR -
@@ -346,7 +358,8 @@ methods http_epoll_s
 int http_epoll_s_create(http_epoll_s *this,usi a_port,
     http_connection_cb_t a_connection_cb,
     http_completed_cb_t a_completed_cb,
-    void *a_user_data)
+    void *a_user_data,
+    const struct MHD_OptionItem *a_mhd_opts)
 {/*{{{*/
   http_epoll_s_clear(this);
 
@@ -358,7 +371,8 @@ int http_epoll_s_create(http_epoll_s *this,usi a_port,
         a_port,
         a_connection_cb,
         a_completed_cb,
-        a_user_data))
+        a_user_data,
+        a_mhd_opts))
   {
     throw_error(HTTP_EPOLL_CREATE_ERROR);
   }

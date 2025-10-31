@@ -128,7 +128,8 @@ void http_server_s_completed_func(void *cls,struct MHD_Connection *connection,
 WUR libmicrohttp_cll_EXPORT int http_server_s_create(http_server_s *this,usi a_port,
     http_connection_cb_t a_connection_cb,
     http_completed_cb_t a_completed_cb,
-    void *a_user_data);
+    void *a_user_data,
+    const struct MHD_OptionItem *a_mhd_opts);
 WUR libmicrohttp_cll_EXPORT int http_server_s_fds(http_server_s *this,pollfd_array_s *a_trg);
 static inline bi http_server_s_timeout(http_server_s *this,ulli *a_timeout);
 WUR static inline int http_server_s_process(http_server_s *this);
@@ -243,7 +244,8 @@ http_epoll_s;
 WUR libmicrohttp_cll_EXPORT int http_epoll_s_create(http_epoll_s *this,usi a_port,
     http_connection_cb_t a_connection_cb,
     http_completed_cb_t a_completed_cb,
-    void *a_user_data);
+    void *a_user_data,
+    const struct MHD_OptionItem *a_mhd_opts);
 WUR static inline int http_epoll_s_check(http_epoll_s *this);
 WUR libmicrohttp_cll_EXPORT int http_epoll_s_process(http_epoll_s *this);
 WUR libmicrohttp_cll_EXPORT int http_epoll_s_update_epoll_fds(http_epoll_s *this);

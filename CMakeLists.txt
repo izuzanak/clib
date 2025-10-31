@@ -225,7 +225,9 @@ if(NOT DEFINED CS_COMPONENT_DIRS)
       "src/inverteddb/tests"
       "src/inverteddb/progs"
       "src/watchdogd/tests"
-      "src/watchdogd/progs")
+      "src/watchdogd/progs"
+      "src/httprecv/tests"
+      "src/httprecv/progs")
 endif()
 
 foreach(COMPONENT_DIR ${CS_COMPONENT_DIRS})
