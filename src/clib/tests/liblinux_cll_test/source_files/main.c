@@ -444,7 +444,10 @@ void test_epoll()
 
 void test_rtc()
 {/*{{{*/
-#if 0
+#define ENABLE_RTC_TEST_ONE 0
+#define ENABLE_RTC_TEST_TWO 0
+
+#if ENABLE_RTC_TEST_ONE
   CONT_INIT_CLEAR(rtc_s,rtc);
   cassert(rtc_s_open(&rtc,"/dev/rtc0") == 0);
 
@@ -455,7 +458,7 @@ void test_rtc()
   time_s_to_string(&time,&buffer);
 #endif
 
-#if 0
+#if ENABLE_RTC_TEST_TWO
   time_s time;
   cassert(clock_s_gettime(CLOCK_REALTIME,&time) == 0);
 

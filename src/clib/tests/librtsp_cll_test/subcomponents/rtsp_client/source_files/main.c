@@ -51,13 +51,16 @@ int client_recv_packet(void *a_client_list,unsigned a_index,time_s a_time,const 
   (void)a_time;
   (void)a_src;
 
+#define ENABLE_RECEIVE_INDICATION 1
+#define ENABLE_NTP_TIMESTAMP 0
+
   // - packet received indication -
-#if 1
+#if ENABLE_RECEIVE_INDICATION
   fputc('.',stderr);
 #endif
 
   // - ntp timestamp -
-#if 0
+#if ENABLE_NTP_TIMESTAMP
   const char *onvif = a_src->data + RTP_TCP_PKT_HEADER_SIZE;
 
   unsigned seconds;

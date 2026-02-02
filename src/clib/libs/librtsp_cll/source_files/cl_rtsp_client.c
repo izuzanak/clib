@@ -649,9 +649,8 @@ int rtsp_client_s_fd_event(rtsp_client_s *this,unsigned a_index,epoll_event_s *a
 "PLAY %s RTSP/1.0\r\n"
 "CSeq: %u\r\n"
 "Session: %s\r\n"
-#if 0 // - debug option -
-"Require: onvif-replay\r\n"
-#endif
+// - debug option -
+//"Require: onvif-replay\r\n"
 "\r\n",this->media_url.data,this->sequence++,this->session.data);
 
           if (rtsp_client_s_send_cmd(this,"PLAY",&this->media_url))

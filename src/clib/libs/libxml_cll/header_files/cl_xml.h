@@ -6,7 +6,6 @@
 include "cl_var.h"
 @end
 
-#include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
