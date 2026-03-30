@@ -45,7 +45,7 @@ methods pipe_array_s
 void test_pollfd()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define POLLFD_ARRAY_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -61,7 +61,7 @@ void test_pollfd()
   bc_array_s_push(&buffer,'\0');\
 }/*}}}*/
 
-  CONT_INIT(pollfd_array_s,pollfd_array);
+  CONT_INIT_CLEAR(pollfd_array_s,pollfd_array);
   int idx = 0;
   do {
     pollfd_s pollfd = {idx,0,0};
@@ -71,7 +71,7 @@ void test_pollfd()
   cassert(strcmp(buffer.data,"[pollfd_s{0,0,0},pollfd_s{1,0,0},pollfd_s{2,0,0}]") == 0);
   cassert(pollfd_array_s_compare(&pollfd_array,&pollfd_array));
 
-  CONT_INIT(pollfd_tree_s,pollfd_tree);
+  CONT_INIT_CLEAR(pollfd_tree_s,pollfd_tree);
   idx = 0;
   do {
     pollfd_s pollfd = {idx,0,0};
@@ -80,16 +80,13 @@ void test_pollfd()
   POLLFD_TREE_S_TO_BUFFER(&pollfd_tree);
   cassert(strcmp(buffer.data,"[pollfd_s{0,0,0},pollfd_s{1,0,0},pollfd_s{2,0,0}]") == 0);
 
-  pollfd_tree_s_clear(&pollfd_tree);
-  pollfd_array_s_clear(&pollfd_array);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_file()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define FILE_ARRAY_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -98,7 +95,7 @@ void test_file()
   bc_array_s_push(&buffer,'\0');\
 }/*}}}*/
 
-  CONT_INIT(file_array_s,file_array);
+  CONT_INIT_CLEAR(file_array_s,file_array);
   file_array_s_push_blanks(&file_array,3);
   FILE_ARRAY_S_TO_BUFFER(&file_array);
 
@@ -132,7 +129,7 @@ void test_file()
   buffer.used = 0;
   cassert(stream_s_read(&file_array.data[1],&buffer) == 0);
 
-  CONT_INIT(string_s,string);
+  CONT_INIT_CLEAR(string_s,string);
   string_s_set_format(&string,"%s%s",text,text);
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,string.data) == 0);
@@ -172,16 +169,13 @@ void test_file()
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,"world!\n") == 0);
 
-  string_s_clear(&string);
-  file_array_s_clear(&file_array);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_pipe()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define PIPE_ARRAY_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -190,7 +184,7 @@ void test_pipe()
   bc_array_s_push(&buffer,'\0');\
 }/*}}}*/
 
-  CONT_INIT(pipe_array_s,pipe_array);
+  CONT_INIT_CLEAR(pipe_array_s,pipe_array);
   pipe_array_s_push_blanks(&pipe_array,3);
   PIPE_ARRAY_S_TO_BUFFER(&pipe_array);
 
@@ -227,7 +221,7 @@ void test_pipe()
   buffer.used = 0;
   cassert(stream_s_read(&pipe_array.data[1],&buffer) == 0);
 
-  CONT_INIT(string_s,string);
+  CONT_INIT_CLEAR(string_s,string);
   string_s_set_format(&string,"%s%s",text,text);
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,string.data) == 0);
@@ -255,11 +249,7 @@ void test_pipe()
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,text) == 0);
 
-  string_s_clear(&string);
 #endif
-
-  pipe_array_s_clear(&pipe_array);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 

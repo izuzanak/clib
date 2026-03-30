@@ -24,12 +24,10 @@ void test_conf_parse()
 #if OPTION_TO_STRING == ENABLED
 
   // - wd_config_s_read_file -
-  CONT_INIT(wd_config_s,wd_config);
+  CONT_INIT_CLEAR(wd_config_s,wd_config);
   cassert(wd_config_s_read_file(&wd_config,
     "tests/libconf_wdl_test/resources/wd_config.json") == 0);
   DEBUG_PRINT(wd_config_s,&wd_config);
-
-  wd_config_s_clear(&wd_config);
 #endif
 }/*}}}*/
 

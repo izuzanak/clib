@@ -29,7 +29,7 @@ void test_ino_size()
 void test_create()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
   struct fuse_lowlevel_ops fuse_oper = {};
 
@@ -39,8 +39,6 @@ void test_create()
   CONT_INIT_CLEAR(fuse_session_s,session);
   cassert(fuse_session_s_create(&session,&args,&fuse_oper,NULL) == 0);
   cassert(fuse_session_s_mount(&session,"tests/libfuse_cll_test/create") == 0);
-
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 

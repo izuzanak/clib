@@ -51,7 +51,7 @@ methods fd_array_s
 void test_fd()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define FD_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -67,7 +67,7 @@ void test_fd()
   bc_array_s_push(&buffer,'\0');\
 }/*}}}*/
 
-  CONT_INIT(regex_s,regex);
+  CONT_INIT_CLEAR(regex_s,regex);
   regmatch_s match;
 
   fd_s fd = creat("tests/liblinux_cll_test/fd/test.file",0666);
@@ -75,7 +75,7 @@ void test_fd()
   cassert(regex_s_create(&regex,"^fd_s\\{[0-9]+\\}$") == 0);
   cassert(regex_s_match(&regex,buffer.data,&match));
 
-  CONT_INIT(fd_array_s,fd_array);
+  CONT_INIT_CLEAR(fd_array_s,fd_array);
   unsigned idx = 0;
   do {
     fd_array_s_push_blank(&fd_array);
@@ -84,9 +84,6 @@ void test_fd()
   cassert(strcmp(buffer.data,"[fd_s{-1},fd_s{-1},fd_s{-1},fd_s{-1},fd_s{-1}]") == 0);
 
   fd_s_clear(&fd);
-  regex_s_clear(&regex);
-  fd_array_s_clear(&fd_array);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
@@ -122,7 +119,7 @@ void test_dir()
 void test_mmap()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define MMAP_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -148,14 +145,13 @@ void test_mmap()
     *ptr = '0' + ((ptr - (char *)mmap.address) % 10);
   } while(++ptr < ptr_end);
 
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_socket_address()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define SOCKET_ADDRESS_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -169,23 +165,20 @@ void test_socket_address()
   SOCKET_ADDRESS_S_TO_BUFFER(&address);
   puts(buffer.data);
 
-  CONT_INIT(bc_array_s,name);
+  CONT_INIT_CLEAR(bc_array_s,name);
   cassert(socket_address_s_name(&address,&name) == 0);
   bc_array_s_push(&name,'\0');
   cassert(strcmp(name.data,"127.0.0.1") == 0);
 
   unsigned short port = socket_address_s_port(&address);
   cassert(port == 8000);
-
-  bc_array_s_clear(&name);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_socket()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define SOCKET_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -194,69 +187,58 @@ void test_socket()
   bc_array_s_push(&buffer,'\0');\
 }/*}}}*/
 
-  CONT_INIT(socket_s,socket_0);
+  CONT_INIT_CLEAR(socket_s,socket_0);
   cassert(socket_s_create(&socket_0,AF_INET,SOCK_STREAM) == 0);
   SOCKET_S_TO_BUFFER(&socket_0);
   puts(buffer.data);
-
-  socket_s_clear(&socket_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_socket_udp()
 {/*{{{*/
-  CONT_INIT(string_array_s,arguments);
+  CONT_INIT_CLEAR(string_array_s,arguments);
   string_array_s_push_ptr(&arguments,"./liblinux_cll_test_socket_udp_recvfrom");
 
-  CONT_INIT(pid_s,recv_pid);
+  CONT_INIT_CLEAR(pid_s,recv_pid);
   cassert(pid_s_execute(&recv_pid,&arguments) == 0);
   usleep(100000);
 
   arguments.used = 0;
   string_array_s_push_ptr(&arguments,"./liblinux_cll_test_socket_udp_sendto");
 
-  CONT_INIT(pid_s,send_pid);
+  CONT_INIT_CLEAR(pid_s,send_pid);
   cassert(pid_s_execute(&send_pid,&arguments) == 0);
 
   int status;
   cassert(waitpid(send_pid,&status,0) != -1 && status == 0);
   cassert(waitpid(recv_pid,&status,0) != -1 && status == 0);
-
-  pid_s_clear(&send_pid);
-  pid_s_clear(&recv_pid);
-  string_array_s_clear(&arguments);
 }/*}}}*/
 
 void test_socket_tcp()
 {/*{{{*/
-  CONT_INIT(string_array_s,arguments);
+  CONT_INIT_CLEAR(string_array_s,arguments);
   string_array_s_push_ptr(&arguments,"./liblinux_cll_test_socket_tcp_server");
 
-  CONT_INIT(pid_s,server_pid);
+  CONT_INIT_CLEAR(pid_s,server_pid);
   cassert(pid_s_execute(&server_pid,&arguments) == 0);
   usleep(100000);
 
   arguments.used = 0;
   string_array_s_push_ptr(&arguments,"./liblinux_cll_test_socket_tcp_client");
 
-  CONT_INIT(pid_s,client_pid);
+  CONT_INIT_CLEAR(pid_s,client_pid);
   cassert(pid_s_execute(&client_pid,&arguments) == 0);
 
   int status;
   cassert(waitpid(client_pid,&status,0) != -1 && status == 0);
   cassert(waitpid(server_pid,&status,0) != -1 && status == 0);
-
-  pid_s_clear(&client_pid);
-  pid_s_clear(&server_pid);
-  string_array_s_clear(&arguments);
 }/*}}}*/
 
 void test_aio()
 {/*{{{*/
 #if SUBSYSTEM_TYPE == SUBSYSTEM_TYPE_LINUX
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define AIO_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -324,7 +306,6 @@ void test_aio()
   cassert(aio_s_return(&aio,&result) == 0 && result == (ssize_t)data_size);
   cassert(strcmp(write_data,read_data) == 0);
 
-  bc_array_s_clear(&buffer);
 #endif
 #endif
 }/*}}}*/
@@ -332,7 +313,7 @@ void test_aio()
 void test_pid()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define PID_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -341,21 +322,17 @@ void test_pid()
   bc_array_s_push(&buffer,'\0');\
 }/*}}}*/
 
-  CONT_INIT(string_array_s,arguments);
+  CONT_INIT_CLEAR(string_array_s,arguments);
 
   string_array_s_push_blank(&arguments);
   string_s_set_ptr(string_array_s_last(&arguments),"ls");
 
   // - pid_s_execute -
-  CONT_INIT(pid_s,pid_0);
+  CONT_INIT_CLEAR(pid_s,pid_0);
   cassert(pid_s_execute(&pid_0,&arguments) == 0);
 
   int status;
   waitpid(pid_0,&status,0);
-
-  pid_s_clear(&pid_0);
-  string_array_s_clear(&arguments);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
@@ -422,7 +399,7 @@ void test_pthread()
 void test_epoll()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define EPOLL_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -437,8 +414,6 @@ void test_epoll()
   ui_array_s_to_string(NAME,&buffer);\
   bc_array_s_push(&buffer,'\0');\
 }/*}}}*/
-
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 

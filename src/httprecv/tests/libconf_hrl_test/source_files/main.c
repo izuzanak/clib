@@ -24,12 +24,10 @@ void test_conf_parse()
 #if OPTION_TO_STRING == ENABLED
 
   // - hr_config_s_read_file -
-  CONT_INIT(hr_config_s,hr_config);
+  CONT_INIT_CLEAR(hr_config_s,hr_config);
   cassert(hr_config_s_read_file(&hr_config,
     "tests/libconf_hrl_test/resources/hr_config.json") == 0);
   DEBUG_PRINT(hr_config_s,&hr_config);
-
-  hr_config_s_clear(&hr_config);
 #endif
 }/*}}}*/
 

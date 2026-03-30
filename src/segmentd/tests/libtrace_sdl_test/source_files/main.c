@@ -23,7 +23,7 @@ test_function_t test_functions[] =
 
 void test_trace()
 {/*{{{*/
-#define TEST_TRACE_FILE "tests/libtrace_sdl_test/trace/trace.img"
+#define TEST_TRACE_FILE "/dev/shm/trace.img"
 
   CONT_INIT_CLEAR(fd_s,fd);
   if ((fd = open(TEST_TRACE_FILE,O_RDWR,0)) == -1)

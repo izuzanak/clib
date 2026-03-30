@@ -126,8 +126,8 @@ methods dynamic_choice_s
 
 void test_bc_array()
 {/*{{{*/
-  CONT_INIT(bc_array_s,buffer_0);
-  CONT_INIT(bc_array_s,buffer_1);
+  CONT_INIT_CLEAR(bc_array_s,buffer_0);
+  CONT_INIT_CLEAR(bc_array_s,buffer_1);
 
   const char *data = "Hello world";
 
@@ -165,8 +165,6 @@ void test_bc_array()
   bc_array_s_push(&buffer_0,'\0');
   cassert(strcmp(buffer_0.data,"world") == 0);
 
-  bc_array_s_clear(&buffer_1);
-  bc_array_s_clear(&buffer_0);
 }/*}}}*/
 
 void test_ui_array()
@@ -201,7 +199,7 @@ void test_ui_array()
 void test_atomic()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define ATOMIC_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -238,14 +236,13 @@ void test_atomic()
   ATOMIC_S_TO_BUFFER(&atomic_0);
   cassert(strcmp(buffer.data,"atomic_s{12}") == 0);
 
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_static()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define STATIC_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -273,7 +270,7 @@ void test_static()
   cassert(strcmp(buffer.data,"{\"first\":1,\"second\":2,\"third\":3}") == 0);
 
   // - static_s_to_json_nice -
-  CONT_INIT(json_nice_s,json_nice);
+  CONT_INIT_CLEAR(json_nice_s,json_nice);
   json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
@@ -286,17 +283,15 @@ void test_static()
 "==--\"third\": 3\n"
 "==}") == 0);
 
-  json_nice_s_clear(&json_nice);
 #endif
 
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_string()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
   // - string_s_init -
   string_s string_0;
@@ -313,7 +308,7 @@ void test_string()
   cassert(string_0.size == strlen(data_0) + 1 && strcmp(string_0.data,data_0) == 0);
 
   // - string_s_swap -
-  CONT_INIT(string_s,string_1);
+  CONT_INIT_CLEAR(string_s,string_1);
   string_s_swap(&string_0,&string_1);
   cassert(string_0.size == 1);
   cassert(string_1.size == strlen(data_0) + 1 && strcmp(string_1.data,data_0) == 0);
@@ -343,16 +338,14 @@ void test_string()
   string_s_clear(&string_1);
   cassert(!string_s_compare(&string_0,&string_1));
 
-  string_s_clear(&string_1);
   string_s_clear(&string_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_basic_type_array()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define BASIC_ARRAY_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -439,14 +432,13 @@ void test_basic_type_array()
 
   ui_array_s_clear(&array_1);
   ui_array_s_clear(&array_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_static_type_array()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define STATIC_ARRAY_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -479,7 +471,7 @@ void test_static_type_array()
     strcmp(buffer.data,"[{first:1,second:2,third:3},{first:4,second:5,third:6},{first:7,second:8,third:9}]") == 0);
 
   // - static_array_s_swap -
-  CONT_INIT(static_array_s,array_1);
+  CONT_INIT_CLEAR(static_array_s,array_1);
   static_array_s_swap(&array_0,&array_1);
   STATIC_ARRAY_S_TO_BUFFER(&array_1);
   cassert(array_0.size == 0 && array_0.used == 0 && array_1.size == 3 && array_1.used == 3 &&
@@ -540,7 +532,7 @@ void test_static_type_array()
   cassert(strcmp(buffer.data,"[{\"first\":0,\"second\":0,\"third\":0},{\"first\":1,\"second\":1,\"third\":1},{\"first\":2,\"second\":2,\"third\":2}]") == 0);
 
   // - static_array_s_to_json_nice -
-  CONT_INIT(json_nice_s,json_nice);
+  CONT_INIT_CLEAR(json_nice_s,json_nice);
   json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
@@ -565,19 +557,16 @@ void test_static_type_array()
 "==--}\n"
 "==]") == 0);
 
-  json_nice_s_clear(&json_nice);
 #endif
 
-  static_array_s_clear(&array_1);
   static_array_s_clear(&array_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_dynamic_type_array()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define DYNAMIC_ARRAY_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -594,16 +583,15 @@ void test_dynamic_type_array()
   // - string_array_s_push -
   const char *data[] = {"One","Two","Three","Four"};
   do {
-    CONT_INIT(string_s,string);
+    CONT_INIT_CLEAR(string_s,string);
     string_s_set_ptr(&string,data[array_0.used]);
     string_array_s_push(&array_0,&string);
-    string_s_clear(&string);
   } while(array_0.used < sizeof(data)/sizeof(data[0]));
   DYNAMIC_ARRAY_S_TO_BUFFER(&array_0)
   cassert(array_0.used == 4 && strcmp(buffer.data,"[One,Two,Three,Four]") == 0);
 
   // - string_array_s_push_blank -
-  CONT_INIT(string_array_s,array_1);
+  CONT_INIT_CLEAR(string_array_s,array_1);
   do {
     string_array_s_push_blank(&array_1);
     string_s_set_ptr(string_array_s_last(&array_1),data[4 - array_1.used]);
@@ -653,10 +641,9 @@ void test_dynamic_type_array()
   // - string_array_s_fill -
   array_0.used = 0;
   string_array_s_copy_resize(&array_0,3);
-  CONT_INIT(string_s,string);
+  CONT_INIT_CLEAR(string_s,string);
   string_s_set_ptr(&string,"Hello world!");
   string_array_s_fill(&array_0,&string);
-  string_s_clear(&string);
   DYNAMIC_ARRAY_S_TO_BUFFER(&array_0);
   cassert(array_0.used == 3 && array_0.size == 3 &&
     strcmp(buffer.data,"[Hello world!,Hello world!,Hello world!]") == 0);
@@ -687,16 +674,14 @@ void test_dynamic_type_array()
   cassert(string_array_s_compare(&array_0,&array_1) &&
     strcmp(buffer.data,"[idx: 0,idx: 1,idx: 2]") == 0);
 
-  string_array_s_clear(&array_1);
   string_array_s_clear(&array_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_basic_type_queue()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define BASIC_QUEUE_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -719,14 +704,13 @@ void test_basic_type_queue()
   cassert(strcmp(buffer.data,"[0,1,2,3,4,5,6,7,8,9]") == 0);
 
   ui_queue_s_clear(&queue_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_static_type_queue()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define STATIC_QUEUE_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -757,7 +741,7 @@ void test_static_type_queue()
   cassert(strcmp(buffer.data,"[{\"first\":0,\"second\":0,\"third\":0},{\"first\":1,\"second\":1,\"third\":1},{\"first\":2,\"second\":2,\"third\":2}]") == 0);
 
   // - static_queue_s_to_json_nice -
-  CONT_INIT(json_nice_s,json_nice);
+  CONT_INIT_CLEAR(json_nice_s,json_nice);
   json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
@@ -782,18 +766,16 @@ void test_static_type_queue()
 "==--}\n"
 "==]") == 0);
 
-  json_nice_s_clear(&json_nice);
 #endif
 
   static_queue_s_clear(&queue_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_dynamic_type_queue()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define DYNAMIC_QUEUE_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -810,10 +792,9 @@ void test_dynamic_type_queue()
   // - string_queue_s_insert -
   const char *data[] = {"One","Two","Three","Four"};
   do {
-    CONT_INIT(string_s,string);
+    CONT_INIT_CLEAR(string_s,string);
     string_s_set_ptr(&string,data[queue_0.used]);
     string_queue_s_insert(&queue_0,&string);
-    string_s_clear(&string);
   } while(queue_0.used < sizeof(data)/sizeof(data[0]));
   DYNAMIC_QUEUE_S_TO_BUFFER(&queue_0);
   cassert(strcmp(buffer.data,"[One,Two,Three,Four]") == 0);
@@ -825,14 +806,13 @@ void test_dynamic_type_queue()
   cassert(strcmp(buffer.data,"One -- Two -- Three -- Four") == 0);
 
   string_queue_s_clear(&queue_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_basic_type_list()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define BASIC_LIST_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -855,14 +835,13 @@ void test_basic_type_list()
   cassert(strcmp(buffer.data,"[0,1,2,3,4,5,6,7,8,9]") == 0);
 
   ui_list_s_clear(&list_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_static_type_list()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define STATIC_LIST_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -893,7 +872,7 @@ void test_static_type_list()
   cassert(strcmp(buffer.data,"[{\"first\":0,\"second\":0,\"third\":0},{\"first\":1,\"second\":1,\"third\":1},{\"first\":2,\"second\":2,\"third\":2}]") == 0);
 
   // - static_list_s_to_json_nice -
-  CONT_INIT(json_nice_s,json_nice);
+  CONT_INIT_CLEAR(json_nice_s,json_nice);
   json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
@@ -918,18 +897,16 @@ void test_static_type_list()
 "==--}\n"
 "==]") == 0);
 
-  json_nice_s_clear(&json_nice);
 #endif
 
   static_list_s_clear(&list_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_dynamic_type_list()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define DYNAMIC_LIST_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -947,10 +924,9 @@ void test_dynamic_type_list()
   const char *data[] = {"One","Two","Three","Four"};
   unsigned idx = 0;
   do {
-    CONT_INIT(string_s,string);
+    CONT_INIT_CLEAR(string_s,string);
     string_s_set_ptr(&string,data[idx]);
     string_list_s_append(&list_0,&string);
-    string_s_clear(&string);
   } while(++idx < sizeof(data)/sizeof(data[0]));
   DYNAMIC_LIST_S_TO_BUFFER(&list_0);
   cassert(strcmp(buffer.data,"[One,Two,Three,Four]") == 0);
@@ -962,14 +938,13 @@ void test_dynamic_type_list()
   cassert(strcmp(buffer.data,"One -- Two -- Three -- Four") == 0);
 
   string_list_s_clear(&list_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_basic_type_tree()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define BASIC_TREE_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -992,14 +967,13 @@ void test_basic_type_tree()
   cassert(strcmp(buffer.data,"[0,1,2,3,4,5,6,7,8,9]") == 0);
 
   ui_tree_s_clear(&tree_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_static_type_tree()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define STATIC_TREE_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -1030,7 +1004,7 @@ void test_static_type_tree()
   cassert(strcmp(buffer.data,"[{\"first\":0,\"second\":0,\"third\":0},{\"first\":1,\"second\":1,\"third\":1},{\"first\":2,\"second\":2,\"third\":2}]") == 0);
 
   // - static_tree_s_to_json_nice -
-  CONT_INIT(json_nice_s,json_nice);
+  CONT_INIT_CLEAR(json_nice_s,json_nice);
   json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
@@ -1055,18 +1029,16 @@ void test_static_type_tree()
 "==--}\n"
 "==]") == 0);
 
-  json_nice_s_clear(&json_nice);
 #endif
 
   static_tree_s_clear(&tree_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_dynamic_type_tree()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define DYNAMIC_TREE_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -1084,10 +1056,9 @@ void test_dynamic_type_tree()
   const char *data[] = {"One","Two","Three","Four"};
   unsigned idx = 0;
   do {
-    CONT_INIT(string_s,string);
+    CONT_INIT_CLEAR(string_s,string);
     string_s_set_ptr(&string,data[idx]);
     string_tree_s_swap_insert(&tree_0,&string);
-    string_s_clear(&string);
   } while(++idx < sizeof(data)/sizeof(data[0]));
   DYNAMIC_TREE_S_TO_BUFFER(&tree_0);
   cassert(strcmp(buffer.data,"[One,Two,Four,Three]") == 0);
@@ -1099,7 +1070,6 @@ void test_dynamic_type_tree()
   cassert(strcmp(buffer.data,"One -- Two -- Four -- Three") == 0);
 
   string_tree_s_clear(&tree_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 

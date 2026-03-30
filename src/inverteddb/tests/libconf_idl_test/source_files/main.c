@@ -24,12 +24,10 @@ void test_conf_parse()
 #if OPTION_TO_STRING == ENABLED
 
   // - id_config_s_read_file -
-  CONT_INIT(id_config_s,id_config);
+  CONT_INIT_CLEAR(id_config_s,id_config);
   cassert(id_config_s_read_file(&id_config,
     "tests/libconf_idl_test/resources/id_config.json") == 0);
   DEBUG_PRINT(id_config_s,&id_config);
-
-  id_config_s_clear(&id_config);
 #endif
 }/*}}}*/
 

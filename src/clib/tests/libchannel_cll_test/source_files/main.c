@@ -23,17 +23,17 @@ test_function_t test_functions[] =
 
 void test_channel()
 {/*{{{*/
-  CONT_INIT(string_array_s,arguments);
+  CONT_INIT_CLEAR(string_array_s,arguments);
   string_array_s_push_ptr(&arguments,"./libchannel_cll_test_channel_server");
 
-  CONT_INIT(pid_s,server_pid);
+  CONT_INIT_CLEAR(pid_s,server_pid);
   cassert(pid_s_execute(&server_pid,&arguments) == 0);
   usleep(100000);
 
   arguments.used = 0;
   string_array_s_push_ptr(&arguments,"./libchannel_cll_test_channel_client");
 
-  CONT_INIT(pid_s,client_pid);
+  CONT_INIT_CLEAR(pid_s,client_pid);
   cassert(pid_s_execute(&client_pid,&arguments) == 0);
   usleep(500000);
 
@@ -42,10 +42,6 @@ void test_channel()
   int status;
   cassert(waitpid(client_pid,&status,0) != -1 && status == 0);
   cassert(waitpid(server_pid,&status,0) != -1 && status == 0);
-
-  pid_s_clear(&client_pid);
-  pid_s_clear(&server_pid);
-  string_array_s_clear(&arguments);
 }/*}}}*/
 
 // === program entry function ==================================================

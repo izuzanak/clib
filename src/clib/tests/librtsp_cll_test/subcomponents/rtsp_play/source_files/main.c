@@ -129,7 +129,7 @@ int rtsp_player_s_conn_get_sdp(void *a_rtsp_player,unsigned a_index,rtsp_parser_
     throw_error(PLAYER_INVALID_MEDIA_URL);
   }
 
-  CONT_INIT(file_s,sdp_file);
+  CONT_INIT_CLEAR(file_s,sdp_file);
   if (file_s_open(&sdp_file,this->buffer.data,"rb"))
   {
     throw_error(PLAYER_FILE_OPEN_ERROR);

@@ -87,7 +87,7 @@ methods dynamic_tree_s
 void test_json_parse()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
   const char *data =
 "{\n"
@@ -122,10 +122,10 @@ void test_json_parse()
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,"[null:<blank>,array:[0,1,2,3,4,5,6,7,8,9],float:123.400000,object:[first:0,third:2,second:1],string:Hello world!,integer:123]") == 0);
 
-  CONT_INIT(string_s,tab);
+  CONT_INIT_CLEAR(string_s,tab);
   string_s_set_ptr(&tab,"  ");
 
-  CONT_INIT(string_s,indent);
+  CONT_INIT_CLEAR(string_s,indent);
   string_s_set_ptr(&indent,"");
 
   // - json_create -
@@ -140,17 +140,14 @@ void test_json_parse()
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,data) == 0);
 
-  string_s_clear(&tab);
-  string_s_clear(&indent);
   var_s_clear(&object);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_json_parse_comments()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
   const char *data =
 "{\n"
@@ -189,13 +186,12 @@ void test_json_parse_comments()
   cassert(strcmp(buffer.data,"[null:<blank>,array:[0,1,2,3,4,5,6,7,8,9],float:123.400000,object:[first:0,third:2,second:1],string:Hello world!,integer:123]") == 0);
 
   var_s_clear(&object);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_json_create()
 {/*{{{*/
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define JSON_CREATE() \
 {/*{{{*/\
@@ -211,10 +207,10 @@ void test_json_create()
 
   VAR(dict,loc_s_dict());
 
-  CONT_INIT(string_s,tab);
+  CONT_INIT_CLEAR(string_s,tab);
   string_s_set_ptr(&tab,"  ");
 
-  CONT_INIT(string_s,indent);
+  CONT_INIT_CLEAR(string_s,indent);
   string_s_set_ptr(&indent,"");
 
   JSON_CREATE_NICE();
@@ -230,9 +226,7 @@ void test_json_create()
   JSON_CREATE_NICE();
   cassert(strcmp(buffer.data,"{\n  \"integer\": null\n}") == 0);
 
-  string_s_clear(&tab);
   var_s_clear(&dict);
-  bc_array_s_clear(&buffer);
 }/*}}}*/
 
 void test_from_json()

@@ -36,7 +36,7 @@ methods time_array_s
 void test_time()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define TIME_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -72,7 +72,6 @@ void test_time()
   DATETIME_S_TO_BUFFER(&datetime_1);
   cassert(strcmp(buffer.data,"{year:2000,month:1,day:1,wday:6,hour:10,min:30,sec:25,msec:0,usec:0,nsec:0}") == 0);
 
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 

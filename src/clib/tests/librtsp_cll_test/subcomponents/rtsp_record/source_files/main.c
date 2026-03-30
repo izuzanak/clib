@@ -187,7 +187,7 @@ int rtsp_recorder_s_recv_sdp(void *a_rtsp_recorder,unsigned a_index,const string
   bc_array_s_append_format(&this->buffer,"%s/%s.sdp",this->base_dir.data,record->file_name.data);
   bc_array_s_push(&this->buffer,'\0');
 
-  CONT_INIT(file_s,sdp_file);
+  CONT_INIT_CLEAR(file_s,sdp_file);
   if (file_s_open(&sdp_file,this->buffer.data,"wb"))
   {
     throw_error(RECORDER_FILE_OPEN_ERROR);

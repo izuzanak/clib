@@ -29,7 +29,7 @@ methods sqlite_array_s
 void test_sqlite()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define DB_PATH "/dev/shm/db.sql"
 //#define DB_PATH "tests/libsqlite_cll_test/sqlite/db.sql"
@@ -37,7 +37,7 @@ void test_sqlite()
   cassert(system("rm -f " DB_PATH) == 0); // NOLINT
 
   // - sqlite_s_open -
-  CONT_INIT(sqlite_s,sqlite_0);
+  CONT_INIT_CLEAR(sqlite_s,sqlite_0);
   cassert(sqlite_s_open(&sqlite_0,DB_PATH) == 0);
   cassert(sqlite_s_compare(&sqlite_0,&sqlite_0));
 
@@ -88,8 +88,6 @@ void test_sqlite()
   bc_array_s_append_ptr(&buffer,"drop table table_0;");
   cassert(sqlite_s_execute(&sqlite_0,buffer.data,buffer.used,&result) == 0);
 
-  sqlite_s_clear(&sqlite_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 

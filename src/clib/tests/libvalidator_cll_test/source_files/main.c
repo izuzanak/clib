@@ -400,7 +400,7 @@ void test_prop_regex()
 void test_prop_items()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
   VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
 
@@ -486,14 +486,13 @@ void test_prop_items()
   VAR_ARRAY_S_TO_STRING(&validator.props_stack);
   cassert(strcmp(buffer.data,"[test,items,2]") == 0);
 
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_prop_opt_items()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
   VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
 
@@ -549,14 +548,13 @@ void test_prop_opt_items()
 
   cassert(validator_s_validate(&validator,str_test_var,value_3) == 0);
 
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_prop_all_items()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
   VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
 
@@ -618,14 +616,13 @@ void test_prop_all_items()
   VAR_ARRAY_S_TO_STRING(&validator.props_stack);
   cassert(strcmp(buffer.data,"[test,all-items,==]") == 0);
 
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_prop_all_keys()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
   VAR_CLEAR(str_test_var,loc_s_string_ptr("test"));
 
@@ -660,7 +657,6 @@ void test_prop_all_keys()
   VAR_ARRAY_S_TO_STRING(&validator.props_stack);
   cassert(strcmp(buffer.data,"[test,all-keys,third1,regex]") == 0);
 
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 

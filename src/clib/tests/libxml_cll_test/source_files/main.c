@@ -31,12 +31,12 @@ test_function_t test_functions[] =
 void test_xml_parse()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
-  CONT_INIT(file_s,file);
+  CONT_INIT_CLEAR(file_s,file);
   cassert(file_s_open(&file,"tests/libxml_cll_test/resources/xml_parse_0.xml","r") == 0);
 
-  CONT_INIT(bc_array_s,data);
+  CONT_INIT_CLEAR(bc_array_s,data);
   data.used = 0;
   cassert(file_s_read_close(&file,&data) == 0);
   bc_array_s_push(&data,'\0');
@@ -54,35 +54,29 @@ void test_xml_parse()
 
   // - xml_create -
   // - xml_create_nice -
-  CONT_INIT(string_s,tab);
+  CONT_INIT_CLEAR(string_s,tab);
   string_s_set_ptr(&tab,"  ");
 
-  CONT_INIT(string_s,indent);
+  CONT_INIT_CLEAR(string_s,indent);
   string_s_set_ptr(&indent,"--");
 
   xml_create_nice(xml_var,&tab,&indent,&buffer);
   bc_array_s_push(&buffer,'\0');
   puts(buffer.data);
 
-  string_s_clear(&indent);
-  string_s_clear(&tab);
-
   var_s_clear(&xml_var);
-  bc_array_s_clear(&data);
-  file_s_clear(&file);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_xml_create()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
-  CONT_INIT(string_s,tab);
+  CONT_INIT_CLEAR(string_s,tab);
   string_s_set_ptr(&tab,"==");
 
-  CONT_INIT(string_s,indent);
+  CONT_INIT_CLEAR(string_s,indent);
   string_s_set_ptr(&indent,"--");
 
   VAR(root,loc_s_xml_node(loc_s_string_ptr("ROOT")));
@@ -101,7 +95,7 @@ void test_xml_create()
 
     unsigned v_idx = 0;
     do {
-      CONT_INIT(string_s,descr);
+      CONT_INIT_CLEAR(string_s,descr);
       string_s_set_format(&descr,"Description of vehicle %u of consist %u, <>&'\"",v_idx,c_idx);
 
       xml_node_s_node_text(consist,loc_s_string_ptr("VEHICLE"),loc_s_string_swap(&descr));
@@ -111,10 +105,10 @@ void test_xml_create()
   xml_create_nice(root,&tab,&indent,&buffer);
   bc_array_s_push(&buffer,'\0');
 
-  CONT_INIT(file_s,file);
+  CONT_INIT_CLEAR(file_s,file);
   cassert(file_s_open(&file,"tests/libxml_cll_test/resources/xml_create_0.xml","r") == 0);
 
-  CONT_INIT(bc_array_s,data);
+  CONT_INIT_CLEAR(bc_array_s,data);
   data.used = 0;
   cassert(file_s_read_close(&file,&data) == 0);
   cassert(strcmp(buffer.data,data.data) == 0);
@@ -128,12 +122,7 @@ void test_xml_create()
   cassert(file_s_read_close(&file,&data) == 0);
   cassert(strcmp(buffer.data,data.data) == 0);
 
-  bc_array_s_clear(&data);
-  file_s_clear(&file);
   var_s_clear(&root);
-  string_s_clear(&indent);
-  string_s_clear(&tab);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 

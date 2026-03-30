@@ -33,7 +33,7 @@ methods pcre_array_s
 void test_pcre()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define REGEX_ARRAY_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -50,10 +50,10 @@ void test_pcre()
 }/*}}}*/
 
   // - pcre_s_create -
-  CONT_INIT(pcre_s,pcre_0);
+  CONT_INIT_CLEAR(pcre_s,pcre_0);
   cassert(pcre_s_create(&pcre_0,"^\\[(pcre_s{.*},){4,4}(pcre_s{.*})\\]$") == 0);
 
-  CONT_INIT(pcre_array_s,pcre_array);
+  CONT_INIT_CLEAR(pcre_array_s,pcre_array);
 
   unsigned idx = 0;
   do {
@@ -61,7 +61,7 @@ void test_pcre()
     cassert(pcre_s_create(pcre_array_s_last(&pcre_array),"^.*$") == 0);
   } while(++idx < 5);
 
-  CONT_INIT(bc_array_s,test_buffer);
+  CONT_INIT_CLEAR(bc_array_s,test_buffer);
   pcre_array_s_to_string(&pcre_array,&test_buffer);
   bc_array_s_push(&test_buffer,'\0');
 
@@ -70,21 +70,16 @@ void test_pcre()
   cassert(pcre_s_match(&pcre_0,test_buffer.data,&match));
 
   // - pcre_s_match_n -
-  CONT_INIT(regmatch_array_s,match_array);
+  CONT_INIT_CLEAR(regmatch_array_s,match_array);
   cassert(pcre_s_match_n(&pcre_0,test_buffer.data,10,&match_array) && match_array.used == 3);
 
-  regmatch_array_s_clear(&match_array);
-  bc_array_s_clear(&test_buffer);
-  pcre_array_s_clear(&pcre_array);
-  pcre_s_clear(&pcre_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_pcre_split()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define STRING_ARRAY_S_TO_BUFFER(NAME) \
 {/*{{{*/\
@@ -96,11 +91,11 @@ void test_pcre_split()
   char data_0[] = "Some text to be splitted";
   string_s string_0 = {strlen(data_0) + 1,data_0};
 
-  CONT_INIT(pcre_s,pcre);
+  CONT_INIT_CLEAR(pcre_s,pcre);
   cassert(pcre_s_create(&pcre," ") == 0);
 
   // - pcre_s_split -
-  CONT_INIT(string_array_s,array_0);
+  CONT_INIT_CLEAR(string_array_s,array_0);
   cassert(pcre_s_split(&pcre,&string_0,&array_0) == 0);
   STRING_ARRAY_S_TO_BUFFER(&array_0);
   cassert(strcmp(buffer.data,"[Some,text,to,be,splitted]") == 0);
@@ -118,16 +113,13 @@ void test_pcre_split()
   STRING_ARRAY_S_TO_BUFFER(&array_0);
   cassert(strcmp(buffer.data,"[,b,c,d,e,]") == 0);
 
-  string_array_s_clear(&array_0);
-  pcre_s_clear(&pcre);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_pcre_replace()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
   char data_0[] = "abacaaadaaaaeaaaaa";
   string_s string_0 = {strlen(data_0) + 1,data_0};
@@ -135,14 +127,11 @@ void test_pcre_replace()
   char data_1[] = " - ";
   string_s string_1 = {strlen(data_1) + 1,data_1};
 
-  CONT_INIT(pcre_s,pcre);
+  CONT_INIT_CLEAR(pcre_s,pcre);
   cassert(pcre_s_create(&pcre,"aa*") == 0);
   cassert(pcre_s_replace(&pcre,&string_0,&string_1,&buffer) == 0);
   bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data," - b - c - d - e - ") == 0);
-
-  pcre_s_clear(&pcre);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 

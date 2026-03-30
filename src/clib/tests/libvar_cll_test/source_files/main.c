@@ -121,7 +121,7 @@ unsigned g_type_person = c_idx_not_exist;
 void test_var_blank()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define BLANK_TO_STRING(NAME) \
 {/*{{{*/\
@@ -146,14 +146,13 @@ void test_var_blank()
 
   var_s_clear(&blank_1);
   var_s_clear(&blank_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_var_integer()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define INTEGER_TO_STRING(NAME) \
 {/*{{{*/\
@@ -169,7 +168,7 @@ void test_var_integer()
   cassert(strcmp(buffer.data,"10") == 0);
 
   // - loc_s_int_order -
-  CONT_INIT(var_s,integer_1);
+  CONT_INIT_CLEAR(var_s,integer_1);
   var_s_copy(&integer_1,&integer_0);
   INTEGER_TO_STRING(integer_1);
   cassert(
@@ -195,16 +194,14 @@ void test_var_integer()
 
   var_s_clear(&integer_3);
   var_s_clear(&integer_2);
-  var_s_clear(&integer_1);
   var_s_clear(&integer_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_var_float()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define FLOAT_TO_STRING(NAME) \
 {/*{{{*/\
@@ -220,7 +217,7 @@ void test_var_float()
   cassert(strcmp(buffer.data,"1.234000") == 0);
 
   // - loc_s_float_order -
-  CONT_INIT(var_s,float_1);
+  CONT_INIT_CLEAR(var_s,float_1);
   var_s_copy(&float_1,&float_0);
   FLOAT_TO_STRING(float_1);
   cassert(
@@ -246,16 +243,14 @@ void test_var_float()
 
   var_s_clear(&float_3);
   var_s_clear(&float_2);
-  var_s_clear(&float_1);
   var_s_clear(&float_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_var_string()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define STRING_TO_STRING(NAME) \
 {/*{{{*/\
@@ -296,14 +291,13 @@ void test_var_string()
   STRING_TO_STRING(string_4);
   cassert(strcmp(buffer.data,"Hello world 123") == 0);
 
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_var_array()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define ARRAY_TO_STRING(NAME) \
 {/*{{{*/\
@@ -326,7 +320,7 @@ void test_var_array()
   cassert(strcmp(buffer.data,"[-5,-4,-3,-2,-1,0,1,2,3,4]") == 0);
 
   // - loc_s_array_order -
-  CONT_INIT(var_s,array_1);
+  CONT_INIT_CLEAR(var_s,array_1);
   var_s_copy(&array_1,&array_0);
   ARRAY_TO_STRING(array_1);
   cassert(
@@ -366,7 +360,7 @@ void test_var_array()
   cassert(strcmp(buffer.data,"[4,3,2,1,0,-1,-2,-3,-4,-5]") == 0);
 
   // - loc_s_array_to_json_nice -
-  CONT_INIT(json_nice_s,json_nice);
+  CONT_INIT_CLEAR(json_nice_s,json_nice);
   json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
@@ -386,7 +380,6 @@ void test_var_array()
 "==---5\n"
 "==]") == 0);
 
-  json_nice_s_clear(&json_nice);
 #endif
 
   // - loc_s_array_order -
@@ -426,16 +419,14 @@ void test_var_array()
   var_s_clear(&array_4);
   var_s_clear(&array_3);
   var_s_clear(&array_2);
-  var_s_clear(&array_1);
   var_s_clear(&array_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_var_dict()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define DICT_TO_STRING(NAME) \
 {/*{{{*/\
@@ -529,7 +520,7 @@ void test_var_dict()
   cassert(strcmp(buffer.data,"{\"first\":1,\"second\":2,\"third\":3,\"fourth\":{\"first\":1,\"second\":2,\"third\":3}}") == 0);
 
   // - loc_s_dict_to_json_nice -
-  CONT_INIT(json_nice_s,json_nice);
+  CONT_INIT_CLEAR(json_nice_s,json_nice);
   json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
@@ -547,7 +538,6 @@ void test_var_dict()
 "==--}\n"
 "==}") == 0);
 
-  json_nice_s_clear(&json_nice);
 #endif
 
   // - var_map_tree_s_set_locs -
@@ -583,14 +573,13 @@ void test_var_dict()
   cassert(strcmp(buffer.data,"[first:1,third:[first:1,third:3,second:2],second:[1,2,3]]") == 0);
 
   var_s_clear(&dict_0);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
 void test_register_type()
 {/*{{{*/
 #if OPTION_TO_STRING == ENABLED
-  CONT_INIT(bc_array_s,buffer);
+  CONT_INIT_CLEAR(bc_array_s,buffer);
 
 #define VAR_ARRAY_S_TO_STRING(NAME) \
 {/*{{{*/\
@@ -621,7 +610,7 @@ void test_register_type()
   VAR_S_TO_STRING(&person);
   cassert(strcmp(buffer.data,"{name:Frank,surname:Sobotka,age:45}") == 0);
 
-  CONT_INIT(var_array_s,array_0);
+  CONT_INIT_CLEAR(var_array_s,array_0);
   var_array_s_copy_resize(&array_0,4);
   var_array_s_fill(&array_0,&person);
   VAR_ARRAY_S_TO_STRING(&array_0);
@@ -635,7 +624,7 @@ void test_register_type()
   cassert(strcmp(buffer.data,"[{\"name\":\"Frank\",\"surname\":\"Sobotka\",\"age\":45},{\"name\":\"Frank\",\"surname\":\"Sobotka\",\"age\":45},{\"name\":\"Frank\",\"surname\":\"Sobotka\",\"age\":45},{\"name\":\"Frank\",\"surname\":\"Sobotka\",\"age\":45}]") == 0);
 
   // - var_array_s_to_json_nice -
-  CONT_INIT(json_nice_s,json_nice);
+  CONT_INIT_CLEAR(json_nice_s,json_nice);
   json_nice_s_create(&json_nice,"--","==",NULL);
 
   buffer.used = 0;
@@ -665,12 +654,9 @@ void test_register_type()
 "==--}\n"
 "==]") == 0);
 
-  json_nice_s_clear(&json_nice);
 #endif
 
-  var_array_s_clear(&array_0);
   var_s_clear(&person);
-  bc_array_s_clear(&buffer);
 #endif
 }/*}}}*/
 
