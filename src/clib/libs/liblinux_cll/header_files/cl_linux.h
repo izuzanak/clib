@@ -85,6 +85,8 @@ include "cl_sys.h"
 #define ERROR_PID_MISSING_PROGRAM_NAME 1
 #define ERROR_PID_CANNOT_CREATE_NEW_PROCESS 2
 #define ERROR_PID_KILL_ERROR 3
+#define ERROR_PID_CREATE_SESSION_ERROR 4
+#define ERROR_PID_KILL_GROUP_ERROR 5
 
 #define ERROR_PTHREAD_CREATE_ERROR 1
 #define ERROR_PTHREAD_NOT_JOINABLE_ERROR 2
@@ -262,7 +264,9 @@ static inline void pid_s_to_string(const pid_s *this,bc_array_s *a_trg);
 #endif
 
 WUR liblinux_cll_EXPORT int pid_s_execute(pid_s *this,const string_array_s *a_arguments);
+WUR liblinux_cll_EXPORT int pid_s_execute_session(pid_s *this,const string_array_s *a_arguments);
 WUR static inline int pid_s_kill(const pid_s *this,int a_signal);
+WUR static inline int pid_s_kill_group(const pid_s *this,int a_signal);
 
 // === definition of structure pthread_s =======================================
 
@@ -1009,6 +1013,18 @@ static inline int pid_s_kill(const pid_s *this,int a_signal)
   if (kill(*this,a_signal))
   {
     throw_error(PID_KILL_ERROR);
+  }
+
+  return 0;
+}/*}}}*/
+
+static inline int pid_s_kill_group(const pid_s *this,int a_signal)
+{/*{{{*/
+  debug_assert(*this != -1);
+
+  if (kill(-*this,a_signal))
+  {
+    throw_error(PID_KILL_GROUP_ERROR);
   }
 
   return 0;

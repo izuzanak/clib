@@ -270,7 +270,6 @@ void test_environment()
 
   CONT_INIT_CLEAR(bc_array_s,target);
   cassert(environment_s_resolve_vars(strlen(data),data,&target) == 0);
-  bc_array_s_push(&target,'\0');
 
   cassert(strcmp(target.data,
 "${VALUE0}: 'value0'\n"

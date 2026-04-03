@@ -41,6 +41,10 @@ include "cl_utf8proc.h"
 \
     } while(s_ptr < s_ptr_end);\
   }\
+\
+  /* - add terminating zero (not counted in used) - */\
+  bc_array_s_push(a_trg,'\0');\
+  --a_trg->used;\
 /*}}}*/
 
 int utf8proc_s_to_lower(unsigned a_size,const char *a_src,bc_array_s *a_trg)
@@ -79,6 +83,10 @@ int utf8proc_s_map(unsigned a_size,const char *a_src,utf8proc_option_t a_options
 
   bc_array_s_append(a_trg,length,(const char *)output);
   free(output);
+
+  // - add terminating zero (not counted in used) -
+  bc_array_s_push(a_trg,'\0');
+  --a_trg->used;
 
   return 0;
 }/*}}}*/

@@ -324,8 +324,7 @@ void test_pid()
 
   CONT_INIT_CLEAR(string_array_s,arguments);
 
-  string_array_s_push_blank(&arguments);
-  string_s_set_ptr(string_array_s_last(&arguments),"ls");
+  string_array_s_push_ptr(&arguments,"ls");
 
   // - pid_s_execute -
   CONT_INIT_CLEAR(pid_s,pid_0);
@@ -333,6 +332,22 @@ void test_pid()
 
   int status;
   waitpid(pid_0,&status,0);
+
+  // - pid_s_execute_session -
+  arguments.used = 0;
+  string_array_s_push_ptr(&arguments,"sleep");
+  string_array_s_push_ptr(&arguments,"10");
+
+  CONT_INIT_CLEAR(pid_s,pid_1);
+  cassert(pid_s_execute_session(&pid_1,&arguments) == 0);
+  cassert(pid_1 != -1);
+  usleep(100000);
+
+  // - pid_s_kill_group -
+  cassert(pid_s_kill_group(&pid_1,SIGTERM) == 0);
+
+  int status_1;
+  waitpid(pid_1,&status_1,0);
 #endif
 }/*}}}*/
 

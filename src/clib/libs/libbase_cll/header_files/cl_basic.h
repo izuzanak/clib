@@ -19,14 +19,14 @@ typedef long double ld;
 
 // - basic containers macros -
 #define CONT_INIT(TYPE,NAME) \
-  TYPE NAME;\
+  TYPE NAME = {0};\
   TYPE ## _init(&(NAME));
 
 #define CONT_CLEAR(TYPE,NAME) \
   __attribute__((cleanup(TYPE ## _clear))) TYPE NAME;
 
 #define CONT_INIT_CLEAR(TYPE,NAME) \
-  __attribute__((cleanup(TYPE ## _clear))) TYPE NAME;\
+  __attribute__((cleanup(TYPE ## _clear))) TYPE NAME = {0};\
   TYPE ## _init(&(NAME));
 
 // - disable clang unused function warning -

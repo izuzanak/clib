@@ -424,6 +424,58 @@ int pid_s_execute(pid_s *this,const string_array_s *a_arguments)
   return 0;
 }/*}}}*/
 
+int pid_s_execute_session(pid_s *this,const string_array_s *a_arguments)
+{/*{{{*/
+  pid_s_clear(this);
+
+  // - ERROR -
+  if (a_arguments->used == 0)
+  {
+    throw_error(PID_MISSING_PROGRAM_NAME);
+  }
+
+  pid_t pid = fork();
+
+  // - ERROR -
+  if (pid == -1)
+  {
+    throw_error(PID_CANNOT_CREATE_NEW_PROCESS);
+  }
+
+  // - process is child -
+  if (pid == 0)
+  {
+    // - create new session -
+    if (setsid() == -1)
+    {
+      exit(126);
+    }
+
+    char *arguments[a_arguments->used + 1];
+    char **a_ptr = arguments;
+
+    // - initialize argument list -
+    const string_s *s_ptr = a_arguments->data;
+    const string_s *s_ptr_end = s_ptr + a_arguments->used;
+    do {
+      *a_ptr++ = s_ptr->data;
+    } while(++s_ptr < s_ptr_end);
+
+    // - add terminating argument -
+    *a_ptr = NULL;
+
+    // - execute target process -
+    if (execvp(a_arguments->data[0].data,arguments) == -1)
+    {
+      exit(127);
+    }
+  }
+
+  *this = pid;
+
+  return 0;
+}/*}}}*/
+
 // === methods of structure signal_s ===========================================
 
 int signal_s_simple_handler(signal_callback_t a_handler)

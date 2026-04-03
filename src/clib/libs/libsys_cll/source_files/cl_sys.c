@@ -316,6 +316,10 @@ int environment_s_resolve_vars(unsigned a_size,const char *a_src,bc_array_s *a_t
     }
   }
 
+  // - add terminating zero (not counted in used) -
+  bc_array_s_push(a_trg,'\0');
+  --a_trg->used;
+
   return 0;
 }/*}}}*/
 

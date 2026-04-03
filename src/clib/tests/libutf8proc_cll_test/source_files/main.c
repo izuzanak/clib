@@ -38,7 +38,6 @@ void test_utf8_to_lower()
 
   CONT_INIT_CLEAR(bc_array_s,buffer);
   cassert(utf8proc_s_to_lower(length,source,&buffer) == 0);
-  bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,"jiří zuzaňák") == 0);
 }/*}}}*/
 
@@ -49,7 +48,6 @@ void test_utf8_to_upper()
 
   CONT_INIT_CLEAR(bc_array_s,buffer);
   cassert(utf8proc_s_to_upper(length,source,&buffer) == 0);
-  bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,"JIŘÍ ZUZAŇÁK") == 0);
 }/*}}}*/
 
@@ -62,7 +60,6 @@ void test_utf8_map()
   cassert(utf8proc_s_map(length,source,
         UTF8PROC_NULLTERM | UTF8PROC_STABLE | UTF8PROC_STRIPMARK | UTF8PROC_DECOMPOSE | UTF8PROC_CASEFOLD
         ,&buffer) == 0);
-  bc_array_s_push(&buffer,'\0');
   cassert(strcmp(buffer.data,"jiri zuzanak") == 0);
 }/*}}}*/
 
