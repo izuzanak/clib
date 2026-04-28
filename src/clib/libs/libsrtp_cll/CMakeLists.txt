@@ -3,6 +3,16 @@ if(PKG_CONFIG_FOUND)
   pkg_search_module(LIBSRTP "libsrtp2 >= 2.2.0")
 endif()
 
+if(NOT LIBSRTP_FOUND)
+  find_path(LIBSRTP_INCLUDE_DIR srtp2/srtp.h)
+  find_library(LIBSRTP_LIBRARY NAMES srtp2)
+  if(LIBSRTP_INCLUDE_DIR AND LIBSRTP_LIBRARY)
+    set(LIBSRTP_FOUND TRUE)
+    set(LIBSRTP_INCLUDE_DIRS ${LIBSRTP_INCLUDE_DIR})
+    set(LIBSRTP_LIBRARIES ${LIBSRTP_LIBRARY})
+  endif()
+endif()
+
 set(CONF_COMPONENTS
   "src/clib/libs/libbase_cll")
 set(CONF_HEADER_DIRS)

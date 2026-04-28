@@ -277,6 +277,10 @@ static inline int sd_channel_client_s_trace_info(sd_channel_client_s *this,const
   return 0;
 }/*}}}*/
 
+// FIXME TODO
+// sd_channel_client_s_trace_write_header
+// sd_channel_client_s_trace_write_send
+
 static inline int sd_channel_client_s_trace_write(sd_channel_client_s *this,
     const string_s *a_trace_id,ulli a_time,const bc_array_s *a_data)
 {/*{{{*/

@@ -1,11 +1,21 @@
 
-set(CONF_COMPONENTS
-  "src/clib/libs/libbase_cll")
-set(CONF_HEADER_DIRS)
-
 if(PKG_CONFIG_FOUND)
   pkg_search_module(LIBUUID "uuid >= 2.33.0")
 endif()
+
+if(NOT LIBUUID_FOUND)
+  find_path(LIBUUID_INCLUDE_DIR uuid/uuid.h)
+  find_library(LIBUUID_LIBRARY NAMES uuid)
+  if(LIBUUID_INCLUDE_DIR AND LIBUUID_LIBRARY)
+    set(LIBUUID_FOUND TRUE)
+    set(LIBUUID_INCLUDE_DIRS ${LIBUUID_INCLUDE_DIR})
+    set(LIBUUID_LIBRARIES ${LIBUUID_LIBRARY})
+  endif()
+endif()
+
+set(CONF_COMPONENTS
+  "src/clib/libs/libbase_cll")
+set(CONF_HEADER_DIRS)
 
 if(LIBUUID_FOUND)
   set(CONF_DO_BUILD TRUE)
