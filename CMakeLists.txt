@@ -96,6 +96,9 @@ function(process_component)
     endif()
   endif()
 
+  set_target_properties(${COMP_NAME} PROPERTIES
+   INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/clib")
+
   target_include_directories(${COMP_NAME} PUBLIC ${COMP_INCLUDE_DIRS})
   target_compile_definitions(${COMP_NAME} PUBLIC ${COMP_COMP_DEFS})
   target_link_libraries(${COMP_NAME} ${COMP_LINK_LIBS})
