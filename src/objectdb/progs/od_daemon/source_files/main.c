@@ -56,6 +56,58 @@ int od_daemon_s_process_config(od_daemon_s *this)
 
     if (storage_cfg->path.size > 1)
     {
+      // - storage file is missing: create it and seed from initial_data -
+      struct stat st;
+      if (this->config.initial_data != NULL &&
+          stat(storage_cfg->path.data,&st) != 0)
+      {
+        var_array_s *records = loc_s_array_value(this->config.initial_data);
+
+        log_info_2("storage, creating new file with %u initial records",records->used);
+
+        // - create parent directories of storage file if missing -
+        const char *last_slash = strrchr(storage_cfg->path.data,'/');
+        if (last_slash != NULL && last_slash != storage_cfg->path.data)
+        {
+          CONT_INIT_CLEAR(bc_array_s,command);
+          bc_array_s_append_format(&command,"mkdir -p '%.*s'",
+              (int)(last_slash - storage_cfg->path.data),storage_cfg->path.data);
+
+          if (system(command.data) != 0) // NOLINT
+          {
+            throw_error(OD_DAEMON_STORAGE_FILE_OPEN_ERROR);
+          }
+        }
+
+        // - create storage file and write initial records -
+        if (file_s_open(&this->storage,storage_cfg->path.data,"wb"))
+        {
+          throw_error(OD_DAEMON_STORAGE_FILE_OPEN_ERROR);
+        }
+
+        if (records->used != 0)
+        {
+          var_s *r_ptr = records->data;
+          var_s *r_ptr_end = r_ptr + records->used;
+          do {
+            var_array_s *rec_arr = loc_s_array_value(*r_ptr);
+            const string_s *path = loc_s_string_value(rec_arr->data[0]);
+            var_s value = rec_arr->data[1];
+
+            // - keep in-memory db in sync so storage_write compaction snapshots correctly -
+            int updated;
+            odb_database_s_set_value(&this->database,path->data,value,&updated);
+
+            if (od_daemon_s_storage_write(this,path,value))
+            {
+              throw_error(OD_DAEMON_STORAGE_WRITE_ERROR);
+            }
+          } while(++r_ptr < r_ptr_end);
+        }
+
+        file_s_clear(&this->storage);
+      }
+
       // - open storage file -
       if (file_s_open(&this->storage,storage_cfg->path.data,"r+b"))
       {

@@ -71,6 +71,7 @@ od_conf_ip_port_s:channel
 od_conf_storage_s:storage
 od_conf_ip_port_s:watchdog
 od_conf_fuser_s:fuser
+var_s:initial_data
 >
 options ( from_var )
 od_config_s;
