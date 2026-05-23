@@ -10,10 +10,15 @@ epoll_s *g_epoll;
 
 void signal_handler(int a_signum)
 {/*{{{*/
-  (void)a_signum;
+  switch (a_signum)
+  {
+  case SIGCHLD:
+    break;
+  default:
 
-  // - terminate on all signals -
-  __sync_add_and_fetch(&g_terminate,1);
+    // - terminate on all signals -
+    __sync_add_and_fetch(&g_terminate,1);
+  }
 }/*}}}*/
 
 int epoll_ws_fd_event(void *a_ws_context,unsigned a_index,epoll_event_s *a_event)

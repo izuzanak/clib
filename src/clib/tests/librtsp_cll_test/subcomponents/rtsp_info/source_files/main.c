@@ -78,10 +78,15 @@ int rtsp_info_s_print_packet(rtsp_info_s *this)
 
 void signal_handler(int a_signum)
 {/*{{{*/
-  (void)a_signum;
+  switch (a_signum)
+  {
+  case SIGCHLD:
+    break;
+  default:
 
-  // - terminate on all signals -
-  __sync_add_and_fetch(&g_terminate,1);
+    // - terminate on all signals -
+    __sync_add_and_fetch(&g_terminate,1);
+  }
 }/*}}}*/
 
 // === program entry function ==================================================

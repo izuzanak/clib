@@ -9,10 +9,15 @@ volatile int g_terminate = 0;
 
 void signal_handler(int a_signum)
 {/*{{{*/
-  (void)a_signum;
+  switch (a_signum)
+  {
+  case SIGCHLD:
+    break;
+  default:
 
-  // - terminate on all signals -
-  __sync_add_and_fetch(&g_terminate,1);
+    // - terminate on all signals -
+    __sync_add_and_fetch(&g_terminate,1);
+  }
 }/*}}}*/
 
 int http_connection(http_conn_s *a_conn)

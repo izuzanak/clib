@@ -137,10 +137,15 @@ int mqtt_client_s_mqtt_callback(void *a_mqtt_client,unsigned a_index,unsigned a_
 
 void signal_handler(int a_signum)
 {/*{{{*/
-  (void)a_signum;
+  switch (a_signum)
+  {
+  case SIGCHLD:
+    break;
+  default:
 
-  // - terminate on all signals -
-  __sync_add_and_fetch(&g_terminate,1);
+    // - terminate on all signals -
+    __sync_add_and_fetch(&g_terminate,1);
+  }
 }/*}}}*/
 
 int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)

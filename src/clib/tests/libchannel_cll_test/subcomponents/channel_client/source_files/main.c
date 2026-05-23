@@ -158,10 +158,15 @@ int channel_comm_s_message(void *a_channel_comm,unsigned a_index,const bc_array_
 
 void signal_handler(int a_signum)
 {/*{{{*/
-  (void)a_signum;
+  switch (a_signum)
+  {
+  case SIGCHLD:
+    break;
+  default:
 
-  // - terminate on all signals -
-  __sync_add_and_fetch(&g_terminate,1);
+    // - terminate on all signals -
+    __sync_add_and_fetch(&g_terminate,1);
+  }
 }/*}}}*/
 
 int epoll_fd_update(int a_fd,unsigned a_evts,int a_update_cb,const epoll_callback_s *a_callback)
