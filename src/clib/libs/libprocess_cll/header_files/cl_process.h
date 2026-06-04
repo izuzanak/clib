@@ -17,7 +17,7 @@ include "cl_logger.h"
 #endif
 #endif
 
-#ifdef SHELF
+#if defined(SHELF) || defined(VAR_RUN_LOG)
 #define PROCESS_RUN_DIR_PATH "/var/run"
 #define PROCESS_LOG_DIR_PATH "/var/log"
 #else
