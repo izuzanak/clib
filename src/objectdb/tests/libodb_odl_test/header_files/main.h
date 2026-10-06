@@ -10,6 +10,7 @@ include "od_odb.h"
 // === test execution functions ================================================
 
 void test_set_get_value();
+void test_delete_keys();
 void test_add_remove_node();
 void test_find_remove_node();
 void test_nodes_path_tree();

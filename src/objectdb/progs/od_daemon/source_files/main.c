@@ -651,26 +651,9 @@ int od_daemon_s_channel_callback(void *a_od_daemon,unsigned a_index,unsigned a_t
       const string_s *path = va_arg(a_ap,const string_s *);
       const var_array_s *keys = va_arg(a_ap,const var_array_s *);
 
-      int updated = 0;
-
+      int updated;
       CONT_INIT_CLEAR(var_s,data_var);
-      odb_database_s_get_value(&this->database,path->data,&data_var);
-
-      if (data_var != NULL && data_var->v_type == c_bi_type_dict)
-      {
-        // - process all keys -
-        var_s *k_ptr = keys->data;
-        var_s *k_ptr_end = k_ptr + keys->used;
-        do
-        {
-          // - remove key from dictionary -
-          if (loc_s_dict_has_key(data_var,*k_ptr))
-          {
-            loc_s_dict_remove_key(data_var,*k_ptr);
-            updated = 1;
-          }
-        } while(++k_ptr < k_ptr_end);
-      }
+      odb_database_s_delete_keys(&this->database,path->data,keys,&data_var,&updated);
 
       if (updated && this->storage != NULL)
       {

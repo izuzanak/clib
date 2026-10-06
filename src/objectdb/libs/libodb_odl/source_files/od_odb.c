@@ -147,6 +147,31 @@ void odb_database_s_get_value(odb_database_s *this,const char *a_path,var_s *a_v
   var_s_copy_loc(a_value_var,data_var);
 }/*}}}*/
 
+void odb_database_s_delete_keys(odb_database_s *this,const char *a_path,const var_array_s *a_keys,var_s *a_value_var,int *a_updated)
+{/*{{{*/
+  *a_updated = 0;
+
+  odb_database_s_get_value(this,a_path,a_value_var);
+
+  // - value is dictionary -
+  if (*a_value_var != NULL && (*a_value_var)->v_type == c_bi_type_dict &&
+      a_keys->used != 0)
+  {
+    // - process all keys -
+    var_s *k_ptr = a_keys->data;
+    var_s *k_ptr_end = k_ptr + a_keys->used;
+    do
+    {
+      // - remove key from dictionary -
+      if (loc_s_dict_has_key(*a_value_var,*k_ptr))
+      {
+        loc_s_dict_remove_key(*a_value_var,*k_ptr);
+        *a_updated = 1;
+      }
+    } while(++k_ptr < k_ptr_end);
+  }
+}/*}}}*/
+
 #define ODB_DATABASE_S_ADD_FIND_NODE(NOT_EXIST_CODE) \
 /*{{{*/\
   var_s node_var = this->node_var;\
