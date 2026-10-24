@@ -7,9 +7,7 @@ include "cl_parser_code.h"
 
 // - basic constants and definitions -
 
-typedef int bool;
-#define true 1
-#define false 0
+#include <stdbool.h>
 
 // parse constants
 const unsigned reg_rule_head_idxs[c_reg_rule_cnt] = {17, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, };
@@ -4120,7 +4118,7 @@ int p_creat_descr_s_compute_kernels(p_creat_descr_s *this)
   return true;
 }/*}}}*/
 
-bool p_creat_descr_s_create_lalr_table(p_creat_descr_s *this,p_lalr_table_s *lalr_table)
+int p_creat_descr_s_create_lalr_table(p_creat_descr_s *this,p_lalr_table_s *lalr_table)
 {/*{{{*/
   cassert(this->terminals.used != 0 && this->nonterminals.used != 0 && this->firsts.used != 0 &&
       this->follows.used != 0 && this->kernels.used != 0);
@@ -4268,7 +4266,7 @@ methods p_rule_descrs_s
 methods parser_s
 @end
 
-bool parser_s_create_from_rule_char_ptr(parser_s *this,unsigned a_length,char *a_data)
+int parser_s_create_from_rule_char_ptr(parser_s *this,unsigned a_length,char *a_data)
 {/*{{{*/
   parser_s_clear(this);
 

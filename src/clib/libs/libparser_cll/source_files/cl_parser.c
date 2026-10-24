@@ -5,9 +5,7 @@ include "cl_parser.h"
 
 // - basic constants and definitions -
 
-typedef int bool;
-#define true 1
-#define false 0
+#include <stdbool.h>
 
 // === methods of generated structures =========================================
 
