@@ -520,6 +520,33 @@ var_s xml_parser_s_get_string_var(xml_parser_s *this,unsigned a_length,const cha
 
 // === global functions ========================================================
 
+static int xml_sax_user_parse_memory(xmlSAXHandler *a_sax,void *a_user_data,
+    const char *a_data,int a_length)
+{/*{{{*/
+  if (a_sax == NULL || a_data == NULL || a_length <= 0)
+  {
+    return -1;
+  }
+
+  // - create push parser context -
+  xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt(a_sax,a_user_data,NULL,0,NULL);
+  if (ctxt == NULL)
+  {
+    return -1;
+  }
+
+  // - feed xml data to the parser, then terminate -
+  int res = xmlParseChunk(ctxt,a_data,a_length,0);
+  if (res == 0)
+  {
+    res = xmlParseChunk(ctxt,NULL,0,1);
+  }
+
+  xmlFreeParserCtxt(ctxt);
+
+  return res;
+}/*}}}*/
+
 int xml_parse_ns(const string_s *a_src,
     var_s *a_trg,string_map_tree_s *a_ns_abbr_map)
 {/*{{{*/
@@ -554,7 +581,7 @@ int xml_parse_ns(const string_s *a_src,
   var_arrays_s_push_blank(&parser.cont_array_stack);
 
   // - parse xml data -
-  int res = xmlSAXUserParseMemory(&sax,&parser,a_src->data,a_src->size - 1);
+  int res = xml_sax_user_parse_memory(&sax,&parser,a_src->data,a_src->size - 1);
 
   // - ERROR -
   if (res != 0)
