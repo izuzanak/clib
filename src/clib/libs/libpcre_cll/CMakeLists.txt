@@ -1,7 +1,7 @@
 
 set(PCRE_DEFS)
 
-# - prefer PCRE2 posix wrapper (PCRE1 is end-of-life and dropped by newer distributions) -
+# - prefer PCRE2 posix wrapper -
 if(PKG_CONFIG_FOUND)
   pkg_search_module(PCRE "libpcre2-posix")
   if(PCRE_FOUND)
