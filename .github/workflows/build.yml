@@ -11,28 +11,20 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Update ubuntu
-        run: sudo apt-get update
+        uses: actions/checkout@v6
 
       - name: Install libraries
-        run: >
-          sudo apt-get -y install
-          libwebsockets-dev
-          libmicrohttpd-dev
-          libsnappy-dev
-          libuuid1
-          libpam0g-dev
-          zlib1g-dev
-          libssl-dev
-          libcurl4-openssl-dev
-          libutf8proc-dev
-          libpq-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install --no-install-recommends \
+            libunwind-dev uuid-dev zlib1g-dev libssl-dev libcurl4-openssl-dev \
+            libpq-dev libsqlite3-dev libsnappy-dev libxml2-dev libpcre3-dev \
+            libutf8proc-dev libpam0g-dev libpng-dev libjpeg-dev libisal-dev \
+            libsrtp2-dev libfuse3-dev libmicrohttpd-dev libwebsockets-dev
 
       - name: Build and install cont_c
         run: |
-          git clone --branch=cont_c https://github.com/izuzanak/cont.git ${GITHUB_WORKSPACE}/../cont_c
+          git clone --depth=1 --branch=cont_c https://github.com/izuzanak/cont.git ${GITHUB_WORKSPACE}/../cont_c
 
           cd ${GITHUB_WORKSPACE}/../cont_c/build
           cmake ..
@@ -43,7 +35,7 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}/build
           cmake -DCMAKE_BUILD_TYPE="Debug" ..
-          make
+          make -j"$(nproc)"
 
       - name: Test clib
         run: |
