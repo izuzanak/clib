@@ -1,7 +1,27 @@
 
 set(PCRE_DEFS)
 
+# - prefer PCRE2 posix wrapper (PCRE1 is end-of-life and dropped by newer distributions) -
 if(PKG_CONFIG_FOUND)
+  pkg_search_module(PCRE "libpcre2-posix")
+  if(PCRE_FOUND)
+    set(PCRE_DEFS "-DCLIB_PCRE2")
+  endif()
+endif()
+
+if(NOT PCRE_FOUND)
+  find_path(PCRE2_INCLUDE_DIR pcre2posix.h)
+  find_library(PCRE2_LIBRARY NAMES pcre2-posix)
+  if(PCRE2_INCLUDE_DIR AND PCRE2_LIBRARY)
+    set(PCRE_FOUND TRUE)
+    set(PCRE_INCLUDE_DIRS ${PCRE2_INCLUDE_DIR})
+    set(PCRE_LIBRARIES ${PCRE2_LIBRARY})
+    set(PCRE_DEFS "-DCLIB_PCRE2")
+  endif()
+endif()
+
+# - fallback to legacy PCRE1 posix wrapper -
+if(NOT PCRE_FOUND AND PKG_CONFIG_FOUND)
   pkg_search_module(PCRE "libpcreposix")
 endif()
 

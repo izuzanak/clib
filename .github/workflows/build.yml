@@ -17,8 +17,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get -y install --no-install-recommends \
-            libunwind-dev uuid-dev zlib1g-dev libssl-dev libcurl4-openssl-dev \
-            libpq-dev libsqlite3-dev libsnappy-dev libxml2-dev libpcre3-dev \
+            uuid-dev zlib1g-dev libssl-dev libcurl4-openssl-dev \
+            libpq-dev libsqlite3-dev libsnappy-dev libxml2-dev libpcre2-dev \
             libutf8proc-dev libpam0g-dev libpng-dev libjpeg-dev libisal-dev \
             libsrtp2-dev libfuse3-dev libmicrohttpd-dev libwebsockets-dev
 

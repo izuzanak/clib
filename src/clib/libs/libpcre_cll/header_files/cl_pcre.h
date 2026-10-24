@@ -6,7 +6,11 @@
 include "cl_struct.h"
 @end
 
+#ifdef CLIB_PCRE2
+#include <pcre2posix.h>
+#else
 #include <pcreposix.h>
+#endif
 
 // - function export definitions -
 #if SYSTEM_TYPE == SYSTEM_TYPE_UNIX
