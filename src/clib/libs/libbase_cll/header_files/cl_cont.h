@@ -13,10 +13,49 @@ include "cl_basic.h"
 #define crealloc(LOCATION,SIZE) check_realloc(LOCATION,SIZE)
 #define cfree(LOCATION) check_free(LOCATION)
 #else
-#define cmalloc(SIZE) malloc(SIZE)
-#define crealloc(LOCATION,SIZE) realloc(LOCATION,SIZE)
+
+static inline pointer cmalloc(size_t a_size)
+{/*{{{*/
+
+  // - ERROR -
+  cassert(a_size <= UINT_MAX);
+
+  pointer location = malloc(a_size);
+
+  // - ERROR -
+  cassert(location != NULL || a_size == 0);
+
+  return location;
+}/*}}}*/
+
+static inline pointer crealloc(pointer a_location,size_t a_size)
+{/*{{{*/
+
+  // - ERROR -
+  cassert(a_size <= UINT_MAX);
+
+  pointer location = realloc(a_location,a_size);
+
+  // - ERROR -
+  cassert(location != NULL || a_size == 0);
+
+  return location;
+}/*}}}*/
+
 #define cfree(LOCATION) free(LOCATION)
 #endif
+
+static inline size_t array_alloc_size(size_t a_count,size_t a_size)
+{/*{{{*/
+
+  // - ERROR -
+  cassert(a_size == 0 || a_count <= SIZE_MAX/a_size);
+
+  return a_count*a_size;
+}/*}}}*/
+
+#define cmalloc_array(COUNT,SIZE) cmalloc(array_alloc_size(COUNT,SIZE))
+#define crealloc_array(LOCATION,COUNT,SIZE) crealloc(LOCATION,array_alloc_size(COUNT,SIZE))
 
 // === definition of generated structures ======================================
 
@@ -111,8 +150,8 @@ additions
 libbase_cll_EXPORT void memcheck_init();
 libbase_cll_EXPORT void memcheck_release();
 libbase_cll_EXPORT void memcheck_release_assert();
-static inline pointer memcheck_s_get_block(memcheck_s *this,unsigned a_size);
-static inline pointer memcheck_s_reget_block(memcheck_s *this,pointer a_location,unsigned a_size);
+static inline pointer memcheck_s_get_block(memcheck_s *this,size_t a_size);
+static inline pointer memcheck_s_reget_block(memcheck_s *this,pointer a_location,size_t a_size);
 static inline void memcheck_s_release_block(memcheck_s *this,pointer a_location);
 void memcheck_s_print(memcheck_s *this);
 }
@@ -125,8 +164,8 @@ libbase_cll_EXPORT extern memcheck_s *g_memcheck;
 #undef check_realloc
 #undef check_free
 
-static inline pointer check_malloc(unsigned a_size);
-static inline pointer check_realloc(pointer a_location,unsigned a_size);
+static inline pointer check_malloc(size_t a_size);
+static inline pointer check_realloc(pointer a_location,size_t a_size);
 static inline void check_free(pointer a_location);
 #else
 #define memcheck_init()
@@ -338,11 +377,18 @@ static inline int mc_block_tree_s___compare_value(const mc_block_tree_s *this,co
 inlines memcheck_s
 @end
 
-static inline pointer memcheck_s_get_block(memcheck_s *this,unsigned a_size)
+static inline pointer memcheck_s_get_block(memcheck_s *this,size_t a_size)
 {/*{{{*/
+
+  // - ERROR -
+  cassert(a_size <= UINT_MAX);
+
   pointer location = malloc(a_size);
 
-  mc_block_s mc_block = {location,a_size};
+  // - ERROR -
+  cassert(location != NULL || a_size == 0);
+
+  mc_block_s mc_block = {location,(unsigned)a_size};
   mc_block_tree_s_insert(&this->mc_block_set,&mc_block);
 
   this->alloc_size += a_size;
@@ -356,8 +402,11 @@ static inline pointer memcheck_s_get_block(memcheck_s *this,unsigned a_size)
   return location;
 }/*}}}*/
 
-static inline pointer memcheck_s_reget_block(memcheck_s *this,pointer a_location,unsigned a_size)
+static inline pointer memcheck_s_reget_block(memcheck_s *this,pointer a_location,size_t a_size)
 {/*{{{*/
+
+  // - ERROR -
+  cassert(a_size <= UINT_MAX);
 
   if (a_location != NULL)
   {
@@ -371,8 +420,11 @@ static inline pointer memcheck_s_reget_block(memcheck_s *this,pointer a_location
 
   pointer location = realloc(a_location,a_size);
 
+  // - ERROR -
+  cassert(location != NULL || a_size == 0);
+
   {
-    mc_block_s mc_block = {location,a_size};
+    mc_block_s mc_block = {location,(unsigned)a_size};
     mc_block_tree_s_insert(&this->mc_block_set,&mc_block);
 
     this->alloc_size += a_size;
@@ -403,12 +455,12 @@ static inline void memcheck_s_release_block(memcheck_s *this,pointer a_location)
 #undef check_realloc
 #undef check_free
 
-static inline pointer check_malloc(unsigned a_size)
+static inline pointer check_malloc(size_t a_size)
 {/*{{{*/
   return memcheck_s_get_block(g_memcheck,a_size);
 }/*}}}*/
 
-static inline pointer check_realloc(pointer a_location,unsigned a_size)
+static inline pointer check_realloc(pointer a_location,size_t a_size)
 {/*{{{*/
   return memcheck_s_reget_block(g_memcheck,a_location,a_size);
 }/*}}}*/

@@ -162,7 +162,7 @@ int image_s_create_data(image_s *this,
   }\
 \
   /* - create target row pointer array - */\
-  png_bytepp row_ptrs = (png_bytepp)cmalloc(height*sizeof(png_bytep));\
+  png_bytepp row_ptrs = (png_bytepp)cmalloc_array(height,sizeof(png_bytep));\
 \
   /* - fill target row pointer array - */\
   IMAGE_CREATE_ROW_PTRS(this,row_ptrs)\
@@ -379,7 +379,7 @@ int image_s_write_png_file(image_s *this,const char *a_path)
   png_write_info(png_ptr,info_ptr);
 
   // - create target row pointer array -
-  png_bytepp row_ptrs = (png_bytepp)cmalloc(height*sizeof(png_bytep));
+  png_bytepp row_ptrs = (png_bytepp)cmalloc_array(height,sizeof(png_bytep));
 
   // - fill target row pointer array -
   IMAGE_CREATE_ROW_PTRS(this,row_ptrs);

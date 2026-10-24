@@ -16,7 +16,7 @@ void string_s_set_format_ap(string_s *this,const char *a_format,va_list a_ap)
 
   const int init_size = 128;
 
-  this->data = (char *)cmalloc(init_size*sizeof(char));
+  this->data = (char *)cmalloc_array(init_size,sizeof(char));
 
   va_list ap;
   va_copy(ap,a_ap);
@@ -27,7 +27,7 @@ void string_s_set_format_ap(string_s *this,const char *a_format,va_list a_ap)
 
   if (length >= init_size)
   {
-    this->data = crealloc(this->data,this->size*sizeof(char));
+    this->data = crealloc_array(this->data,this->size,sizeof(char));
     vsnprintf(this->data,this->size,a_format,a_ap);
   }
 }/*}}}*/

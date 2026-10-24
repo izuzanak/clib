@@ -102,7 +102,7 @@ static inline void string_s_create(string_s *this,unsigned a_length)
     return;
   }
 
-  this->data = (char *)cmalloc((a_length + 1)*sizeof(char));
+  this->data = (char *)cmalloc_array(a_length + 1,sizeof(char));
 
   this->data[a_length] = '\0';
   this->size = a_length + 1;
@@ -117,7 +117,7 @@ static inline void string_s_set(string_s *this,unsigned a_length,const char *a_d
     return;
   }
 
-  this->data = (char *)cmalloc((a_length + 1)*sizeof(char));
+  this->data = (char *)cmalloc_array(a_length + 1,sizeof(char));
   memcpy(this->data,a_data,a_length*sizeof(char));
 
   this->data[a_length] = '\0';
@@ -158,7 +158,7 @@ static inline void string_s_copy(string_s *this,const string_s *a_src)
     return;
   }
 
-  this->data = (char *)cmalloc(a_src->size*sizeof(char));
+  this->data = (char *)cmalloc_array(a_src->size,sizeof(char));
   memcpy(this->data,a_src->data,(a_src->size - 1)*sizeof(char));
 
   this->data[a_src->size - 1] = '\0';

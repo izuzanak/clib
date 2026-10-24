@@ -226,7 +226,7 @@ int ws_context_s_create(ws_context_s *this,
   }
 
   // - create websocket protocols structure -
-  this->protocols = (struct lws_protocols *)cmalloc((2 + a_prot_names->used)*sizeof(struct lws_protocols));
+  this->protocols = (struct lws_protocols *)cmalloc_array(2 + a_prot_names->used,sizeof(struct lws_protocols));
 
   // - configure http protocol -
   struct lws_protocols *http_prot = this->protocols;
