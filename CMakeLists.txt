@@ -53,7 +53,7 @@ function(process_source TARGET)
       OUTPUT_VARIABLE DEPS
       ERROR_QUIET)
   add_custom_command(OUTPUT "${PROC_DIR}/p.${TARGET}.c"
-      DEPENDS ${DEPS}
+      DEPENDS ${DEPS} ${PROCESS_BIN}
       COMMAND ${PROCESS_BIN} ${CONT_PROJECT_DEFS} --geninc "--output" "${PROC_DIR}/p.${TARGET}.c" "${SOURCE_DIR}/${TARGET}.c" ${COMP_HEADER_DIRS})
 # }}}
 endfunction()
