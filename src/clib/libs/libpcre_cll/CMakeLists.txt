@@ -1,10 +1,14 @@
 
+set(PCRE_FOUND FALSE)
 set(PCRE_DEFS)
 
 # - prefer PCRE2 posix wrapper -
 if(PKG_CONFIG_FOUND)
-  pkg_search_module(PCRE "libpcre2-posix")
-  if(PCRE_FOUND)
+  pkg_search_module(PC_PCRE2 "libpcre2-posix")
+  if(PC_PCRE2_FOUND)
+    set(PCRE_FOUND TRUE)
+    set(PCRE_INCLUDE_DIRS ${PC_PCRE2_INCLUDE_DIRS})
+    set(PCRE_LIBRARIES ${PC_PCRE2_LIBRARIES})
     set(PCRE_DEFS "-DCLIB_PCRE2")
   endif()
 endif()
@@ -22,7 +26,12 @@ endif()
 
 # - fallback to legacy PCRE1 posix wrapper -
 if(NOT PCRE_FOUND AND PKG_CONFIG_FOUND)
-  pkg_search_module(PCRE "libpcreposix")
+  pkg_search_module(PC_PCRE1 "libpcreposix")
+  if(PC_PCRE1_FOUND)
+    set(PCRE_FOUND TRUE)
+    set(PCRE_INCLUDE_DIRS ${PC_PCRE1_INCLUDE_DIRS})
+    set(PCRE_LIBRARIES ${PC_PCRE1_LIBRARIES})
+  endif()
 endif()
 
 if(NOT PCRE_FOUND)
