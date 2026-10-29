@@ -280,6 +280,14 @@ int sd_daemon_s_update_traces(sd_daemon_s *this)
     } while(++sttn_ptr < sttn_ptr_end);
   }
 
+#ifdef CLIB_SEGMENTD_TRACE_CREATE
+  // - create missing trace files -
+  if (sd_trace_create_missing_files(&this->config.traces))
+  {
+    throw_error(SD_DAEMON_TRACE_CREATE_ERROR);
+  }
+#endif
+
   // - add or update traces according to configuration -
   if (this->config.traces.root_idx != c_idx_not_exist)
   {

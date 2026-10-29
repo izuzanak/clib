@@ -964,10 +964,123 @@ int sd_trace_s_read_record(sd_trace_s *this,lli a_id,time_s *a_time,bc_array_s *
   return 0;
 }/*}}}*/
 
+// -- sd_trace_file_size_s --
+@begin
+methods sd_trace_file_size_s
+@end
+
+// -- sd_trace_file_size_tree_s --
+@begin
+methods sd_trace_file_size_tree_s
+@end
+
 // -- sd_trace_descr_s --
 @begin
 methods sd_trace_descr_s
 @end
+
+#ifdef CLIB_SEGMENTD_TRACE_CREATE
+int sd_trace_create_missing_files(sd_conf_trace_tree_s *a_traces)
+{/*{{{*/
+  CONT_INIT_CLEAR(sd_trace_file_size_tree_s,file_sizes);
+
+  // - collect maximal end of memory mapped regions for each file -
+  if (a_traces->root_idx != c_idx_not_exist)
+  {
+    sd_conf_trace_tree_s_node *scttn_ptr = a_traces->data;
+    sd_conf_trace_tree_s_node *scttn_ptr_end = scttn_ptr + a_traces->used;
+    do {
+      if (scttn_ptr->valid)
+      {
+        sd_conf_trace_s *trace_config = &scttn_ptr->object;
+
+        // - memory mapped regions of trace -
+        const sd_conf_mmap_s *regions[3];
+        unsigned region_cnt = 0;
+
+        if (trace_config->header.type == c_sd_trace_data_type_MMAP)
+        {
+          regions[region_cnt++] = &trace_config->header.mmap;
+        }
+
+        if (trace_config->timestamp.type == c_sd_trace_data_type_MMAP)
+        {
+          regions[region_cnt++] = &trace_config->timestamp.mmap;
+        }
+
+        regions[region_cnt++] = &trace_config->trace;
+
+        unsigned idx = 0;
+        do {
+          const sd_conf_mmap_s *region = regions[idx];
+          ulli end = region->offset + region->size;
+
+          sd_trace_file_size_s search_file_size = {.path=region->path};
+          unsigned fs_idx = sd_trace_file_size_tree_s_get_idx(&file_sizes,&search_file_size);
+
+          if (fs_idx == c_idx_not_exist)
+          {
+            // - insert new file size -
+            CONT_INIT_CLEAR(sd_trace_file_size_s,insert_file_size);
+            string_s_copy(&insert_file_size.path,&region->path);
+            insert_file_size.size = end;
+
+            sd_trace_file_size_tree_s_swap_insert(&file_sizes,&insert_file_size);
+          }
+          else
+          {
+            // - update file size -
+            sd_trace_file_size_s *file_size = sd_trace_file_size_tree_s_at(&file_sizes,fs_idx);
+            if (end > file_size->size)
+            {
+              file_size->size = end;
+            }
+          }
+        } while(++idx < region_cnt);
+      }
+    } while(++scttn_ptr < scttn_ptr_end);
+  }
+
+  // - create missing files -
+  if (file_sizes.root_idx != c_idx_not_exist)
+  {
+    unsigned fs_idx = sd_trace_file_size_tree_s_get_min_value_idx(&file_sizes,file_sizes.root_idx);
+    do {
+      sd_trace_file_size_s *file_size = sd_trace_file_size_tree_s_at(&file_sizes,fs_idx);
+
+      // - round size up to multiple of c_sd_trace_file_size_multiple -
+      ulli size = ((file_size->size + c_sd_trace_file_size_multiple - 1)/c_sd_trace_file_size_multiple)*c_sd_trace_file_size_multiple;
+
+      // - create file only if it does not exist -
+      CONT_INIT_CLEAR(fd_s,fd);
+      fd = open(file_size->path.data,O_RDWR | O_CREAT | O_EXCL,0666);
+
+      if (fd == -1)
+      {
+        // - file already exists, keep it untouched -
+        if (errno != EEXIST)
+        {
+          throw_error(SD_TRACE_DESCR_FILE_CREATE_ERROR);
+        }
+      }
+      else
+      {
+        // - log message -
+        log_info_2("create trace file: %s, size: %llu",file_size->path.data,size);
+
+        if (posix_fallocate(fd,0,size) != 0)
+        {
+          throw_error(SD_TRACE_DESCR_FILE_CREATE_ERROR);
+        }
+      }
+
+      fs_idx = sd_trace_file_size_tree_s_get_next_idx(&file_sizes,fs_idx);
+    } while(fs_idx != c_idx_not_exist);
+  }
+
+  return 0;
+}/*}}}*/
+#endif
 
 int sd_trace_descr_s_create(sd_trace_descr_s *this,sd_conf_trace_s *a_config)
 {/*{{{*/

@@ -38,8 +38,14 @@ include "sd_segment.h"
 #define ERROR_SD_TRACE_DESCR_MMAP_CREATE_ERROR 2
 #define ERROR_SD_TRACE_DESCR_FILES_MMAP_ERROR 3
 #define ERROR_SD_TRACE_DESCR_TRACE_CREATE_ERROR 4
+#define ERROR_SD_TRACE_DESCR_FILE_CREATE_ERROR 5
 
 // === constants and definitions ===============================================
+
+#ifdef CLIB_SEGMENTD_TRACE_CREATE
+// - trace files size is multiple of this value -
+#define c_sd_trace_file_size_multiple (100ULL << 20) // 100 MiB
+#endif
 
 // === definition of generated structures ======================================
 
@@ -188,6 +194,21 @@ WUR libtrace_sdl_EXPORT int sd_trace_s_write_record(sd_trace_s *this,
 WUR libtrace_sdl_EXPORT int sd_trace_s_read_record(sd_trace_s *this,
     lli a_id,time_s *a_time,bc_array_s *a_trg);
 
+// -- sd_trace_file_size_s --
+@begin
+struct
+<
+string_s:path
+ulli:size
+>
+sd_trace_file_size_s;
+@end
+
+// -- sd_trace_file_size_tree_s --
+@begin
+rb_tree<sd_trace_file_size_s> sd_trace_file_size_tree_s;
+@end
+
 // -- sd_trace_descr_s --
 @begin
 struct
@@ -204,6 +225,9 @@ sd_trace_descr_s;
 
 WUR libtrace_sdl_EXPORT int sd_trace_descr_s_create(sd_trace_descr_s *this,
     sd_conf_trace_s *a_config);
+#ifdef CLIB_SEGMENTD_TRACE_CREATE
+WUR libtrace_sdl_EXPORT int sd_trace_create_missing_files(sd_conf_trace_tree_s *a_traces);
+#endif
 WUR static inline int sd_trace_descr_s_mmap_file(sd_trace_mmap_s *a_trace_mmap,sd_conf_mmap_s *a_trace_data);
 void sd_trace_descr_s_read_to_message(sd_trace_descr_s *this,lli a_record_id,bc_array_s *a_trg);
 void sd_trace_descr_s_read_size_to_message(sd_trace_descr_s *this,lli a_record_id,bc_array_s *a_trg);
@@ -424,6 +448,29 @@ static inline void sd_trace_s_clear_timestamp(sd_trace_s *this)
   {
     sd_trace_s_clear_timestamp_structures(this);
   }
+}/*}}}*/
+
+// -- sd_trace_file_size_s --
+@begin
+inlines sd_trace_file_size_s
+@end
+
+// -- sd_trace_file_size_tree_s --
+@begin
+inlines sd_trace_file_size_tree_s
+@end
+
+static inline int sd_trace_file_size_tree_s___compare_value(const sd_trace_file_size_tree_s *this,const sd_trace_file_size_s *a_first,const sd_trace_file_size_s *a_second)
+{/*{{{*/
+  (void)this;
+
+  const string_s *first = &a_first->path;
+  const string_s *second = &a_second->path;
+
+  if (first->size < second->size) { return -1; }
+  if (first->size > second->size) { return 1; }
+
+  return memcmp(first->data,second->data,first->size - 1);
 }/*}}}*/
 
 // -- sd_trace_descr_s --
