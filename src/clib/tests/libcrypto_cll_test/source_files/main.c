@@ -67,6 +67,53 @@ void test_base64()
   CONT_INIT_CLEAR(bc_array_s,decoded);
   cassert(crypto_decode_base64(base64.data,base64.used,&decoded) == 0)
   cassert(bc_array_s_compare(&data,&decoded));
+
+  // - known vectors for every padding case -
+  static const struct { const char *plain; const char *encoded; } vectors[] =
+  {
+    {"",       ""},
+    {"A",      "QQ=="},
+    {"AB",     "QUI="},
+    {"ABC",    "QUJD"},
+    {"ABCD",   "QUJDRA=="},
+    {"ABCDE",  "QUJDREU="},
+    {"ABCDEF", "QUJDREVG"},
+  };
+
+  unsigned idx = 0;
+  do {
+    const char *plain = vectors[idx].plain;
+    const char *encoded = vectors[idx].encoded;
+
+    CONT_INIT_CLEAR(bc_array_s,enc);
+    crypto_encode_base64(plain,strlen(plain),&enc);
+    cassert(enc.used == strlen(encoded) && memcmp(enc.data,encoded,enc.used) == 0);
+
+    CONT_INIT_CLEAR(bc_array_s,dec);
+    cassert(crypto_decode_base64(encoded,strlen(encoded),&dec) == 0);
+    cassert(dec.used == strlen(plain) && memcmp(dec.data,plain,dec.used) == 0);
+  } while(++idx < sizeof(vectors)/sizeof(vectors[0]));
+
+  // - decode appends to non-empty target -
+  CONT_INIT_CLEAR(bc_array_s,appended);
+  bc_array_s_append_ptr(&appended,"prefix:");
+  cassert(crypto_decode_base64("QUJD",4,&appended) == 0);
+  cassert(appended.used == 10 && memcmp(appended.data,"prefix:ABC",10) == 0);
+
+  // - non-canonical padding (nonzero trailing bits) -
+  CONT_INIT_CLEAR(bc_array_s,nc);
+  cassert(crypto_decode_base64("QR==",4,&nc) == 0);
+  cassert(nc.used == 1 && nc.data[0] == 'A');
+
+  CONT_INIT_CLEAR(bc_array_s,nc2);
+  cassert(crypto_decode_base64("QUJ=",4,&nc2) == 0);
+  cassert(nc2.used == 2 && memcmp(nc2.data,"AB",2) == 0);
+
+  // - invalid input size and invalid characters -
+  CONT_INIT_CLEAR(bc_array_s,bad);
+  cassert(crypto_decode_base64("QUJ",3,&bad) != 0);
+  cassert(crypto_decode_base64("QU!D",4,&bad) != 0);
+  cassert(bad.used == 0);
 }/*}}}*/
 
 void test_pkey()

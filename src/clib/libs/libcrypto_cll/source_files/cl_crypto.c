@@ -739,7 +739,7 @@ void crypto_encode_base64(const char *a_data,unsigned a_size,bc_array_s *a_trg)
 {/*{{{*/
   if (a_size != 0)
   {
-    unsigned encode_size = ((a_size/3 + 1) << 2) + 1;
+    unsigned encode_size = (((a_size + 2)/3) << 2) + 1;
     bc_array_s_reserve(a_trg,encode_size);
 
     a_trg->used += EVP_EncodeBlock(
@@ -760,7 +760,7 @@ int crypto_decode_base64(const char *a_data,unsigned a_size,bc_array_s *a_trg)
 
   if (a_size != 0)
   {
-    unsigned decode_size = ((a_size >> 2) * 3) + 1;
+    unsigned decode_size = (a_size >> 2) * 3;
     bc_array_s_reserve(a_trg,decode_size);
 
     int length = EVP_DecodeBlock(
